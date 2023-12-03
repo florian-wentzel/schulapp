@@ -13,10 +13,6 @@ final _router = GoRouter(
       path: TimeTableScreen.route,
       builder: (context, state) => const TimeTableScreen(),
     ),
-    GoRoute(
-      path: CreateTimeTableScreen.route,
-      builder: (context, state) => const CreateTimeTableScreen(),
-    ),
   ],
 );
 

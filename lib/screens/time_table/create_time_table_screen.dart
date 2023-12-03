@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:schulapp/code_behind/time_table.dart';
 
+// ignore: must_be_immutable
 class CreateTimeTableScreen extends StatefulWidget {
   static const String route = "/createTimeTable";
-  const CreateTimeTableScreen({super.key});
+  TimeTable timeTable;
+
+  CreateTimeTableScreen({super.key, required this.timeTable});
 
   @override
   State<CreateTimeTableScreen> createState() => _CreateTimeTableScreenState();
@@ -13,10 +17,46 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Create a Time Table"),
+        title: Text("Create a Timetable: ${widget.timeTable.name}"),
       ),
-      body: const Center(
-        child: Text("TODO :)"),
+      body: Column(
+        children: [
+          Center(child: _timeTable()),
+        ],
+      ),
+    );
+  }
+
+  Widget _timeTable() {
+    TimeTable tt = widget.timeTable;
+
+    List<DataColumn> dataColumn = List.generate(
+      tt.schoolDays.length,
+      (index) => DataColumn(
+        label: Text(tt.schoolDays[index].name),
+      ),
+    );
+
+    List<DataRow> dataRow = List.generate(
+      tt.maxLessonCount,
+      (rowIndex) => DataRow(
+        cells: List.generate(
+          tt.schoolDays.length,
+          (cellIndex) => DataCell(
+            //DragTarget(builder: builde),
+            Text("Placeholder $rowIndex : $cellIndex"),
+            placeholder: true,
+          ),
+        ),
+      ),
+    );
+    return Expanded(
+      child: SingleChildScrollView(
+        scrollDirection: Axis.vertical,
+        child: DataTable(
+          columns: dataColumn,
+          rows: dataRow,
+        ),
       ),
     );
   }
