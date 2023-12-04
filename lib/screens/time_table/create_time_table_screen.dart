@@ -38,13 +38,13 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
         },
       ),
       body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Center(child: _lessonPrefabScrollbar()),
-            Center(child: _timeTable()),
-          ],
+        child: Center(
+          child: Column(
+            children: [
+              _lessonPrefabScrollbar(),
+              _timeTable(),
+            ],
+          ),
         ),
       ),
     );
@@ -53,22 +53,41 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
   Widget _lessonPrefabScrollbar() {
     const containerHeight = 100.0;
     const containerWidth = containerHeight;
-    return SizedBox(
-      width: double.infinity,
-      height: containerHeight,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: lessonPrefabs.length,
-        itemBuilder: (context, index) {
-          final prefab = lessonPrefabs[index];
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: List.generate(
+          lessonPrefabs.length,
+          (index) {
+            final prefab = lessonPrefabs[index];
 
-          return Container(
-            height: containerHeight,
-            width: containerWidth,
-            color: prefab.color,
-            child: Center(child: Text(prefab.name)),
-          );
-        },
+            return Draggable(
+              data: prefab,
+              feedback: Container(
+                margin: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: prefab.color.withAlpha(127),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                height: containerHeight,
+                width: containerWidth,
+              ),
+              child: Container(
+                margin: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: prefab.color,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                height: containerHeight,
+                width: containerWidth,
+                child: Center(
+                  child: Text(prefab.name),
+                ),
+              ),
+            );
+          },
+        ),
       ),
     );
   }
@@ -90,7 +109,15 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
           tt.schoolDays.length,
           (cellIndex) => DataCell(
             //DragTarget(builder: builde),
-            Text("Placeholder $rowIndex : $cellIndex"),
+            DragTarget(
+              onAccept: (SchoolLessonPrefab schoolLessonPrefab) {
+                print("On Drop:  $rowIndex : $cellIndex");
+                print(schoolLessonPrefab.name);
+              },
+              builder: (context, accepted, rejected) {
+                return Text("Placeholder $rowIndex : $cellIndex");
+              },
+            ),
             placeholder: true,
           ),
         ),
