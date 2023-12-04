@@ -19,10 +19,13 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
       appBar: AppBar(
         title: Text("Create a Timetable: ${widget.timeTable.name}"),
       ),
-      body: Column(
-        children: [
-          Center(child: _timeTable()),
-        ],
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(child: _timeTable()),
+          ],
+        ),
       ),
     );
   }
@@ -50,13 +53,11 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
         ),
       ),
     );
-    return Expanded(
-      child: SingleChildScrollView(
-        scrollDirection: Axis.vertical,
-        child: DataTable(
-          columns: dataColumn,
-          rows: dataRow,
-        ),
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: DataTable(
+        columns: dataColumn,
+        rows: dataRow,
       ),
     );
   }
