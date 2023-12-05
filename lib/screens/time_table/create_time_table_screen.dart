@@ -104,24 +104,43 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
 
     List<DataRow> dataRow = List.generate(
       tt.maxLessonCount,
-      (rowIndex) => DataRow(
-        cells: List.generate(
-          tt.schoolDays.length,
-          (cellIndex) => DataCell(
-            //DragTarget(builder: builde),
-            DragTarget(
-              onAccept: (SchoolLessonPrefab schoolLessonPrefab) {
-                print("On Drop:  $rowIndex : $cellIndex");
-                print(schoolLessonPrefab.name);
-              },
-              builder: (context, accepted, rejected) {
-                return Text("Placeholder $rowIndex : $cellIndex");
-              },
-            ),
-            placeholder: true,
+      (rowIndex) {
+        return DataRow(
+          cells: List.generate(
+            tt.schoolDays.length,
+            (cellIndex) {
+              final schoolDay = tt.schoolDays[cellIndex];
+              final lesson = schoolDay.lessons[rowIndex];
+
+              return DataCell(
+                //DragTarget(builder: builde),
+                DragTarget(
+                  onAccept: (SchoolLessonPrefab schoolLessonPrefab) {
+                    print("MIAU");
+
+                    lesson.setFromPrefab(schoolLessonPrefab);
+                    // setState(() {});
+                  },
+                  builder: (context, accepted, rejected) {
+                    return Center(
+                      child: Container(
+                        margin: const EdgeInsets.all(12),
+                        // padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: lesson.color,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(lesson.name),
+                      ),
+                    );
+                  },
+                ),
+                placeholder: true,
+              );
+            },
           ),
-        ),
-      ),
+        );
+      },
     );
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,

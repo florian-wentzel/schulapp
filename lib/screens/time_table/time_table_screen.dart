@@ -129,7 +129,7 @@ class _TimeTableScreenState extends State<TimeTableScreen> {
     return TimeTable(
       name: nameController.text,
       maxLessonCount: lessonCount,
-      schoolDays: TimeTable.defaultSchoolDays,
+      schoolDays: TimeTable.defaultSchoolDays(lessonCount),
     );
   }
 }

@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/school_event.dart';
+import 'package:schulapp/code_behind/school_lesson_prefab.dart';
 
 class SchoolLesson {
   final List<SchoolEvent> _events;
-  final String _name;
-  final String _room;
-  final String _teacher;
+  String _name;
+  String _room;
+  String _teacher;
   final TimeOfDay _start;
   final TimeOfDay _end;
-  final Color _color;
+  Color _color;
 
   String get name => _name;
   String get room => _room;
@@ -38,4 +39,11 @@ class SchoolLesson {
         _start = start,
         _end = end,
         _events = events;
+
+  void setFromPrefab(SchoolLessonPrefab prefab) {
+    _name = prefab.name;
+    _room = prefab.room;
+    _teacher = prefab.teacher;
+    _color = prefab.color;
+  }
 }

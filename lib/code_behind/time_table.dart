@@ -1,13 +1,33 @@
+import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/school_day.dart';
+import 'package:schulapp/code_behind/school_lesson.dart';
+import 'package:schulapp/extensions.dart';
 
 class TimeTable {
-  static List<SchoolDay> defaultSchoolDays = [
-    SchoolDay(name: "Monday", lessons: []),
-    SchoolDay(name: "Tuesday", lessons: []),
-    SchoolDay(name: "Wednesday", lessons: []),
-    SchoolDay(name: "Thursday", lessons: []),
-    SchoolDay(name: "Friday", lessons: []),
-  ];
+  static List<SchoolDay> defaultSchoolDays(int hoursCount) {
+    const startTime = TimeOfDay(hour: 7, minute: 45);
+
+    final lessons = List.generate(
+      hoursCount,
+      (index) => SchoolLesson(
+        name: "---",
+        room: "---",
+        teacher: "---",
+        color: const Color.fromARGB(255, 127, 127, 127),
+        start: startTime.add(minutes: index * 45),
+        end: startTime.add(minutes: 45 + index * 45),
+        events: [],
+      ),
+    );
+    return [
+      SchoolDay(name: "Monday", lessons: lessons),
+      SchoolDay(name: "Tuesday", lessons: lessons),
+      SchoolDay(name: "Wednesday", lessons: lessons),
+      SchoolDay(name: "Thursday", lessons: lessons),
+      SchoolDay(name: "Friday", lessons: lessons),
+    ];
+  }
 
   final String _name;
   final int _maxLessonCount;
