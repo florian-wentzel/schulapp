@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:schulapp/code_behind/school_lesson_prefab.dart';
 import 'package:schulapp/code_behind/time_table.dart';
+import 'package:schulapp/screens/time_table/time_table_droptarget.dart';
 
 // ignore: must_be_immutable
 class CreateTimeTableScreen extends StatefulWidget {
@@ -42,7 +43,19 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
           child: Column(
             children: [
               _lessonPrefabScrollbar(),
-              _timeTable(),
+              TimetableDroptarget(timeTable: widget.timeTable),
+              const SizedBox(
+                height: 16,
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  print("TODO: next screen oder so");
+                },
+                child: const Icon(
+                  Icons.arrow_right_alt,
+                  size: 32,
+                ),
+              ),
             ],
           ),
         ),
@@ -73,6 +86,11 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
                 height: containerHeight,
                 width: containerWidth,
               ),
+              childWhenDragging: Container(
+                margin: const EdgeInsets.all(12),
+                width: containerWidth,
+                height: containerHeight,
+              ),
               child: Container(
                 margin: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
@@ -82,7 +100,10 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
                 height: containerHeight,
                 width: containerWidth,
                 child: Center(
-                  child: Text(prefab.name),
+                  child: Text(
+                    prefab.name,
+                    textAlign: TextAlign.center,
+                  ),
                 ),
               ),
             );
@@ -92,67 +113,8 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
     );
   }
 
-  Widget _timeTable() {
-    TimeTable tt = widget.timeTable;
-
-    List<DataColumn> dataColumn = List.generate(
-      tt.schoolDays.length,
-      (index) => DataColumn(
-        label: Text(tt.schoolDays[index].name),
-      ),
-    );
-
-    List<DataRow> dataRow = List.generate(
-      tt.maxLessonCount,
-      (rowIndex) {
-        return DataRow(
-          cells: List.generate(
-            tt.schoolDays.length,
-            (cellIndex) {
-              final schoolDay = tt.schoolDays[cellIndex];
-              final lesson = schoolDay.lessons[rowIndex];
-
-              return DataCell(
-                //DragTarget(builder: builde),
-                DragTarget(
-                  onAccept: (SchoolLessonPrefab schoolLessonPrefab) {
-                    print("MIAU");
-
-                    lesson.setFromPrefab(schoolLessonPrefab);
-                    // setState(() {});
-                  },
-                  builder: (context, accepted, rejected) {
-                    return Center(
-                      child: Container(
-                        margin: const EdgeInsets.all(12),
-                        // padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: lesson.color,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(lesson.name),
-                      ),
-                    );
-                  },
-                ),
-                placeholder: true,
-              );
-            },
-          ),
-        );
-      },
-    );
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: DataTable(
-        columns: dataColumn,
-        rows: dataRow,
-      ),
-    );
-  }
-
   Future<SchoolLessonPrefab?> _showCreateNewPrefabBottomSheet() async {
-    const maxNameLength = 15;
+    const maxNameLength = 20;
 
     TextEditingController nameController = TextEditingController();
     TextEditingController teacherController = TextEditingController();
@@ -233,7 +195,7 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
                 ElevatedButton(
                   onPressed: () {
                     name = nameController.text.trim();
-                    teacher = nameController.text.trim();
+                    teacher = teacherController.text.trim();
                     room = roomController.text.trim();
                     Navigator.of(context).pop();
                   },

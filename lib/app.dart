@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:schulapp/screens/time_table/create_time_table_screen.dart';
 import 'package:schulapp/screens/time_table/time_table_screen.dart';
 import 'package:schulapp/theme/theme_manager.dart';
 import 'package:schulapp/theme/themes.dart';

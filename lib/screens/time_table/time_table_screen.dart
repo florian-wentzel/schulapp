@@ -48,6 +48,7 @@ class _TimeTableScreenState extends State<TimeTableScreen> {
   }
 
   Future<TimeTable?> _showCreateTimeTableSheet() async {
+    const defaultLessonCountValue = 9;
     const maxNameLength = 15;
     const minLessonCount = 5;
     const maxLessonCount = 12;
@@ -106,7 +107,10 @@ class _TimeTableScreenState extends State<TimeTableScreen> {
                 onPressed: () {
                   ttName = nameController.text.trim();
                   //sollte immer funktionieren da man nur Zahlen eingebe kann
-                  lessonCount = int.parse(lessonCountController.text);
+                  if (lessonCountController.text.isNotEmpty) {
+                    lessonCount = int.parse(lessonCountController.text.trim());
+                  }
+
                   Navigator.of(context).pop();
                 },
                 child: const Text("Create"),
@@ -121,7 +125,10 @@ class _TimeTableScreenState extends State<TimeTableScreen> {
       //show error
       return null;
     }
-
+    if (lessonCount == -1) {
+      //also nicht gesetzt
+      lessonCount = defaultLessonCountValue;
+    }
     if (lessonCount < minLessonCount || lessonCount > maxLessonCount) {
       return null;
     }
