@@ -52,6 +52,10 @@ class _TimeTableScreenState extends State<TimeTableScreen> {
     const maxNameLength = 15;
     const minLessonCount = 5;
     const maxLessonCount = 12;
+
+    final textColor =
+        Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white;
+
     TextEditingController nameController = TextEditingController();
     TextEditingController lessonCountController = TextEditingController();
 
@@ -65,9 +69,10 @@ class _TimeTableScreenState extends State<TimeTableScreen> {
           margin: const EdgeInsets.all(16),
           child: Column(
             children: [
-              const Text(
+              Text(
                 'Create Timetable',
                 style: TextStyle(
+                  color: textColor,
                   fontSize: 24.0, // Adjust the font size as needed
                   fontWeight: FontWeight.bold,
                 ),
@@ -137,6 +142,7 @@ class _TimeTableScreenState extends State<TimeTableScreen> {
       name: nameController.text,
       maxLessonCount: lessonCount,
       schoolDays: TimeTable.defaultSchoolDays(lessonCount),
+      schoolTimes: TimeTable.defaultSchoolTimes(lessonCount),
     );
   }
 }
