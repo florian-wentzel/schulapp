@@ -5,7 +5,12 @@ import 'package:schulapp/code_behind/school_lesson.dart';
 import 'package:schulapp/code_behind/school_time.dart';
 import 'package:schulapp/extensions.dart';
 
-class TimeTable {
+class Timetable {
+  static const nameKey = "name";
+  static const maxLessonCountKey = "maxLessonCount";
+  static const schoolDaysKey = "days";
+  static const schoolTimesKey = "times";
+
   static List<SchoolTime> defaultSchoolTimes(int hoursCount) {
     TimeOfDay startTime = const TimeOfDay(hour: 7, minute: 45);
 
@@ -122,7 +127,7 @@ class TimeTable {
   List<SchoolDay> get schoolDays => _schoolDays;
   List<SchoolTime> get schoolTimes => _schoolTimes;
 
-  TimeTable({
+  Timetable({
     required String name,
     required int maxLessonCount,
     required List<SchoolDay> schoolDays,
@@ -131,4 +136,46 @@ class TimeTable {
         _maxLessonCount = maxLessonCount,
         _schoolDays = schoolDays,
         _schoolTimes = schoolTimes;
+
+  static Timetable? fromJson(Map<String, dynamic> json) {
+    Timetable? timetable;
+    try {
+      String n = json[nameKey];
+      int mlc = json[maxLessonCountKey]; //maxLessonCount
+      List<Map<String, dynamic>> ds = (json[schoolDaysKey] as List).cast();
+      List<Map<String, dynamic>> ts = (json[schoolTimesKey] as List).cast();
+
+      timetable = Timetable(
+        name: n,
+        maxLessonCount: mlc,
+        schoolDays: List.generate(
+          ds.length,
+          (index) => SchoolDay.fromJson(ds[index]),
+        ),
+        schoolTimes: List.generate(
+          ts.length,
+          (index) => SchoolTime.fromJson(ts[index]),
+        ),
+      );
+    } catch (e) {
+      print(e);
+    }
+
+    return timetable;
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      nameKey: name,
+      maxLessonCountKey: maxLessonCount,
+      schoolTimesKey: List<Map<String, dynamic>>.generate(
+        schoolTimes.length,
+        (index) => schoolTimes[index].toJson(),
+      ),
+      schoolDaysKey: List<Map<String, dynamic>>.generate(
+        schoolDays.length,
+        (index) => schoolDays[index].toJson(),
+      ),
+    };
+  }
 }

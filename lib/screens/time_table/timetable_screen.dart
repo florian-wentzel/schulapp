@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:schulapp/code_behind/time_table.dart';
-import 'package:schulapp/save_system/time_table_save_manager.dart';
-import 'package:schulapp/screens/time_table/create_time_table_screen.dart';
+import 'package:schulapp/code_behind/time_table_manager.dart';
+import 'package:schulapp/screens/time_table/create_timetable_screen.dart';
 
 class TimeTableScreen extends StatefulWidget {
   static const String route = "/";
@@ -20,11 +20,11 @@ class _TimeTableScreenState extends State<TimeTableScreen> {
         title: const Text("Time Table"),
       ),
       body: Visibility(
-        visible: TimeTableSaveManager().timeTables.isNotEmpty,
+        visible: TimetableManager().timetables.isNotEmpty,
         replacement: Center(
           child: ElevatedButton(
             onPressed: () async {
-              TimeTable? tt = await _showCreateTimeTableSheet();
+              Timetable? tt = await _showCreateTimeTableSheet();
               if (tt == null) return;
 
               if (!mounted) return;
@@ -40,14 +40,14 @@ class _TimeTableScreenState extends State<TimeTableScreen> {
         ),
         child: Center(
           child: Text(
-            "You have ${TimeTableSaveManager().timeTables.length} timetables",
+            "You have ${TimetableManager().timetables.length} timetables",
           ),
         ),
       ),
     );
   }
 
-  Future<TimeTable?> _showCreateTimeTableSheet() async {
+  Future<Timetable?> _showCreateTimeTableSheet() async {
     const defaultLessonCountValue = 9;
     const maxNameLength = 15;
     const minLessonCount = 5;
@@ -138,11 +138,11 @@ class _TimeTableScreenState extends State<TimeTableScreen> {
       return null;
     }
 
-    return TimeTable(
+    return Timetable(
       name: nameController.text,
       maxLessonCount: lessonCount,
-      schoolDays: TimeTable.defaultSchoolDays(lessonCount),
-      schoolTimes: TimeTable.defaultSchoolTimes(lessonCount),
+      schoolDays: Timetable.defaultSchoolDays(lessonCount),
+      schoolTimes: Timetable.defaultSchoolTimes(lessonCount),
     );
   }
 }

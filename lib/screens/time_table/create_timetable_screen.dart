@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:schulapp/code_behind/school_lesson_prefab.dart';
 import 'package:schulapp/code_behind/time_table.dart';
-import 'package:schulapp/screens/time_table/time_table_droptarget.dart';
+import 'package:schulapp/code_behind/time_table_manager.dart';
+import 'package:schulapp/code_behind/utils.dart';
+import 'package:schulapp/screens/time_table/timetable_droptarget.dart';
 
 // ignore: must_be_immutable
 class CreateTimeTableScreen extends StatefulWidget {
   static const String route = "/createTimeTable";
-  TimeTable timeTable;
+  Timetable timeTable;
 
   CreateTimeTableScreen({
     super.key,
@@ -49,7 +51,8 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
               ),
               ElevatedButton(
                 onPressed: () {
-                  print("TODO: next screen oder so");
+                  TimetableManager().addTimetable(widget.timeTable);
+                  Navigator.of(context).pop();
                 },
                 child: const Icon(
                   Icons.arrow_right_alt,
@@ -73,36 +76,74 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
         children: List.generate(
           lessonPrefabs.length,
           (index) {
-            final prefab = lessonPrefabs[index];
-
-            return Draggable(
-              data: prefab,
-              feedback: Container(
-                margin: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: prefab.color.withAlpha(127),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                height: containerHeight,
-                width: containerWidth,
-              ),
-              childWhenDragging: Container(
-                margin: const EdgeInsets.all(12),
-                width: containerWidth,
-                height: containerHeight,
-              ),
-              child: Container(
-                margin: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
+            SchoolLessonPrefab prefab = lessonPrefabs[index];
+            final heroString = "prefabScrollbar:$index";
+            return GestureDetector(
+              onTap: () async {
+                SchoolLessonPrefab? newPrefab =
+                    await _showCreateNewPrefabBottomSheet(
+                  title: "Change School lesson",
+                  name: prefab.name,
+                  room: prefab.room,
+                  teacher: prefab.teacher,
                   color: prefab.color,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                height: containerHeight,
-                width: containerWidth,
-                child: Center(
-                  child: Text(
-                    prefab.name,
-                    textAlign: TextAlign.center,
+                );
+
+                if (newPrefab == null) return;
+
+                if (!mounted) return;
+
+                bool updateLessons = await Utils.showBoolInputDialog(
+                  context,
+                  question: "Do you want to update all Lessons?",
+                  description: "(rooms wont change)",
+                );
+
+                if (updateLessons) {
+                  Utils.updateTimetableLessons(
+                    widget.timeTable,
+                    prefab,
+                    newName: newPrefab.name,
+                    newTeacher: newPrefab.teacher,
+                    newColor: newPrefab.color,
+                  );
+                }
+
+                lessonPrefabs[index] = newPrefab;
+                setState(() {});
+              },
+              child: Hero(
+                tag: heroString,
+                child: Draggable(
+                  data: prefab,
+                  feedback: Container(
+                    margin: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: prefab.color.withAlpha(127),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    height: containerHeight,
+                    width: containerWidth,
+                  ),
+                  childWhenDragging: Container(
+                    margin: const EdgeInsets.all(12),
+                    width: containerWidth,
+                    height: containerHeight,
+                  ),
+                  child: Container(
+                    margin: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: prefab.color,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    height: containerHeight,
+                    width: containerWidth,
+                    child: Center(
+                      child: Text(
+                        prefab.name,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -113,17 +154,26 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
     );
   }
 
-  Future<SchoolLessonPrefab?> _showCreateNewPrefabBottomSheet() async {
+  Future<SchoolLessonPrefab?> _showCreateNewPrefabBottomSheet({
+    String title = "Create School lesson",
+    String name = "",
+    String room = "",
+    String teacher = "",
+    Color color = Colors.white,
+  }) async {
     const maxNameLength = 20;
 
     TextEditingController nameController = TextEditingController();
-    TextEditingController teacherController = TextEditingController();
-    TextEditingController roomController = TextEditingController();
+    nameController.text = name;
+    if (name.isNotEmpty) name = "";
 
-    String name = "";
-    String room = "";
-    String teacher = "";
-    Color color = Colors.white;
+    TextEditingController teacherController = TextEditingController();
+    teacherController.text = teacher;
+    if (teacher.isNotEmpty) teacher = "";
+
+    TextEditingController roomController = TextEditingController();
+    roomController.text = room;
+    if (room.isNotEmpty) room = "";
 
     await showModalBottomSheet(
       context: context,
@@ -135,10 +185,10 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Text(
-                  'Create School lesson',
-                  style: TextStyle(
-                    fontSize: 24.0, // Adjust the font size as needed
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 24.0,
                     fontWeight: FontWeight.bold,
                   ),
                 ),

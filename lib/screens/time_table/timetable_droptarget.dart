@@ -9,7 +9,7 @@ import 'package:schulapp/widgets/custom_pop_up.dart';
 
 // ignore: must_be_immutable
 class TimetableDroptarget extends StatefulWidget {
-  TimeTable timeTable;
+  Timetable timeTable;
   TimetableDroptarget({super.key, required this.timeTable});
 
   @override
@@ -19,7 +19,7 @@ class TimetableDroptarget extends StatefulWidget {
 class _TimetableDroptargetState extends State<TimetableDroptarget> {
   @override
   Widget build(BuildContext context) {
-    TimeTable tt = widget.timeTable;
+    Timetable tt = widget.timeTable;
     List<DataColumn> dataColumn = List.generate(
       tt.schoolDays.length,
       (index) => DataColumn(
@@ -455,7 +455,6 @@ class _CustomPopUpCreateTimetableState
   }
 
   void _save() {
-    //TODO
     widget.schoolLesson.name = _name;
     widget.schoolLesson.room = _room;
     widget.schoolLesson.teacher = _teacher;

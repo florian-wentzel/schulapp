@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/school_event.dart';
 import 'package:schulapp/code_behind/school_lesson_prefab.dart';
+import 'package:schulapp/code_behind/utils.dart';
 
 class SchoolLesson {
+  static const nameKey = "name";
+  static const roomKey = "room";
+  static const teacherKey = "teacher";
+  static const colorKey = "color";
+  static const eventsKey = "events(coming soon)";
+
   static SchoolLesson get defaultSchoolLesson {
     return SchoolLesson(
       name: "---",
@@ -66,5 +73,29 @@ class SchoolLesson {
     _room = prefab.room;
     _teacher = prefab.teacher;
     _color = prefab.color;
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      nameKey: _name,
+      roomKey: _room,
+      teacherKey: _teacher,
+      colorKey: Utils.colorToJson(_color),
+      eventsKey: _events,
+    };
+  }
+
+  static SchoolLesson fromJson(Map<String, dynamic> json) {
+    String n = json[nameKey];
+    String t = json[teacherKey];
+    String r = json[roomKey];
+    Color c = Utils.jsonToColor(json[colorKey]);
+    return SchoolLesson(
+      name: n,
+      teacher: t,
+      room: r,
+      color: c,
+      events: [],
+    );
   }
 }
