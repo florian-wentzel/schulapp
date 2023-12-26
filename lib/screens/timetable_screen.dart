@@ -4,8 +4,9 @@ import 'package:schulapp/code_behind/time_table.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/screens/time_table/create_timetable_screen.dart';
 import 'package:schulapp/screens/time_table/timetable_widget.dart';
-import 'package:schulapp/widgets/create_new_timetable_func.dart';
+import 'package:schulapp/widgets/timetable_util_functions.dart';
 import 'package:schulapp/widgets/navigation_bar_drawer.dart';
+import 'package:schulapp/widgets/timetable_one_day_widget.dart';
 
 // ignore: must_be_immutable
 class TimetableScreen extends StatefulWidget {
@@ -107,6 +108,14 @@ class _TimetableScreenState extends State<TimetableScreen> {
         ),
       );
     }
+    final aspectRatio = Utils.getAspectRatio(context);
+
+    if (aspectRatio <= Utils.getMobileRatio()) {
+      return TimetableOneDayWidget(
+        timetable: widget.timetable!,
+      );
+    }
+
     return Center(
       child: SingleChildScrollView(
         scrollDirection: Axis.vertical,

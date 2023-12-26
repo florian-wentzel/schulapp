@@ -4,7 +4,7 @@ import 'package:schulapp/code_behind/time_table_manager.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/screens/time_table/create_timetable_screen.dart';
 import 'package:schulapp/screens/timetable_screen.dart';
-import 'package:schulapp/widgets/create_new_timetable_func.dart';
+import 'package:schulapp/widgets/timetable_util_functions.dart';
 import 'package:schulapp/widgets/navigation_bar_drawer.dart';
 
 class AllTimetablesScreen extends StatefulWidget {

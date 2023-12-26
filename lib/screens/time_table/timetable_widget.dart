@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:schulapp/code_behind/school_day.dart';
-import 'package:schulapp/code_behind/school_lesson.dart';
-import 'package:schulapp/code_behind/school_time.dart';
 import 'package:schulapp/code_behind/time_table.dart';
+import 'package:schulapp/widgets/timetable_util_functions.dart';
 import 'package:schulapp/widgets/custom_pop_up.dart';
 
 // ignore: must_be_immutable
@@ -51,7 +49,7 @@ class _TimetableWidgetState extends State<TimetableWidget> {
       tt.maxLessonCount,
       (rowIndex) {
         return DataRow(
-          // selected: rowIndex == 2,
+          selected: tt.schoolTimes[rowIndex].isCurrentlyRunning(),
           cells: List.generate(
             dataColumn.length,
             (cellIndex) {
@@ -75,13 +73,15 @@ class _TimetableWidgetState extends State<TimetableWidget> {
 
               return DataCell(
                 onTap: () async {
-                  await _showPopUp(
+                  await showSchoolLessonHomePopUp(
                     context,
                     lesson,
                     schoolDay,
                     widget.timetable.schoolTimes[rowIndex],
                     heroString,
                   );
+                  if (!mounted) return;
+                  setState(() {});
                 },
                 Center(
                   child: Hero(
@@ -160,26 +160,6 @@ class _TimetableWidgetState extends State<TimetableWidget> {
         horizontalMargin: 25,
       ),
     );
-  }
-
-  Future<void> _showPopUp(
-    BuildContext context,
-    SchoolLesson lesson,
-    SchoolDay day,
-    SchoolTime schoolTime,
-    String heroString,
-  ) async {
-    await Navigator.push(
-      context,
-      PageRouteBuilder(
-        opaque: false,
-        pageBuilder: (BuildContext context, _, __) =>
-            CustomPopUpShowLesson(heroString: heroString),
-        barrierDismissible: true,
-        fullscreenDialog: true,
-      ),
-    );
-    setState(() {});
   }
 }
 

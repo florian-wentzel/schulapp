@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:schulapp/code_behind/school_day.dart';
+import 'package:schulapp/code_behind/school_lesson.dart';
+import 'package:schulapp/code_behind/school_time.dart';
 import 'package:schulapp/code_behind/time_table.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/screens/time_table/create_timetable_screen.dart';
+import 'package:schulapp/screens/time_table/timetable_widget.dart';
 
 ///set State after calling
-Future<void> createNewTimetable(BuildContext context) async {
+Future<bool?> createNewTimetable(BuildContext context) async {
   Timetable? tt = await showCreateTimeTableSheet(context);
-  if (tt == null) return;
+  if (tt == null) return null;
 
   // bool? createdNewTimetable =
-  await Navigator.of(context).push<bool>(
+  return Navigator.of(context).push<bool>(
     MaterialPageRoute(
       builder: (context) => CreateTimeTableScreen(timetable: tt),
     ),
@@ -129,5 +133,25 @@ Future<Timetable?> showCreateTimeTableSheet(BuildContext context) async {
     maxLessonCount: lessonCount,
     schoolDays: Timetable.defaultSchoolDays(lessonCount),
     schoolTimes: Timetable.defaultSchoolTimes(lessonCount),
+  );
+}
+
+///setState after calling this method
+Future<void> showSchoolLessonHomePopUp(
+  BuildContext context,
+  SchoolLesson lesson,
+  SchoolDay day,
+  SchoolTime schoolTime,
+  String heroString,
+) async {
+  await Navigator.push(
+    context,
+    PageRouteBuilder(
+      opaque: false,
+      pageBuilder: (BuildContext context, _, __) =>
+          CustomPopUpShowLesson(heroString: heroString),
+      barrierDismissible: true,
+      fullscreenDialog: true,
+    ),
   );
 }

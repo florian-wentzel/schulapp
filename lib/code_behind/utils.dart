@@ -277,6 +277,14 @@ class Utils {
 
     return TimetableManager().timetables.first;
   }
+
+  static double getMobileRatio() => 9 / 16;
+  static double getAspectRatio(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final height = MediaQuery.of(context).size.height;
+
+    return width / height;
+  }
 }
 
 enum InfoType {

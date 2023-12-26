@@ -23,7 +23,7 @@ class CustomPopUp extends StatefulWidget {
 class _CustomPopUpState extends State<CustomPopUp> {
   @override
   Widget build(BuildContext context) {
-    bool isDesktop = Utils.isDesktop;
+    bool isDesktop = Utils.getAspectRatio(context) > Utils.getMobileRatio();
 
     return Center(
       child: FractionallySizedBox(

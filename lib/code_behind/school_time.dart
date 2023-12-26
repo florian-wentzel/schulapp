@@ -55,4 +55,18 @@ class SchoolTime {
 
     return SchoolTime(start: start, end: end);
   }
+
+  bool isCurrentlyRunning() {
+    TimeOfDay now = TimeOfDay.now();
+
+    // Convert start and end to DateTime for proper comparison
+    DateTime startDate = DateTime(2023, 1, 1, start.hour, start.minute);
+    DateTime endDate = DateTime(2023, 1, 1, end.hour, end.minute);
+
+    // Convert now to DateTime for proper comparison
+    DateTime nowDate = DateTime(2023, 1, 1, now.hour, now.minute);
+
+    // Check if nowDate is between startDate and endDate
+    return nowDate.isAfter(startDate) && nowDate.isBefore(endDate);
+  }
 }
