@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:go_router/go_router.dart';
 import 'package:schulapp/code_behind/time_table.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/screens/time_table/create_timetable_screen.dart';
@@ -56,7 +57,9 @@ class _TimetableScreenState extends State<TimetableScreen> {
             onTap: () async {
               await createNewTimetable(context);
 
-              setState(() {});
+              if (!mounted) return;
+
+              context.go(TimetableScreen.route);
             },
           ),
           SpeedDialChild(
@@ -102,7 +105,8 @@ class _TimetableScreenState extends State<TimetableScreen> {
         child: ElevatedButton(
           onPressed: () async {
             await createNewTimetable(context);
-            setState(() {});
+            if (!mounted) return;
+            context.go(TimetableScreen.route);
           },
           child: const Text("Create a Timetable"),
         ),

@@ -27,8 +27,8 @@ class _CustomPopUpState extends State<CustomPopUp> {
 
     return Center(
       child: FractionallySizedBox(
-        widthFactor: isDesktop ? 0.5 : 0.7,
-        heightFactor: isDesktop ? 0.7 : 0.5,
+        widthFactor: isDesktop ? 0.7 : 0.8,
+        heightFactor: isDesktop ? 0.8 : 0.6,
         child: Material(
           color: Colors.transparent,
           child: Hero(
