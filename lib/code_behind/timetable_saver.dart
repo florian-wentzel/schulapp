@@ -3,27 +3,25 @@ import 'dart:io';
 
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/time_table.dart';
 import 'package:schulapp/code_behind/time_table_manager.dart';
 
-class TimetableSaver {
-  static final TimetableSaver _instance = TimetableSaver._privateConstructor();
-  TimetableSaver._privateConstructor();
+class SaveManager {
+  static final SaveManager _instance = SaveManager._privateConstructor();
+  SaveManager._privateConstructor();
 
-  factory TimetableSaver() {
+  factory SaveManager() {
     return _instance;
   }
-
+  static const String mainDirName = "Schulapp";
+  static const String settingsFileName = "settings.json";
   static const String timetableSaveDirName = "timetables";
   static const String timetableFileName = "timetable.json";
 
   Directory? applicationDocumentsDirectory;
 
   List<Timetable> loadAllTimetables() {
-    if (applicationDocumentsDirectory == null) {
-      loadApplicationDocumentsDirectory();
-      return [];
-    }
     final timetablesDir = getTimetablesDir();
     final files = timetablesDir.listSync();
 
@@ -73,7 +71,6 @@ class TimetableSaver {
     // Now you can work with the loaded JSON data
     print(jsonData);
 
-    //TODO: return loaded Timetable
     return Timetable.fromJson(jsonData);
   }
 
@@ -89,11 +86,6 @@ class TimetableSaver {
   }
 
   void saveTimeTable(Timetable timetable) {
-    if (applicationDocumentsDirectory == null) {
-      loadApplicationDocumentsDirectory();
-      throw Exception("document dir not loaded");
-    }
-
     String timetableDirPath = join(getTimetablesDir().path, timetable.name);
 
     Directory timetableDir = Directory(timetableDirPath);
@@ -122,17 +114,71 @@ class TimetableSaver {
     }
   }
 
-  Directory getTimetablesDir() {
+  Directory getMainSaveDir() {
     if (applicationDocumentsDirectory == null) {
       loadApplicationDocumentsDirectory();
       throw Exception("document dir not loaded");
     }
 
+    final dir =
+        Directory(join(applicationDocumentsDirectory!.path, mainDirName));
+
+    dir.createSync(recursive: true);
+
+    return dir;
+  }
+
+  Directory getTimetablesDir() {
+    String mainDirPath = getMainSaveDir().path;
+
     final dir = Directory(
-        join(applicationDocumentsDirectory!.path, timetableSaveDirName));
+      join(mainDirPath, timetableSaveDirName),
+    );
 
     dir.createSync();
 
     return dir;
+  }
+
+  Settings loadSettings() {
+    String mainSaveDirPath = getMainSaveDir().path;
+
+    String path = join(mainSaveDirPath, settingsFileName);
+
+    if (!File(path).existsSync()) return Settings();
+
+    String fileContent = File(path).readAsStringSync();
+
+    Map<String, dynamic> json = jsonDecode(fileContent);
+
+    return Settings.fromJson(json);
+  }
+
+  void saveSettings(Settings settings) {
+    String mainSaveDirPath = getMainSaveDir().path;
+
+    String path = join(mainSaveDirPath, settingsFileName);
+
+    Map<String, dynamic> json = settings.toJson();
+
+    String fileContent = jsonEncode(json);
+
+    File(path).writeAsStringSync(fileContent);
+  }
+
+  bool delteTimetable(Timetable timetable) {
+    try {
+      String timetableDirPath = join(getTimetablesDir().path, timetable.name);
+
+      Directory timetableDir = Directory(timetableDirPath);
+
+      if (timetableDir.existsSync()) {
+        timetableDir.deleteSync(recursive: true);
+      }
+
+      return true;
+    } on Exception catch (_) {
+      return false;
+    }
   }
 }

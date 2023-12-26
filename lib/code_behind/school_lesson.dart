@@ -72,7 +72,7 @@ class SchoolLesson {
     _name = prefab.name;
     _room = prefab.room;
     _teacher = prefab.teacher;
-    _color = prefab.color;
+    _color = prefab.color; //TODO: vielleicht Fehler weil keine Kopie
   }
 
   Map<String, dynamic> toJson() {

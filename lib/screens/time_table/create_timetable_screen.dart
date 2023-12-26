@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:schulapp/code_behind/school_lesson.dart';
 import 'package:schulapp/code_behind/school_lesson_prefab.dart';
 import 'package:schulapp/code_behind/time_table.dart';
 import 'package:schulapp/code_behind/time_table_manager.dart';
@@ -9,11 +10,11 @@ import 'package:schulapp/screens/time_table/timetable_droptarget.dart';
 // ignore: must_be_immutable
 class CreateTimeTableScreen extends StatefulWidget {
   static const String route = "/createTimeTable";
-  Timetable timeTable;
+  Timetable timetable;
 
   CreateTimeTableScreen({
     super.key,
-    required this.timeTable,
+    required this.timetable,
   });
 
   @override
@@ -23,11 +24,45 @@ class CreateTimeTableScreen extends StatefulWidget {
 class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
   List<SchoolLessonPrefab> lessonPrefabs = [];
 
+  late final String _originalName = widget.timetable.name;
+
+  @override
+  void initState() {
+    lessonPrefabs = _createLessonPrefabsFromTt();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Create a Timetable: ${widget.timeTable.name}"),
+        title: GestureDetector(
+          onTap: () async {
+            String? name = await Utils.showStringInputDialog(
+              context,
+              hintText: "Enter Timetable name",
+              maxInputLength: Timetable.maxNameLength,
+            );
+
+            if (name == null) {
+              return;
+            }
+            try {
+              widget.timetable.name = name;
+            } catch (e) {
+              if (mounted) {
+                Utils.showInfo(
+                  context,
+                  msg: e.toString(),
+                  type: InfoType.error,
+                );
+              }
+            }
+
+            setState(() {});
+          },
+          child: Text("Create a Timetable: ${widget.timetable.name}"),
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.add),
@@ -40,27 +75,54 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
           setState(() {});
         },
       ),
-      body: SingleChildScrollView(
-        child: Center(
-          child: Column(
-            children: [
-              _lessonPrefabScrollbar(),
-              TimetableDroptarget(timeTable: widget.timeTable),
-              const SizedBox(
-                height: 16,
+      body: _body(),
+    );
+  }
+
+  Widget _body() {
+    return SingleChildScrollView(
+      child: Center(
+        child: Column(
+          children: [
+            _lessonPrefabScrollbar(),
+            TimetableDroptarget(timetable: widget.timetable),
+            const SizedBox(
+              height: 16,
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                //TODO: Are there "-$number-" lessons? then ask question othetwise skip
+                bool replace = await Utils.showBoolInputDialog(
+                  context,
+                  question: "Do you want to replace empty lessons with '---'?",
+                );
+
+                if (replace) {
+                  Utils.removeEmptySchoolLessons(
+                    widget.timetable,
+                    newName: "---",
+                    newColor: Colors.transparent,
+                    // newRoom: "---", ist schon "---"
+                    // newTeacher: "---", ist schon "---"
+                  );
+                }
+
+                TimetableManager().addOrChangeTimetable(
+                  widget.timetable,
+                  originalName: _originalName,
+                );
+
+                if (!mounted) return;
+
+                //weil neuer timetable erstellt return true damit kann man später vielleicht was anfangen
+                Navigator.of(context).pop(true);
+              },
+              child: const Icon(
+                Icons.arrow_right_alt,
+                size: 32,
               ),
-              ElevatedButton(
-                onPressed: () {
-                  TimetableManager().addTimetable(widget.timeTable);
-                  Navigator.of(context).pop();
-                },
-                child: const Icon(
-                  Icons.arrow_right_alt,
-                  size: 32,
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -77,7 +139,6 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
           lessonPrefabs.length,
           (index) {
             SchoolLessonPrefab prefab = lessonPrefabs[index];
-            final heroString = "prefabScrollbar:$index";
             return GestureDetector(
               onTap: () async {
                 SchoolLessonPrefab? newPrefab =
@@ -101,7 +162,7 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
 
                 if (updateLessons) {
                   Utils.updateTimetableLessons(
-                    widget.timeTable,
+                    widget.timetable,
                     prefab,
                     newName: newPrefab.name,
                     newTeacher: newPrefab.teacher,
@@ -112,37 +173,34 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
                 lessonPrefabs[index] = newPrefab;
                 setState(() {});
               },
-              child: Hero(
-                tag: heroString,
-                child: Draggable(
-                  data: prefab,
-                  feedback: Container(
-                    margin: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: prefab.color.withAlpha(127),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    height: containerHeight,
-                    width: containerWidth,
+              child: Draggable(
+                data: prefab,
+                feedback: Container(
+                  margin: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: prefab.color.withAlpha(127),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  childWhenDragging: Container(
-                    margin: const EdgeInsets.all(12),
-                    width: containerWidth,
-                    height: containerHeight,
+                  height: containerHeight,
+                  width: containerWidth,
+                ),
+                childWhenDragging: Container(
+                  margin: const EdgeInsets.all(12),
+                  width: containerWidth,
+                  height: containerHeight,
+                ),
+                child: Container(
+                  margin: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: prefab.color,
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Container(
-                    margin: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: prefab.color,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    height: containerHeight,
-                    width: containerWidth,
-                    child: Center(
-                      child: Text(
-                        prefab.name,
-                        textAlign: TextAlign.center,
-                      ),
+                  height: containerHeight,
+                  width: containerWidth,
+                  child: Center(
+                    child: Text(
+                      prefab.name,
+                      textAlign: TextAlign.center,
                     ),
                   ),
                 ),
@@ -268,5 +326,39 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
       teacher: teacher,
       color: color,
     );
+  }
+
+  List<SchoolLessonPrefab> _createLessonPrefabsFromTt() {
+    Map<String, SchoolLessonPrefab> lessonPrefabsMap = {};
+
+    for (int schoolDayIndex = 0;
+        schoolDayIndex < widget.timetable.schoolDays.length;
+        schoolDayIndex++) {
+      for (int schoolLessonIndex = 0;
+          schoolLessonIndex < widget.timetable.maxLessonCount;
+          schoolLessonIndex++) {
+        SchoolLesson lesson = widget
+            .timetable.schoolDays[schoolDayIndex].lessons[schoolLessonIndex];
+
+        if (lesson.name.startsWith("-")) {
+          continue;
+        }
+
+        bool exists = lessonPrefabsMap.containsKey(lesson.name);
+
+        if (exists) continue;
+
+        SchoolLessonPrefab prefab = SchoolLessonPrefab(
+          name: lesson.name,
+          room: lesson.room,
+          teacher: lesson.teacher,
+          color: lesson.color,
+        );
+
+        lessonPrefabsMap[lesson.name] = prefab;
+      }
+    }
+
+    return lessonPrefabsMap.values.toList();
   }
 }

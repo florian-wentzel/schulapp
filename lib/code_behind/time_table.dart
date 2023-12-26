@@ -6,6 +6,10 @@ import 'package:schulapp/code_behind/school_time.dart';
 import 'package:schulapp/extensions.dart';
 
 class Timetable {
+  static const maxNameLength = 15;
+  static const minMaxLessonCount = 5;
+  static const maxMaxLessonCount = 12;
+
   static const nameKey = "name";
   static const maxLessonCountKey = "maxLessonCount";
   static const schoolDaysKey = "days";
@@ -117,7 +121,7 @@ class Timetable {
     ];
   }
 
-  final String _name;
+  String _name;
   final int _maxLessonCount;
   final List<SchoolDay> _schoolDays;
   final List<SchoolTime> _schoolTimes;
@@ -126,6 +130,18 @@ class Timetable {
   int get maxLessonCount => _maxLessonCount;
   List<SchoolDay> get schoolDays => _schoolDays;
   List<SchoolTime> get schoolTimes => _schoolTimes;
+
+  set name(String value) {
+    value = value.trim();
+
+    if (value.isEmpty) {
+      throw Exception("Name can not be empty!");
+    }
+    if (value.length > maxNameLength) {
+      throw Exception("Name is to long!");
+    }
+    _name = value;
+  }
 
   Timetable({
     required String name,

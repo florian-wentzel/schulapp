@@ -1,6 +1,12 @@
+///Routes and Theme updates
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:schulapp/screens/time_table/timetable_screen.dart';
+import 'package:schulapp/code_behind/utils.dart';
+import 'package:schulapp/screens/all_timetables_screen.dart';
+import 'package:schulapp/screens/notes_screen.dart';
+import 'package:schulapp/screens/settings_screen.dart';
+import 'package:schulapp/screens/timetable_screen.dart';
 import 'package:schulapp/theme/theme_manager.dart';
 import 'package:schulapp/theme/themes.dart';
 
@@ -9,8 +15,24 @@ import 'package:schulapp/theme/themes.dart';
 final _router = GoRouter(
   routes: [
     GoRoute(
-      path: TimeTableScreen.route,
-      builder: (context, state) => const TimeTableScreen(),
+      path: TimetableScreen.route,
+      builder: (context, state) => TimetableScreen(
+        title: "Home",
+        timetable: Utils.getHomescreenTimetable(),
+        isHomeScreen: true,
+      ),
+    ),
+    GoRoute(
+      path: AllTimetablesScreen.route,
+      builder: (context, state) => const AllTimetablesScreen(),
+    ),
+    GoRoute(
+      path: NotesScreen.route,
+      builder: (context, state) => const NotesScreen(),
+    ),
+    GoRoute(
+      path: SettingsScreen.route,
+      builder: (context, state) => const SettingsScreen(),
     ),
   ],
 );

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/school_lesson.dart';
 import 'package:schulapp/code_behind/school_lesson_prefab.dart';
 import 'package:schulapp/code_behind/time_table.dart';
+import 'package:schulapp/code_behind/time_table_manager.dart';
 
 class Utils {
   static const hourKey = "hour";
@@ -21,6 +22,44 @@ class Utils {
   static bool get isDesktop {
     return /*!kIsWeb && */
         (Platform.isWindows || Platform.isLinux || Platform.isMacOS);
+  }
+
+  static void removeEmptySchoolLessons(
+    Timetable timetable, {
+    String? newName,
+    String? newTeacher,
+    String? newRoom,
+    Color? newColor,
+  }) {
+    for (int schoolDayIndex = 0;
+        schoolDayIndex < timetable.schoolDays.length;
+        schoolDayIndex++) {
+      for (int lessonIndex = 0;
+          lessonIndex < timetable.maxLessonCount;
+          lessonIndex++) {
+        SchoolLesson lesson =
+            timetable.schoolDays[schoolDayIndex].lessons[lessonIndex];
+
+        if (!lesson.name.startsWith("-") ||
+            lesson.room != "---" ||
+            lesson.teacher != "---") {
+          continue;
+        }
+
+        if (newName != null) {
+          lesson.name = newName;
+        }
+        if (newTeacher != null) {
+          lesson.teacher = newTeacher;
+        }
+        if (newRoom != null) {
+          lesson.room = newRoom;
+        }
+        if (newColor != null) {
+          lesson.color = newColor;
+        }
+      }
+    }
   }
 
   static void updateTimetableLessons(
@@ -98,6 +137,7 @@ class Utils {
     required String hintText,
     String? title,
     bool autofocus = false,
+    int? maxInputLength,
   }) async {
     TextEditingController textController = TextEditingController();
 
@@ -107,6 +147,7 @@ class Utils {
         return AlertDialog(
           title: title == null ? null : Text(title),
           content: TextField(
+            maxLength: maxInputLength,
             autofocus: autofocus,
             controller: textController,
             decoration: InputDecoration(
@@ -185,6 +226,33 @@ class Utils {
     };
   }
 
+  static void showInfo(BuildContext context,
+      {required String msg, InfoType type = InfoType.normal}) {
+    Color backgroundColor;
+    switch (type) {
+      case InfoType.success:
+        backgroundColor = Colors.green;
+        break;
+      case InfoType.normal:
+        backgroundColor = Colors.white;
+        break;
+      case InfoType.warning:
+        backgroundColor = Colors.yellow;
+        break;
+      case InfoType.error:
+        backgroundColor = Colors.red;
+        break;
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: backgroundColor,
+        content: Text(
+          msg,
+        ),
+      ),
+    );
+  }
+
   static Color jsonToColor(Map<String, dynamic> json) {
     int a = json[aKey];
     int r = json[rKey];
@@ -192,4 +260,28 @@ class Utils {
     int b = json[bKey];
     return Color.fromARGB(a, r, g, b);
   }
+
+  static Timetable? getHomescreenTimetable() {
+    if (TimetableManager().timetables.isEmpty) {
+      return null;
+    }
+
+    try {
+      if (TimetableManager().settings.mainTimetableName != null) {
+        return TimetableManager().timetables.firstWhere(
+              (element) =>
+                  element.name == TimetableManager().settings.mainTimetableName,
+            );
+      }
+    } catch (_) {}
+
+    return TimetableManager().timetables.first;
+  }
+}
+
+enum InfoType {
+  normal,
+  success,
+  warning,
+  error,
 }

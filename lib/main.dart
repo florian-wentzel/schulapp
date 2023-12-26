@@ -5,7 +5,7 @@ import 'package:schulapp/code_behind/timetable_saver.dart';
 void main() async {
   //sichergehen dass alle plugins initialisiert wurden
   WidgetsFlutterBinding.ensureInitialized();
-  TimetableSaver().loadApplicationDocumentsDirectory();
+  await SaveManager().loadApplicationDocumentsDirectory();
   runApp(const MainApp());
 }
 
