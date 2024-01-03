@@ -77,6 +77,10 @@ class SchoolSemester {
 
     return semester;
   }
+
+  bool removeSubject(SchoolGradeSubject subject) {
+    return subjects.remove(subject);
+  }
 }
 
 class SchoolGradeSubject {
@@ -144,9 +148,54 @@ class SchoolGradeSubject {
       gradeGroups: gradeGroups,
     );
   }
+
+  void adaptPercentage(GradeGroup from, int toIndex) {
+    if (gradeGroups.length - 1 == 0) return;
+    if (gradeGroups.length == 2) {
+      gradeGroups[toIndex].percent = 100 - from.percent;
+      return;
+    }
+
+    int percentage = 0;
+
+    for (var gradeGroup in gradeGroups) {
+      percentage += gradeGroup.percent;
+    }
+
+    if (percentage == 100) return;
+
+    int diff = 100 - percentage;
+
+    for (int i = 0; i < gradeGroups.length; i++) {
+      int index = (i + toIndex) % gradeGroups.length;
+      if (index == gradeGroups.indexOf(from)) continue;
+      final currGroup = gradeGroups[index];
+
+      if (currGroup.percent + diff >= 0) {
+        currGroup.percent += diff;
+        diff = 0;
+        break;
+      } else {
+        currGroup.percent = 0;
+        diff += currGroup.percent;
+      }
+    }
+  }
+
+  bool removeGradegroup(GradeGroup gg) {
+    return gradeGroups.remove(gg);
+  }
+
+  void addGradeGroup(GradeGroup gradeGroup) {
+    gradeGroups.add(gradeGroup);
+
+    adaptPercentage(gradeGroup, 0);
+  }
 }
 
 class GradeGroup {
+  static const maxNameLength = 15;
+
   static const nameKey = "name";
   static const percentKey = "percent";
   static const gradesKey = "grades";

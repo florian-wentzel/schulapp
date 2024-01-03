@@ -7,6 +7,7 @@ import 'package:schulapp/code_behind/school_semester.dart';
 import 'package:schulapp/code_behind/time_table.dart';
 import 'package:schulapp/code_behind/time_table_manager.dart';
 import 'package:schulapp/code_behind/utils.dart';
+import 'package:schulapp/screens/semester/school_grade_subject_screen.dart';
 import 'package:schulapp/widgets/school_grade_subject_widget.dart';
 
 // ignore: must_be_immutable
@@ -173,9 +174,23 @@ class _SemesterScreenState extends State<SemesterScreen> {
               ),
             );
           },
-          child: SchoolGradeSubjectWidget(
-            subject: subject,
-            semester: widget.semester,
+          child: InkWell(
+            onTap: () async {
+              await Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => SchoolGradeSubjectScreen(
+                    subject: subject,
+                    semester: widget.semester,
+                  ),
+                ),
+              );
+
+              setState(() {});
+            },
+            child: SchoolGradeSubjectWidget(
+              subject: subject,
+              semester: widget.semester,
+            ),
           ),
         ),
       ),
