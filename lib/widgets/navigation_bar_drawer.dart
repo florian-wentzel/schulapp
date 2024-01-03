@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:schulapp/screens/all_timetables_screen.dart';
+import 'package:schulapp/screens/grades_screen.dart';
 import 'package:schulapp/screens/notes_screen.dart';
 import 'package:schulapp/screens/settings_screen.dart';
 import 'package:schulapp/screens/timetable_screen.dart';
@@ -42,6 +43,12 @@ class _NavigationBarDrawerState extends State<NavigationBarDrawer> {
       route: AllTimetablesScreen.route,
       icon: const Icon(Icons.dataset_outlined),
       selectedIcon: const Icon(Icons.dataset),
+    ),
+    CustomDestination(
+      label: "Grades",
+      route: GradesScreen.route,
+      icon: const Icon(Icons.school_outlined),
+      selectedIcon: const Icon(Icons.school),
     ),
     CustomDestination(
       label: "Notes",

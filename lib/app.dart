@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/screens/all_timetables_screen.dart';
+import 'package:schulapp/screens/grades_screen.dart';
 import 'package:schulapp/screens/notes_screen.dart';
 import 'package:schulapp/screens/settings_screen.dart';
 import 'package:schulapp/screens/timetable_screen.dart';
@@ -25,6 +26,10 @@ final _router = GoRouter(
     GoRoute(
       path: AllTimetablesScreen.route,
       builder: (context, state) => const AllTimetablesScreen(),
+    ),
+    GoRoute(
+      path: GradesScreen.route,
+      builder: (context, state) => const GradesScreen(),
     ),
     GoRoute(
       path: NotesScreen.route,

@@ -15,7 +15,50 @@ class Timetable {
   static const schoolDaysKey = "days";
   static const schoolTimesKey = "times";
 
+  static final defaultPaulDessauTimetable = [
+    SchoolTime(
+      start: const TimeOfDay(hour: 7, minute: 45),
+      end: const TimeOfDay(hour: 8, minute: 30),
+    ),
+    SchoolTime(
+      start: const TimeOfDay(hour: 8, minute: 40),
+      end: const TimeOfDay(hour: 9, minute: 25),
+    ),
+    SchoolTime(
+      start: const TimeOfDay(hour: 9, minute: 45),
+      end: const TimeOfDay(hour: 10, minute: 30),
+    ),
+    SchoolTime(
+      start: const TimeOfDay(hour: 10, minute: 40),
+      end: const TimeOfDay(hour: 11, minute: 25),
+    ),
+    SchoolTime(
+      start: const TimeOfDay(hour: 11, minute: 35),
+      end: const TimeOfDay(hour: 12, minute: 20),
+    ),
+    SchoolTime(
+      start: const TimeOfDay(hour: 12, minute: 50),
+      end: const TimeOfDay(hour: 13, minute: 35),
+    ),
+    SchoolTime(
+      start: const TimeOfDay(hour: 13, minute: 45),
+      end: const TimeOfDay(hour: 14, minute: 30),
+    ),
+    SchoolTime(
+      start: const TimeOfDay(hour: 14, minute: 40),
+      end: const TimeOfDay(hour: 15, minute: 25),
+    ),
+    SchoolTime(
+      start: const TimeOfDay(hour: 15, minute: 30),
+      end: const TimeOfDay(hour: 16, minute: 15),
+    ),
+  ];
+
   static List<SchoolTime> defaultSchoolTimes(int hoursCount) {
+    if (hoursCount == 9) {
+      return defaultPaulDessauTimetable;
+    }
+
     TimeOfDay startTime = const TimeOfDay(hour: 7, minute: 45);
 
     return List.generate(

@@ -398,6 +398,7 @@ class _CustomPopUpCreateTimetableState
                     Colors.white,
                 fontSize: 42.0,
               ),
+              textAlign: TextAlign.center,
             ),
           ),
         ),
@@ -422,6 +423,7 @@ class _CustomPopUpCreateTimetableState
                   Theme.of(context).textTheme.bodyLarge?.color ?? Colors.white,
               fontSize: 42.0,
             ),
+            textAlign: TextAlign.center,
           ),
         ),
         const Spacer(

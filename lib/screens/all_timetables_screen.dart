@@ -39,9 +39,12 @@ class _AllTimetablesScreenState extends State<AllTimetablesScreen> {
         ),
       );
     }
-    return ListView.builder(
-      itemCount: TimetableManager().timetables.length,
-      itemBuilder: _itemBuilder,
+    return Padding(
+      padding: const EdgeInsets.all(8),
+      child: ListView.builder(
+        itemCount: TimetableManager().timetables.length,
+        itemBuilder: _itemBuilder,
+      ),
     );
   }
 

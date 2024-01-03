@@ -6,10 +6,11 @@ import 'package:google_fonts/google_fonts.dart';
 final lightTheme = ThemeData.light().copyWith(
   cardColor:
       const Color.fromARGB(225, 18, 17, 20), //TODO setze white mode color
-  textTheme: GoogleFonts.preahvihearTextTheme(),
+  textTheme: GoogleFonts.libreFranklinTextTheme(Typography.blackCupertino),
 );
 
 final darkTheme = ThemeData.dark().copyWith(
   cardColor: const Color.fromARGB(225, 18, 17, 20),
-  textTheme: GoogleFonts.preahvihearTextTheme(Typography.whiteCupertino),
+  textTheme: GoogleFonts.libreFranklinTextTheme(Typography.whiteCupertino),
+  // textTheme: GoogleFonts.preahvihearTextTheme(Typography.whiteCupertino),
 );

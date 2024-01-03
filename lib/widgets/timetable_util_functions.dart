@@ -2,15 +2,91 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:schulapp/code_behind/school_day.dart';
 import 'package:schulapp/code_behind/school_lesson.dart';
+import 'package:schulapp/code_behind/school_semester.dart';
 import 'package:schulapp/code_behind/school_time.dart';
 import 'package:schulapp/code_behind/time_table.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/screens/time_table/create_timetable_screen.dart';
 import 'package:schulapp/screens/time_table/timetable_widget.dart';
 
+Future<SchoolSemester?> createNewSemester(BuildContext context) async {
+  SchoolSemester? schoolSemester = await showCreateSemesterSheet(context);
+
+  return schoolSemester;
+}
+
+Future<SchoolSemester?> showCreateSemesterSheet(BuildContext context) async {
+  const maxNameLength = SchoolSemester.maxNameLength;
+
+  final textColor =
+      Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white;
+
+  TextEditingController nameController = TextEditingController();
+  bool createPressed = false;
+
+  await showModalBottomSheet(
+    context: context,
+    builder: (context) {
+      return Container(
+        margin: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            Text(
+              'Create Semester',
+              style: TextStyle(
+                color: textColor,
+                fontSize: 24.0, // Adjust the font size as needed
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(
+              height: 12,
+            ),
+            TextField(
+              decoration: const InputDecoration(
+                hintText: "Name",
+              ),
+              autofocus: true,
+              maxLines: 1,
+              maxLength: maxNameLength,
+              textAlign: TextAlign.center,
+              controller: nameController,
+            ),
+            const Spacer(),
+            ElevatedButton(
+              onPressed: () {
+                createPressed = true;
+                Navigator.of(context).pop();
+              },
+              child: const Text("Create"),
+            ),
+          ],
+        ),
+      );
+    },
+  );
+
+  if (!createPressed) return null;
+
+  if (nameController.text.trim().isEmpty) {
+    //show error
+    Utils.showInfo(
+      context,
+      msg: "Semester name can not be empty!",
+      type: InfoType.error,
+    );
+    return null;
+  }
+
+  return SchoolSemester(
+    name: nameController.text.trim(),
+    subjects: [],
+  );
+}
+
 ///set State after calling
 Future<bool?> createNewTimetable(BuildContext context) async {
-  Timetable? tt = await showCreateTimeTableSheet(context);
+  Timetable? tt = await showCreateTimetableSheet(context);
   if (tt == null) return null;
 
   // bool? createdNewTimetable =
@@ -21,7 +97,7 @@ Future<bool?> createNewTimetable(BuildContext context) async {
   );
 }
 
-Future<Timetable?> showCreateTimeTableSheet(BuildContext context) async {
+Future<Timetable?> showCreateTimetableSheet(BuildContext context) async {
   const defaultLessonCountValue = 9;
   const maxNameLength = Timetable.maxNameLength;
   const minLessonCount = Timetable.minMaxLessonCount;

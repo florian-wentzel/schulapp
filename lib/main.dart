@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:schulapp/app.dart';
-import 'package:schulapp/code_behind/timetable_saver.dart';
+import 'package:schulapp/code_behind/save_manager.dart';
 
 void main() async {
   //sichergehen dass alle plugins initialisiert wurden

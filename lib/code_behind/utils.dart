@@ -15,6 +15,31 @@ class Utils {
   static const gKey = "g";
   static const bKey = "b";
 
+  static final List<Color> _gradeColors = [
+    const Color.fromARGB(255, 127, 127, 127),
+    const Color.fromARGB(255, 237, 84, 71),
+    const Color.fromARGB(255, 237, 84, 71),
+    const Color.fromARGB(255, 247, 144, 49),
+    const Color.fromARGB(255, 250, 166, 53),
+    const Color.fromARGB(255, 248, 181, 63),
+    const Color.fromARGB(255, 248, 196, 76),
+    const Color.fromARGB(255, 215, 185, 61),
+    const Color.fromARGB(255, 181, 176, 50),
+    const Color.fromARGB(255, 159, 171, 45),
+    const Color.fromARGB(255, 145, 171, 44),
+    const Color.fromARGB(255, 131, 171, 43),
+    const Color.fromARGB(255, 116, 171, 43),
+    const Color.fromARGB(255, 101, 171, 42),
+    const Color.fromARGB(255, 83, 170, 42),
+    const Color.fromARGB(255, 53, 170, 41),
+    const Color.fromARGB(255, 53, 170, 41),
+  ];
+
+  ///from -1 to 15
+  static Color getGradeColor(int grade) {
+    return _gradeColors[grade + 1];
+  }
+
   static bool get isMobile {
     return /*!kIsWeb && */ (Platform.isAndroid || Platform.isIOS);
   }
@@ -284,6 +309,45 @@ class Utils {
     final height = MediaQuery.of(context).size.height;
 
     return width / height;
+  }
+
+  static List<SchoolLessonPrefab> createLessonPrefabsFromTt(
+      Timetable timetable) {
+    Map<String, SchoolLessonPrefab> lessonPrefabsMap = {};
+
+    for (int schoolDayIndex = 0;
+        schoolDayIndex < timetable.schoolDays.length;
+        schoolDayIndex++) {
+      for (int schoolLessonIndex = 0;
+          schoolLessonIndex < timetable.maxLessonCount;
+          schoolLessonIndex++) {
+        SchoolLesson lesson =
+            timetable.schoolDays[schoolDayIndex].lessons[schoolLessonIndex];
+
+        if (lesson.name.startsWith("-")) {
+          continue;
+        }
+
+        bool exists = lessonPrefabsMap.containsKey(lesson.name);
+
+        if (exists) continue;
+
+        SchoolLessonPrefab prefab = SchoolLessonPrefab(
+          name: lesson.name,
+          room: lesson.room,
+          teacher: lesson.teacher,
+          color: lesson.color,
+        );
+
+        lessonPrefabsMap[lesson.name] = prefab;
+      }
+    }
+
+    return lessonPrefabsMap.values.toList();
+  }
+
+  static String dateToString(DateTime date) {
+    return "${date.day}.${date.month}.${date.year}";
   }
 }
 

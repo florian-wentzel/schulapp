@@ -24,11 +24,13 @@ class CreateTimeTableScreen extends StatefulWidget {
 class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
   List<SchoolLessonPrefab> lessonPrefabs = [];
 
-  late final String _originalName = widget.timetable.name;
+  late String _originalName;
 
   @override
   void initState() {
-    lessonPrefabs = _createLessonPrefabsFromTt();
+    lessonPrefabs = Utils.createLessonPrefabsFromTt(widget.timetable);
+    _originalName = String.fromCharCodes(widget.timetable.name.codeUnits);
+
     super.initState();
   }
 
@@ -132,6 +134,7 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
     const containerHeight = 100.0;
     const containerWidth = containerHeight;
     return SingleChildScrollView(
+      primary: true,
       scrollDirection: Axis.horizontal,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -174,6 +177,7 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
                 setState(() {});
               },
               child: Draggable(
+                affinity: Axis.vertical, // damit man nicht ausversehen scrollt
                 data: prefab,
                 feedback: Container(
                   margin: const EdgeInsets.all(12),
@@ -326,39 +330,5 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
       teacher: teacher,
       color: color,
     );
-  }
-
-  List<SchoolLessonPrefab> _createLessonPrefabsFromTt() {
-    Map<String, SchoolLessonPrefab> lessonPrefabsMap = {};
-
-    for (int schoolDayIndex = 0;
-        schoolDayIndex < widget.timetable.schoolDays.length;
-        schoolDayIndex++) {
-      for (int schoolLessonIndex = 0;
-          schoolLessonIndex < widget.timetable.maxLessonCount;
-          schoolLessonIndex++) {
-        SchoolLesson lesson = widget
-            .timetable.schoolDays[schoolDayIndex].lessons[schoolLessonIndex];
-
-        if (lesson.name.startsWith("-")) {
-          continue;
-        }
-
-        bool exists = lessonPrefabsMap.containsKey(lesson.name);
-
-        if (exists) continue;
-
-        SchoolLessonPrefab prefab = SchoolLessonPrefab(
-          name: lesson.name,
-          room: lesson.room,
-          teacher: lesson.teacher,
-          color: lesson.color,
-        );
-
-        lessonPrefabsMap[lesson.name] = prefab;
-      }
-    }
-
-    return lessonPrefabsMap.values.toList();
   }
 }

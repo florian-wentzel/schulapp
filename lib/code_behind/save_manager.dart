@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:schulapp/code_behind/school_semester.dart';
 import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/time_table.dart';
 import 'package:schulapp/code_behind/time_table_manager.dart';
@@ -14,10 +15,13 @@ class SaveManager {
   factory SaveManager() {
     return _instance;
   }
+
   static const String mainDirName = "Schulapp";
   static const String settingsFileName = "settings.json";
   static const String timetableSaveDirName = "timetables";
+  static const String semestersSaveDirName = "semesters";
   static const String timetableFileName = "timetable.json";
+  static const String semesterFileName = "semester.json";
 
   Directory? applicationDocumentsDirectory;
 
@@ -140,6 +144,18 @@ class SaveManager {
     return dir;
   }
 
+  Directory getSemestersDir() {
+    String mainDirPath = getMainSaveDir().path;
+
+    final dir = Directory(
+      join(mainDirPath, semestersSaveDirName),
+    );
+
+    dir.createSync();
+
+    return dir;
+  }
+
   Settings loadSettings() {
     String mainSaveDirPath = getMainSaveDir().path;
 
@@ -181,4 +197,93 @@ class SaveManager {
       return false;
     }
   }
+
+  List<SchoolSemester> loadAllSemesters() {
+    final semestersDir = getSemestersDir();
+    final files = semestersDir.listSync();
+
+    List<String> names = List.generate(
+      files.length,
+      (index) => basename(files[index].path),
+    );
+
+    return loadSemesters(names);
+  }
+
+  List<SchoolSemester> loadSemesters(List<String> names) {
+    List<SchoolSemester> semesters = [];
+    int errorCount = 0;
+
+    for (var name in names) {
+      try {
+        SchoolSemester? semester = loadSemester(name);
+        if (semester == null) {
+          errorCount++;
+          continue;
+        }
+        semesters.add(semester);
+      } catch (e) {
+        print('Error reading or parsing the JSON file: $e');
+      }
+    }
+
+    if (errorCount != 0) {
+      print("Errorcount while loading: $errorCount");
+    }
+
+    return semesters;
+  }
+
+  SchoolSemester? loadSemester(String name) {
+    String semesterDirPath = join(getSemestersDir().path, name);
+
+    final semesterFile = File(join(semesterDirPath, semesterFileName));
+
+    if (!semesterFile.existsSync()) return null;
+
+    String jsonString = semesterFile.readAsStringSync();
+
+    Map<String, dynamic> jsonData = json.decode(jsonString);
+
+    print(jsonData);
+
+    return SchoolSemester.fromJson(jsonData);
+  }
+
+  bool saveSemester(SchoolSemester semester) {
+    String semestersDirPath = join(getSemestersDir().path, semester.name);
+
+    Directory timetableDir = Directory(semestersDirPath);
+    timetableDir.createSync();
+
+    File semesterFile = File(join(semestersDirPath, semesterFileName));
+
+    if (!timetableDir.existsSync()) {
+      throw Exception(
+        "timetable dir could not be created: ${timetableDir.path}",
+      );
+    }
+
+    String jsonString = json.encode(semester.toJson());
+
+    semesterFile.writeAsStringSync(jsonString);
+    return true;
+  }
+
+  bool deleteSemester(SchoolSemester semester) {
+    try {
+      String semestersDirPath = join(getSemestersDir().path, semester.name);
+
+      Directory semesterDir = Directory(semestersDirPath);
+
+      if (semesterDir.existsSync()) {
+        semesterDir.deleteSync(recursive: true);
+      }
+
+      return true;
+    } on Exception catch (_) {
+      return false;
+    }
+  }
+  // SchoolSemester loadSemester() {}
 }
