@@ -5,6 +5,7 @@ import 'package:schulapp/code_behind/school_lesson.dart';
 import 'package:schulapp/code_behind/school_lesson_prefab.dart';
 import 'package:schulapp/code_behind/time_table.dart';
 import 'package:schulapp/code_behind/time_table_manager.dart';
+import 'package:schulapp/widgets/custom_pop_up.dart';
 
 class Utils {
   static const hourKey = "hour";
@@ -304,6 +305,7 @@ class Utils {
   }
 
   static double getMobileRatio() => 9 / 16;
+
   static double getAspectRatio(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
     final height = MediaQuery.of(context).size.height;
@@ -348,6 +350,29 @@ class Utils {
 
   static String dateToString(DateTime date) {
     return "${date.day}.${date.month}.${date.year}";
+  }
+
+  static Future<T?> showCustomPopUp<T>({
+    required BuildContext context,
+    required Object heroObject,
+    required Widget body,
+    Color? color,
+  }) async {
+    color ??= Theme.of(context).cardColor.withAlpha(220);
+
+    return await Navigator.push<T>(
+      context,
+      PageRouteBuilder(
+        opaque: false,
+        pageBuilder: (BuildContext context, _, __) => CustomPopUp(
+          heroObject: heroObject,
+          color: color!,
+          body: body,
+        ),
+        barrierDismissible: true,
+        fullscreenDialog: true,
+      ),
+    );
   }
 }
 

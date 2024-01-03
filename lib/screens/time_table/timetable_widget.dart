@@ -172,7 +172,7 @@ class CustomPopUpShowLesson extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CustomPopUp(
-      heroString: heroString,
+      heroObject: heroString,
       color: Theme.of(context).cardColor,
       body: _body(),
     );

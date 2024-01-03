@@ -5,13 +5,13 @@ import 'package:schulapp/code_behind/utils.dart';
 
 // ignore: must_be_immutable
 class CustomPopUp extends StatefulWidget {
-  String heroString;
+  Object heroObject;
   Widget body;
   Color color;
 
   CustomPopUp({
     super.key,
-    required this.heroString,
+    required this.heroObject,
     required this.color,
     required this.body,
   });
@@ -32,7 +32,7 @@ class _CustomPopUpState extends State<CustomPopUp> {
         child: Material(
           color: Colors.transparent,
           child: Hero(
-            tag: widget.heroString,
+            tag: widget.heroObject,
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
               child: Container(

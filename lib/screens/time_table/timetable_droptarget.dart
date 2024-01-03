@@ -236,7 +236,7 @@ class _CustomPopUpCreateTimetableState
   @override
   Widget build(BuildContext context) {
     return CustomPopUp(
-      heroString: widget.heroString,
+      heroObject: widget.heroString,
       color: Theme.of(context).cardColor,
       body: _body(),
     );

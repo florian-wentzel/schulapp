@@ -133,24 +133,44 @@ class _SchoolGradeSubjectScreenState extends State<SchoolGradeSubjectScreen> {
     Grade grade = gg.grades[index];
     return InkWell(
       onTap: () async {
-        Grade? newGrade = await _showEditGradeSheet(grade);
-        if (newGrade == null) {
-          gg.grades.removeAt(index);
-        } else {
-          gg.grades[index] = newGrade;
-        }
-        setState(() {});
-        SaveManager().saveSemester(widget.semester);
+        Utils.showCustomPopUp(
+          context: context,
+          heroObject: grade,
+          body: _gradeNumberItemPopUp(gg, index),
+        );
       },
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: Utils.getGradeColor(grade.grade),
+      child: Hero(
+        tag: grade,
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Utils.getGradeColor(grade.grade),
+          ),
+          child: Center(
+            child: Text(grade.toString()),
+          ),
         ),
-        child: Center(
-          child: Text(grade.toString()),
-        ),
+        flightShuttleBuilder: (context, animation, __, ___, ____) {
+          const targetAlpha = 220;
+
+          return AnimatedBuilder(
+            animation: animation,
+            builder: (context, _) {
+              return Container(
+                margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  color: ColorTween(
+                    begin: Utils.getGradeColor(grade.grade),
+                    end: Theme.of(context).cardColor.withAlpha(targetAlpha),
+                  ).lerp(animation.value),
+                ),
+              );
+            },
+          );
+        },
       ),
     );
   }
@@ -417,6 +437,105 @@ class _SchoolGradeSubjectScreenState extends State<SchoolGradeSubjectScreen> {
       grade: selectedGrade,
       date: dateController.date,
       info: infoController.text.trim(),
+    );
+  }
+
+  Widget _gradeNumberItemPopUp(GradeGroup gg, int index) {
+    Grade grade = gg.grades[index];
+
+    return Column(
+      children: [
+        Align(
+          alignment: Alignment.topRight,
+          child: IconButton(
+            onPressed: () async {
+              Navigator.pop(context);
+
+              Grade? newGrade = await _showEditGradeSheet(grade);
+              if (newGrade == null) {
+                gg.grades.removeAt(index);
+              } else {
+                gg.grades[index] = newGrade;
+              }
+              setState(() {});
+              SaveManager().saveSemester(widget.semester);
+            },
+            icon: const Icon(
+              Icons.edit,
+              // color: Colors.red,
+              size: 32,
+            ),
+          ),
+        ),
+        GestureDetector(
+          child: Text(
+            style: TextStyle(
+              color:
+                  Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+              // decoration: TextDecoration.underline,
+              fontSize: 42.0,
+              fontWeight: FontWeight.bold,
+            ),
+            gg.name,
+          ),
+        ),
+        const SizedBox(
+          height: 16,
+        ),
+        GestureDetector(
+          child: Container(
+            width: 100,
+            height: 100,
+            decoration: BoxDecoration(
+              // borderRadius: BorderRadius.circular(16),
+              shape: BoxShape.circle,
+              color: Utils.getGradeColor(grade.grade),
+            ),
+            child: Center(
+              child: Text(
+                grade.toString(),
+                style: Theme.of(context).textTheme.displaySmall,
+              ),
+            ),
+          ),
+        ),
+        const Spacer(),
+        const SizedBox(
+          height: 12,
+        ),
+        Visibility(
+          visible: grade.info.isNotEmpty,
+          child: Text(
+            grade.info,
+            style: TextStyle(
+              color:
+                  Theme.of(context).textTheme.bodyLarge?.color ?? Colors.white,
+              fontSize: 42.0,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ),
+        Text(
+          Utils.dateToString(grade.date),
+          style: TextStyle(
+            color: Theme.of(context).textTheme.bodyLarge?.color ?? Colors.white,
+            fontSize: 42.0,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        const Spacer(
+          flex: 2,
+        ),
+        ElevatedButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: const Icon(
+            Icons.check,
+            size: 42,
+          ),
+        ),
+      ],
     );
   }
 }
