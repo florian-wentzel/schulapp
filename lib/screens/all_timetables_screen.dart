@@ -23,6 +23,16 @@ class _AllTimetablesScreenState extends State<AllTimetablesScreen> {
       appBar: AppBar(
         title: const Text("Timetables"),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          await createNewTimetable(context);
+
+          if (!mounted) return;
+
+          setState(() {});
+        },
+        child: const Icon(Icons.add),
+      ),
       body: _body(),
     );
   }
