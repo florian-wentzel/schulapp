@@ -5,6 +5,7 @@ import 'package:schulapp/code_behind/school_lesson_prefab.dart';
 import 'package:schulapp/code_behind/school_time.dart';
 import 'package:schulapp/code_behind/time_table.dart';
 import 'package:schulapp/code_behind/utils.dart';
+import 'package:schulapp/extensions.dart';
 import 'package:schulapp/widgets/custom_pop_up.dart';
 
 // ignore: must_be_immutable
@@ -60,13 +61,40 @@ class _TimetableDroptargetState extends State<TimetableDroptarget> {
               if (cellIndex == 0) {
                 final startString = tt.schoolTimes[rowIndex].getStartString();
                 final endString = tt.schoolTimes[rowIndex].getEndString();
+                final text = Text(
+                  "$startString\n$endString",
+                  textAlign: TextAlign.center,
+                );
                 return DataCell(
                   Center(
-                    child: Text(
-                      "$startString\n$endString",
-                      textAlign: TextAlign.center,
+                    child: Hero(
+                      tag: tt.schoolTimes[rowIndex],
+                      child: text,
                     ),
                   ),
+                  onTap: () async {
+                    await Utils.showCustomPopUp(
+                      context: context,
+                      heroObject: tt.schoolTimes[rowIndex],
+                      flightShuttleBuilder: (p0, p1, p2, p3, p4) {
+                        return AnimatedBuilder(
+                          animation: p1,
+                          builder: (context, child) {
+                            return Container(
+                              color: ColorTween(
+                                begin: Colors.transparent,
+                                end: Theme.of(context).cardColor.withAlpha(220),
+                              ).lerp(p1.value),
+                            );
+                          },
+                        );
+                      },
+                      body: CustomPopUpChangeSubjectTime(
+                        schoolTime: tt.schoolTimes[rowIndex],
+                      ),
+                    );
+                    setState(() {});
+                  },
                 );
               }
               //dadurch das wir jz eine Zeile mehr haben durch die Zeit müssen wir einen Index abziehen..
@@ -462,6 +490,144 @@ class _CustomPopUpCreateTimetableState
     widget.schoolLesson.room = _room;
     widget.schoolLesson.teacher = _teacher;
     widget.schoolLesson.color = _color;
+    widget.schoolTime.start = _start;
+    widget.schoolTime.end = _end;
+  }
+}
+
+// just for the time
+// ignore: must_be_immutable
+class CustomPopUpChangeSubjectTime extends StatefulWidget {
+  SchoolTime schoolTime;
+
+  CustomPopUpChangeSubjectTime({super.key, required this.schoolTime});
+
+  @override
+  State<CustomPopUpChangeSubjectTime> createState() =>
+      _CustomPopUpChangeSubjectTimeState();
+}
+
+class _CustomPopUpChangeSubjectTimeState
+    extends State<CustomPopUpChangeSubjectTime> {
+  TimeOfDay _start = const TimeOfDay(hour: 0, minute: 0);
+  TimeOfDay _end = const TimeOfDay(hour: 0, minute: 0);
+
+  @override
+  void initState() {
+    _start = TimeOfDay(
+      hour: widget.schoolTime.start.hour,
+      minute: widget.schoolTime.start.minute,
+    );
+    _end = TimeOfDay(
+      hour: widget.schoolTime.end.hour,
+      minute: widget.schoolTime.end.minute,
+    );
+
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        const Spacer(),
+        FittedBox(
+          fit: BoxFit.fitWidth,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              GestureDetector(
+                onTap: () async {
+                  TimeOfDay? input = await showTimePicker(
+                      context: context, initialTime: _start);
+
+                  if (input == null) return;
+
+                  _start = input;
+                  setState(() {});
+                },
+                child: Text(
+                  _start.format(context),
+                  style: TextStyle(
+                    color: Theme.of(context).textTheme.bodyLarge?.color ??
+                        Colors.white,
+                    fontSize: 64.0,
+                    // decoration: TextDecoration.underline,
+                  ),
+                ),
+              ),
+              Text(
+                " - ",
+                style: TextStyle(
+                  color: Theme.of(context).textTheme.bodyLarge?.color ??
+                      Colors.white,
+                  fontSize: 64.0,
+                ),
+              ),
+              GestureDetector(
+                onTap: () async {
+                  TimeOfDay? input =
+                      await showTimePicker(context: context, initialTime: _end);
+
+                  if (input == null) return;
+
+                  _end = input;
+                  setState(() {});
+                },
+                child: Text(
+                  _end.format(context),
+                  style: TextStyle(
+                    color: Theme.of(context).textTheme.bodyLarge?.color ??
+                        Colors.white,
+                    fontSize: 64.0,
+                    // decoration: TextDecoration.underline,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const Spacer(
+          flex: 2,
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Icon(
+                Icons.close,
+                size: 42,
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (_start.isBefore(_end)) {
+                  _save();
+                  Navigator.of(context).pop();
+                } else {
+                  Utils.showInfo(
+                    context,
+                    msg: "Time is not valid.",
+                    type: InfoType.error,
+                  );
+                }
+              },
+              child: const Icon(
+                Icons.check,
+                size: 42,
+              ),
+            ),
+          ],
+        ),
+        const Spacer()
+      ],
+    );
+  }
+
+  void _save() {
     widget.schoolTime.start = _start;
     widget.schoolTime.end = _end;
   }
