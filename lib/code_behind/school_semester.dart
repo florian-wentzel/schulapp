@@ -102,19 +102,33 @@ class SchoolGradeSubject {
   });
 
   double getGradeAverage() {
-    double average = 0;
+    int percent = 0;
     int count = 0;
+
+    for (var gradeGroup in gradeGroups) {
+      final percentage = gradeGroup.getPercentageForCalculation();
+      if (percentage == -1) continue;
+
+      percent += percentage;
+      count++;
+    }
+
+    if (count == 0) return -1;
+
+    double correctorVal = (100 - percent) / count;
+    int correctorValInt = correctorVal.toInt();
+
+    double average = 0;
 
     for (var gradeGroup in gradeGroups) {
       double gradeGroupAverage = gradeGroup.getGradeAverage();
 
       if (gradeGroupAverage == -1) continue;
 
-      average += gradeGroupAverage * gradeGroup.percent / 100;
-      count++;
+      average +=
+          gradeGroupAverage * (gradeGroup.percent + correctorValInt) / 100;
     }
 
-    average /= count;
     return average;
   }
 
@@ -257,6 +271,11 @@ class GradeGroup {
     average /= grades.length;
 
     return average;
+  }
+
+  int getPercentageForCalculation() {
+    if (grades.isEmpty) return -1;
+    return percent;
   }
 }
 
