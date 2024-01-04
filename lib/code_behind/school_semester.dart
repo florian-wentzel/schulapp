@@ -164,6 +164,7 @@ class SchoolGradeSubject {
   }
 
   void adaptPercentage(GradeGroup from, int toIndex) {
+    if (toIndex < 0 || toIndex >= gradeGroups.length) return;
     if (gradeGroups.length - 1 == 0) return;
     if (gradeGroups.length == 2) {
       gradeGroups[toIndex].percent = 100 - from.percent;
@@ -197,13 +198,25 @@ class SchoolGradeSubject {
   }
 
   bool removeGradegroup(GradeGroup gg) {
-    return gradeGroups.remove(gg);
+    bool removed = gradeGroups.remove(gg);
+    if (gradeGroups.isNotEmpty) {
+      adaptPercentage(gradeGroups[0], 1);
+    }
+    return removed;
   }
 
   void addGradeGroup(GradeGroup gradeGroup) {
     gradeGroups.add(gradeGroup);
 
     adaptPercentage(gradeGroup, 0);
+  }
+
+  String getGradeAverageString() {
+    final gradeAverage = getGradeAverage();
+    if (gradeAverage == -1) {
+      return "-";
+    }
+    return gradeAverage.toStringAsPrecision(2);
   }
 }
 

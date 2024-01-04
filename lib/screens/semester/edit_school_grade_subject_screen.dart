@@ -263,52 +263,6 @@ class _EditSchoolGradeSubjectScreenState
     );
   }
 
-  Widget _gradeNumberItem(GradeGroup gg, int index) {
-    Grade grade = gg.grades[index];
-    return InkWell(
-      onTap: () async {
-        Utils.showCustomPopUp(
-          context: context,
-          heroObject: grade,
-          body: _gradeNumberItemPopUp(gg, index),
-        );
-      },
-      child: Hero(
-        tag: grade,
-        child: Container(
-          margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Utils.getGradeColor(grade.grade),
-          ),
-          child: Center(
-            child: Text(grade.toString()),
-          ),
-        ),
-        flightShuttleBuilder: (context, animation, __, ___, ____) {
-          const targetAlpha = 220;
-
-          return AnimatedBuilder(
-            animation: animation,
-            builder: (context, _) {
-              return Container(
-                margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  color: ColorTween(
-                    begin: Utils.getGradeColor(grade.grade),
-                    end: Theme.of(context).cardColor.withAlpha(targetAlpha),
-                  ).lerp(animation.value),
-                ),
-              );
-            },
-          );
-        },
-      ),
-    );
-  }
-
   static const maxInfoLength = 50;
   Future<Grade?> _showEditGradeSheet(Grade grade) async {
     TextEditingController infoController = TextEditingController();

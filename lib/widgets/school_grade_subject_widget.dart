@@ -59,15 +59,13 @@ class SchoolGradeSubjectWidget extends StatelessWidget {
           Container(
             margin: const EdgeInsets.all(8),
             padding: const EdgeInsets.all(8),
-            // width: 75,
-            // height: 75,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
               color: Utils.getGradeColor(subject.getGradeAverage().toInt()),
             ),
             child: Center(
               child: Text(
-                subject.getGradeAverage().toString(),
+                subject.getGradeAverageString(),
                 textAlign: TextAlign.center,
               ),
             ),
