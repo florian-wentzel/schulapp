@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:schulapp/code_behind/time_table.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/screens/time_table/create_timetable_screen.dart';
+import 'package:schulapp/screens/time_table/import_export_timetable_screen.dart';
 import 'package:schulapp/screens/time_table/timetable_widget.dart';
 import 'package:schulapp/widgets/timetable_util_functions.dart';
 import 'package:schulapp/widgets/navigation_bar_drawer.dart';
@@ -87,11 +88,14 @@ class _TimetableScreenState extends State<TimetableScreen> {
             backgroundColor: Colors.lightBlue,
             foregroundColor: Colors.white,
             label: 'Import / Export',
-            onTap: () => Utils.showInfo(
-              context,
-              msg: "This function is not impelemented yet! sry :/",
-              type: InfoType.warning,
-            ),
+            onTap: () async {
+              await Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const ImportExportTimetableScreen(),
+                ),
+              );
+              setState(() {});
+            },
           ),
         ],
       ),

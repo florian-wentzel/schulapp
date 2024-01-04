@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:schulapp/code_behind/save_manager.dart';
 import 'package:schulapp/code_behind/school_lesson_prefab.dart';
@@ -202,59 +201,42 @@ class _SemesterScreenState extends State<SemesterScreen> {
 
     TextEditingController nameController = TextEditingController();
 
-    Color color = Colors.red;
-
     bool createPressed = false;
 
     await showModalBottomSheet(
       context: context,
-      isScrollControlled: true,
       builder: (context) {
         return Container(
           margin: const EdgeInsets.all(16),
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  "Create Subject",
-                  style: Theme.of(context).textTheme.headlineMedium,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                "Create Subject",
+                style: Theme.of(context).textTheme.headlineMedium,
+              ),
+              const SizedBox(
+                height: 12,
+              ),
+              TextField(
+                decoration: const InputDecoration(
+                  hintText: "Name",
                 ),
-                const SizedBox(
-                  height: 12,
-                ),
-                TextField(
-                  decoration: const InputDecoration(
-                    hintText: "Name",
-                  ),
-                  autofocus: true,
-                  maxLines: 1,
-                  maxLength: maxNameLength,
-                  textAlign: TextAlign.center,
-                  controller: nameController,
-                ),
-                const SizedBox(
-                  height: 12,
-                ),
-                HueRingPicker(
-                  pickerColor: color,
-                  onColorChanged: (value) {
-                    color = value;
-                    setState(() {});
-                  },
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    createPressed = true;
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text("Create"),
-                ),
-              ],
-            ),
+                autofocus: true,
+                maxLines: 1,
+                maxLength: maxNameLength,
+                textAlign: TextAlign.center,
+                controller: nameController,
+              ),
+              const Spacer(),
+              ElevatedButton(
+                onPressed: () {
+                  createPressed = true;
+                  Navigator.of(context).pop();
+                },
+                child: const Text("Create"),
+              ),
+            ],
           ),
         );
       },
@@ -277,7 +259,6 @@ class _SemesterScreenState extends State<SemesterScreen> {
 
     return SchoolGradeSubject(
       name: name,
-      color: color,
       gradeGroups: TimetableManager().settings.defaultGradeGroups,
     );
   }
@@ -346,7 +327,6 @@ class _SemesterScreenState extends State<SemesterScreen> {
       (index) {
         return SchoolGradeSubject(
           name: lessonPrefabs[index].name,
-          color: lessonPrefabs[index].color,
           gradeGroups: TimetableManager().settings.defaultGradeGroups,
         );
       },

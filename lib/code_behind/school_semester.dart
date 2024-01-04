@@ -85,19 +85,16 @@ class SchoolSemester {
 
 class SchoolGradeSubject {
   static const String nameKey = "name";
-  static const String colorKey = "color";
   static const String gradeGroupsKey = "gradeGroups";
 
   static const int maxNameLength = 15;
 
   String name;
-  Color color;
 
   List<GradeGroup> gradeGroups; //Schriftliche und Mündliche Noten etc.
 
   SchoolGradeSubject({
     required this.name,
-    required this.color,
     required this.gradeGroups,
   });
 
@@ -135,7 +132,6 @@ class SchoolGradeSubject {
   Map<String, dynamic> toJson() {
     return {
       nameKey: name,
-      colorKey: Utils.colorToJson(color),
       gradeGroupsKey: List.generate(
         gradeGroups.length,
         (index) => gradeGroups[index].toJson(),
@@ -145,7 +141,6 @@ class SchoolGradeSubject {
 
   static SchoolGradeSubject fromJson(Map<String, dynamic> json) {
     String name = json[nameKey];
-    Color color = Utils.jsonToColor(json[colorKey]);
     List<Map<String, dynamic>> gradeGroupsJsons =
         (json[gradeGroupsKey] as List).cast();
 
@@ -158,7 +153,6 @@ class SchoolGradeSubject {
 
     return SchoolGradeSubject(
       name: name,
-      color: color,
       gradeGroups: gradeGroups,
     );
   }

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:schulapp/code_behind/time_table.dart';
 import 'package:schulapp/code_behind/time_table_manager.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/screens/time_table/create_timetable_screen.dart';
+import 'package:schulapp/screens/time_table/import_export_timetable_screen.dart';
 import 'package:schulapp/screens/timetable_screen.dart';
 import 'package:schulapp/widgets/timetable_util_functions.dart';
 import 'package:schulapp/widgets/navigation_bar_drawer.dart';
@@ -23,15 +25,45 @@ class _AllTimetablesScreenState extends State<AllTimetablesScreen> {
       appBar: AppBar(
         title: const Text("Timetables"),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          await createNewTimetable(context);
+      floatingActionButton: SpeedDial(
+        icon: Icons.add,
+        activeIcon: Icons.close,
+        spacing: 3,
+        useRotationAnimation: true,
+        tooltip: '',
+        animationCurve: Curves.elasticInOut,
 
-          if (!mounted) return;
+        // onOpen: () => print('OPENING DIAL'),
+        // onClose: () => print('DIAL CLOSED'),
+        children: [
+          SpeedDialChild(
+            child: const Icon(Icons.add),
+            backgroundColor: Colors.indigo,
+            foregroundColor: Colors.white,
+            label: 'Create new timetable',
+            onTap: () async {
+              await createNewTimetable(context);
 
-          setState(() {});
-        },
-        child: const Icon(Icons.add),
+              if (!mounted) return;
+
+              setState(() {});
+            },
+          ),
+          SpeedDialChild(
+            child: const Icon(Icons.import_export),
+            backgroundColor: Colors.lightBlue,
+            foregroundColor: Colors.white,
+            label: 'Import / Export',
+            onTap: () async {
+              await Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const ImportExportTimetableScreen(),
+                ),
+              );
+              setState(() {});
+            },
+          ),
+        ],
       ),
       body: _body(),
     );

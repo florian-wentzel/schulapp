@@ -14,9 +14,14 @@ class TimetableOneDayWidget extends StatefulWidget {
 }
 
 class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
+  final PageController _pageController = PageController(
+    initialPage: (DateTime.now().weekday - 1) % 5,
+  );
+
   @override
   Widget build(BuildContext context) {
     return PageView(
+      controller: _pageController,
       children: _createDayWidgets(),
     );
   }

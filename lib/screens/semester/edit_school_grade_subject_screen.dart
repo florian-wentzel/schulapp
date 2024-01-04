@@ -109,61 +109,6 @@ class _EditSchoolGradeSubjectScreenState
                   ],
                 ),
               ),
-              ElevatedButton(
-                onPressed: () async {
-                  String name =
-                      String.fromCharCodes(widget.subject.name.codeUnits);
-
-                  bool value = await Utils.showBoolInputDialog(
-                    context,
-                    question: "Do you want to delete: ${widget.subject.name}?",
-                  );
-
-                  if (!value) return;
-
-                  bool removed = widget.semester.removeSubject(widget.subject);
-
-                  setState(() {});
-
-                  SaveManager().saveSemester(widget.semester);
-
-                  if (!mounted) return;
-
-                  if (removed) {
-                    Utils.showInfo(
-                      context,
-                      msg: "$name was successfully removed!",
-                      type: InfoType.success,
-                    );
-                  } else {
-                    Utils.showInfo(
-                      context,
-                      msg: "$name could not be removed!",
-                      type: InfoType.error,
-                    );
-                  }
-
-                  Navigator.of(context).pop();
-                },
-                child: const Column(
-                  children: [
-                    SizedBox(
-                      height: 12,
-                    ),
-                    Icon(
-                      Icons.delete,
-                      color: Colors.red,
-                    ),
-                    SizedBox(
-                      height: 12,
-                    ),
-                    Text("Delete Subject"),
-                    SizedBox(
-                      height: 12,
-                    ),
-                  ],
-                ),
-              ),
             ],
           ),
         ],
@@ -190,9 +135,24 @@ class _EditSchoolGradeSubjectScreenState
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                gg.name,
-                style: Theme.of(context).textTheme.titleLarge,
+              InkWell(
+                onTap: () async {
+                  String? newName = await Utils.showStringInputDialog(
+                    context,
+                    hintText: "Name",
+                    autofocus: true,
+                    maxInputLength: GradeGroup.maxNameLength,
+                  );
+
+                  if (newName == null) return;
+
+                  gg.name = newName;
+                  setState(() {});
+                },
+                child: Text(
+                  gg.name,
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
               ),
               Text(
                 "${gg.percent} %",
