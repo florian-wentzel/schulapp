@@ -14,4 +14,12 @@ extension TimeOfDayExtension on TimeOfDay {
 
     return TimeOfDay(hour: newHour, minute: newMinute);
   }
+
+  bool isBefore(TimeOfDay time) {
+    double thisTimeInSeconds = hour.toDouble() * 60 + minute.toDouble();
+    double otherTimeInSeconds =
+        time.hour.toDouble() * 60 + time.minute.toDouble();
+
+    return thisTimeInSeconds < otherTimeInSeconds;
+  }
 }

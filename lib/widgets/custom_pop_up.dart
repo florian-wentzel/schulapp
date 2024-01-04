@@ -8,12 +8,15 @@ class CustomPopUp extends StatefulWidget {
   Object heroObject;
   Widget body;
   Color color;
+  Widget Function(BuildContext, Animation<double>, HeroFlightDirection,
+      BuildContext, BuildContext)? flightShuttleBuilder;
 
   CustomPopUp({
     super.key,
     required this.heroObject,
     required this.color,
     required this.body,
+    this.flightShuttleBuilder,
   });
 
   @override
@@ -33,6 +36,7 @@ class _CustomPopUpState extends State<CustomPopUp> {
           color: Colors.transparent,
           child: Hero(
             tag: widget.heroObject,
+            flightShuttleBuilder: widget.flightShuttleBuilder,
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
               child: Container(
