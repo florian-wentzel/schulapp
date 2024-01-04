@@ -167,11 +167,10 @@ class _SemesterScreenState extends State<SemesterScreen> {
           tag: subject,
           flightShuttleBuilder: (flightContext, animation, flightDirection,
               fromHeroContext, toHeroContext) {
-            return Center(
-              child: Text(
-                subject.name,
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
+            return SchoolGradeSubjectWidget(
+              subject: subject,
+              semester: widget.semester,
+              isFlightShuttleBuilder: true,
             );
           },
           child: InkWell(

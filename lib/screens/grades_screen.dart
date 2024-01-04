@@ -76,7 +76,7 @@ class _GradesScreenState extends State<GradesScreen> {
 
     return ListTile(
       onTap: () async {
-        Navigator.of(context).push(
+        await Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) => SemesterScreen(
               semester: semester,
@@ -84,6 +84,8 @@ class _GradesScreenState extends State<GradesScreen> {
             ),
           ),
         );
+
+        setState(() {});
       },
       title: Text(semester.name),
       leading: Hero(
