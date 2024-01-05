@@ -8,15 +8,49 @@ class SchoolSemester {
   static const maxNameLength = 15;
 
   String name;
-  List<SchoolGradeSubject> subjects; //Deutsch Mathe Englisch
+  List<SchoolGradeSubject> _subjects; //Deutsch Mathe Englisch
 
-  SchoolSemester({required this.name, required this.subjects});
+  List<SchoolGradeSubject> get subjects {
+    return _subjects;
+  }
+
+  List<SchoolGradeSubject> get sortedSubjects {
+    //vielleicht sollte man eine kopie von der Liste machen und diese Kopieren, sortieren und zurückgeben
+    _subjects.sort(
+      (a, b) {
+        double averageA = a.getGradeAverage();
+        double averageB = b.getGradeAverage();
+        if (averageA == -1 && averageB == -1) {
+          return a.name.compareTo(b.name);
+        }
+
+        if (averageA == -1) {
+          return 1;
+        }
+
+        if (averageB == -1) {
+          return -1;
+        }
+
+        return (averageB - averageA).toInt();
+      },
+    );
+    return _subjects;
+  }
+
+  set subject(value) {
+    _subjects = value;
+  }
+
+  SchoolSemester(
+      {required this.name, required List<SchoolGradeSubject> subjects})
+      : _subjects = subjects;
 
   double getGradeAverage() {
     double average = 0;
     int count = 0;
 
-    for (var subject in subjects) {
+    for (var subject in _subjects) {
       double subjectAverage = subject.getGradeAverage();
 
       if (subjectAverage == -1) continue;
@@ -51,8 +85,8 @@ class SchoolSemester {
     return {
       nameKey: name,
       subjectsKey: List.generate(
-        subjects.length,
-        (index) => subjects[index].toJson(),
+        _subjects.length,
+        (index) => _subjects[index].toJson(),
       ),
     };
   }
@@ -79,7 +113,7 @@ class SchoolSemester {
   }
 
   bool removeSubject(SchoolGradeSubject subject) {
-    return subjects.remove(subject);
+    return _subjects.remove(subject);
   }
 }
 
@@ -309,6 +343,9 @@ class Grade {
   String toString() {
     if (grade.isNaN || grade.isInfinite) {
       return "-";
+    }
+    if (grade < 10) {
+      return "0$grade";
     }
     return grade.toString();
   }

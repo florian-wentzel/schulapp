@@ -203,6 +203,7 @@ class _SchoolGradeSubjectScreenState extends State<SchoolGradeSubjectScreen> {
               primary: false,
               scrollDirection: Axis.horizontal,
               child: Row(
+                //Wenn man ohne die 0  gleiche größe bekommen möchte kann vielleicht IntrinsicWidth widget helfen
                 children: List.generate(
                   gg.grades.length,
                   (gradeNumberItemIndex) =>
@@ -244,6 +245,7 @@ class _SchoolGradeSubjectScreenState extends State<SchoolGradeSubjectScreen> {
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
             color: Utils.getGradeColor(grade.grade),
+            borderRadius: BorderRadius.circular(8),
           ),
           child: Center(
             child: Text(grade.toString()),

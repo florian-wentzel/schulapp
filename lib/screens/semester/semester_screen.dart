@@ -114,7 +114,11 @@ class _SemesterScreenState extends State<SemesterScreen> {
         ),
         SliverList(
           delegate: SliverChildBuilderDelegate(
-            _listItem,
+            (context, index) => _listItem(
+              context,
+              index,
+              semester.sortedSubjects,
+            ),
             childCount: semester.subjects.length,
           ),
         ),
@@ -158,8 +162,12 @@ class _SemesterScreenState extends State<SemesterScreen> {
     );
   }
 
-  Widget _listItem(BuildContext context, int index) {
-    SchoolGradeSubject subject = widget.semester.subjects[index];
+  Widget _listItem(
+    BuildContext context,
+    int index,
+    List<SchoolGradeSubject> sortedSubjects,
+  ) {
+    SchoolGradeSubject subject = sortedSubjects[index];
     return Material(
       child: Center(
         child: Hero(
@@ -393,6 +401,6 @@ class CircleHeaderDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   bool shouldRebuild(SliverPersistentHeaderDelegate oldDelegate) {
-    return false;
+    return true;
   }
 }
