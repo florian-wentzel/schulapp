@@ -20,6 +20,7 @@ class SchoolSemester {
       (a, b) {
         double averageA = a.getGradeAverage();
         double averageB = b.getGradeAverage();
+
         if (averageA == -1 && averageB == -1) {
           return a.name.compareTo(b.name);
         }
@@ -31,8 +32,8 @@ class SchoolSemester {
         if (averageB == -1) {
           return -1;
         }
-
-        return (averageB - averageA).toInt();
+        //+0.5 damit es gerundet wird also 0.5 + 0.5 = 1 also 0 und 0.3 + 0.5 = 0.8 also 0
+        return (averageB - averageA + 0.5).toInt();
       },
     );
     return _subjects;

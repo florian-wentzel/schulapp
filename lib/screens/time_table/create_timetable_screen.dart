@@ -25,6 +25,8 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
 
   late String _originalName;
 
+  bool _canPop = false;
+
   @override
   void initState() {
     lessonPrefabs = Utils.createLessonPrefabsFromTt(widget.timetable);
@@ -35,59 +37,78 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: GestureDetector(
-          onTap: () async {
-            String? name = await Utils.showStringInputDialog(
-              context,
-              hintText: "Enter Timetable name",
-              maxInputLength: Timetable.maxNameLength,
-            );
+    return PopScope(
+      canPop: _canPop,
+      onPopInvoked: (didPop) async {
+        if (_canPop) {
+          return;
+        }
 
-            if (name == null) return;
-            name = name.trim();
+        bool? exit = await Utils.showBoolInputDialog(
+          context,
+          question: "Do you want to exit without saving?",
+        );
 
-            if (name.isEmpty) {
-              if (mounted) {
-                Utils.showInfo(
-                  context,
-                  msg: "Name can not be empty!",
-                  type: InfoType.error,
-                );
+        _canPop = exit;
+        setState(() {});
+
+        if (_canPop && mounted) Navigator.of(context).pop();
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: GestureDetector(
+            onTap: () async {
+              String? name = await Utils.showStringInputDialog(
+                context,
+                hintText: "Enter Timetable name",
+                maxInputLength: Timetable.maxNameLength,
+              );
+
+              if (name == null) return;
+              name = name.trim();
+
+              if (name.isEmpty) {
+                if (mounted) {
+                  Utils.showInfo(
+                    context,
+                    msg: "Name can not be empty!",
+                    type: InfoType.error,
+                  );
+                }
+                return;
               }
-              return;
-            }
 
-            try {
-              widget.timetable.name = name;
-            } catch (e) {
-              if (mounted) {
-                Utils.showInfo(
-                  context,
-                  msg: e.toString(),
-                  type: InfoType.error,
-                );
+              try {
+                widget.timetable.name = name;
+              } catch (e) {
+                if (mounted) {
+                  Utils.showInfo(
+                    context,
+                    msg: e.toString(),
+                    type: InfoType.error,
+                  );
+                }
               }
-            }
 
+              setState(() {});
+            },
+            child: Text("Create a Timetable: ${widget.timetable.name}"),
+          ),
+        ),
+        floatingActionButton: FloatingActionButton(
+          child: const Icon(Icons.add),
+          onPressed: () async {
+            SchoolLessonPrefab? prefab =
+                await _showCreateNewPrefabBottomSheet();
+
+            if (prefab == null) return;
+
+            lessonPrefabs.add(prefab);
             setState(() {});
           },
-          child: Text("Create a Timetable: ${widget.timetable.name}"),
         ),
+        body: _body(),
       ),
-      floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.add),
-        onPressed: () async {
-          SchoolLessonPrefab? prefab = await _showCreateNewPrefabBottomSheet();
-
-          if (prefab == null) return;
-
-          lessonPrefabs.add(prefab);
-          setState(() {});
-        },
-      ),
-      body: _body(),
     );
   }
 
