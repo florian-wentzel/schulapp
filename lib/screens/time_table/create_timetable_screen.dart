@@ -124,6 +124,8 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
             ),
             ElevatedButton(
               onPressed: () async {
+                _canPop = true;
+
                 //TODO: Are there "-$number-" lessons? then ask question othetwise skip
                 bool replace = await Utils.showBoolInputDialog(
                   context,

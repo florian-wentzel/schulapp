@@ -279,6 +279,15 @@ class Utils {
     );
   }
 
+  static void hideCurrInfo(
+    BuildContext context, {
+    SnackBarClosedReason closedReason = SnackBarClosedReason.hide,
+  }) {
+    ScaffoldMessenger.of(context).hideCurrentSnackBar(
+      reason: closedReason,
+    );
+  }
+
   static Color jsonToColor(Map<String, dynamic> json) {
     int a = json[aKey];
     int r = json[rKey];

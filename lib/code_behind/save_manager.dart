@@ -7,6 +7,7 @@ import 'package:schulapp/code_behind/school_semester.dart';
 import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/time_table.dart';
 import 'package:schulapp/code_behind/time_table_manager.dart';
+import 'package:schulapp/code_behind/zip_manager.dart';
 
 class SaveManager {
   static final SaveManager _instance = SaveManager._privateConstructor();
@@ -19,9 +20,11 @@ class SaveManager {
   static const String mainDirName = "Schulapp";
   static const String settingsFileName = "settings.json";
   static const String timetableSaveDirName = "timetables";
+  static const String exportDirName = "exports";
   static const String semestersSaveDirName = "semesters";
   static const String timetableFileName = "timetable.json";
   static const String semesterFileName = "semester.json";
+  static const String timetableExportExtension = ".timetable";
 
   Directory? applicationDocumentsDirectory;
 
@@ -89,8 +92,11 @@ class SaveManager {
     }
   }
 
-  void saveTimeTable(Timetable timetable) {
-    String timetableDirPath = join(getTimetablesDir().path, timetable.name);
+  void saveTimeTable(
+    Timetable timetable, {
+    String? timetableDirPath,
+  }) {
+    timetableDirPath ??= join(getTimetablesDir().path, timetable.name);
 
     Directory timetableDir = Directory(timetableDirPath);
     timetableDir.createSync();
@@ -106,6 +112,45 @@ class SaveManager {
     String jsonString = json.encode(timetable.toJson());
 
     timetableFile.writeAsStringSync(jsonString);
+  }
+
+  void cleanExports() {
+    const maxFileCount = 5;
+    Directory exportsDir = getExportDir();
+    List<FileSystemEntity> files = exportsDir.listSync();
+
+    while (files.length > maxFileCount) {
+      files[0].deleteSync(recursive: true);
+      files.removeAt(0);
+    }
+  }
+
+  File exportTimetable(Timetable timetable) {
+    final now = DateTime.now();
+    final exportName = " ${now.day}.${now.month}.${now.year}";
+
+    final dirSavePath = join(
+      getExportDir().path,
+      timetable.name + exportName,
+    );
+    final zipExportPath = join(
+      getExportDir().path,
+      timetable.name + exportName + timetableExportExtension,
+    );
+
+    saveTimeTable(
+      timetable,
+      timetableDirPath: dirSavePath,
+    );
+
+    ZipManager.folderToZip(
+      Directory(dirSavePath),
+      File(zipExportPath),
+    );
+
+    Directory(dirSavePath).deleteSync(recursive: true);
+
+    return File(zipExportPath);
   }
 
   Future<void> loadApplicationDocumentsDirectory() async {
@@ -128,6 +173,18 @@ class SaveManager {
         Directory(join(applicationDocumentsDirectory!.path, mainDirName));
 
     dir.createSync(recursive: true);
+
+    return dir;
+  }
+
+  Directory getExportDir() {
+    String mainDirPath = getMainSaveDir().path;
+
+    final dir = Directory(
+      join(mainDirPath, exportDirName),
+    );
+
+    dir.createSync();
 
     return dir;
   }
