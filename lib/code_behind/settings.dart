@@ -21,12 +21,17 @@ class Settings {
     return [
       GradeGroup(
         name: "Written grades",
-        percent: 60,
+        percent: 42,
         grades: [],
       ),
       GradeGroup(
         name: "Verbal grades",
-        percent: 40,
+        percent: 28,
+        grades: [],
+      ),
+      GradeGroup(
+        name: "Exam grades",
+        percent: 30,
         grades: [],
       ),
     ];
