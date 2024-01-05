@@ -76,15 +76,15 @@ class _TimetableDroptargetState extends State<TimetableDroptarget> {
                     await Utils.showCustomPopUp(
                       context: context,
                       heroObject: tt.schoolTimes[rowIndex],
-                      flightShuttleBuilder: (p0, p1, p2, p3, p4) {
+                      flightShuttleBuilder: (p0, animation, p2, p3, p4) {
                         return AnimatedBuilder(
-                          animation: p1,
+                          animation: animation,
                           builder: (context, child) {
                             return Container(
                               color: ColorTween(
                                 begin: Colors.transparent,
                                 end: Theme.of(context).cardColor.withAlpha(220),
-                              ).lerp(p1.value),
+                              ).lerp(animation.value),
                             );
                           },
                         );
@@ -299,11 +299,23 @@ class _CustomPopUpCreateTimetableState
               context,
               hintText: "Enter Subject name",
               autofocus: true,
+              maxInputLength: SchoolLesson.maxNameLength,
             );
 
             if (input == null) return;
-
             input = input.trim(); //mach so leerzeichen weg und so
+
+            if (input.isEmpty) {
+              if (mounted) {
+                Utils.showInfo(
+                  context,
+                  msg: "Name can not be empty!",
+                  type: InfoType.error,
+                );
+              }
+              return;
+            }
+
             _name = input;
             setState(() {});
           },
@@ -410,12 +422,24 @@ class _CustomPopUpCreateTimetableState
               String? input = await Utils.showStringInputDialog(
                 context,
                 hintText: "Enter a Room number",
+                maxInputLength: SchoolLesson.maxRoomLength,
                 autofocus: true,
               );
 
               if (input == null) return;
-
               input = input.trim(); //mach so leerzeichen weg und so
+
+              if (input.isEmpty && mounted) {
+                bool? update = await Utils.showBoolInputDialog(
+                  context,
+                  question:
+                      "Warning: your room name is empty do you want to continue?",
+                );
+                if (!update) {
+                  return;
+                }
+              }
+
               _room = input;
               setState(() {});
             },
@@ -439,13 +463,24 @@ class _CustomPopUpCreateTimetableState
             );
 
             if (input == null) return;
-
             input = input.trim(); //mach so leerzeichen weg und so
+
+            if (input.isEmpty && mounted) {
+              bool? update = await Utils.showBoolInputDialog(
+                context,
+                question:
+                    "Warning: Teacher name is empty do you want to continue?",
+              );
+              if (!update) {
+                return;
+              }
+            }
+
             _teacher = input;
             setState(() {});
           },
           child: Text(
-            _teacher,
+            _teacher.isEmpty ? "   " : _teacher,
             style: TextStyle(
               color:
                   Theme.of(context).textTheme.bodyLarge?.color ?? Colors.white,

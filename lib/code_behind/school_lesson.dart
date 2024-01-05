@@ -10,6 +10,9 @@ class SchoolLesson {
   static const colorKey = "color";
   static const eventsKey = "events(coming soon)";
 
+  static const maxNameLength = 10;
+  static const maxRoomLength = 10;
+
   static SchoolLesson get defaultSchoolLesson {
     return SchoolLesson(
       name: "---",

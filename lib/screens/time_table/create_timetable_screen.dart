@@ -45,9 +45,20 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
               maxInputLength: Timetable.maxNameLength,
             );
 
-            if (name == null) {
+            if (name == null) return;
+            name = name.trim();
+
+            if (name.isEmpty) {
+              if (mounted) {
+                Utils.showInfo(
+                  context,
+                  msg: "Name can not be empty!",
+                  type: InfoType.error,
+                );
+              }
               return;
             }
+
             try {
               widget.timetable.name = name;
             } catch (e) {

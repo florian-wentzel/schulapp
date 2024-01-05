@@ -49,9 +49,23 @@ class _EditSchoolGradeSubjectScreenState
                 String? name = await Utils.showStringInputDialog(
                   context,
                   hintText: "Subject name",
+                  maxInputLength: SchoolGradeSubject.maxNameLength,
+                  autofocus: true,
                 );
+
                 if (name == null) return;
-                if (name.isEmpty) return;
+                name = name.trim();
+
+                if (name.isEmpty) {
+                  if (mounted) {
+                    Utils.showInfo(
+                      context,
+                      msg: "Name can not be empty!",
+                      type: InfoType.error,
+                    );
+                  }
+                  return;
+                }
 
                 widget.subject.name = name;
                 setState(() {});
@@ -145,6 +159,18 @@ class _EditSchoolGradeSubjectScreenState
                   );
 
                   if (newName == null) return;
+                  newName = newName.trim();
+
+                  if (newName.isEmpty) {
+                    if (mounted) {
+                      Utils.showInfo(
+                        context,
+                        msg: "Name can not be empty!",
+                        type: InfoType.error,
+                      );
+                    }
+                    return;
+                  }
 
                   gg.name = newName;
                   setState(() {});
