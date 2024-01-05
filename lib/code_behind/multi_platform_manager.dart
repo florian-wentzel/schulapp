@@ -17,7 +17,20 @@ class MultiPlatformManager {
         [XFile(exportFile.path)],
         text: "Share you Timetable!",
       );
-    } else if (Platform.isWindows || Platform.isMacOS) {
+    } else if (Platform.isWindows) {
+      String path = exportFile.path;
+      try {
+        Process.run(
+          'explorer.exe',
+          [
+            '/select,',
+            path,
+          ],
+        );
+      } on Exception catch (e) {
+        print(e);
+      }
+    } else if (Platform.isMacOS) {
       print("WARNING: Share Timetable not Implemented!");
     }
 

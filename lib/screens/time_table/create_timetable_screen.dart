@@ -157,6 +157,9 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
                 size: 32,
               ),
             ),
+            const SizedBox(
+              height: 16,
+            ),
           ],
         ),
       ),
