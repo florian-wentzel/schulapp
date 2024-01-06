@@ -139,22 +139,6 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
               onPressed: () async {
                 _canPop = true;
 
-                //TODO: Are there "-$number-" lessons? then ask question othetwise skip
-                // bool replace = await Utils.showBoolInputDialog(
-                //   context,
-                //   question: "Do you want to replace empty lessons with '---'?",
-                // );
-
-                // if (replace) {
-                //   Utils.removeEmptySchoolLessons(
-                //     widget.timetable,
-                //     newName: "---",
-                //     newColor: Colors.transparent,
-                //     // newRoom: "---", ist schon "---"
-                //     // newTeacher: "---", ist schon "---"
-                //   );
-                // }
-
                 TimetableManager().addOrChangeTimetable(
                   widget.timetable,
                   originalName: _originalName,
@@ -165,9 +149,11 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
                 //weil neuer timetable erstellt return true damit kann man später vielleicht was anfangen
                 Navigator.of(context).pop(true);
               },
-              child: const Icon(
-                Icons.arrow_right_alt,
-                size: 32,
+              child: const Text(
+                "SAVE",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
             const SizedBox(
