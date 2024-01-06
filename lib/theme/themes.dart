@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-//TODO: eigene farben reinmachen
-
 final lightTheme = ThemeData.light().copyWith(
-  cardColor:
-      const Color.fromARGB(225, 18, 17, 20), //TODO setze white mode color
+  cardColor: const Color.fromARGB(223, 206, 206, 206),
   textTheme: GoogleFonts.libreFranklinTextTheme(Typography.blackCupertino),
 );
 
