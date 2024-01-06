@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/school_day.dart';
 import 'package:schulapp/code_behind/school_lesson.dart';
 import 'package:schulapp/code_behind/school_time.dart';
+import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/extensions.dart';
 
 class Timetable {
@@ -236,5 +237,13 @@ class Timetable {
         (index) => schoolDays[index].toJson(),
       ),
     };
+  }
+
+  changeLessonNumberVisablety(bool isVisalbe) {
+    if (isVisalbe) {
+      Utils.changeLessonNumberToVisable(this);
+    } else {
+      Utils.changeLessonNumberToNonVisable(this);
+    }
   }
 }

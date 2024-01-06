@@ -27,6 +27,8 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
 
   bool _canPop = false;
 
+  bool showLessenNumbers = true;
+
   @override
   void initState() {
     lessonPrefabs = Utils.createLessonPrefabsFromTt(widget.timetable);
@@ -122,25 +124,36 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
             const SizedBox(
               height: 16,
             ),
+            Switch.adaptive(
+              value: showLessenNumbers,
+              onChanged: (value) {
+                showLessenNumbers = value;
+                widget.timetable.changeLessonNumberVisablety(value);
+                setState(() {});
+              },
+            ),
+            const SizedBox(
+              height: 16,
+            ),
             ElevatedButton(
               onPressed: () async {
                 _canPop = true;
 
                 //TODO: Are there "-$number-" lessons? then ask question othetwise skip
-                bool replace = await Utils.showBoolInputDialog(
-                  context,
-                  question: "Do you want to replace empty lessons with '---'?",
-                );
+                // bool replace = await Utils.showBoolInputDialog(
+                //   context,
+                //   question: "Do you want to replace empty lessons with '---'?",
+                // );
 
-                if (replace) {
-                  Utils.removeEmptySchoolLessons(
-                    widget.timetable,
-                    newName: "---",
-                    newColor: Colors.transparent,
-                    // newRoom: "---", ist schon "---"
-                    // newTeacher: "---", ist schon "---"
-                  );
-                }
+                // if (replace) {
+                //   Utils.removeEmptySchoolLessons(
+                //     widget.timetable,
+                //     newName: "---",
+                //     newColor: Colors.transparent,
+                //     // newRoom: "---", ist schon "---"
+                //     // newTeacher: "---", ist schon "---"
+                //   );
+                // }
 
                 TimetableManager().addOrChangeTimetable(
                   widget.timetable,
