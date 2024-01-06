@@ -8,6 +8,7 @@ import 'package:schulapp/code_behind/time_table.dart';
 import 'package:schulapp/code_behind/time_table_manager.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/screens/timetable_screen.dart';
+// import 'package:share_plus/share_plus.dart';
 
 class ImportExportTimetableScreen extends StatefulWidget {
   const ImportExportTimetableScreen({super.key});
@@ -239,9 +240,13 @@ class _ImportExportTimetableScreenState
       );
     }
 
-    final result = MultiPlatformManager.shareFile(exportFile);
+    // final result = await MultiPlatformManager.shareFile(exportFile);
 
-    print(result);
+    // if (result == null) return;
+
+    // if (result.status != ShareResultStatus.success) {
+    //   return;
+    // }
 
     _goToPage(homePageIndex);
   }
