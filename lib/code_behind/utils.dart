@@ -51,12 +51,9 @@ class Utils {
   }
 
   static void removeEmptySchoolLessons(
-    Timetable timetable,
-    bool Function(SchoolLesson, int) shouldChangeLesson, { Function()
-    String? newName,
-    String? newTeacher,
-    String? newRoom,
-    Color? newColor,
+    Timetable timetable, {
+    required bool Function(SchoolLesson, int) shouldChangeLesson,
+    required void Function(SchoolLesson, int) updateSchoolLesson,
   }) {
     for (int schoolDayIndex = 0;
         schoolDayIndex < timetable.schoolDays.length;
@@ -71,27 +68,21 @@ class Utils {
           continue;
         }
 
-        if (newName != null) {
-          lesson.name = newName;
-        }
-        if (newTeacher != null) {
-          lesson.teacher = newTeacher;
-        }
-        if (newRoom != null) {
-          lesson.room = newRoom;
-        }
-        if (newColor != null) {
-          lesson.color = newColor;
-        }
+        updateSchoolLesson(lesson, lessonIndex);
       }
     }
   }
 
   static void changeLessonNumberToVisable(Timetable timetable) {
-    int index;
-    removeEmptySchoolLessons(timetable, (schoolLesson, emofhiuwe) {
-      return schoolLesson.name == "---";
-    }, newName: "-${index + 1}-");
+    removeEmptySchoolLessons(
+      timetable,
+      shouldChangeLesson: (schoolLesson, emofhiuwe) {
+        return schoolLesson.name == "---";
+      },
+      updateSchoolLesson: (schoolLesson, emofhiuwe) {
+        schoolLesson.name = "---";
+      },
+    );
 
     // if (lesson.name == "---") {
     //   lesson.name = "-${lessonIndex + 1}-";
