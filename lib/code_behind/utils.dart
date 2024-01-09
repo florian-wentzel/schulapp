@@ -397,6 +397,12 @@ class Utils {
       ),
     );
   }
+
+  static int nowInSeconds() {
+    final DateTime now = DateTime.now();
+
+    return now.hour * 3600 + now.minute * 60 + now.second;
+  }
 }
 
 enum InfoType {

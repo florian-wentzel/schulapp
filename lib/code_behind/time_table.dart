@@ -246,4 +246,48 @@ class Timetable {
       Utils.changeLessonNumberToNonVisable(this);
     }
   }
+
+  SchoolTime? getCurrentLessonOrBreakTime() {
+    final timeBeforeFirstLessonStartInt =
+        const TimeOfDay(hour: 0, minute: 10).toSeconds();
+
+    final int nowInt = Utils.nowInSeconds();
+    final int firstInt = _schoolTimes.first.start.toSeconds();
+    final int lastInt = _schoolTimes.last.end.toSeconds();
+
+    //TODO: wenn firstDouble = 0 dann kommt bestimm nur trash bei raus
+    if (nowInt < firstInt - timeBeforeFirstLessonStartInt || nowInt > lastInt) {
+      return null;
+    }
+
+    SchoolTime? currTime;
+
+    for (int i = _schoolTimes.length - 1; i >= 0; i--) {
+      SchoolTime time = _schoolTimes[i];
+      if (nowInt > time.end.toSeconds()) {
+        continue;
+      }
+      currTime = time;
+      if (nowInt > time.start.toSeconds()) {
+        continue;
+      }
+      if (i - 1 < 0) continue;
+
+      currTime = SchoolTime(
+        start: _schoolTimes[i - 1].end,
+        end: time.start,
+      );
+    }
+
+    return currTime;
+  }
+
+  SchoolTime? getCurrentlyRunningLesson() {
+    for (var time in _schoolTimes) {
+      if (time.isCurrentlyRunning()) {
+        return time;
+      }
+    }
+    return null;
+  }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/time_table.dart';
+import 'package:schulapp/widgets/time_to_next_lesson_widget.dart';
 import 'package:schulapp/widgets/timetable_util_functions.dart';
 import 'package:schulapp/widgets/custom_pop_up.dart';
 
@@ -34,13 +35,15 @@ class _TimetableWidgetState extends State<TimetableWidget> {
     //füge Zeiten hinzu
     dataColumn.insert(
       0,
-      const DataColumn(
+      DataColumn(
         label: Expanded(
-          child: Center(
-            child: Text(
-              "Times",
-              textAlign: TextAlign.center,
-            ),
+          child: TimeToNextLessonWidget(
+            timetable: tt,
+            onNewLessonCB: () {
+              if (mounted) {
+                setState(() {});
+              }
+            },
           ),
         ),
       ),

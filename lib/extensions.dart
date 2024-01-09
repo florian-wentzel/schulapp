@@ -15,11 +15,18 @@ extension TimeOfDayExtension on TimeOfDay {
     return TimeOfDay(hour: newHour, minute: newMinute);
   }
 
-  bool isBefore(TimeOfDay time) {
-    double thisTimeInSeconds = hour.toDouble() * 60 + minute.toDouble();
-    double otherTimeInSeconds =
-        time.hour.toDouble() * 60 + time.minute.toDouble();
+  bool isBefore(TimeOfDay otherTime) {
+    int thisTimeInSeconds = toMinutes();
+    int otherTimeInSeconds = otherTime.toMinutes();
 
     return thisTimeInSeconds < otherTimeInSeconds;
+  }
+
+  int toMinutes() {
+    return hour * 60 + minute;
+  }
+
+  int toSeconds() {
+    return toMinutes() * 60;
   }
 }
