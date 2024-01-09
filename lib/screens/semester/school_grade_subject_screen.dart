@@ -545,27 +545,48 @@ class _SchoolGradeSubjectScreenState extends State<SchoolGradeSubjectScreen> {
 
     return Column(
       children: [
-        Align(
-          alignment: Alignment.topRight,
-          child: IconButton(
-            onPressed: () async {
-              Navigator.pop(context);
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            IconButton(
+              onPressed: () async {
+                Navigator.pop(context);
 
-              Grade? newGrade = await _showEditGradeSheet(grade);
-              if (newGrade == null) {
+                //warten damit animation funktioniert
+                await Future.delayed(
+                  const Duration(milliseconds: 500),
+                );
+
                 gg.grades.removeAt(index);
-              } else {
-                gg.grades[index] = newGrade;
-              }
-              setState(() {});
-              SaveManager().saveSemester(widget.semester);
-            },
-            icon: const Icon(
-              Icons.edit,
-              // color: Colors.red,
-              size: 32,
+                setState(() {});
+                SaveManager().saveSemester(widget.semester);
+              },
+              icon: const Icon(
+                Icons.delete,
+                color: Colors.red,
+                size: 32,
+              ),
             ),
-          ),
+            IconButton(
+              onPressed: () async {
+                Navigator.pop(context);
+
+                Grade? newGrade = await _showEditGradeSheet(grade);
+                if (newGrade == null) {
+                  gg.grades.removeAt(index);
+                } else {
+                  gg.grades[index] = newGrade;
+                }
+                setState(() {});
+                SaveManager().saveSemester(widget.semester);
+              },
+              icon: const Icon(
+                Icons.edit,
+                // color: Colors.red,
+                size: 32,
+              ),
+            ),
+          ],
         ),
         GestureDetector(
           child: Text(
