@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/school_day.dart';
 import 'package:schulapp/code_behind/time_table.dart';
+import 'package:schulapp/widgets/time_to_next_lesson_widget.dart';
 import 'package:schulapp/widgets/timetable_util_functions.dart';
 
 // ignore: must_be_immutable
@@ -36,13 +37,15 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
 
       Widget dt = DataTable(
         columns: [
-          const DataColumn(
+          DataColumn(
             label: Expanded(
-              child: Center(
-                child: Text(
-                  "Time",
-                  textAlign: TextAlign.center,
-                ),
+              child: TimeToNextLessonWidget(
+                timetable: widget.timetable,
+                onNewLessonCB: () {
+                  if (mounted) {
+                    setState(() {});
+                  }
+                },
               ),
             ),
           ),

@@ -2,7 +2,6 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:schulapp/code_behind/multi_platform_manager.dart';
 import 'package:schulapp/code_behind/save_manager.dart';
 import 'package:schulapp/code_behind/time_table.dart';
 import 'package:schulapp/code_behind/time_table_manager.dart';
