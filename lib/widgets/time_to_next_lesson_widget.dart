@@ -22,13 +22,14 @@ class TimeToNextLessonWidget extends StatefulWidget {
 }
 
 class _TimeToNextLessonWidgetState extends State<TimeToNextLessonWidget> {
-  String currTimeString = "00:00";
+  String _currTimeString = "";
   SchoolTime? _currTime;
   Timer? _timer;
 
   @override
   void initState() {
     _currTime = widget.timetable.getCurrentLessonOrBreakTime();
+    _currTimeString = _getCurrTimeString();
     _timer ??= Timer.periodic(
       const Duration(seconds: 1),
       onTimer,
@@ -49,16 +50,15 @@ class _TimeToNextLessonWidgetState extends State<TimeToNextLessonWidget> {
       _onNewLesson();
     }
 
-    currTimeString = _getCurrTimeString();
+    _currTimeString = _getCurrTimeString();
     setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
-    onTimer(Timer(Duration.zero, () {}));
     return Center(
       child: Text(
-        "Times\n$currTimeString",
+        "Times\n$_currTimeString",
         textAlign: TextAlign.center,
       ),
     );

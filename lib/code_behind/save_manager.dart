@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart';
+import 'package:document_file_save_plus/document_file_save_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:schulapp/code_behind/school_semester.dart';
 import 'package:schulapp/code_behind/settings.dart';
@@ -149,6 +150,14 @@ class SaveManager {
     );
 
     Directory(dirSavePath).deleteSync(recursive: true);
+
+    if (Platform.isAndroid || Platform.isIOS) {
+      DocumentFileSavePlus().saveFile(
+        File(zipExportPath).readAsBytesSync(),
+        basename(zipExportPath),
+        "application/zip",
+      );
+    }
 
     return File(zipExportPath);
   }
@@ -342,5 +351,16 @@ class SaveManager {
       return false;
     }
   }
-  // SchoolSemester loadSemester() {}
+
+  // Future<File> moveFile(File sourceFile, String newPath) async {
+  //   try {
+  //     // prefer using rename as it is probably faster
+  //     return await sourceFile.rename(newPath);
+  //   } on FileSystemException {
+  //     // if rename fails, copy the source file and then delete it
+  //     final newFile = await sourceFile.copy(newPath);
+  //     await sourceFile.delete();
+  //     return newFile;
+  //   }
+  // }
 }

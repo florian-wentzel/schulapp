@@ -233,11 +233,19 @@ class _ImportExportTimetableScreenState
     }
 
     if (mounted) {
-      Utils.showInfo(
-        context,
-        msg: "Exporting Successful!",
-        type: InfoType.success,
-      );
+      if (Platform.isAndroid || Platform.isIOS) {
+        Utils.showInfo(
+          context,
+          msg: "File saved in Downloads Directory.",
+          type: InfoType.success,
+        );
+      } else {
+        Utils.showInfo(
+          context,
+          msg: "Exporting Successful!",
+          type: InfoType.success,
+        );
+      }
     }
 
     final result = await MultiPlatformManager.shareFile(exportFile);

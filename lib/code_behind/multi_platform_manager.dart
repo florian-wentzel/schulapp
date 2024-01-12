@@ -21,7 +21,7 @@ class MultiPlatformManager {
       //   [XFile(exportFile.path)],
       //   text: "Share you Timetable!",
       // );
-      return ShareResult.error;
+      return ShareResult.success;
     }
     if (Platform.isWindows) {
       try {
