@@ -29,7 +29,6 @@ class _TimeToNextLessonWidgetState extends State<TimeToNextLessonWidget> {
   @override
   void initState() {
     _currTime = widget.timetable.getCurrentLessonOrBreakTime();
-    onTimer(Timer(Duration.zero, () {}));
     _timer ??= Timer.periodic(
       const Duration(seconds: 1),
       onTimer,
@@ -56,6 +55,7 @@ class _TimeToNextLessonWidgetState extends State<TimeToNextLessonWidget> {
 
   @override
   Widget build(BuildContext context) {
+    onTimer(Timer(Duration.zero, () {}));
     return Center(
       child: Text(
         "Times\n$currTimeString",

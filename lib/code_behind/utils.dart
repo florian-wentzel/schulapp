@@ -73,7 +73,7 @@ class Utils {
     }
   }
 
-  static void changeLessonNumberToVisable(Timetable timetable) {
+  static void changeLessonNumberToVisible(Timetable timetable) {
     removeEmptySchoolLessons(
       timetable,
       shouldChangeLesson: (schoolLesson) {
@@ -81,11 +81,12 @@ class Utils {
       },
       updateSchoolLesson: (schoolLesson, lessonIndex) {
         schoolLesson.name = "-${lessonIndex + 1}-";
+        schoolLesson.room = "";
       },
     );
   }
 
-  static void changeLessonNumberToNonVisable(Timetable timetable) {
+  static void changeLessonNumberToNonVisible(Timetable timetable) {
     removeEmptySchoolLessons(
       timetable,
       shouldChangeLesson: (schoolLesson) {
@@ -94,6 +95,7 @@ class Utils {
       },
       updateSchoolLesson: (schoolLesson, lessonIndex) {
         schoolLesson.name = "---";
+        schoolLesson.room = "---";
       },
     );
   }
@@ -402,6 +404,15 @@ class Utils {
     final DateTime now = DateTime.now();
 
     return now.hour * 3600 + now.minute * 60 + now.second;
+  }
+
+  static int getCurrentWeekDayIndex() {
+    int dayIndex = DateTime.now().weekday - 1;
+
+    if (dayIndex == 5) return 4; //wenn samstag zeig Freitag
+    if (dayIndex == 6) return 0; //wenn sonntag zeig Montag
+
+    return dayIndex % 5;
   }
 }
 

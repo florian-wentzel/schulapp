@@ -119,7 +119,7 @@ class _SemesterScreenState extends State<SemesterScreen> {
               index,
               semester.sortedSubjects,
             ),
-            childCount: semester.subjects.length,
+            childCount: semester.subjects.length + 1,
           ),
         ),
         SliverVisibility(
@@ -167,6 +167,11 @@ class _SemesterScreenState extends State<SemesterScreen> {
     int index,
     List<SchoolGradeSubject> sortedSubjects,
   ) {
+    if (index == sortedSubjects.length) {
+      return const SizedBox(
+        height: 64,
+      );
+    }
     SchoolGradeSubject subject = sortedSubjects[index];
     return Material(
       child: Center(

@@ -21,19 +21,19 @@ class CreateTimeTableScreen extends StatefulWidget {
 }
 
 class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
-  List<SchoolLessonPrefab> lessonPrefabs = [];
+  List<SchoolLessonPrefab> _lessonPrefabs = [];
 
   late String _originalName;
 
   bool _canPop = false;
 
-  bool showLessenNumbers = true;
-
   @override
   void initState() {
-    lessonPrefabs = Utils.createLessonPrefabsFromTt(widget.timetable);
+    _lessonPrefabs = Utils.createLessonPrefabsFromTt(widget.timetable);
     _originalName = String.fromCharCodes(widget.timetable.name.codeUnits);
-
+    widget.timetable.changeLessonNumberVisibility(
+      TimetableManager().settings.showLessonNumbers,
+    );
     super.initState();
   }
 
@@ -105,7 +105,7 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
 
             if (prefab == null) return;
 
-            lessonPrefabs.add(prefab);
+            _lessonPrefabs.add(prefab);
             setState(() {});
           },
         ),
@@ -125,10 +125,10 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
               height: 16,
             ),
             Switch.adaptive(
-              value: showLessenNumbers,
+              value: TimetableManager().settings.showLessonNumbers,
               onChanged: (value) {
-                showLessenNumbers = value;
-                widget.timetable.changeLessonNumberVisablety(value);
+                TimetableManager().settings.showLessonNumbers = value;
+                widget.timetable.changeLessonNumberVisibility(value);
                 setState(() {});
               },
             ),
@@ -174,9 +174,9 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: List.generate(
-          lessonPrefabs.length,
+          _lessonPrefabs.length,
           (index) {
-            SchoolLessonPrefab prefab = lessonPrefabs[index];
+            SchoolLessonPrefab prefab = _lessonPrefabs[index];
             return GestureDetector(
               onTap: () async {
                 SchoolLessonPrefab? newPrefab =
@@ -208,7 +208,7 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
                   );
                 }
 
-                lessonPrefabs[index] = newPrefab;
+                _lessonPrefabs[index] = newPrefab;
                 setState(() {});
               },
               child: Draggable(

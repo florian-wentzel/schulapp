@@ -7,7 +7,7 @@ import 'package:schulapp/code_behind/school_time.dart';
 import 'package:schulapp/code_behind/time_table.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/screens/time_table/create_timetable_screen.dart';
-import 'package:schulapp/screens/time_table/timetable_widget.dart';
+import 'package:schulapp/widgets/timetable_widget.dart';
 
 Future<SchoolSemester?> createNewSemester(BuildContext context) async {
   SchoolSemester? schoolSemester = await showCreateSemesterSheet(context);

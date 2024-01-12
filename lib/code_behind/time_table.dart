@@ -239,11 +239,11 @@ class Timetable {
     };
   }
 
-  changeLessonNumberVisablety(bool isVisalbe) {
+  changeLessonNumberVisibility(bool isVisalbe) {
     if (isVisalbe) {
-      Utils.changeLessonNumberToVisable(this);
+      Utils.changeLessonNumberToVisible(this);
     } else {
-      Utils.changeLessonNumberToNonVisable(this);
+      Utils.changeLessonNumberToNonVisible(this);
     }
   }
 

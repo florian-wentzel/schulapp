@@ -35,27 +35,32 @@ class SchoolGradeSubjectWidget extends StatelessWidget {
                   child: SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Wrap(
-                      spacing: 16,
-                      direction: Axis.horizontal,
-                      children: List.generate(
-                        subject.gradeGroups.length,
-                        (gradeGroupsIndex) => Wrap(
-                          spacing: 8,
-                          children: List.generate(
-                            subject.gradeGroups[gradeGroupsIndex].grades.length,
-                            (gradeIndex) => Text(
-                              subject.gradeGroups[gradeGroupsIndex]
-                                  .grades[gradeIndex]
-                                  .toString(),
-                              style: TextStyle(
-                                color: subject.gradeGroups[gradeGroupsIndex]
-                                    .getGradeColor(gradeIndex),
+                        spacing: 8,
+                        direction: Axis.horizontal,
+                        children: List.generate(
+                          subject.gradeGroups.length,
+                          (gradeGroupsIndex) => Wrap(
+                            spacing: 8,
+                            children: List.generate(
+                              subject
+                                  .gradeGroups[gradeGroupsIndex].grades.length,
+                              (gradeIndex) => Text(
+                                subject.gradeGroups[gradeGroupsIndex]
+                                    .grades[gradeIndex]
+                                    .toString(),
+                                style: TextStyle(
+                                  color: subject.gradeGroups[gradeGroupsIndex]
+                                      .getGradeColor(gradeIndex),
+                                ),
                               ),
-                            ),
+                            )..add(
+                                (subject.gradeGroups[gradeGroupsIndex].grades
+                                        .isNotEmpty)
+                                    ? const Text("|")
+                                    : Container(),
+                              ),
                           ),
-                        ),
-                      ),
-                    ),
+                        )),
                   ),
                 ),
               ),

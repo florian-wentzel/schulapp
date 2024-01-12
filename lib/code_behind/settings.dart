@@ -4,9 +4,35 @@ import 'package:schulapp/code_behind/school_semester.dart';
 class Settings {
   static const mainTimetableNameKey = "mainTimetable";
   static const defaultGradeGroupsKey = "defaultGradeGroups";
+  static const showLessonNumbersKey = "showLessonNumbers";
+  static const timetableLessonWidthKey = "timetableLessonWidth";
 
   ///if [null] firstTimetable shown
   String? _mainTimetableName;
+  double? _timetableLessonWidth;
+  bool? _showLessonNumbers;
+
+  bool get showLessonNumbers {
+    return _showLessonNumbers ?? false;
+  }
+
+  set showLessonNumbers(bool? value) {
+    _showLessonNumbers = value;
+    SaveManager().saveSettings(this);
+  }
+
+  double get timetableLessonWidth {
+    const double defaultValue = 100;
+
+    _timetableLessonWidth ??= defaultValue;
+
+    return _timetableLessonWidth!;
+  }
+
+  set timetableLessonWidth(double? width) {
+    _timetableLessonWidth = width;
+    SaveManager().saveSettings(this);
+  }
 
   String? get mainTimetableName {
     return _mainTimetableName;
@@ -20,18 +46,13 @@ class Settings {
   List<GradeGroup> get defaultGradeGroups {
     return [
       GradeGroup(
-        name: "Written grades",
-        percent: 42,
-        grades: [],
-      ),
-      GradeGroup(
-        name: "Verbal grades",
-        percent: 28,
+        name: "Written & Verbal grades",
+        percent: 67,
         grades: [],
       ),
       GradeGroup(
         name: "Exam grades",
-        percent: 30,
+        percent: 33,
         grades: [],
       ),
     ];
@@ -39,11 +60,17 @@ class Settings {
 
   Settings({
     String? mainTimetableName,
-  }) : _mainTimetableName = mainTimetableName;
+    double? timetableLessonWidth,
+    bool? showLessonNumbers,
+  })  : _mainTimetableName = mainTimetableName,
+        _timetableLessonWidth = timetableLessonWidth,
+        _showLessonNumbers = showLessonNumbers;
 
   Map<String, dynamic> toJson() {
     return {
       mainTimetableNameKey: _mainTimetableName,
+      showLessonNumbersKey: _showLessonNumbers,
+      timetableLessonWidthKey: _timetableLessonWidth,
       // defaultGradeGroupsKey: _defaultGradeGroups != null
       //     ? List.generate(
       //         _defaultGradeGroups!.length,
@@ -54,7 +81,9 @@ class Settings {
   }
 
   static Settings fromJson(Map<String, dynamic> json) {
-    String? mtn = json[mainTimetableNameKey];
+    String? mainTimetableName = json[mainTimetableNameKey];
+    double? timetableLessonWidth = json[timetableLessonWidthKey];
+    bool? showLessonNumbers = json[showLessonNumbersKey];
     // List<Map<String, dynamic>>? defaultGradeGroupsJson =
     //     json[defaultGradeGroupsKey];
 
@@ -68,7 +97,9 @@ class Settings {
     //       );
 
     return Settings(
-      mainTimetableName: mtn,
+      mainTimetableName: mainTimetableName,
+      timetableLessonWidth: timetableLessonWidth,
+      showLessonNumbers: showLessonNumbers,
       // defaultGradeGroups: gradeGroups,
     );
   }
