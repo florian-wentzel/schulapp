@@ -116,6 +116,16 @@ class SchoolSemester {
   bool removeSubject(SchoolGradeSubject subject) {
     return _subjects.remove(subject);
   }
+
+  SchoolGradeSubject? getSubjectByName(String name) {
+    try {
+      return _subjects.firstWhere(
+        (element) => element.name == name,
+      );
+    } on Exception {
+      return null;
+    }
+  }
 }
 
 class SchoolGradeSubject {

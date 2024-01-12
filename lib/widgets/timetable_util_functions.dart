@@ -224,8 +224,12 @@ Future<void> showSchoolLessonHomePopUp(
     context,
     PageRouteBuilder(
       opaque: false,
-      pageBuilder: (BuildContext context, _, __) =>
-          CustomPopUpShowLesson(heroString: heroString),
+      pageBuilder: (BuildContext context, _, __) => CustomPopUpShowLesson(
+        heroString: heroString,
+        lesson: lesson,
+        day: day,
+        schoolTime: schoolTime,
+      ),
       barrierDismissible: true,
       fullscreenDialog: true,
     ),

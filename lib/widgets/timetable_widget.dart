@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:schulapp/code_behind/school_day.dart';
+import 'package:schulapp/code_behind/school_lesson.dart';
+import 'package:schulapp/code_behind/school_time.dart';
 import 'package:schulapp/code_behind/time_table.dart';
 import 'package:schulapp/code_behind/time_table_manager.dart';
+import 'package:schulapp/widgets/school_grade_subject_widget.dart';
 import 'package:schulapp/widgets/time_to_next_lesson_widget.dart';
 import 'package:schulapp/widgets/timetable_util_functions.dart';
 import 'package:schulapp/widgets/custom_pop_up.dart';
@@ -29,7 +33,7 @@ class _TimetableWidgetState extends State<TimetableWidget> {
       (index) => DataColumn(
         label: Expanded(
           child: Container(
-            color: index == DateTime.now().weekday - 2
+            color: index == DateTime.now().weekday - 1
                 ? selectedColor
                 : Colors.transparent,
             child: Center(
@@ -99,7 +103,7 @@ class _TimetableWidgetState extends State<TimetableWidget> {
                 },
                 Center(
                   child: Container(
-                    color: cellIndex == DateTime.now().weekday - 1
+                    color: cellIndex == DateTime.now().weekday
                         ? selectedColor
                         : Colors.transparent,
                     child: Hero(
@@ -188,20 +192,103 @@ class _TimetableWidgetState extends State<TimetableWidget> {
 
 // ignore: must_be_immutable
 class CustomPopUpShowLesson extends StatelessWidget {
+  SchoolLesson lesson;
+  SchoolDay day;
+  SchoolTime schoolTime;
   String heroString;
 
-  CustomPopUpShowLesson({super.key, required this.heroString});
+  CustomPopUpShowLesson({
+    super.key,
+    required this.heroString,
+    required this.day,
+    required this.lesson,
+    required this.schoolTime,
+  });
 
   @override
   Widget build(BuildContext context) {
     return CustomPopUp(
       heroObject: heroString,
       color: Theme.of(context).cardColor,
-      body: _body(),
+      body: _body(context),
     );
   }
 
-  Widget _body() {
-    return const Placeholder();
+  Widget _body(BuildContext context) {
+    final selectedSemester = TimetableManager().semesters.firstOrNull;
+    final selectedSubject = selectedSemester?.getSubjectByName(lesson.name);
+
+    return Column(
+      children: [
+        Text(
+          lesson.name,
+          style: TextStyle(
+            color:
+                Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
+            // decoration: TextDecoration.underline,
+            fontSize: 42.0,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(
+          height: 4,
+        ),
+        Container(
+          width: 150,
+          height: 35,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            color: lesson.color,
+          ),
+        ),
+        const SizedBox(
+          height: 12,
+        ),
+        FittedBox(
+          fit: BoxFit.fitWidth,
+          child: Text(
+            "Room: ${lesson.room}",
+            style: TextStyle(
+              color:
+                  Theme.of(context).textTheme.bodyLarge?.color ?? Colors.white,
+              fontSize: 42.0,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ),
+        Text(
+          lesson.teacher,
+          style: TextStyle(
+            color: Theme.of(context).textTheme.bodyLarge?.color ?? Colors.white,
+            fontSize: 42.0,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        const Spacer(),
+        Visibility(
+          visible: selectedSemester != null && selectedSubject != null,
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            margin: const EdgeInsets.all(8),
+            child: SchoolGradeSubjectWidget(
+              subject: selectedSubject!,
+              semester: selectedSemester!,
+            ),
+          ),
+        ),
+        const Spacer(
+          flex: 2,
+        ),
+        ElevatedButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: const Icon(
+            Icons.check,
+            size: 42,
+          ),
+        ),
+      ],
+    );
   }
 }
