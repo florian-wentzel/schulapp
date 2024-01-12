@@ -21,7 +21,7 @@ class _GradesScreenState extends State<GradesScreen> {
     return Scaffold(
       drawer: NavigationBarDrawer(selectedRoute: GradesScreen.route),
       appBar: AppBar(
-        title: const Text("Semesters"),
+        title: const Text("Grades"),
       ),
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.add),
@@ -37,11 +37,11 @@ class _GradesScreenState extends State<GradesScreen> {
           setState(() {});
         },
       ),
-      body: _body(),
+      body: _body(context),
     );
   }
 
-  Widget _body() {
+  Widget _body(BuildContext context) {
     if (TimetableManager().semesters.isEmpty) {
       return Center(
         child: ElevatedButton(
@@ -72,6 +72,7 @@ class _GradesScreenState extends State<GradesScreen> {
 
   Widget itemBuilder(context, index) {
     final semester = TimetableManager().semesters[index];
+    final mainSemesterName = TimetableManager().settings.mainSemesterName ?? "";
     final heroString = semester.name;
 
     return ListTile(
@@ -116,6 +117,38 @@ class _GradesScreenState extends State<GradesScreen> {
         spacing: 12,
         crossAxisAlignment: WrapCrossAlignment.center,
         children: [
+          Switch.adaptive(
+            value: mainSemesterName == semester.name,
+            onChanged: (bool value) {
+              if (value) {
+                TimetableManager().settings.mainSemesterName = semester.name;
+              } else {
+                TimetableManager().settings.mainSemesterName = null;
+              }
+              setState(() {});
+            },
+          ),
+          IconButton(
+            onPressed: () async {
+              SchoolSemester? editedSemester = await showCreateSemesterSheet(
+                context,
+                headingText: "Edit Semester: ${semester.name}",
+                initalNameValue: semester.name,
+              );
+              if (editedSemester == null) return;
+
+              String originalName =
+                  String.fromCharCodes(semester.name.codeUnits);
+
+              semester.name = editedSemester.name;
+
+              TimetableManager().addOrChangeSemester(
+                semester,
+                originalName: originalName,
+              );
+            },
+            icon: const Icon(Icons.edit),
+          ),
           IconButton(
             onPressed: () async {
               bool delete = await Utils.showBoolInputDialog(

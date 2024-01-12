@@ -51,7 +51,9 @@ class _TimeToNextLessonWidgetState extends State<TimeToNextLessonWidget> {
     }
 
     _currTimeString = _getCurrTimeString();
-    setState(() {});
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override

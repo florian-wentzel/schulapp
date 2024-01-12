@@ -15,13 +15,21 @@ Future<SchoolSemester?> createNewSemester(BuildContext context) async {
   return schoolSemester;
 }
 
-Future<SchoolSemester?> showCreateSemesterSheet(BuildContext context) async {
+Future<SchoolSemester?> showCreateSemesterSheet(
+  BuildContext context, {
+  String headingText = 'Create Semester',
+  String? initalNameValue,
+}) async {
   const maxNameLength = SchoolSemester.maxNameLength;
 
   final textColor =
       Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white;
 
   TextEditingController nameController = TextEditingController();
+  if (initalNameValue != null) {
+    nameController.text = initalNameValue;
+  }
+
   bool createPressed = false;
 
   await showModalBottomSheet(
@@ -32,7 +40,7 @@ Future<SchoolSemester?> showCreateSemesterSheet(BuildContext context) async {
         child: Column(
           children: [
             Text(
-              'Create Semester',
+              headingText,
               style: TextStyle(
                 color: textColor,
                 fontSize: 24.0, // Adjust the font size as needed

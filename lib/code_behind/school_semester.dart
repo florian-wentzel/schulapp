@@ -5,7 +5,7 @@ class SchoolSemester {
   static const nameKey = "name";
   static const subjectsKey = "subjects";
 
-  static const maxNameLength = 15;
+  static const maxNameLength = 25;
 
   String name;
   List<SchoolGradeSubject> _subjects; //Deutsch Mathe Englisch
@@ -118,13 +118,12 @@ class SchoolSemester {
   }
 
   SchoolGradeSubject? getSubjectByName(String name) {
-    try {
-      return _subjects.firstWhere(
+    if (subjects.any((element) => element.name == name)) {
+      return subjects.firstWhere(
         (element) => element.name == name,
       );
-    } on Exception {
-      return null;
     }
+    return null;
   }
 }
 

@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:schulapp/code_behind/save_manager.dart';
 import 'package:schulapp/code_behind/school_day.dart';
 import 'package:schulapp/code_behind/school_lesson.dart';
+import 'package:schulapp/code_behind/school_semester.dart';
 import 'package:schulapp/code_behind/school_time.dart';
 import 'package:schulapp/code_behind/time_table.dart';
 import 'package:schulapp/code_behind/time_table_manager.dart';
+import 'package:schulapp/code_behind/utils.dart';
+import 'package:schulapp/screens/grades_screen.dart';
 import 'package:schulapp/widgets/school_grade_subject_widget.dart';
 import 'package:schulapp/widgets/time_to_next_lesson_widget.dart';
 import 'package:schulapp/widgets/timetable_util_functions.dart';
@@ -191,7 +196,7 @@ class _TimetableWidgetState extends State<TimetableWidget> {
 }
 
 // ignore: must_be_immutable
-class CustomPopUpShowLesson extends StatelessWidget {
+class CustomPopUpShowLesson extends StatefulWidget {
   SchoolLesson lesson;
   SchoolDay day;
   SchoolTime schoolTime;
@@ -206,22 +211,28 @@ class CustomPopUpShowLesson extends StatelessWidget {
   });
 
   @override
+  State<CustomPopUpShowLesson> createState() => _CustomPopUpShowLessonState();
+}
+
+class _CustomPopUpShowLessonState extends State<CustomPopUpShowLesson> {
+  @override
   Widget build(BuildContext context) {
     return CustomPopUp(
-      heroObject: heroString,
+      heroObject: widget.heroString,
       color: Theme.of(context).cardColor,
       body: _body(context),
     );
   }
 
   Widget _body(BuildContext context) {
-    final selectedSemester = TimetableManager().semesters.firstOrNull;
-    final selectedSubject = selectedSemester?.getSubjectByName(lesson.name);
+    final selectedSemester = Utils.getMainSemester();
+    final selectedSubject =
+        selectedSemester?.getSubjectByName(widget.lesson.name);
 
     return Column(
       children: [
         Text(
-          lesson.name,
+          widget.lesson.name,
           style: TextStyle(
             color:
                 Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
@@ -238,16 +249,16 @@ class CustomPopUpShowLesson extends StatelessWidget {
           height: 35,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
-            color: lesson.color,
+            color: widget.lesson.color,
           ),
         ),
         const SizedBox(
           height: 12,
         ),
         FittedBox(
-          fit: BoxFit.fitWidth,
+          // fit: BoxFit.fitWidth,
           child: Text(
-            "Room: ${lesson.room}",
+            "Room: ${widget.lesson.room}",
             style: TextStyle(
               color:
                   Theme.of(context).textTheme.bodyLarge?.color ?? Colors.white,
@@ -257,7 +268,7 @@ class CustomPopUpShowLesson extends StatelessWidget {
           ),
         ),
         Text(
-          lesson.teacher,
+          widget.lesson.teacher,
           style: TextStyle(
             color: Theme.of(context).textTheme.bodyLarge?.color ?? Colors.white,
             fontSize: 42.0,
@@ -265,16 +276,11 @@ class CustomPopUpShowLesson extends StatelessWidget {
           textAlign: TextAlign.center,
         ),
         const Spacer(),
-        Visibility(
-          visible: selectedSemester != null && selectedSubject != null,
-          child: Container(
-            padding: const EdgeInsets.all(8),
-            margin: const EdgeInsets.all(8),
-            child: SchoolGradeSubjectWidget(
-              subject: selectedSubject!,
-              semester: selectedSemester!,
-            ),
-          ),
+        _showGradesWidget(
+          context,
+          lesson: widget.lesson,
+          selectedSemester: selectedSemester,
+          selectedSubject: selectedSubject,
         ),
         const Spacer(
           flex: 2,
@@ -283,12 +289,91 @@ class CustomPopUpShowLesson extends StatelessWidget {
           onPressed: () {
             Navigator.of(context).pop();
           },
-          child: const Icon(
-            Icons.check,
-            size: 42,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            child: const Icon(
+              Icons.close,
+              size: 42,
+            ),
           ),
         ),
       ],
+    );
+  }
+
+  Widget _showGradesWidget(
+    BuildContext context, {
+    required SchoolLesson lesson,
+    SchoolSemester? selectedSemester,
+    SchoolGradeSubject? selectedSubject,
+  }) {
+    if (selectedSemester != null && selectedSubject != null) {
+      return Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          color: Theme.of(context).canvasColor,
+        ),
+        padding: const EdgeInsets.all(8),
+        margin: const EdgeInsets.all(8),
+        child: SchoolGradeSubjectWidget(
+          subject: selectedSubject,
+          semester: selectedSemester,
+        ),
+      );
+    }
+    String errorMsg = "";
+    String buttonText = "";
+    void Function() buttonFunc = () {};
+
+    if (selectedSubject == null) {
+      errorMsg =
+          "Your Selected Semester does not\n contain a Subject named: ${lesson.name}";
+      buttonText = "Create a Subject named: ${lesson.name}";
+      buttonFunc = () {
+        selectedSemester!.subjects.add(
+          SchoolGradeSubject(
+            name: lesson.name,
+            gradeGroups: TimetableManager().settings.defaultGradeGroups,
+          ),
+        );
+        if (mounted) {
+          setState(() {});
+        }
+        SaveManager().saveSemester(selectedSemester);
+      };
+    }
+    if (selectedSemester == null) {
+      errorMsg =
+          "You did not select a Semester to show on homescreen.\nGo to the Grades page and select a Semester:)";
+      buttonText = "Go to Grades screen";
+      buttonFunc = () {
+        context.go(GradesScreen.route);
+      };
+    }
+    return Container(
+      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        color: Theme.of(context).canvasColor,
+      ),
+      child: Column(
+        children: [
+          FittedBox(
+            child: Text(
+              errorMsg,
+              textAlign: TextAlign.center,
+            ),
+          ),
+          const SizedBox(
+            height: 16,
+          ),
+          ElevatedButton(
+            onPressed: buttonFunc,
+            child: Text(buttonText),
+          ),
+        ],
+      ),
     );
   }
 }

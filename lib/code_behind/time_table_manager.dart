@@ -99,14 +99,23 @@ class TimetableManager {
 
   void addOrChangeSemester(SchoolSemester semester, {String? originalName}) {
     if (originalName != null) {
+      //um sicher zu gehen das er wirklich gelöscht wird
+      SaveManager().deleteSemester(
+        SchoolSemester(
+          name: originalName,
+          subjects: [],
+        ),
+      );
+
       if (semesters.any((element) => element.name == originalName)) {
-        final sem =
+        // throw Exception("there is already a timetable called: ${timetable.name}");
+        final semester =
             semesters.firstWhere((element) => element.name == originalName);
 
-        bool removed = removeSemester(sem);
+        bool removed = removeSemester(semester);
 
         if (!removed) {
-          print("semester ${sem.name} could not be removed");
+          print("Semester ${semester.name} could not be removed");
         }
       }
     }

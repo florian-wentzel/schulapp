@@ -11,5 +11,3 @@ void main() async {
 
 //Save data online
 //https://stackoverflow.com/questions/68955545/flutter-how-to-backup-user-data-on-google-drive-like-whatsapp-does
-//change background color of column
-//https://support.syncfusion.com/kb/article/10847/how-to-change-background-color-of-column-in-flutter-datatable-sfdatagrid
