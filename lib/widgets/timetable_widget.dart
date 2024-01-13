@@ -9,6 +9,7 @@ import 'package:schulapp/code_behind/time_table.dart';
 import 'package:schulapp/code_behind/time_table_manager.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/screens/grades_screen.dart';
+import 'package:schulapp/screens/semester/school_grade_subject_screen.dart';
 import 'package:schulapp/widgets/school_grade_subject_widget.dart';
 import 'package:schulapp/widgets/time_to_next_lesson_widget.dart';
 import 'package:schulapp/widgets/timetable_util_functions.dart';
@@ -308,16 +309,31 @@ class _CustomPopUpShowLessonState extends State<CustomPopUpShowLesson> {
     SchoolGradeSubject? selectedSubject,
   }) {
     if (selectedSemester != null && selectedSubject != null) {
-      return Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          color: Theme.of(context).canvasColor,
-        ),
-        padding: const EdgeInsets.all(8),
-        margin: const EdgeInsets.all(8),
-        child: SchoolGradeSubjectWidget(
-          subject: selectedSubject,
-          semester: selectedSemester,
+      return InkWell(
+        onTap: () async {
+          await Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => SchoolGradeSubjectScreen(
+                subject: selectedSubject,
+                semester: selectedSemester,
+              ),
+            ),
+          );
+          if (mounted) {
+            setState(() {});
+          }
+        },
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            color: Theme.of(context).canvasColor,
+          ),
+          padding: const EdgeInsets.all(8),
+          margin: const EdgeInsets.all(8),
+          child: SchoolGradeSubjectWidget(
+            subject: selectedSubject,
+            semester: selectedSemester,
+          ),
         ),
       );
     }
@@ -344,7 +360,7 @@ class _CustomPopUpShowLessonState extends State<CustomPopUpShowLesson> {
     }
     if (selectedSemester == null) {
       errorMsg =
-          "You did not select a Semester to show on homescreen.\nGo to the Grades page and select a Semester:)";
+          "You did not select a Semester\n to show on homescreen.\nGo to the Grades page\nand select a Semester:)";
       buttonText = "Go to Grades screen";
       buttonFunc = () {
         context.go(GradesScreen.route);
@@ -370,7 +386,10 @@ class _CustomPopUpShowLessonState extends State<CustomPopUpShowLesson> {
           ),
           ElevatedButton(
             onPressed: buttonFunc,
-            child: Text(buttonText),
+            child: Text(
+              buttonText,
+              textAlign: TextAlign.center,
+            ),
           ),
         ],
       ),
