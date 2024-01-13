@@ -96,17 +96,19 @@ class _TimetableWidgetState extends State<TimetableWidget> {
               final lesson = schoolDay.lessons[rowIndex];
 
               return DataCell(
-                onTap: () async {
-                  await showSchoolLessonHomePopUp(
-                    context,
-                    lesson,
-                    schoolDay,
-                    widget.timetable.schoolTimes[rowIndex],
-                    heroString,
-                  );
-                  if (!mounted) return;
-                  setState(() {});
-                },
+                onTap: lesson.name == SchoolLesson.emptyLessonName
+                    ? null
+                    : () async {
+                        await showSchoolLessonHomePopUp(
+                          context,
+                          lesson,
+                          schoolDay,
+                          widget.timetable.schoolTimes[rowIndex],
+                          heroString,
+                        );
+                        if (!mounted) return;
+                        setState(() {});
+                      },
                 Center(
                   child: Container(
                     color: cellIndex == DateTime.now().weekday

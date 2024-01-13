@@ -78,7 +78,7 @@ class Utils {
     removeEmptySchoolLessons(
       timetable,
       shouldChangeLesson: (schoolLesson) {
-        return schoolLesson.name == "---";
+        return schoolLesson.name == SchoolLesson.emptyLessonName;
       },
       updateSchoolLesson: (schoolLesson, lessonIndex) {
         schoolLesson.name = "-${lessonIndex + 1}-";
@@ -95,8 +95,8 @@ class Utils {
             schoolLesson.name.endsWith("-");
       },
       updateSchoolLesson: (schoolLesson, lessonIndex) {
-        schoolLesson.name = "---";
-        schoolLesson.room = "---";
+        schoolLesson.name = SchoolLesson.emptyLessonName;
+        schoolLesson.room = SchoolLesson.emptyLessonName;
       },
     );
   }

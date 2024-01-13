@@ -13,11 +13,13 @@ class SchoolLesson {
   static const maxNameLength = 10;
   static const maxRoomLength = 10;
 
+  static const String emptyLessonName = "---";
+
   static SchoolLesson get defaultSchoolLesson {
     return SchoolLesson(
-      name: "---",
-      room: "---",
-      teacher: "---",
+      name: emptyLessonName,
+      room: emptyLessonName,
+      teacher: emptyLessonName,
       color: Colors.transparent,
       events: [],
     );

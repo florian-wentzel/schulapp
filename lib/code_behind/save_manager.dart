@@ -22,10 +22,11 @@ class SaveManager {
   static const String settingsFileName = "settings.json";
   static const String timetableSaveDirName = "timetables";
   static const String exportDirName = "exports";
+  static const String importDirName = "imports";
   static const String semestersSaveDirName = "semesters";
   static const String timetableFileName = "timetable.json";
   static const String semesterFileName = "semester.json";
-  static const String timetableExportExtension = ".timetable";
+  static const String timetableExportExtension = ".zip"; //".timetable";
 
   Directory? applicationDocumentsDirectory;
 
@@ -126,6 +127,23 @@ class SaveManager {
     }
   }
 
+  Timetable? importTimetable(File timetableExportFile) {
+    if (!timetableExportFile.existsSync()) return null;
+    ZipManager.zipToFolder(timetableExportFile, getImportDir());
+
+    String timetableFilePath =
+        join(getImportDir().path, SaveManager.timetableFileName);
+    File timetableFile = File(timetableFilePath);
+
+    String jsonString = timetableFile.readAsStringSync();
+
+    getImportDir().deleteSync(recursive: true);
+
+    Map<String, dynamic> json = jsonDecode(jsonString);
+
+    return Timetable.fromJson(json);
+  }
+
   File exportTimetable(Timetable timetable) {
     final now = DateTime.now();
     final exportName = " ${now.day}.${now.month}.${now.year}";
@@ -191,6 +209,18 @@ class SaveManager {
 
     final dir = Directory(
       join(mainDirPath, exportDirName),
+    );
+
+    dir.createSync();
+
+    return dir;
+  }
+
+  Directory getImportDir() {
+    String mainDirPath = getMainSaveDir().path;
+
+    final dir = Directory(
+      join(mainDirPath, importDirName),
     );
 
     dir.createSync();
