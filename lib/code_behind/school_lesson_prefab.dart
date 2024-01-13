@@ -13,12 +13,6 @@ class SchoolLessonPrefab {
   String get room => _room;
   String get teacher => _teacher;
   Color get color => _color;
-  // List<SchoolEvent> get events => _events;
-
-  // void set name (String value){
-  //   _name = value;
-  //   save..
-  // }
 
   SchoolLessonPrefab({
     required String name,

@@ -51,7 +51,7 @@ class _NavigationBarDrawerState extends State<NavigationBarDrawer> {
       selectedIcon: const Icon(Icons.school),
     ),
     CustomDestination(
-      label: "Notes",
+      label: "Tasks / Notes",
       route: NotesScreen.route,
       icon: const Icon(Icons.assignment_outlined),
       selectedIcon: const Icon(Icons.assignment),

@@ -1,6 +1,8 @@
 import 'dart:io';
 
+// import 'package:android_intent_plus/android_intent.dart';
 import 'package:flutter/foundation.dart';
+// import 'package:android_intent_plus/flag.dart' as flag;
 
 // import 'package:share_plus/share_plus.dart';
 enum ShareResult {
@@ -15,12 +17,33 @@ class MultiPlatformManager {
       return ShareResult.error;
     }
 
-    if (Platform.isAndroid || Platform.isIOS) {
+    if (Platform.isAndroid) {
       if (kDebugMode) print("WARNING: Share Timetable not Implemented!");
+      // try {
+      //   final intent = AndroidIntent(
+      //     action: 'android.intent.action.VIEW',
+      //     data:
+      //         "content://com.android.externalstorage.documents/document/${Uri.encodeComponent(exportFile.)}",
+      //     flags: <int>[flag.Flag.FLAG_ACTIVITY_NEW_TASK],
+      //   );
+
+      //   await intent.launch();
+      // } catch (e) {
+      //   print("Error opening file explorer: $e");
+      // }
+      // Intent intent = new Intent(Intent.ACTION_VIEW);
+      //   Uri uri = Uri.parse("file://" + filePath);
+      //   intent.setDataAndType(uri, "*/*");
+      //   startActivity(intent);
+
       // result = await Share.shareXFiles(
       //   [XFile(exportFile.path)],
       //   text: "Share you Timetable!",
       // );
+      return ShareResult.success;
+    }
+    if (Platform.isIOS) {
+      if (kDebugMode) print("WARNING: Share Timetable not Implemented!");
       return ShareResult.success;
     }
     if (Platform.isWindows) {

@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:path/path.dart';
 import 'package:document_file_save_plus/document_file_save_plus.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:schulapp/code_behind/school_event.dart';
 import 'package:schulapp/code_behind/school_semester.dart';
 import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/time_table.dart';
@@ -29,6 +30,10 @@ class SaveManager {
   static const String timetableExportExtension = ".zip"; //".timetable";
 
   Directory? applicationDocumentsDirectory;
+
+  List<SchoolEvent> loadAllSchoolEvents() {
+    return [];
+  }
 
   List<Timetable> loadAllTimetables() {
     final timetablesDir = getTimetablesDir();

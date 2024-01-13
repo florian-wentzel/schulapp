@@ -1,3 +1,4 @@
+import 'package:schulapp/code_behind/school_event.dart';
 import 'package:schulapp/code_behind/school_semester.dart';
 import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/time_table.dart';
@@ -15,6 +16,7 @@ class TimetableManager {
 
   List<Timetable>? _timetables;
   List<SchoolSemester>? _semesters;
+  List<SchoolEvent>? _schoolEvents;
   Settings? _settings;
 
   List<Timetable> get timetables {
@@ -27,9 +29,25 @@ class TimetableManager {
     return _semesters!;
   }
 
+  List<SchoolEvent> get schoolEvents {
+    _schoolEvents ??= SaveManager().loadAllSchoolEvents();
+    return _schoolEvents!;
+  }
+
   Settings get settings {
     _settings ??= SaveManager().loadSettings();
     return _settings!;
+  }
+
+  int getNextSchoolEventKey() {
+    //sortieren und neu nummerieren damit es keine Fehler gibt
+    schoolEvents.sort(
+      (a, b) => a.key.compareTo(b.key),
+    );
+    for (int i = 0; i < schoolEvents.length; i++) {
+      schoolEvents[i].key = i;
+    }
+    return schoolEvents.length;
   }
 
   ///Adds the [Timetable] and saves it to lokal storage
@@ -134,6 +152,18 @@ class TimetableManager {
     _semesters!.add(semester);
 
     SaveManager().saveSemester(semester);
+  }
+
+  void addOrChangeSchoolEvent(SchoolEvent event) {
+    if (event.key >= schoolEvents.length) {
+      //neues element
+      schoolEvents.add(event);
+    } else {
+      //wurde geändert
+      schoolEvents[event.key] = event;
+    }
+    // SaveManager().saveSchoolEvents();
+    print("addOrChangeSchoolEvent notSaved");
   }
 
   bool removeSemesterAt(int index) {
