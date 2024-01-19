@@ -58,26 +58,24 @@ class _TimeToNextLessonWidgetState extends State<TimeToNextLessonWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: FittedBox(
-        fit: BoxFit.contain,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            const Text(
-              "Times",
+    return FittedBox(
+      fit: BoxFit.contain,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          const Text(
+            "Time",
+            textAlign: TextAlign.center,
+          ),
+          Visibility(
+            visible: _currTimeString.isNotEmpty,
+            child: Text(
+              _currTimeString,
               textAlign: TextAlign.center,
             ),
-            Visibility(
-              visible: _currTimeString.isNotEmpty,
-              child: Text(
-                _currTimeString,
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

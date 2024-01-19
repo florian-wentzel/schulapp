@@ -41,7 +41,7 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
     }
 
     double lessonHeight = (MediaQuery.of(context).size.height * 0.8) /
-        (widget.timetable.maxLessonCount);
+        (widget.timetable.maxLessonCount + 1);
     if (lessonHeight < minLessonHeight) {
       lessonHeight = minLessonHeight;
     }
