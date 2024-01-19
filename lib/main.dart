@@ -9,7 +9,7 @@ void main() async {
   runApp(const MainApp());
 }
 
-//file_picker setup: (already working for: windows)
+//file_picker setup: (already working for: windows and android)
 //https://github.com/miguelpruivo/flutter_file_picker/wiki/Setup
 
 //Save data online

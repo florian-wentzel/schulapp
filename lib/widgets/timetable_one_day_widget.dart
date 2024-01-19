@@ -30,140 +30,203 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
   }
 
   List<Widget> _createDayWidgets() {
+    Timetable tt = widget.timetable;
     List<Widget> widgets = [];
 
-    for (int schoolDayIndex = 0;
-        schoolDayIndex < widget.timetable.schoolDays.length;
-        schoolDayIndex++) {
-      SchoolDay day = widget.timetable.schoolDays[schoolDayIndex];
+    const double minLessonWidth = 100;
+    const double minLessonHeight = 50;
+    double lessonWidth = (MediaQuery.of(context).size.width * 0.8) / 2;
+    if (lessonWidth < minLessonWidth) {
+      lessonWidth = minLessonWidth;
+    }
 
-      Widget dt = DataTable(
-        columns: [
-          DataColumn(
-            label: Expanded(
-              child: TimeToNextLessonWidget(
-                timetable: widget.timetable,
-                onNewLessonCB: () {
-                  if (mounted) {
-                    setState(() {});
-                  }
-                },
-              ),
-            ),
-          ),
-          DataColumn(
-            label: Expanded(
-              child: Center(
-                child: Text(
-                  day.name,
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ),
-          ),
-        ],
-        rows: List.generate(
-          widget.timetable.maxLessonCount,
-          (rowIndex) {
-            final schoolTime = widget.timetable.schoolTimes[rowIndex];
-            final startString = schoolTime.getStartString();
-            final endString = schoolTime.getEndString();
+    double lessonHeight = (MediaQuery.of(context).size.height * 0.8) /
+        (widget.timetable.maxLessonCount);
+    if (lessonHeight < minLessonHeight) {
+      lessonHeight = minLessonHeight;
+    }
 
-            final heroString = "$rowIndex:$schoolDayIndex";
-            final schoolDay = widget.timetable.schoolDays[schoolDayIndex];
-            final lesson = schoolDay.lessons[rowIndex];
+    final selectedColor = Theme.of(context)
+        .colorScheme
+        .secondary
+        .withAlpha(30); // Color.fromARGB(30, 255, 255, 255);
 
-            return DataRow(
-              selected: schoolTime.isCurrentlyRunning(),
-              cells: [
-                DataCell(
-                  Center(
-                    child: Text(
-                      "$startString\n$endString",
-                      textAlign: TextAlign.center,
+    for (int dayIndex = 0; dayIndex < tt.schoolDays.length; dayIndex++) {
+      SchoolDay day = tt.schoolDays[dayIndex];
+      Widget widget = Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Column(
+            children: List.generate(
+              tt.schoolTimes.length + 1,
+              (int lessonIndex) {
+                if (lessonIndex == 0) {
+                  return SizedBox(
+                    width: lessonWidth,
+                    height: lessonHeight,
+                    child: Center(
+                      child: TimeToNextLessonWidget(
+                        timetable: tt,
+                        onNewLessonCB: () {
+                          if (mounted) {
+                            setState(() {});
+                          }
+                        },
+                      ),
+                    ),
+                  );
+                }
+                final schoolTime = tt.schoolTimes[lessonIndex - 1];
+                String startString = schoolTime.getStartString();
+                String endString = schoolTime.getEndString();
+                return Container(
+                  color: schoolTime.isCurrentlyRunning()
+                      ? selectedColor
+                      : Colors.transparent,
+                  width: lessonWidth,
+                  height: lessonHeight,
+                  child: Center(
+                    child: FittedBox(
+                      fit: BoxFit.contain,
+                      child: Column(
+                        children: [
+                          Text(
+                            startString,
+                            textAlign: TextAlign.center,
+                          ),
+                          Text(
+                            endString,
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                DataCell(
+                );
+              },
+            ),
+          ),
+          Column(
+            children: List.generate(
+              day.lessons.length + 1,
+              (lessonIndex) {
+                if (lessonIndex == 0) {
+                  return Container(
+                    color: dayIndex == DateTime.now().weekday
+                        ? selectedColor
+                        : Colors.transparent,
+                    width: lessonWidth,
+                    height: lessonHeight,
+                    child: Center(
+                      child: FittedBox(
+                        fit: BoxFit.contain,
+                        child: Text(
+                          day.name,
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                  );
+                }
+                final schoolTime = tt.schoolTimes[lessonIndex - 1];
+                final lesson = day.lessons[lessonIndex - 1];
+                final heroString = "$lessonIndex:$dayIndex";
+
+                return InkWell(
                   onTap: lesson.name == SchoolLesson.emptyLessonName
                       ? null
                       : () async {
                           await showSchoolLessonHomePopUp(
                             context,
                             lesson,
-                            schoolDay,
-                            widget.timetable.schoolTimes[rowIndex],
+                            day,
+                            schoolTime,
                             heroString,
                           );
                           if (!mounted) return;
                           setState(() {});
                         },
-                  Center(
-                    child: Hero(
-                      tag: heroString,
-                      flightShuttleBuilder:
-                          (context, animation, __, ___, ____) {
-                        const targetAlpha = 220;
+                  child: Container(
+                    color: dayIndex == DateTime.now().weekday ||
+                            schoolTime.isCurrentlyRunning()
+                        ? selectedColor
+                        : Colors.transparent,
+                    width: lessonWidth,
+                    height: lessonHeight,
+                    child: Center(
+                      child: Hero(
+                        tag: heroString,
+                        flightShuttleBuilder:
+                            (context, animation, __, ___, ____) {
+                          const targetAlpha = 220;
 
-                        return AnimatedBuilder(
-                          animation: animation,
-                          builder: (context, _) {
-                            return Container(
-                              width: 100,
-                              decoration: BoxDecoration(
-                                color: ColorTween(
-                                  begin: lesson.color,
-                                  end: Theme.of(context)
-                                      .cardColor
-                                      .withAlpha(targetAlpha),
-                                ).lerp(animation.value),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            );
-                          },
-                        );
-                      },
-                      child: AnimatedContainer(
-                        duration: const Duration(seconds: 1),
-                        width: 100,
-                        // margin: const EdgeInsets.symmetric(vertical: 12),
-                        // padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          color: lesson.color,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Text(
-                              lesson.name,
+                          return AnimatedBuilder(
+                            animation: animation,
+                            builder: (context, _) {
+                              return Container(
+                                width: lessonWidth * 0.8,
+                                height: lessonHeight * 0.8,
+                                decoration: BoxDecoration(
+                                  color: ColorTween(
+                                    begin: lesson.color,
+                                    end: Theme.of(context)
+                                        .cardColor
+                                        .withAlpha(targetAlpha),
+                                  ).lerp(animation.value),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              );
+                            },
+                          );
+                        },
+                        child: Container(
+                          width: lessonWidth * 0.8,
+                          height: lessonHeight * 0.8,
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 4, horizontal: 8),
+                          // padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: lesson.color,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: FittedBox(
+                            fit: BoxFit.contain,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Text(
+                                  lesson.name,
+                                  textAlign: TextAlign.center,
+                                  style: Theme.of(context).textTheme.labelSmall,
+                                ),
+                                Visibility(
+                                  visible: lesson.room.isNotEmpty,
+                                  child: Text(
+                                    lesson.room,
+                                    textAlign: TextAlign.center,
+                                    style:
+                                        Theme.of(context).textTheme.labelSmall,
+                                    overflow: TextOverflow.fade,
+                                  ),
+                                ),
+                              ],
                             ),
-                            Text(
-                              lesson.room,
-                              style: Theme.of(context).textTheme.labelSmall,
-                            ),
-                          ],
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ],
-            );
-          },
-        ),
-      );
-
-      widgets.add(
-        SingleChildScrollView(
-          scrollDirection: Axis.vertical,
-          child: Center(
-            child: dt,
+                );
+              },
+            ),
           ),
-        ),
+        ],
       );
+      widgets.add(widget);
     }
+
     return widgets;
   }
 }

@@ -127,12 +127,19 @@ class _TimetableScreenState extends State<TimetableScreen> {
     return Center(
       child: SingleChildScrollView(
         scrollDirection: Axis.vertical,
-        child: Column(
-          children: [
-            TimetableWidget(
-              timetable: widget.timetable!,
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                TimetableWidget(
+                  timetable: widget.timetable!,
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
