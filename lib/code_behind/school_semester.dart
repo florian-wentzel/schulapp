@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/utils.dart';
 
 class SchoolSemester {
@@ -18,8 +19,10 @@ class SchoolSemester {
     //vielleicht sollte man eine kopie von der Liste machen und diese Kopieren, sortieren und zurückgeben
     _subjects.sort(
       (a, b) {
-        double averageA = a.getGradeAverage();
-        double averageB = b.getGradeAverage();
+        double averageA = double.parse(
+            a.getGradeAverage().toStringAsFixed(Settings.decimalPlaces));
+        double averageB = double.parse(
+            b.getGradeAverage().toStringAsFixed(Settings.decimalPlaces));
 
         if (averageA == -1 && averageB == -1) {
           return a.name.compareTo(b.name);
@@ -32,8 +35,9 @@ class SchoolSemester {
         if (averageB == -1) {
           return -1;
         }
-        //+0.5 damit es gerundet wird also 0.5 + 0.5 = 1 also 0 und 0.3 + 0.5 = 0.8 also 0
-        return (averageB - averageA + 0.5).toInt();
+        if (averageA == averageB) return a.name.compareTo(b.name);
+        if (averageA > averageB) return -1;
+        return 1;
       },
     );
     return _subjects;
@@ -79,7 +83,8 @@ class SchoolSemester {
     if (gradeAverage.isNaN || gradeAverage.isInfinite || gradeAverage == -1) {
       return "-";
     }
-    return gradeAverage.toStringAsPrecision(2);
+
+    return gradeAverage.toStringAsFixed(Settings.decimalPlaces);
   }
 
   Map<String, dynamic> toJson() {
@@ -254,7 +259,7 @@ class SchoolGradeSubject {
     if (gradeAverage == -1) {
       return "-";
     }
-    return gradeAverage.toStringAsPrecision(2);
+    return gradeAverage.toStringAsFixed(Settings.decimalPlaces);
   }
 }
 

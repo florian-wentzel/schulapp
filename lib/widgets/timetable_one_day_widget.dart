@@ -123,6 +123,7 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
                         fit: BoxFit.contain,
                         child: Text(
                           day.name,
+                          style: Theme.of(context).textTheme.headlineSmall,
                           textAlign: TextAlign.center,
                         ),
                       ),

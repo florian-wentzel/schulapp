@@ -23,6 +23,7 @@ class SchoolGradeSubjectWidget extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
               Text(
                 subject.name,
@@ -67,18 +68,18 @@ class SchoolGradeSubjectWidget extends StatelessWidget {
             ],
           ),
           Container(
-            width: isFlightShuttleBuilder ? 30 : null,
-            height: isFlightShuttleBuilder ? 30 : null,
-            margin: const EdgeInsets.all(8),
-            padding: const EdgeInsets.all(8),
+            width: isFlightShuttleBuilder ? 80 : null,
+            height: isFlightShuttleBuilder ? 80 : null,
+            padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
+              shape: BoxShape.circle,
               color: Utils.getGradeColor(subject.getGradeAverage().toInt()),
             ),
             child: Center(
               child: Text(
                 subject.getGradeAverageString(),
                 textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.headlineSmall,
               ),
             ),
           ),

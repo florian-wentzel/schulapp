@@ -17,6 +17,8 @@ class Settings {
   double? _timetableLessonWidth;
   bool? _showLessonNumbers;
 
+  static int decimalPlaces = 1;
+
   ThemeMode get themeMode {
     if (_themeMode == ThemeMode.dark.toString()) {
       return ThemeMode.dark;

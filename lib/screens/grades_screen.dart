@@ -92,21 +92,24 @@ class _GradesScreenState extends State<GradesScreen> {
       leading: Hero(
         tag: heroString,
         child: Container(
-          width: 42,
-          height: 42,
+          width: 62,
+          height: 62,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: semester.getColor(),
           ),
           child: Center(
-            child: FittedBox(
-              fit: BoxFit.fitWidth,
-              child: Padding(
-                padding: const EdgeInsets.all(8),
-                child: Text(
-                  semester.getGradeAverageString(),
-                  style: Theme.of(context).textTheme.displaySmall,
-                  textAlign: TextAlign.center,
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              child: FittedBox(
+                fit: BoxFit.contain,
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: Text(
+                    semester.getGradeAverageString(),
+                    style: Theme.of(context).textTheme.displaySmall,
+                    textAlign: TextAlign.center,
+                  ),
                 ),
               ),
             ),
