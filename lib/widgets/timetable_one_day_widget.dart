@@ -113,7 +113,7 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
               (lessonIndex) {
                 if (lessonIndex == 0) {
                   return Container(
-                    color: dayIndex == DateTime.now().weekday
+                    color: dayIndex == DateTime.now().weekday - 1
                         ? selectedColor
                         : Colors.transparent,
                     width: lessonWidth,
@@ -149,7 +149,7 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
                           setState(() {});
                         },
                   child: Container(
-                    color: dayIndex == DateTime.now().weekday ||
+                    color: dayIndex == DateTime.now().weekday - 1 ||
                             schoolTime.isCurrentlyRunning()
                         ? selectedColor
                         : Colors.transparent,

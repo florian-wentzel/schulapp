@@ -381,8 +381,7 @@ class _NotesScreenState extends State<NotesScreen> {
                 style: Theme.of(context).textTheme.headlineMedium,
                 textAlign: TextAlign.center,
               ),
-              Flexible(
-                fit: FlexFit.tight,
+              Expanded(
                 child: Container(
                   margin: const EdgeInsets.all(16),
                   padding: const EdgeInsets.all(8),
@@ -390,18 +389,15 @@ class _NotesScreenState extends State<NotesScreen> {
                     color: Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  child: Flexible(
-                    fit: FlexFit.loose,
-                    child: ListView.builder(
-                      itemCount: selectedTimetablePrefabs.length,
-                      itemBuilder: (context, index) => ListTile(
-                        title: Text(selectedTimetablePrefabs[index].name),
-                        onTap: () {
-                          selectdSubjectName =
-                              selectedTimetablePrefabs[index].name;
-                          Navigator.of(context).pop();
-                        },
-                      ),
+                  child: ListView.builder(
+                    itemCount: selectedTimetablePrefabs.length,
+                    itemBuilder: (context, index) => ListTile(
+                      title: Text(selectedTimetablePrefabs[index].name),
+                      onTap: () {
+                        selectdSubjectName =
+                            selectedTimetablePrefabs[index].name;
+                        Navigator.of(context).pop();
+                      },
                     ),
                   ),
                 ),

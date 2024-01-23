@@ -1,27 +1,33 @@
-///Soll später so Hausauffgaben sein und so
-///aber fürs erste noch keine Funktionalität
 abstract class SchoolEvent {
   static const String _nameKey = "name";
   static const String _linkedSubjectNameKey = "linkedSubjectName";
+  static const int maxNameLength = 25;
 
   //identifyer set at runtime
-  int key;
+  int _key;
   final String _name;
   // final DateTime createDate;
   // final DateTime laseEditDate;
   final String _linkedSubjectName;
 
-  static const int maxNameLength = 25;
+  int get key {
+    return _key;
+  }
+
+  set key(int value) {
+    _key = value;
+  }
 
   String get name {
     return _name;
   }
 
   SchoolEvent({
-    required this.key,
+    required int key,
     required String name,
     required String linkedSubjectName,
-  })  : _linkedSubjectName = linkedSubjectName,
+  })  : _key = key,
+        _linkedSubjectName = linkedSubjectName,
         _name = name;
 
   Map<String, dynamic> toJson() {
