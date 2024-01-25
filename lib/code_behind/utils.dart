@@ -392,6 +392,10 @@ class Utils {
     return "${date.day}.${date.month}.${date.year}";
   }
 
+  static String timeToString(DateTime date) {
+    return "${date.hour} : ${date.minute}";
+  }
+
   static Future<T?> showCustomPopUp<T>({
     required BuildContext context,
     required Object heroObject,

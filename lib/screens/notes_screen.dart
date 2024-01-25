@@ -1,3 +1,5 @@
+import 'package:animated_list_plus/animated_list_plus.dart';
+import 'package:animated_list_plus/transitions.dart';
 import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/school_event.dart';
 import 'package:schulapp/code_behind/school_lesson_prefab.dart';
@@ -6,6 +8,8 @@ import 'package:schulapp/code_behind/time_table_manager.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/widgets/date_selection_button.dart';
 import 'package:schulapp/widgets/navigation_bar_drawer.dart';
+import 'package:schulapp/widgets/time_selection_button.dart';
+import 'package:schulapp/widgets/todo_event_list_item_widget.dart';
 
 class NotesScreen extends StatefulWidget {
   static const route = "/notes";
@@ -27,11 +31,20 @@ class _NotesScreenState extends State<NotesScreen> {
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.add),
         onPressed: () async {
-          SchoolEvent? event = await _createNewSchoolEventSheet(context);
+          String? selectedSubjectName =
+              await _showSelectSubjectNameSheet(context);
+
+          if (selectedSubjectName == null) return;
+          if (!mounted) return;
+
+          TodoEvent? event = await _createNewTodoEventSheet(
+            context,
+            linkedSubjectName: selectedSubjectName,
+          );
 
           if (event == null) return;
 
-          TimetableManager().addOrChangeSchoolEvent(event);
+          TimetableManager().addOrChangeTodoEvent(event);
 
           if (!mounted) return;
 
@@ -43,16 +56,25 @@ class _NotesScreenState extends State<NotesScreen> {
   }
 
   Widget _body() {
-    final events = TimetableManager().schoolEvents;
+    final events = TimetableManager().sortedTodoEvents;
     if (events.isEmpty) {
       return Center(
         child: ElevatedButton(
           onPressed: () async {
-            SchoolEvent? event = await _createNewSchoolEventSheet(context);
+            String? selectedSubjectName =
+                await _showSelectSubjectNameSheet(context);
+
+            if (selectedSubjectName == null) return;
+            if (!mounted) return;
+
+            TodoEvent? event = await _createNewTodoEventSheet(
+              context,
+              linkedSubjectName: selectedSubjectName,
+            );
 
             if (event == null) return;
 
-            TimetableManager().addOrChangeSchoolEvent(event);
+            TimetableManager().addOrChangeTodoEvent(event);
 
             if (!mounted) return;
 
@@ -62,123 +84,54 @@ class _NotesScreenState extends State<NotesScreen> {
         ),
       );
     }
-    return ListView.builder(
-      itemCount: events.length,
-      itemBuilder: (context, index) {
-        final event = events[index];
-        return ListTile(
-          title: Text(
-            event.name,
-          ),
-          // trailing: Checkbox(
-          //   onChanged: (value){
 
-          //   },
-          //   value: event.,
-          // ),
-        );
-      },
-    );
-  }
-
-  Future<SchoolEvent?> _createNewSchoolEventSheet(BuildContext context) async {
-    const int taskType = 1;
-    const int noteType = 2;
-    int type = -1;
-
-    await showModalBottomSheet(
-      context: context,
-      builder: (context) {
-        return Container(
-          margin: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                'Create new Task / Note',
-                style: Theme.of(context).textTheme.headlineMedium,
-                textAlign: TextAlign.center,
-              ),
-              const Spacer(),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _customButton(
-                    text: "Task",
-                    onTap: () async {
-                      type = taskType;
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                  _customButton(
-                    text: "Note",
-                    onTap: () {
-                      type = noteType;
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                ],
-              ),
-              const Spacer(),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
+    return ImplicitlyAnimatedList<TodoEvent>(
+      items: events,
+      itemBuilder: (context, animation, event, index) {
+        return SizeFadeTransition(
+          sizeFraction: 0.7,
+          animation: animation,
+          key: Key(event.key.toString()),
+          child: TodoEventListItemWidget(
+            event: event,
+            onInfoPressed: () {
+              Utils.showCustomPopUp(
+                context: context,
+                heroObject: event,
+                body: const Placeholder(),
+                flightShuttleBuilder: (p0, p1, p2, p3, p4) {
+                  return Container(
+                    color: Theme.of(context).cardColor,
+                  );
                 },
-                child: const Text("Cancel"),
-              ),
-            ],
+              );
+            },
+            onPressed: () {
+              event.finished = !event.finished;
+              setState(() {});
+            },
+            onDeleteSwipe: () {
+              setState(() {
+                TimetableManager().removeTodoEvent(event);
+              });
+            },
           ),
         );
       },
+      areItemsTheSame: (a, b) =>
+          a.desciption == b.desciption &&
+          a.endTime == b.endTime &&
+          a.name == b.name &&
+          a.type == b.type &&
+          a.linkedSubjectName == b.linkedSubjectName,
     );
-
-    if (type == -1) return null;
-    if (!mounted) return null;
-
-    //müsste eigentlich weiter unten abgefragt werden aber ist noch nicht implementiert deswegen..
-    if (type == noteType) {
-      Utils.showInfo(
-        context,
-        msg: "Not Implemented yet! Sorry :/",
-        type: InfoType.error,
-      );
-      return null;
-    }
-
-    String? mainTimetableName = TimetableManager().settings.mainTimetableName;
-
-    if (mainTimetableName == null) {
-      Utils.showInfo(
-        context,
-        msg:
-            "You did not select an Timetable to be the default!\nGo to the Timetables Screen and select a Timetable.",
-        type: InfoType.error,
-      );
-      return null;
-    }
-
-    String? selectedSubjectName = await _showSelectSubjectNameSheet(context);
-
-    if (!mounted) return null;
-    if (selectedSubjectName == null) return null;
-
-    if (type == taskType) {
-      TodoEvent? event = await _createNewTodoEventSheet(
-        context,
-        linkedSubjectName: selectedSubjectName,
-      );
-
-      return event;
-    }
-
-    return null;
   }
 
   Future<TodoEvent?> _createNewTodoEventSheet(
     BuildContext context, {
     required String linkedSubjectName,
   }) async {
-    const maxNameLength = SchoolEvent.maxNameLength;
+    const maxNameLength = TodoEvent.maxNameLength;
     const maxDescriptionLength = TodoEvent.maxDescriptionLength;
 
     TextEditingController nameController = TextEditingController();
@@ -186,7 +139,9 @@ class _NotesScreenState extends State<NotesScreen> {
 
     DateSelectionButtonController endDateController =
         DateSelectionButtonController(
-      date: DateTime.now(),
+      date: Utils.getHomescreenTimetable()
+              ?.getNextLessonDate(linkedSubjectName) ??
+          DateTime.now(),
     );
 
     TodoType? type;
@@ -249,8 +204,18 @@ class _NotesScreenState extends State<NotesScreen> {
                       const SizedBox(
                         height: 16,
                       ),
-                      DateSelectionButton(
-                        controller: endDateController,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Expanded(
+                            child: DateSelectionButton(
+                              controller: endDateController,
+                            ),
+                          ),
+                          TimeSelectionButton(
+                            controller: endDateController,
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -262,30 +227,42 @@ class _NotesScreenState extends State<NotesScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     Expanded(
-                      child: _customButton(
-                        text: "Exam",
-                        onTap: () {
-                          type = TodoType.exam;
-                          Navigator.of(context).pop();
-                        },
+                      child: Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: _customButton(
+                          text: "Exam",
+                          icon: TodoEvent.examIcon,
+                          onTap: () {
+                            type = TodoType.exam;
+                            Navigator.of(context).pop();
+                          },
+                        ),
                       ),
                     ),
                     Expanded(
-                      child: _customButton(
-                        text: "Test",
-                        onTap: () {
-                          type = TodoType.test;
-                          Navigator.of(context).pop();
-                        },
+                      child: Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: _customButton(
+                          text: "Test",
+                          icon: TodoEvent.testIcon,
+                          onTap: () {
+                            type = TodoType.test;
+                            Navigator.of(context).pop();
+                          },
+                        ),
                       ),
                     ),
                     Expanded(
-                      child: _customButton(
-                        text: "Homework",
-                        onTap: () {
-                          type = TodoType.homework;
-                          Navigator.of(context).pop();
-                        },
+                      child: Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: _customButton(
+                          text: "Homework",
+                          icon: TodoEvent.homeworkIcon,
+                          onTap: () {
+                            type = TodoType.homework;
+                            Navigator.of(context).pop();
+                          },
+                        ),
                       ),
                     ),
                   ],
@@ -335,6 +312,7 @@ class _NotesScreenState extends State<NotesScreen> {
 
   Widget _customButton({
     required String text,
+    IconData? icon,
     required void Function()? onTap,
   }) {
     return InkWell(
@@ -342,16 +320,30 @@ class _NotesScreenState extends State<NotesScreen> {
       child: Container(
         decoration: BoxDecoration(
           color: Theme.of(context).canvasColor,
-          // borderRadius: BorderRadius.circular(16),
-          shape: BoxShape.circle,
+          borderRadius: BorderRadius.circular(16),
+          // shape: BoxShape.circle,
         ),
         child: Container(
           margin: const EdgeInsets.all(32),
           padding: const EdgeInsets.all(8),
-          child: Text(
-            text,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyMedium,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              icon == null
+                  ? Container()
+                  : Icon(
+                      icon,
+                    ),
+              const SizedBox(
+                height: 8,
+              ),
+              Text(
+                text,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            ],
           ),
         ),
       ),
@@ -359,6 +351,18 @@ class _NotesScreenState extends State<NotesScreen> {
   }
 
   Future<String?> _showSelectSubjectNameSheet(BuildContext context) async {
+    String? mainTimetableName = TimetableManager().settings.mainTimetableName;
+
+    if (mainTimetableName == null) {
+      Utils.showInfo(
+        context,
+        msg:
+            "You did not select an Timetable to be the default!\nGo to the Timetables Screen and select a Timetable.",
+        type: InfoType.error,
+      );
+      return null;
+    }
+
     Timetable? selectedTimetable = Utils.getHomescreenTimetable();
     if (selectedTimetable == null) return null;
 

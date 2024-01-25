@@ -29,7 +29,9 @@ class _DateSelectionButtonState extends State<DateSelectionButton> {
           //This number is the max
           lastDate: DateTime.fromMillisecondsSinceEpoch(8640000000000000),
         );
-        dateTime ??= DateTime.now();
+
+        if (dateTime == null) return;
+
         widget.controller.date = dateTime;
         setState(() {});
       },

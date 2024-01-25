@@ -16,7 +16,7 @@ class TimetableManager {
 
   List<Timetable>? _timetables;
   List<SchoolSemester>? _semesters;
-  List<SchoolEvent>? _schoolEvents;
+  List<TodoEvent>? _todoEvents;
   Settings? _settings;
 
   List<Timetable> get timetables {
@@ -29,9 +29,28 @@ class TimetableManager {
     return _semesters!;
   }
 
-  List<SchoolEvent> get schoolEvents {
-    _schoolEvents ??= SaveManager().loadAllSchoolEvents();
-    return _schoolEvents!;
+  List<TodoEvent> get todoEvents {
+    _todoEvents ??= SaveManager().loadAllTodoEvents();
+    return _todoEvents!;
+  }
+
+  List<TodoEvent> get sortedTodoEvents {
+    todoEvents.sort(
+      (a, b) {
+        if (a.finished && b.finished) {
+          return a.endTime.compareTo(b.endTime);
+          //TodoEvent.compareType(a.type, b.type);
+        }
+        if (a.finished) {
+          return 1;
+        }
+        if (b.finished) {
+          return -1;
+        }
+        return a.endTime.compareTo(b.endTime);
+      },
+    );
+    return todoEvents;
   }
 
   Settings get settings {
@@ -41,13 +60,13 @@ class TimetableManager {
 
   int getNextSchoolEventKey() {
     //sortieren und neu nummerieren damit es keine Fehler gibt
-    schoolEvents.sort(
+    todoEvents.sort(
       (a, b) => a.key.compareTo(b.key),
     );
-    for (int i = 0; i < schoolEvents.length; i++) {
-      schoolEvents[i].key = i;
+    for (int i = 0; i < todoEvents.length; i++) {
+      todoEvents[i].key = i;
     }
-    return schoolEvents.length;
+    return todoEvents.length;
   }
 
   ///Adds the [Timetable] and saves it to lokal storage
@@ -154,16 +173,23 @@ class TimetableManager {
     SaveManager().saveSemester(semester);
   }
 
-  void addOrChangeSchoolEvent(SchoolEvent event) {
-    if (event.key >= schoolEvents.length) {
+  void addOrChangeTodoEvent(TodoEvent event) {
+    if (event.key >= todoEvents.length) {
       //neues element
-      schoolEvents.add(event);
+      todoEvents.add(event);
     } else {
       //wurde geändert
-      schoolEvents[event.key] = event;
+      todoEvents[event.key] = event;
     }
-    // SaveManager().saveSchoolEvents();
-    print("addOrChangeSchoolEvent notSaved");
+    SaveManager().saveTodoEvents();
+  }
+
+  bool removeTodoEvent(TodoEvent event) {
+    if (event.key < 0 || event.key >= timetables.length) return false;
+
+    todoEvents.remove(event);
+
+    return SaveManager().saveTodoEvents();
   }
 
   bool removeSemesterAt(int index) {

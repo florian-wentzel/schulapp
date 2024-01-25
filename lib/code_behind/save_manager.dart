@@ -31,7 +31,7 @@ class SaveManager {
 
   Directory? applicationDocumentsDirectory;
 
-  List<SchoolEvent> loadAllSchoolEvents() {
+  List<TodoEvent> loadAllTodoEvents() {
     return [];
   }
 
@@ -385,6 +385,11 @@ class SaveManager {
     } on Exception catch (_) {
       return false;
     }
+  }
+
+  bool saveTodoEvents() {
+    print("TODO: saveTodoEvents");
+    return false;
   }
 
   // Future<File> moveFile(File sourceFile, String newPath) async {

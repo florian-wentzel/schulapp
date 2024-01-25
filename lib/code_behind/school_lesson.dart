@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:schulapp/code_behind/school_event.dart';
 import 'package:schulapp/code_behind/school_lesson_prefab.dart';
 import 'package:schulapp/code_behind/utils.dart';
 
@@ -8,7 +7,7 @@ class SchoolLesson {
   static const roomKey = "room";
   static const teacherKey = "teacher";
   static const colorKey = "color";
-  static const eventsKey = "events(coming soon)";
+  // static const eventsKey = "events(coming soon)";
 
   static const maxNameLength = 10;
   static const maxRoomLength = 10;
@@ -21,11 +20,11 @@ class SchoolLesson {
       room: emptyLessonName,
       teacher: emptyLessonName,
       color: Colors.transparent,
-      events: [],
+      // events: [],
     );
   }
 
-  final List<SchoolEvent> _events;
+  // final List<TodoEvent> _events;
   String _name;
   String _room;
   String _teacher;
@@ -66,12 +65,12 @@ class SchoolLesson {
     required String room,
     required String teacher,
     required Color color,
-    required List<SchoolEvent> events,
+    // required List<SchoolEvent> events,
   })  : _name = name,
         _room = room,
         _teacher = teacher,
-        _color = color,
-        _events = events;
+        _color = color;
+  // _events = events;
 
   void setFromPrefab(SchoolLessonPrefab prefab) {
     _name = prefab.name;
@@ -86,7 +85,7 @@ class SchoolLesson {
       roomKey: _room,
       teacherKey: _teacher,
       colorKey: Utils.colorToJson(_color),
-      eventsKey: _events,
+      // eventsKey: _events,
     };
   }
 
@@ -100,7 +99,7 @@ class SchoolLesson {
       teacher: t,
       room: r,
       color: c,
-      events: [],
+      // events: [],
     );
   }
 }

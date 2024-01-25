@@ -106,7 +106,6 @@ class Timetable {
             room: SchoolLesson.emptyLessonName,
             teacher: SchoolLesson.emptyLessonName,
             color: color,
-            events: [],
           ),
         ),
       ),
@@ -119,7 +118,6 @@ class Timetable {
             room: SchoolLesson.emptyLessonName,
             teacher: SchoolLesson.emptyLessonName,
             color: color,
-            events: [],
           ),
         ),
       ),
@@ -132,7 +130,6 @@ class Timetable {
             room: SchoolLesson.emptyLessonName,
             teacher: SchoolLesson.emptyLessonName,
             color: color,
-            events: [],
           ),
         ),
       ),
@@ -145,7 +142,6 @@ class Timetable {
             room: SchoolLesson.emptyLessonName,
             teacher: SchoolLesson.emptyLessonName,
             color: color,
-            events: [],
           ),
         ),
       ),
@@ -158,7 +154,6 @@ class Timetable {
             room: SchoolLesson.emptyLessonName,
             teacher: SchoolLesson.emptyLessonName,
             color: color,
-            events: [],
           ),
         ),
       ),
@@ -197,54 +192,68 @@ class Timetable {
         _schoolDays = schoolDays,
         _schoolTimes = schoolTimes;
 
-  static Timetable? fromJson(Map<String, dynamic> json) {
-    Timetable? timetable;
-    try {
-      String n = json[nameKey];
-      int mlc = json[maxLessonCountKey]; //maxLessonCount
-      List<Map<String, dynamic>> ds = (json[schoolDaysKey] as List).cast();
-      List<Map<String, dynamic>> ts = (json[schoolTimesKey] as List).cast();
-
-      timetable = Timetable(
-        name: n,
-        maxLessonCount: mlc,
-        schoolDays: List.generate(
-          ds.length,
-          (index) => SchoolDay.fromJson(ds[index]),
-        ),
-        schoolTimes: List.generate(
-          ts.length,
-          (index) => SchoolTime.fromJson(ts[index]),
-        ),
-      );
-    } catch (e) {
-      print(e);
-    }
-
-    return timetable;
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      nameKey: name,
-      maxLessonCountKey: maxLessonCount,
-      schoolTimesKey: List<Map<String, dynamic>>.generate(
-        schoolTimes.length,
-        (index) => schoolTimes[index].toJson(),
-      ),
-      schoolDaysKey: List<Map<String, dynamic>>.generate(
-        schoolDays.length,
-        (index) => schoolDays[index].toJson(),
-      ),
-    };
-  }
-
-  changeLessonNumberVisibility(bool isVisalbe) {
+  void changeLessonNumberVisibility(bool isVisalbe) {
     if (isVisalbe) {
       Utils.changeLessonNumberToVisible(this);
     } else {
       Utils.changeLessonNumberToNonVisible(this);
     }
+  }
+
+  DateTime getNextLessonDate(String subjectName) {
+    //-1 kann man weglassen weil die Stude am heutigen Tag ruhig ignoriert werden kann
+    int currDayIndex = DateTime.now().weekday;
+    int nextDayIndex = -1;
+    int nextLessonIndex = -1;
+
+    outerLoop:
+    for (int i = 0; i < _schoolDays.length; i++) {
+      int index = (i + currDayIndex) % (_schoolDays.length);
+      final schoolDay = _schoolDays[index];
+      for (int j = 0; j < schoolDay.lessons.length; j++) {
+        final schoolLesson = schoolDay.lessons[j];
+        if (schoolLesson.name == subjectName) {
+          nextDayIndex = index;
+          nextLessonIndex = j;
+          break outerLoop;
+        }
+      }
+    }
+
+    if (nextDayIndex == -1 || nextLessonIndex == -1) return DateTime.now();
+
+    final schoolTime = schoolTimes[nextLessonIndex].start;
+
+    if (nextDayIndex < currDayIndex) {
+      //es ist erst nächste woche
+      final lessonDate = DateTime.now().add(
+        Duration(
+          days: nextDayIndex - (currDayIndex - 1) + 7,
+        ),
+      );
+
+      return DateTime(
+        lessonDate.year,
+        lessonDate.month,
+        lessonDate.day,
+        schoolTime.hour,
+        schoolTime.minute,
+      );
+    }
+    //diese woche
+    final lessonDate = DateTime.now().add(
+      Duration(
+        days: (nextDayIndex - (currDayIndex - 1).abs()),
+      ),
+    );
+
+    return DateTime(
+      lessonDate.year,
+      lessonDate.month,
+      lessonDate.day,
+      schoolTime.hour,
+      schoolTime.minute,
+    );
   }
 
   SchoolTime? getCurrentLessonOrBreakTime() {
@@ -289,5 +298,47 @@ class Timetable {
       }
     }
     return null;
+  }
+
+  static Timetable? fromJson(Map<String, dynamic> json) {
+    Timetable? timetable;
+    try {
+      String n = json[nameKey];
+      int mlc = json[maxLessonCountKey]; //maxLessonCount
+      List<Map<String, dynamic>> ds = (json[schoolDaysKey] as List).cast();
+      List<Map<String, dynamic>> ts = (json[schoolTimesKey] as List).cast();
+
+      timetable = Timetable(
+        name: n,
+        maxLessonCount: mlc,
+        schoolDays: List.generate(
+          ds.length,
+          (index) => SchoolDay.fromJson(ds[index]),
+        ),
+        schoolTimes: List.generate(
+          ts.length,
+          (index) => SchoolTime.fromJson(ts[index]),
+        ),
+      );
+    } catch (e) {
+      print(e);
+    }
+
+    return timetable;
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      nameKey: name,
+      maxLessonCountKey: maxLessonCount,
+      schoolTimesKey: List<Map<String, dynamic>>.generate(
+        schoolTimes.length,
+        (index) => schoolTimes[index].toJson(),
+      ),
+      schoolDaysKey: List<Map<String, dynamic>>.generate(
+        schoolDays.length,
+        (index) => schoolDays[index].toJson(),
+      ),
+    };
   }
 }
