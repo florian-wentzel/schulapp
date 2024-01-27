@@ -202,7 +202,7 @@ class Timetable {
 
   DateTime getNextLessonDate(String subjectName) {
     //-1 kann man weglassen weil die Stude am heutigen Tag ruhig ignoriert werden kann
-    int currDayIndex = DateTime.now().weekday;
+    int currDayIndex = DateTime.now().weekday.clamp(0, _schoolDays.length);
     int nextDayIndex = -1;
     int nextLessonIndex = -1;
 
@@ -228,7 +228,7 @@ class Timetable {
       //es ist erst nächste woche
       final lessonDate = DateTime.now().add(
         Duration(
-          days: nextDayIndex - (currDayIndex - 1) + 7,
+          days: nextDayIndex - (DateTime.now().weekday - 1) + 7,
         ),
       );
 
