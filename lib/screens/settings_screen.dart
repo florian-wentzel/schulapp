@@ -37,13 +37,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return ListView(
       children: [
         _themeSelector(),
+        _currentVersion(),
       ],
     );
   }
 
   Widget _themeSelector() {
     return Container(
-      padding: const EdgeInsets.all(8),
+      padding: const EdgeInsets.all(12),
       margin: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
@@ -83,6 +84,38 @@ class _SettingsScreenState extends State<SettingsScreen> {
             showSelectedIcon: false,
             multiSelectionEnabled: false,
             emptySelectionAllowed: false,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _currentVersion() {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        color: Theme.of(context).cardColor,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            "Version",
+            style: Theme.of(context).textTheme.headlineMedium,
+          ),
+          const SizedBox(
+            height: 12,
+          ),
+          //später wenn wir richtige Versionen haben kann man:
+          //"package_info_plus" benutzten
+          Text(
+            "beta",
+            style: Theme.of(context)
+                .textTheme
+                .bodyMedium
+                ?.copyWith(color: Colors.grey),
           ),
         ],
       ),
