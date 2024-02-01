@@ -25,15 +25,15 @@ class SaveManager {
   static const String exportDirName = "exports";
   static const String importDirName = "imports";
   static const String semestersSaveDirName = "semesters";
+  static const String todoEventSaveDirName = "todos";
+  static const String finishedEventSaveName = "finsihedTodos.json";
+  static const String todoEventSaveName = "todos.json";
   static const String timetableFileName = "timetable.json";
   static const String semesterFileName = "semester.json";
   static const String timetableExportExtension = ".zip"; //".timetable";
+  static const String todosKey = "todos";
 
   Directory? applicationDocumentsDirectory;
-
-  List<TodoEvent> loadAllTodoEvents() {
-    return [];
-  }
 
   List<Timetable> loadAllTimetables() {
     final timetablesDir = getTimetablesDir();
@@ -221,6 +221,18 @@ class SaveManager {
     return dir;
   }
 
+  Directory getTodosDir() {
+    String mainDirPath = getMainSaveDir().path;
+
+    final dir = Directory(
+      join(mainDirPath, todoEventSaveDirName),
+    );
+
+    dir.createSync();
+
+    return dir;
+  }
+
   Directory getImportDir() {
     String mainDirPath = getMainSaveDir().path;
 
@@ -250,6 +262,18 @@ class SaveManager {
 
     final dir = Directory(
       join(mainDirPath, semestersSaveDirName),
+    );
+
+    dir.createSync();
+
+    return dir;
+  }
+
+  Directory getTodoEventDir() {
+    String mainDirPath = getMainSaveDir().path;
+
+    final dir = Directory(
+      join(mainDirPath, todoEventSaveDirName),
     );
 
     dir.createSync();
@@ -387,9 +411,43 @@ class SaveManager {
     }
   }
 
-  bool saveTodoEvents() {
-    print("TODO: saveTodoEvents");
-    return false;
+  bool saveTodoEvents(List<TodoEvent> todoEvents) {
+    Directory eventDir = getTodosDir();
+    String pathToFile = join(eventDir.path, todoEventSaveName);
+    Map<String, dynamic> json = {
+      todosKey: List<Map<String, dynamic>>.generate(
+        todoEvents.length,
+        (index) => todoEvents[index].toJson(),
+      ),
+    };
+
+    String fileContent = jsonEncode(json);
+    try {
+      File(pathToFile).writeAsStringSync(fileContent);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  List<TodoEvent> loadAllTodoEvents() {
+    Directory eventDir = getTodosDir();
+    String pathToFile = join(eventDir.path, todoEventSaveName);
+    try {
+      String fileCOntent = File(pathToFile).readAsStringSync();
+      Map<String, dynamic> json = jsonDecode(fileCOntent);
+      List<Map<String, dynamic>> todos = (json[todosKey] as List).cast();
+
+      return List.generate(
+        todos.length,
+        (index) => TodoEvent.fromJson(
+          todos[index],
+          index,
+        ),
+      );
+    } catch (e) {
+      return [];
+    }
   }
 
   // Future<File> moveFile(File sourceFile, String newPath) async {

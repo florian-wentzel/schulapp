@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 
 class TodoEvent {
+  static const String _nameKey = "name";
+  static const String _linkedSubjectNameKey = "linkedSubjectName";
+  static const String _endTimeKey = "endTime";
+  static const String _typeKey = "type";
+  static const String _desciptionKey = "desciption";
+  static const String _finishedKey = "finished";
+
   static const IconData homeworkIcon = Icons.assignment;
   static const IconData testIcon = Icons.edit;
   static const IconData examIcon = Icons.school;
-  static const String _nameKey = "name";
-  static const String _linkedSubjectNameKey = "linkedSubjectName";
   static const int maxNameLength = 25;
 
   //identifyer set at runtime
@@ -71,11 +76,30 @@ class TodoEvent {
     return {
       _nameKey: name,
       _linkedSubjectNameKey: linkedSubjectName,
+      _endTimeKey: endTime.millisecondsSinceEpoch,
+      _typeKey: type.toString(),
+      _desciptionKey: desciption,
+      _finishedKey: finished,
     };
   }
 
-  TodoEvent fromJson(Map<String, dynamic> json) {
-    throw UnimplementedError();
+  static TodoEvent fromJson(Map<String, dynamic> json, int key) {
+    String name = json[_nameKey];
+    String linkedSubjectName = json[_linkedSubjectNameKey];
+    DateTime endTime = DateTime.fromMillisecondsSinceEpoch(json[_endTimeKey]);
+    TodoType type = todoTypeFromString(json[_typeKey]);
+    String desciption = json[_desciptionKey];
+    bool finished = json[_finishedKey];
+
+    return TodoEvent(
+      key: key,
+      name: name,
+      linkedSubjectName: linkedSubjectName,
+      endTime: endTime,
+      type: type,
+      desciption: desciption,
+      finished: finished,
+    );
   }
 
   static int compareType(TodoType a, TodoType b) {
@@ -97,6 +121,19 @@ class TodoEvent {
       case TodoType.homework:
         return 1;
     }
+  }
+
+  static TodoType todoTypeFromString(String type) {
+    if (type == TodoType.test.toString()) {
+      return TodoType.test;
+    }
+    if (type == TodoType.homework.toString()) {
+      return TodoType.homework;
+    }
+    if (type == TodoType.exam.toString()) {
+      return TodoType.exam;
+    }
+    return TodoType.test;
   }
 
   Color getColor() {

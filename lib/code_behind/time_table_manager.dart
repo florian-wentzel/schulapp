@@ -181,7 +181,7 @@ class TimetableManager {
       //wurde geändert
       todoEvents[event.key] = event;
     }
-    SaveManager().saveTodoEvents();
+    SaveManager().saveTodoEvents(todoEvents);
   }
 
   bool removeTodoEvent(TodoEvent event) {
@@ -189,7 +189,7 @@ class TimetableManager {
 
     todoEvents.remove(event);
 
-    return SaveManager().saveTodoEvents();
+    return SaveManager().saveTodoEvents(todoEvents);
   }
 
   bool removeSemesterAt(int index) {

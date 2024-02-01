@@ -109,6 +109,8 @@ class _NotesScreenState extends State<NotesScreen> {
             onPressed: () {
               event.finished = !event.finished;
               setState(() {});
+              //damit es gespeichert wird
+              TimetableManager().addOrChangeTodoEvent(event);
             },
             onDeleteSwipe: () {
               setState(() {
@@ -164,7 +166,7 @@ class _NotesScreenState extends State<NotesScreen> {
                 ),
                 TextField(
                   decoration: const InputDecoration(
-                    hintText: "Name",
+                    hintText: "Topic",
                   ),
                   maxLines: 1,
                   maxLength: maxNameLength,
