@@ -149,6 +149,18 @@ class TodoEvent {
         return Colors.yellow;
     }
   }
+
+  TodoEvent copy() {
+    return TodoEvent(
+      key: key,
+      name: name,
+      linkedSubjectName: linkedSubjectName,
+      endTime: endTime,
+      type: type,
+      desciption: desciption,
+      finished: finished,
+    );
+  }
 }
 
 enum TodoType {

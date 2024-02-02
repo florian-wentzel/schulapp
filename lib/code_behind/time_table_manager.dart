@@ -50,6 +50,11 @@ class TimetableManager {
         return a.endTime.compareTo(b.endTime);
       },
     );
+
+    for (int i = 0; i < todoEvents.length; i++) {
+      todoEvents[i].key = i;
+    }
+
     return todoEvents;
   }
 
@@ -60,12 +65,7 @@ class TimetableManager {
 
   int getNextSchoolEventKey() {
     //sortieren und neu nummerieren damit es keine Fehler gibt
-    todoEvents.sort(
-      (a, b) => a.key.compareTo(b.key),
-    );
-    for (int i = 0; i < todoEvents.length; i++) {
-      todoEvents[i].key = i;
-    }
+    sortedTodoEvents;
     return todoEvents.length;
   }
 
@@ -179,7 +179,7 @@ class TimetableManager {
       todoEvents.add(event);
     } else {
       //wurde geändert
-      todoEvents[event.key] = event;
+      todoEvents[event.key] = event.copy();
     }
     SaveManager().saveTodoEvents(todoEvents);
   }
@@ -188,6 +188,10 @@ class TimetableManager {
     if (event.key < 0 || event.key >= timetables.length) return false;
 
     todoEvents.remove(event);
+
+    for (int i = 0; i < todoEvents.length; i++) {
+      todoEvents[i].key = i;
+    }
 
     return SaveManager().saveTodoEvents(todoEvents);
   }

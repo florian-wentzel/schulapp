@@ -94,23 +94,41 @@ class _NotesScreenState extends State<NotesScreen> {
           key: Key(event.key.toString()),
           child: TodoEventListItemWidget(
             event: event,
-            onInfoPressed: () {
-              Utils.showCustomPopUp(
+            onInfoPressed: () async {
+              await Utils.showCustomPopUp(
                 context: context,
                 heroObject: event,
-                body: const Placeholder(),
+                body: TodoEventInfoPopUp(
+                  event: event,
+                  showEditGradeSheet: (event) async {
+                    TodoEvent? newEvent = await _createNewTodoEventSheet(
+                      context,
+                      linkedSubjectName: event.linkedSubjectName,
+                      event: event,
+                    );
+
+                    return newEvent;
+                  },
+                ),
                 flightShuttleBuilder: (p0, p1, p2, p3, p4) {
                   return Container(
                     color: Theme.of(context).cardColor,
                   );
                 },
               );
+
+              //warten damit animation funktioniert
+              await Future.delayed(
+                const Duration(milliseconds: 500),
+              );
+
+              setState(() {});
             },
             onPressed: () {
               event.finished = !event.finished;
-              setState(() {});
               //damit es gespeichert wird
               TimetableManager().addOrChangeTodoEvent(event);
+              setState(() {});
             },
             onDeleteSwipe: () {
               setState(() {
@@ -132,12 +150,15 @@ class _NotesScreenState extends State<NotesScreen> {
   Future<TodoEvent?> _createNewTodoEventSheet(
     BuildContext context, {
     required String linkedSubjectName,
+    TodoEvent? event,
   }) async {
     const maxNameLength = TodoEvent.maxNameLength;
     const maxDescriptionLength = TodoEvent.maxDescriptionLength;
 
     TextEditingController nameController = TextEditingController();
+    nameController.text = event?.name ?? "";
     TextEditingController descriptionController = TextEditingController();
+    descriptionController.text = event?.desciption ?? "";
 
     DateSelectionButtonController endDateController =
         DateSelectionButtonController(
@@ -145,6 +166,9 @@ class _NotesScreenState extends State<NotesScreen> {
               ?.getNextLessonDate(linkedSubjectName) ??
           DateTime.now(),
     );
+    if (event != null) {
+      endDateController.date = event.endTime;
+    }
 
     TodoType? type;
 
@@ -302,13 +326,13 @@ class _NotesScreenState extends State<NotesScreen> {
     // }
 
     return TodoEvent(
-      key: TimetableManager().getNextSchoolEventKey(),
+      key: event?.key ?? TimetableManager().getNextSchoolEventKey(),
       name: name,
       desciption: desciption,
       linkedSubjectName: linkedSubjectName,
       endTime: endDateController.date,
       type: type!,
-      finished: false,
+      finished: event?.finished ?? false,
     );
   }
 
@@ -414,5 +438,123 @@ class _NotesScreenState extends State<NotesScreen> {
       },
     );
     return selectdSubjectName;
+  }
+}
+
+// ignore: must_be_immutable
+class TodoEventInfoPopUp extends StatelessWidget {
+  Future<TodoEvent?> Function(TodoEvent event) showEditGradeSheet;
+  TodoEvent event;
+
+  TodoEventInfoPopUp({
+    super.key,
+    required this.event,
+    required this.showEditGradeSheet,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            IconButton(
+              onPressed: () async {
+                TimetableManager().removeTodoEvent(event);
+                Navigator.pop(context);
+              },
+              icon: const Icon(
+                Icons.delete,
+                color: Colors.red,
+                size: 32,
+              ),
+            ),
+            Icon(
+              event.getIcon(),
+              color: event.getColor(),
+            ),
+            IconButton(
+              onPressed: () async {
+                TodoEvent? newEvent = await showEditGradeSheet(event);
+
+                if (newEvent == null) return;
+
+                TimetableManager().addOrChangeTodoEvent(newEvent);
+
+                Navigator.pop(context);
+              },
+              icon: const Icon(
+                Icons.edit,
+                size: 32,
+              ),
+            ),
+          ],
+        ),
+        Text(
+          style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+          event.linkedSubjectName,
+        ),
+        Text(
+          style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+          event.name,
+        ),
+        const SizedBox(
+          height: 24,
+        ),
+        Visibility(
+          visible: event.desciption.isNotEmpty,
+          replacement: const Spacer(),
+          child: Flexible(
+            fit: FlexFit.tight,
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              margin: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Theme.of(context).canvasColor,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.vertical,
+                child: Text(
+                  event.desciption,
+                  style: Theme.of(context).textTheme.bodyLarge,
+                  textAlign: TextAlign.left,
+                ),
+              ),
+            ),
+          ),
+        ),
+        Container(
+          padding: const EdgeInsets.all(8),
+          margin: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Theme.of(context).canvasColor,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Text(
+            "${Utils.dateToString(event.endTime)} | ${event.endTime.hour} : ${event.endTime.minute}",
+            style: Theme.of(context).textTheme.bodyLarge,
+            textAlign: TextAlign.center,
+          ),
+        ),
+        const SizedBox(
+          height: 12,
+        ),
+        ElevatedButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: const Icon(
+            Icons.check,
+            size: 42,
+          ),
+        ),
+      ],
+    );
   }
 }
