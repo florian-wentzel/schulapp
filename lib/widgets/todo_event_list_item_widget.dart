@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:schulapp/code_behind/school_event.dart';
+import 'package:schulapp/code_behind/todo_event.dart';
 
 // ignore: must_be_immutable
 class TodoEventListItemWidget extends StatelessWidget {
