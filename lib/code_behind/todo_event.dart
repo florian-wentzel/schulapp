@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:schulapp/code_behind/notification_manager.dart';
 
 class TodoEvent {
   static const String _nameKey = "name";
@@ -7,6 +8,7 @@ class TodoEvent {
   static const String _typeKey = "type";
   static const String _desciptionKey = "desciption";
   static const String _finishedKey = "finished";
+  static const int notificationMultiplier = 10;
 
   static const IconData homeworkIcon = Icons.assignment;
   static const IconData testIcon = Icons.edit;
@@ -47,18 +49,31 @@ class TodoEvent {
 
     Duration timeLeft = endTime.difference(DateTime.now());
 
-    if (timeLeft.inSeconds <= 0) {
-      if (timeLeft.inDays == 0) {
-        return "Expired ${timeLeft.inHours.abs()} hours ago";
-      }
+    if (timeLeft.inDays > 0) {
+      return "In ${timeLeft.inDays} days";
+    } else if (timeLeft.inDays < 0) {
       return "Expired ${timeLeft.inDays.abs()} days ago";
     }
 
-    if (timeLeft.inDays == 0) {
+    if (timeLeft.inHours > 0) {
       return "In ${timeLeft.inHours} hours";
+    } else if (timeLeft.inHours < 0) {
+      return "Expired ${timeLeft.inHours.abs()} hours ago";
     }
 
-    return "In ${timeLeft.inDays} days";
+    if (timeLeft.inMinutes > 0) {
+      return "In ${timeLeft.inMinutes} minutes";
+    } else if (timeLeft.inMinutes < 0) {
+      return "Expired ${timeLeft.inMinutes.abs()} minutes ago";
+    }
+
+    if (timeLeft.inSeconds > 0) {
+      return "In ${timeLeft.inSeconds} seconds";
+    } else if (timeLeft.inSeconds < 0) {
+      return "Expired ${timeLeft.inSeconds.abs()} seconds ago";
+    }
+
+    return "now";
   }
 
   IconData getIcon() {
@@ -159,6 +174,42 @@ class TodoEvent {
       type: type,
       desciption: desciption,
       finished: finished,
+    );
+  }
+
+  static String typeToString(TodoType type) {
+    switch (type) {
+      case TodoType.exam:
+        return "Exam";
+      case TodoType.test:
+        return "Test";
+      case TodoType.homework:
+        return "Homework";
+    }
+  }
+
+  Future<void> addNotification() async {
+    if (finished) return;
+    await NotificationManager().scheduleNotification(
+      id: key * notificationMultiplier,
+      scheduledDateTime: endTime.subtract(const Duration(days: 1)),
+      title: "$linkedSubjectName : ${TodoEvent.typeToString(type)}",
+      body: "Tomorrow",
+    );
+    return NotificationManager().scheduleNotification(
+      id: key * notificationMultiplier + 1,
+      scheduledDateTime: endTime,
+      title: "$linkedSubjectName : ${TodoEvent.typeToString(type)}",
+      body: "now",
+    );
+  }
+
+  Future<void> cancleNotification() async {
+    await NotificationManager().cancleNotification(
+      key * notificationMultiplier,
+    );
+    await NotificationManager().cancleNotification(
+      key * notificationMultiplier + 1,
     );
   }
 }

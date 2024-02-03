@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:schulapp/code_behind/notification_manager.dart';
 import 'package:schulapp/theme/theme_manager.dart';
 import 'package:schulapp/widgets/navigation_bar_drawer.dart';
 
@@ -38,6 +39,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
       children: [
         _themeSelector(),
         _currentVersion(),
+        ElevatedButton(
+          onPressed: () {
+            NotificationManager().showNotifications(
+              id: 0,
+              title: "Test",
+              body: "Notification",
+            );
+          },
+          child: const Text("Send test Notification"),
+        ),
       ],
     );
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/todo_event.dart';
+import 'package:schulapp/widgets/periodic_updating_widget.dart';
 
 // ignore: must_be_immutable
 class TodoEventListItemWidget extends StatelessWidget {
@@ -64,35 +65,24 @@ class TodoEventListItemWidget extends StatelessWidget {
             spacing: 12,
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              // IconButton(
-              //   onPressed: () {},
-              //   icon: const Icon(
-              //     Icons.edit,
-              //   ),
-              // ),
-              Text(
-                event.getEndTimeString(),
-                style: event.isExpired()
-                    ? Theme.of(context)
-                        .textTheme
-                        .bodyLarge
-                        ?.copyWith(color: Colors.red)
-                    : Theme.of(context).textTheme.bodyLarge,
+              PeriodicUpdatingWidget(
+                timerDuration: const Duration(seconds: 1),
+                updateWidget: () {
+                  return Text(
+                    event.getEndTimeString(),
+                    style: event.isExpired()
+                        ? Theme.of(context)
+                            .textTheme
+                            .bodyLarge
+                            ?.copyWith(color: Colors.red)
+                        : Theme.of(context).textTheme.bodyLarge,
+                  );
+                },
               ),
-              // Checkbox(
-              //   onChanged: (value) {
-              //     onPressed.call();
-              //   },
-              //   value: event.finished,
-              // ),
               IconButton(
                 onPressed: onInfoPressed,
                 icon: const Icon(Icons.info),
               ),
-              // ElevatedButton(
-              //   onPressed: () {},
-              //   child: const Text("FINISHED"),
-              // ),
             ],
           ),
         ),

@@ -52,7 +52,10 @@ class TimetableManager {
     );
 
     for (int i = 0; i < todoEvents.length; i++) {
-      todoEvents[i].key = i;
+      todoEvents[i].cancleNotification().then((value) {
+        todoEvents[i].key = i;
+        todoEvents[i].addNotification();
+      });
     }
 
     return todoEvents;
@@ -177,20 +180,29 @@ class TimetableManager {
     if (event.key >= todoEvents.length) {
       //neues element
       todoEvents.add(event);
+      //notification hinzufügen
+      event.addNotification();
     } else {
       //wurde geändert
       todoEvents[event.key] = event.copy();
+      event.cancleNotification().then(
+            (value) => event.addNotification(),
+          );
     }
     SaveManager().saveTodoEvents(todoEvents);
   }
 
   bool removeTodoEvent(TodoEvent event) {
     if (event.key < 0 || event.key >= timetables.length) return false;
+    event.cancleNotification();
 
     todoEvents.remove(event);
 
     for (int i = 0; i < todoEvents.length; i++) {
-      todoEvents[i].key = i;
+      todoEvents[i].cancleNotification().then((value) {
+        todoEvents[i].key = i;
+        todoEvents[i].addNotification();
+      });
     }
 
     return SaveManager().saveTodoEvents(todoEvents);
