@@ -63,6 +63,7 @@ class _SchoolGradeSubjectScreenState extends State<SchoolGradeSubjectScreen> {
             widget.subject.gradeGroups.length,
             _gradeGroupBuilder,
           ),
+          ...[_setGradeContainer()],
           const SizedBox(
             height: 8,
           ),
@@ -657,6 +658,220 @@ class _SchoolGradeSubjectScreenState extends State<SchoolGradeSubjectScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _setGradeNumberItemPopUp(Grade? grade) {
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            IconButton(
+              onPressed: () async {
+                Navigator.pop<Grade?>(context, null);
+
+                //warten damit animation funktioniert
+                await Future.delayed(
+                  const Duration(milliseconds: 500),
+                );
+
+                setState(() {});
+                SaveManager().saveSemester(widget.semester);
+              },
+              icon: const Icon(
+                Icons.delete,
+                color: Colors.red,
+                size: 32,
+              ),
+            ),
+            // IconButton(
+            //   onPressed: () async {
+            //     Navigator.pop(context);
+            //     Grade? newGrade;
+            //     if (grade == null) {
+            //       newGrade = await _showAddNewGradeSheet();
+            //     } else {
+            //       newGrade = await _showEditGradeSheet(grade!);
+            //     }
+            //     if (newGrade == null) {
+            //       grade = null;
+            //     } else {
+            //       grade = newGrade;
+            //     }
+            //     setState(() {});
+            //     SaveManager().saveSemester(widget.semester);
+            //   },
+            //   icon: const Icon(
+            //     Icons.edit,
+            //     // color: Colors.red,
+            //     size: 32,
+            //   ),
+            // ),
+          ],
+        ),
+        const SizedBox(
+          height: 16,
+        ),
+        GestureDetector(
+          child: Container(
+            width: 100,
+            height: 100,
+            decoration: BoxDecoration(
+              // borderRadius: BorderRadius.circular(16),
+              shape: BoxShape.circle,
+              color: Utils.getGradeColor(grade?.grade ?? -1),
+            ),
+            child: Center(
+              child: Text(
+                grade?.toString() ?? " - ",
+                style: Theme.of(context).textTheme.displaySmall,
+              ),
+            ),
+          ),
+        ),
+        const Spacer(),
+        const SizedBox(
+          height: 12,
+        ),
+        Visibility(
+          visible: grade?.info.isNotEmpty ?? false,
+          child: Text(
+            grade?.info ?? "",
+            style: TextStyle(
+              color:
+                  Theme.of(context).textTheme.bodyLarge?.color ?? Colors.white,
+              fontSize: 42.0,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ),
+        Text(
+          Utils.dateToString(grade?.date ?? DateTime(0)),
+          style: TextStyle(
+            color: Theme.of(context).textTheme.bodyLarge?.color ?? Colors.white,
+            fontSize: 42.0,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        const Spacer(
+          flex: 2,
+        ),
+        ElevatedButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: const Icon(
+            Icons.check,
+            size: 42,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _setGradeContainer() {
+    String endSetGradeString = " – ";
+    final endSetGrade = widget.subject.endSetGrade;
+    if (endSetGrade != null) {
+      endSetGradeString = endSetGrade.grade.toString();
+    }
+    return InkWell(
+      onTap: () async {
+        Grade? newGrade = await _showAddNewGradeSheet();
+        if (newGrade == null) return;
+
+        widget.subject.endSetGrade = newGrade;
+        setState(() {});
+        SaveManager().saveSemester(widget.semester);
+      },
+      child: Container(
+        width: MediaQuery.of(context).size.width,
+        margin: const EdgeInsets.all(4),
+        padding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 8,
+        ),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          color: Theme.of(context).cardColor,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Set Grade",
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+              ],
+            ),
+            SizedBox(
+              height: 50,
+              child: SingleChildScrollView(
+                primary: false,
+                scrollDirection: Axis.horizontal,
+                child: InkWell(
+                  onTap: endSetGrade != null
+                      ? () async {
+                          Grade? newGrade = await Utils.showCustomPopUp<Grade?>(
+                            context: context,
+                            heroObject: endSetGrade,
+                            body: _setGradeNumberItemPopUp(
+                              widget.subject.endSetGrade,
+                            ),
+                          );
+                          widget.subject.endSetGrade = newGrade;
+                        }
+                      : null,
+                  child: Hero(
+                    tag: endSetGrade ?? "",
+                    flightShuttleBuilder: (context, animation, __, ___, ____) {
+                      const targetAlpha = 220;
+
+                      return AnimatedBuilder(
+                        animation: animation,
+                        builder: (context, _) {
+                          return Container(
+                            margin: const EdgeInsets.symmetric(
+                                horizontal: 4, vertical: 8),
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                              color: ColorTween(
+                                begin: Utils.getGradeColor(
+                                    endSetGrade?.grade ?? -1),
+                                end: Theme.of(context)
+                                    .cardColor
+                                    .withAlpha(targetAlpha),
+                              ).lerp(animation.value),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 500),
+                      margin: const EdgeInsets.symmetric(
+                          horizontal: 4, vertical: 8),
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Utils.getGradeColor(endSetGrade?.grade ?? -1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Center(
+                        child: Text(endSetGradeString),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -8,6 +8,8 @@ class Settings {
   static const defaultGradeGroupsKey = "defaultGradeGroups";
   static const showLessonNumbersKey = "showLessonNumbers";
   static const timetableLessonWidthKey = "timetableLessonWidth";
+  static const openMainSemesterAutomaticallyKey =
+      "openMainSemesterAutomatically";
   static const themeModeKey = "theme";
 
   ///if [null] firstTimetable shown
@@ -16,6 +18,7 @@ class Settings {
   String? _themeMode;
   double? _timetableLessonWidth;
   bool? _showLessonNumbers;
+  bool? _openMainSemesterAutomatically;
 
   static int decimalPlaces = 1;
 
@@ -43,6 +46,15 @@ class Settings {
 
   set showLessonNumbers(bool? value) {
     _showLessonNumbers = value;
+    SaveManager().saveSettings(this);
+  }
+
+  bool get openMainSemesterAutomatically {
+    return _openMainSemesterAutomatically ?? true;
+  }
+
+  set openMainSemesterAutomatically(bool? value) {
+    _openMainSemesterAutomatically = value;
     SaveManager().saveSettings(this);
   }
 
@@ -98,11 +110,13 @@ class Settings {
     String? themeMode,
     double? timetableLessonWidth,
     bool? showLessonNumbers,
+    bool? openMainSemesterAutomatically,
   })  : _mainTimetableName = mainTimetableName,
         _mainSemesterName = mainSemesterName,
         _themeMode = themeMode,
         _timetableLessonWidth = timetableLessonWidth,
-        _showLessonNumbers = showLessonNumbers;
+        _showLessonNumbers = showLessonNumbers,
+        _openMainSemesterAutomatically = openMainSemesterAutomatically;
 
   Map<String, dynamic> toJson() {
     return {
@@ -111,6 +125,7 @@ class Settings {
       themeModeKey: _themeMode,
       showLessonNumbersKey: _showLessonNumbers,
       timetableLessonWidthKey: _timetableLessonWidth,
+      openMainSemesterAutomaticallyKey: _openMainSemesterAutomatically,
       // defaultGradeGroupsKey: _defaultGradeGroups != null
       //     ? List.generate(
       //         _defaultGradeGroups!.length,
@@ -126,6 +141,8 @@ class Settings {
     String? themeMode = json[themeModeKey];
     double? timetableLessonWidth = json[timetableLessonWidthKey];
     bool? showLessonNumbers = json[showLessonNumbersKey];
+    bool? openMainSemesterAutomatically =
+        json[openMainSemesterAutomaticallyKey];
     // List<Map<String, dynamic>>? defaultGradeGroupsJson =
     //     json[defaultGradeGroupsKey];
 
@@ -144,6 +161,7 @@ class Settings {
       themeMode: themeMode,
       timetableLessonWidth: timetableLessonWidth,
       showLessonNumbers: showLessonNumbers,
+      openMainSemesterAutomatically: openMainSemesterAutomatically,
       // defaultGradeGroups: gradeGroups,
     );
   }

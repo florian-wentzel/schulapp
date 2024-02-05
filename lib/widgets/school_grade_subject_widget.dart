@@ -79,7 +79,11 @@ class SchoolGradeSubjectWidget extends StatelessWidget {
               child: Text(
                 subject.getGradeAverageString(),
                 textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.headlineSmall,
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      decoration: subject.endSetGrade != null
+                          ? TextDecoration.underline
+                          : null,
+                    ),
               ),
             ),
           ),

@@ -87,7 +87,10 @@ class NotificationManager {
     );
   }
 
-  Future<void> cancleNotification(int id) {
+  Future<void> cancleNotification(int id) async {
+    if (!Platform.isIOS && !Platform.isAndroid) {
+      return;
+    }
     return notificationsPlugin.cancel(id);
   }
 }

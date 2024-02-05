@@ -47,9 +47,10 @@ class SchoolSemester {
     _subjects = value;
   }
 
-  SchoolSemester(
-      {required this.name, required List<SchoolGradeSubject> subjects})
-      : _subjects = subjects;
+  SchoolSemester({
+    required this.name,
+    required List<SchoolGradeSubject> subjects,
+  }) : _subjects = subjects;
 
   double getGradeAverage() {
     double average = 0;
@@ -135,6 +136,7 @@ class SchoolSemester {
 class SchoolGradeSubject {
   static const String nameKey = "name";
   static const String gradeGroupsKey = "gradeGroups";
+  static const endSetGradeKey = "endSetGrade";
 
   static const int maxNameLength = 15;
 
@@ -142,12 +144,17 @@ class SchoolGradeSubject {
 
   List<GradeGroup> gradeGroups; //Schriftliche und Mündliche Noten etc.
 
+  Grade? endSetGrade; //die note welche alle anderen überschreibt
+
   SchoolGradeSubject({
     required this.name,
     required this.gradeGroups,
+    this.endSetGrade,
   });
 
   double getGradeAverage() {
+    if (endSetGrade != null) return endSetGrade!.grade.toDouble();
+
     int percent = 0;
     int count = 0;
 
@@ -181,6 +188,7 @@ class SchoolGradeSubject {
   Map<String, dynamic> toJson() {
     return {
       nameKey: name,
+      endSetGradeKey: endSetGrade?.toJson(),
       gradeGroupsKey: List.generate(
         gradeGroups.length,
         (index) => gradeGroups[index].toJson(),
@@ -190,6 +198,10 @@ class SchoolGradeSubject {
 
   static SchoolGradeSubject fromJson(Map<String, dynamic> json) {
     String name = json[nameKey];
+    Grade? endSetGrade = json[endSetGradeKey] == null
+        ? null
+        : Grade.fromJson(json[endSetGradeKey]);
+
     List<Map<String, dynamic>> gradeGroupsJsons =
         (json[gradeGroupsKey] as List).cast();
 
@@ -202,6 +214,7 @@ class SchoolGradeSubject {
 
     return SchoolGradeSubject(
       name: name,
+      endSetGrade: endSetGrade,
       gradeGroups: gradeGroups,
     );
   }
@@ -256,10 +269,15 @@ class SchoolGradeSubject {
 
   String getGradeAverageString() {
     final gradeAverage = getGradeAverage();
-    if (gradeAverage == -1) {
+
+    return getGradeAverageStringStatic(gradeAverage);
+  }
+
+  static String getGradeAverageStringStatic(double grade) {
+    if (grade == -1) {
       return "-";
     }
-    return gradeAverage.toStringAsFixed(Settings.decimalPlaces);
+    return grade.toStringAsFixed(Settings.decimalPlaces);
   }
 }
 
