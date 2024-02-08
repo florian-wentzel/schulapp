@@ -1,0 +1,6 @@
+- paste new icon.png image in folder
+- paste new icon.png in "android\app\src\main\res\drawable\icon.png" //das ist für die benachrichtigungen für android
+
+- open terminal and run "flutter clean" to delete old build and packages 
+- run "flutter pub get" to get packages
+- run "flutter pub run flutter_launcher_icons" to create icons

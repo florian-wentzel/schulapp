@@ -28,8 +28,7 @@ class NotificationManager {
 
   Future<void> initNotifications() async {
     //um logo zu ändern: https://youtu.be/26TTYlwc6FM?t=146
-    const initializationSettingsAndroid =
-        AndroidInitializationSettings("flutter_logo");
+    const initializationSettingsAndroid = AndroidInitializationSettings("icon");
 
     final initializationSettingsIOS = DarwinInitializationSettings(
       requestAlertPermission: true,

@@ -5,7 +5,7 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
 
-    <application android:label="schulapp" android:name="${applicationName}" android:icon="@mipmap/ic_launcher" android:enableOnBackInvokedCallback="true">
+    <application android:label="schulapp" android:name="${applicationName}" android:icon="@mipmap/icon" android:enableOnBackInvokedCallback="true">
         <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver" />
         <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver">
             <intent-filter>
