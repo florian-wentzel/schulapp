@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:schulapp/code_behind/school_day.dart';
 import 'package:schulapp/code_behind/school_lesson.dart';
+import 'package:schulapp/code_behind/school_lesson_prefab.dart';
 import 'package:schulapp/code_behind/school_semester.dart';
 import 'package:schulapp/code_behind/school_time.dart';
 import 'package:schulapp/code_behind/time_table.dart';
+import 'package:schulapp/code_behind/time_table_manager.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/screens/time_table/create_timetable_screen.dart';
+import 'package:schulapp/screens/timetable_screen.dart';
 import 'package:schulapp/widgets/timetable_widget.dart';
 
 Future<SchoolSemester?> createNewSemester(BuildContext context) async {
@@ -213,7 +216,7 @@ Future<Timetable?> showCreateTimetableSheet(BuildContext context) async {
   }
 
   return Timetable(
-    name: nameController.text,
+    name: ttName,
     maxLessonCount: lessonCount,
     schoolDays: Timetable.defaultSchoolDays(lessonCount),
     schoolTimes: Timetable.defaultSchoolTimes(lessonCount),
@@ -242,4 +245,119 @@ Future<void> showSchoolLessonHomePopUp(
       fullscreenDialog: true,
     ),
   );
+}
+
+Future<String?> showSelectSubjectNameSheet(
+  BuildContext context, {
+  required String title,
+}) async {
+  Timetable? selectedTimetable = Utils.getHomescreenTimetable();
+  if (selectedTimetable == null) return null;
+
+  List<SchoolLessonPrefab> selectedTimetablePrefabs =
+      Utils.createLessonPrefabsFromTt(selectedTimetable);
+
+  String? selectdSubjectName;
+
+  await showModalBottomSheet(
+    context: context,
+    scrollControlDisabledMaxHeightRatio: 0.6,
+    builder: (context) {
+      return Container(
+        margin: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              title,
+              style: Theme.of(context).textTheme.headlineMedium,
+              textAlign: TextAlign.center,
+            ),
+            Expanded(
+              child: Container(
+                margin: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).cardColor,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: ListView.builder(
+                  itemCount: selectedTimetablePrefabs.length,
+                  itemBuilder: (context, index) => ListTile(
+                    title: Text(selectedTimetablePrefabs[index].name),
+                    onTap: () {
+                      selectdSubjectName = selectedTimetablePrefabs[index].name;
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    },
+  );
+  return selectdSubjectName;
+}
+
+Future<Timetable?> showSelectTimetableSheet(
+  BuildContext context, {
+  required String title,
+}) async {
+  List<Timetable> timetables = TimetableManager().timetables;
+
+  Timetable? selectedTimetable;
+
+  await showModalBottomSheet(
+    context: context,
+    scrollControlDisabledMaxHeightRatio: 0.6,
+    builder: (context) {
+      return Container(
+        margin: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              title,
+              style: Theme.of(context).textTheme.headlineMedium,
+              textAlign: TextAlign.center,
+            ),
+            Expanded(
+              child: Container(
+                margin: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).cardColor,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: ListView.builder(
+                  itemCount: timetables.length,
+                  itemBuilder: (context, index) => ListTile(
+                    title: Text(timetables[index].name),
+                    trailing: IconButton(
+                      onPressed: () {
+                        Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) => TimetableScreen(
+                            title: "Timetable Info: ${timetables[index].name}",
+                            timetable: timetables[index],
+                          ),
+                        ));
+                      },
+                      icon: const Icon(Icons.info),
+                    ),
+                    onTap: () {
+                      selectedTimetable = timetables[index];
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    },
+  );
+  return selectedTimetable;
 }

@@ -81,7 +81,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return listItem(
       title: "Open main semester automatically",
       afterTitle: [
-        const Spacer(),
         Switch.adaptive(
           value: TimetableManager().settings.openMainSemesterAutomatically,
           onChanged: (value) {
@@ -126,10 +125,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                title,
-                style: Theme.of(context).textTheme.headlineMedium,
+              Flexible(
+                child: Text(
+                  title,
+                  style: Theme.of(context).textTheme.headlineMedium,
+                ),
               ),
               ...afterTitle ?? [Container()],
             ],

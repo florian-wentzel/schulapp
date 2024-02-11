@@ -5,6 +5,7 @@ import 'package:schulapp/code_behind/time_table.dart';
 import 'package:schulapp/code_behind/time_table_manager.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/screens/time_table/timetable_droptarget.dart';
+import 'package:schulapp/widgets/timetable_util_functions.dart';
 
 // ignore: must_be_immutable
 class CreateTimeTableScreen extends StatefulWidget {
@@ -168,6 +169,44 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
   Widget _lessonPrefabScrollbar() {
     const containerHeight = 100.0;
     const containerWidth = containerHeight;
+
+    if (_lessonPrefabs.isEmpty) {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          InkWell(
+            onTap: () async {
+              Timetable? timetable = await showSelectTimetableSheet(
+                context,
+                title: "Select Timetable to import Subject from",
+              );
+
+              if (timetable == null) return;
+              List<SchoolLessonPrefab> prefabs =
+                  Utils.createLessonPrefabsFromTt(timetable);
+              _lessonPrefabs.addAll(prefabs);
+              setState(() {});
+            },
+            child: Container(
+              height: containerHeight,
+              width: containerWidth,
+              margin: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Center(
+                child: Text(
+                  "Import Subjects",
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
     return SingleChildScrollView(
       primary: true,
       scrollDirection: Axis.horizontal,
@@ -177,7 +216,7 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
           _lessonPrefabs.length,
           (index) {
             SchoolLessonPrefab prefab = _lessonPrefabs[index];
-            return GestureDetector(
+            return InkWell(
               onTap: () async {
                 SchoolLessonPrefab? newPrefab =
                     await _showCreateNewPrefabBottomSheet(
@@ -188,7 +227,27 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
                   color: prefab.color,
                 );
 
-                if (newPrefab == null) return;
+                if (newPrefab == null) {
+                  bool delete = await Utils.showBoolInputDialog(
+                    context,
+                    question:
+                        "Do you want to delete this Subject: ${prefab.name}",
+                  );
+
+                  if (delete) {
+                    try {
+                      SchoolLessonPrefab deletePrefab =
+                          _lessonPrefabs.firstWhere(
+                        (element) => element.name == prefab.name,
+                      );
+                      _lessonPrefabs.remove(deletePrefab);
+                      setState(() {});
+                    } catch (_) {}
+                    return;
+                  } else {
+                    return;
+                  }
+                }
 
                 if (!mounted) return;
 
@@ -257,6 +316,7 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
     String room = "",
     String teacher = "",
     Color color = Colors.white,
+    bool showDeleteButton = false,
   }) async {
     const maxNameLength = 20;
 
@@ -337,7 +397,7 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
                   },
                 ),
                 const SizedBox(
-                  height: 20,
+                  height: 16,
                 ),
                 ElevatedButton(
                   onPressed: () {
@@ -347,6 +407,18 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
                     Navigator.of(context).pop();
                   },
                   child: const Text("Create"),
+                ),
+                const SizedBox(
+                  height: 16,
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Icon(
+                    Icons.delete,
+                    color: Colors.red,
+                  ),
                 ),
               ],
             ),

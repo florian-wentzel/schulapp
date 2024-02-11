@@ -11,6 +11,7 @@ class Settings {
   static const openMainSemesterAutomaticallyKey =
       "openMainSemesterAutomatically";
   static const themeModeKey = "theme";
+  static const hiddenDebugModeKey = "hiddenDebugMode";
 
   ///if [null] firstTimetable shown
   String? _mainTimetableName;
@@ -19,6 +20,7 @@ class Settings {
   double? _timetableLessonWidth;
   bool? _showLessonNumbers;
   bool? _openMainSemesterAutomatically;
+  bool? _hiddenDebugMode;
 
   static int decimalPlaces = 1;
 
@@ -46,6 +48,15 @@ class Settings {
 
   set showLessonNumbers(bool? value) {
     _showLessonNumbers = value;
+    SaveManager().saveSettings(this);
+  }
+
+  bool get hiddenDebugMode {
+    return _hiddenDebugMode ?? false;
+  }
+
+  set hiddenDebugMode(bool? value) {
+    _hiddenDebugMode = value;
     SaveManager().saveSettings(this);
   }
 
@@ -111,12 +122,14 @@ class Settings {
     double? timetableLessonWidth,
     bool? showLessonNumbers,
     bool? openMainSemesterAutomatically,
+    bool? hiddenDebugMode,
   })  : _mainTimetableName = mainTimetableName,
         _mainSemesterName = mainSemesterName,
         _themeMode = themeMode,
         _timetableLessonWidth = timetableLessonWidth,
         _showLessonNumbers = showLessonNumbers,
-        _openMainSemesterAutomatically = openMainSemesterAutomatically;
+        _openMainSemesterAutomatically = openMainSemesterAutomatically,
+        _hiddenDebugMode = hiddenDebugMode;
 
   Map<String, dynamic> toJson() {
     return {
@@ -126,6 +139,7 @@ class Settings {
       showLessonNumbersKey: _showLessonNumbers,
       timetableLessonWidthKey: _timetableLessonWidth,
       openMainSemesterAutomaticallyKey: _openMainSemesterAutomatically,
+      hiddenDebugModeKey: _hiddenDebugMode,
       // defaultGradeGroupsKey: _defaultGradeGroups != null
       //     ? List.generate(
       //         _defaultGradeGroups!.length,
@@ -143,6 +157,7 @@ class Settings {
     bool? showLessonNumbers = json[showLessonNumbersKey];
     bool? openMainSemesterAutomatically =
         json[openMainSemesterAutomaticallyKey];
+    bool? hiddenDebugMode = json[hiddenDebugModeKey];
     // List<Map<String, dynamic>>? defaultGradeGroupsJson =
     //     json[defaultGradeGroupsKey];
 
@@ -162,6 +177,7 @@ class Settings {
       timetableLessonWidth: timetableLessonWidth,
       showLessonNumbers: showLessonNumbers,
       openMainSemesterAutomatically: openMainSemesterAutomatically,
+      hiddenDebugMode: hiddenDebugMode,
       // defaultGradeGroups: gradeGroups,
     );
   }

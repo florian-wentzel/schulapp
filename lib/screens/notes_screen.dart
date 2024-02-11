@@ -2,13 +2,12 @@ import 'package:animated_list_plus/animated_list_plus.dart';
 import 'package:animated_list_plus/transitions.dart';
 import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/todo_event.dart';
-import 'package:schulapp/code_behind/school_lesson_prefab.dart';
-import 'package:schulapp/code_behind/time_table.dart';
 import 'package:schulapp/code_behind/time_table_manager.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/widgets/date_selection_button.dart';
 import 'package:schulapp/widgets/navigation_bar_drawer.dart';
 import 'package:schulapp/widgets/time_selection_button.dart';
+import 'package:schulapp/widgets/timetable_util_functions.dart';
 import 'package:schulapp/widgets/todo_event_list_item_widget.dart';
 
 class NotesScreen extends StatefulWidget {
@@ -31,8 +30,10 @@ class _NotesScreenState extends State<NotesScreen> {
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.add),
         onPressed: () async {
-          String? selectedSubjectName =
-              await _showSelectSubjectNameSheet(context);
+          String? selectedSubjectName = await showSelectSubjectNameSheet(
+            context,
+            title: "Select Subject to add Task Or Note!",
+          );
 
           if (selectedSubjectName == null) return;
           if (!mounted) return;
@@ -61,11 +62,13 @@ class _NotesScreenState extends State<NotesScreen> {
       return Center(
         child: ElevatedButton(
           onPressed: () async {
-            String? selectedSubjectName =
-                await _showSelectSubjectNameSheet(context);
+            String? selectedSubjectName = await showSelectSubjectNameSheet(
+              context,
+              title: "Select Subject to add Task Or Note!",
+            );
 
-            if (selectedSubjectName == null) return;
             if (!mounted) return;
+            if (selectedSubjectName == null) return;
 
             TodoEvent? event = await _createNewTodoEventSheet(
               context,
@@ -374,70 +377,6 @@ class _NotesScreenState extends State<NotesScreen> {
         ),
       ),
     );
-  }
-
-  Future<String?> _showSelectSubjectNameSheet(BuildContext context) async {
-    String? mainTimetableName = TimetableManager().settings.mainTimetableName;
-
-    if (mainTimetableName == null) {
-      Utils.showInfo(
-        context,
-        msg:
-            "You did not select an Timetable to be the default!\nGo to the Timetables Screen and select a Timetable.",
-        type: InfoType.error,
-      );
-      return null;
-    }
-
-    Timetable? selectedTimetable = Utils.getHomescreenTimetable();
-    if (selectedTimetable == null) return null;
-
-    List<SchoolLessonPrefab> selectedTimetablePrefabs =
-        Utils.createLessonPrefabsFromTt(selectedTimetable);
-
-    String? selectdSubjectName;
-
-    await showModalBottomSheet(
-      context: context,
-      scrollControlDisabledMaxHeightRatio: 0.6,
-      builder: (context) {
-        return Container(
-          margin: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                "Select Subject to add Task Or Note!",
-                style: Theme.of(context).textTheme.headlineMedium,
-                textAlign: TextAlign.center,
-              ),
-              Expanded(
-                child: Container(
-                  margin: const EdgeInsets.all(16),
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).cardColor,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: ListView.builder(
-                    itemCount: selectedTimetablePrefabs.length,
-                    itemBuilder: (context, index) => ListTile(
-                      title: Text(selectedTimetablePrefabs[index].name),
-                      onTap: () {
-                        selectdSubjectName =
-                            selectedTimetablePrefabs[index].name;
-                        Navigator.of(context).pop();
-                      },
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-    return selectdSubjectName;
   }
 }
 

@@ -103,6 +103,7 @@ class SaveManager {
     Timetable timetable, {
     String? timetableDirPath,
   }) {
+    timetable.name = timetable.name.trim();
     timetableDirPath ??= join(getTimetablesDir().path, timetable.name);
 
     Directory timetableDir = Directory(timetableDirPath);
