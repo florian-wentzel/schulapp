@@ -437,6 +437,18 @@ class Utils {
 
     return dayIndex % 5;
   }
+
+  static DateTime getWeekDay(DateTime dateTime, int targetDay) {
+    int diff = dateTime.weekday - targetDay;
+
+    if (diff < 0) {
+      diff += 7;
+    }
+
+    DateTime mondayOfCurrentWeek = dateTime.subtract(Duration(days: diff));
+
+    return mondayOfCurrentWeek;
+  }
 }
 
 enum InfoType {

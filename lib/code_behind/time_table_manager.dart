@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/todo_event.dart';
 import 'package:schulapp/code_behind/school_semester.dart';
 import 'package:schulapp/code_behind/settings.dart';
@@ -227,5 +228,25 @@ class TimetableManager {
     } catch (e) {
       return false;
     }
+  }
+
+  TodoEvent? getRunningTodoEvent({
+    required String linkedSubjectName,
+    required DateTime lessonDayTime,
+    required TimeOfDay endTime,
+  }) {
+    for (int i = 0; i < todoEvents.length; i++) {
+      TodoEvent event = todoEvents[i];
+      if (event.finished) continue;
+      if (event.linkedSubjectName != linkedSubjectName) continue;
+      if (event.endTime.year != lessonDayTime.year ||
+          event.endTime.month != lessonDayTime.month ||
+          event.endTime.day != lessonDayTime.day) {
+        continue;
+      }
+
+      return event;
+    }
+    return null;
   }
 }

@@ -225,6 +225,7 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
                   room: prefab.room,
                   teacher: prefab.teacher,
                   color: prefab.color,
+                  showDeleteButton: true,
                 );
 
                 if (newPrefab == null) {
@@ -411,13 +412,22 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
                 const SizedBox(
                   height: 16,
                 ),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: const Icon(
-                    Icons.delete,
-                    color: Colors.red,
+                Visibility(
+                  visible: showDeleteButton,
+                  replacement: ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text("Cancle"),
+                  ),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Icon(
+                      Icons.delete,
+                      color: Colors.red,
+                    ),
                   ),
                 ),
               ],
