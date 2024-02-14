@@ -47,6 +47,7 @@ class TodoEventListItemWidget extends StatelessWidget {
         child: ListTile(
           contentPadding: const EdgeInsets.all(8),
           onTap: onPressed,
+          onLongPress: onInfoPressed,
           subtitle: Text(
             event.name,
           ),

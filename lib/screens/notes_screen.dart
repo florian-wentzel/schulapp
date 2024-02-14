@@ -285,6 +285,19 @@ class _NotesScreenState extends State<NotesScreen> {
                       child: Padding(
                         padding: const EdgeInsets.all(8),
                         child: _customButton(
+                          text: "Presentation",
+                          icon: TodoEvent.presentationIcon,
+                          onTap: () {
+                            type = TodoType.presentation;
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: _customButton(
                           text: "Homework",
                           icon: TodoEvent.homeworkIcon,
                           onTap: () {
@@ -353,8 +366,14 @@ class _NotesScreenState extends State<NotesScreen> {
           // shape: BoxShape.circle,
         ),
         child: Container(
-          margin: const EdgeInsets.all(32),
-          padding: const EdgeInsets.all(8),
+          margin: const EdgeInsets.symmetric(
+            horizontal: 4,
+            vertical: 8,
+          ),
+          padding: const EdgeInsets.symmetric(
+            horizontal: 4,
+            vertical: 8,
+          ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             crossAxisAlignment: CrossAxisAlignment.stretch,

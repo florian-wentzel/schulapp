@@ -20,8 +20,10 @@ import 'package:schulapp/widgets/custom_pop_up.dart';
 // ignore: must_be_immutable
 class TimetableWidget extends StatefulWidget {
   Timetable timetable;
+  bool showTodoEvents;
 
-  TimetableWidget({super.key, required this.timetable});
+  TimetableWidget(
+      {super.key, required this.timetable, required this.showTodoEvents});
 
   @override
   State<TimetableWidget> createState() => _TimetableWidgetState();
@@ -140,11 +142,15 @@ class _TimetableWidgetState extends State<TimetableWidget> {
                   final lesson = day.lessons[lessonIndex - 1];
                   final heroString = "$lessonIndex:$dayIndex";
 
-                  TodoEvent? currEvent = TimetableManager().getRunningTodoEvent(
-                    linkedSubjectName: lesson.name,
-                    lessonDayTime: currMonday.add(Duration(days: dayIndex - 1)),
-                    endTime: schoolTime.end,
-                  );
+                  TodoEvent? currEvent;
+                  if (widget.showTodoEvents) {
+                    currEvent = TimetableManager().getRunningTodoEvent(
+                      linkedSubjectName: lesson.name,
+                      lessonDayTime:
+                          currMonday.add(Duration(days: dayIndex - 1)),
+                      endTime: schoolTime.end,
+                    );
+                  }
 
                   return InkWell(
                     onTap: lesson.name == SchoolLesson.emptyLessonName

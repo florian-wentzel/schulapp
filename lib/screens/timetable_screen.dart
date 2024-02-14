@@ -136,6 +136,7 @@ class _TimetableScreenState extends State<TimetableScreen> {
               children: [
                 TimetableWidget(
                   timetable: widget.timetable!,
+                  showTodoEvents: widget.isHomeScreen,
                 ),
               ],
             ),

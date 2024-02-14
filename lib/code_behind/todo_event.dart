@@ -11,6 +11,7 @@ class TodoEvent {
   static const int notificationMultiplier = 10;
 
   static const IconData homeworkIcon = Icons.assignment;
+  static const IconData presentationIcon = Icons.speaker_notes;
   static const IconData testIcon = Icons.edit;
   static const IconData examIcon = Icons.school;
   static const int maxNameLength = 25;
@@ -77,14 +78,13 @@ class TodoEvent {
   }
 
   IconData getIcon() {
-    switch (type) {
-      case TodoType.exam:
-        return examIcon;
-      case TodoType.test:
-        return testIcon;
-      case TodoType.homework:
-        return homeworkIcon;
-    }
+    return switchTodoType(
+      type,
+      onExam: examIcon,
+      onTest: testIcon,
+      onPresentation: presentationIcon,
+      onHomework: homeworkIcon,
+    );
   }
 
   Map<String, dynamic> toJson() {
@@ -128,19 +128,21 @@ class TodoEvent {
   }
 
   static int typeToInt(TodoType type) {
-    switch (type) {
-      case TodoType.exam:
-        return 10;
-      case TodoType.test:
-        return 5;
-      case TodoType.homework:
-        return 1;
-    }
+    return switchTodoType(
+      type,
+      onExam: 10,
+      onTest: 5,
+      onPresentation: 5,
+      onHomework: 1,
+    );
   }
 
   static TodoType todoTypeFromString(String type) {
     if (type == TodoType.test.toString()) {
       return TodoType.test;
+    }
+    if (type == TodoType.presentation.toString()) {
+      return TodoType.presentation;
     }
     if (type == TodoType.homework.toString()) {
       return TodoType.homework;
@@ -155,14 +157,13 @@ class TodoEvent {
     if (finished) {
       return Colors.green;
     }
-    switch (type) {
-      case TodoType.exam:
-        return Colors.red;
-      case TodoType.test:
-        return Colors.orange;
-      case TodoType.homework:
-        return Colors.yellow;
-    }
+    return switchTodoType(
+      type,
+      onExam: Colors.red,
+      onTest: Colors.orange,
+      onPresentation: Colors.orange,
+      onHomework: Colors.yellow,
+    );
   }
 
   TodoEvent copy() {
@@ -178,14 +179,13 @@ class TodoEvent {
   }
 
   static String typeToString(TodoType type) {
-    switch (type) {
-      case TodoType.exam:
-        return "Exam";
-      case TodoType.test:
-        return "Test";
-      case TodoType.homework:
-        return "Homework";
-    }
+    return switchTodoType(
+      type,
+      onExam: "Exam",
+      onTest: "Test",
+      onPresentation: "Presentation",
+      onHomework: "Homework",
+    );
   }
 
   Future<void> addNotification() async {
@@ -212,10 +212,30 @@ class TodoEvent {
       key * notificationMultiplier + 1,
     );
   }
+
+  static T switchTodoType<T>(
+    TodoType type, {
+    required T onExam,
+    required T onTest,
+    required T onPresentation,
+    required T onHomework,
+  }) {
+    switch (type) {
+      case TodoType.exam:
+        return onExam;
+      case TodoType.presentation:
+        return onPresentation;
+      case TodoType.test:
+        return onTest;
+      case TodoType.homework:
+        return onHomework;
+    }
+  }
 }
 
 enum TodoType {
   exam,
   test,
+  presentation,
   homework,
 }
