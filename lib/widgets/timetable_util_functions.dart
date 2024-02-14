@@ -7,6 +7,7 @@ import 'package:schulapp/code_behind/school_semester.dart';
 import 'package:schulapp/code_behind/school_time.dart';
 import 'package:schulapp/code_behind/time_table.dart';
 import 'package:schulapp/code_behind/time_table_manager.dart';
+import 'package:schulapp/code_behind/todo_event.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/screens/time_table/create_timetable_screen.dart';
 import 'package:schulapp/screens/timetable_screen.dart';
@@ -224,14 +225,15 @@ Future<Timetable?> showCreateTimetableSheet(BuildContext context) async {
 }
 
 ///setState after calling this method
-Future<void> showSchoolLessonHomePopUp(
+Future<bool?> showSchoolLessonHomePopUp(
   BuildContext context,
   SchoolLesson lesson,
   SchoolDay day,
   SchoolTime schoolTime,
+  TodoEvent? event,
   String heroString,
 ) async {
-  await Navigator.push(
+  return Navigator.push<bool>(
     context,
     PageRouteBuilder(
       opaque: false,
@@ -240,6 +242,7 @@ Future<void> showSchoolLessonHomePopUp(
         lesson: lesson,
         day: day,
         schoolTime: schoolTime,
+        event: event,
       ),
       barrierDismissible: true,
       fullscreenDialog: true,

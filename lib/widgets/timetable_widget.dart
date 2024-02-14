@@ -16,6 +16,7 @@ import 'package:schulapp/widgets/school_grade_subject_widget.dart';
 import 'package:schulapp/widgets/time_to_next_lesson_widget.dart';
 import 'package:schulapp/widgets/timetable_util_functions.dart';
 import 'package:schulapp/widgets/custom_pop_up.dart';
+import 'package:schulapp/widgets/todo_event_util_functions.dart';
 
 // ignore: must_be_immutable
 class TimetableWidget extends StatefulWidget {
@@ -143,27 +144,90 @@ class _TimetableWidgetState extends State<TimetableWidget> {
                   final heroString = "$lessonIndex:$dayIndex";
 
                   TodoEvent? currEvent;
+
                   if (widget.showTodoEvents) {
+                    DateTime lessonDayTime =
+                        currMonday.add(Duration(days: dayIndex - 1)).copyWith(
+                              hour: schoolTime.start.hour,
+                              minute: schoolTime.start.minute,
+                            );
+
+                    if (lessonDayTime.isBefore(DateTime.now())) {
+                      lessonDayTime = lessonDayTime.add(
+                        const Duration(days: 7),
+                      );
+                    }
+
                     currEvent = TimetableManager().getRunningTodoEvent(
                       linkedSubjectName: lesson.name,
-                      lessonDayTime:
-                          currMonday.add(Duration(days: dayIndex - 1)),
+                      lessonDayTime: lessonDayTime,
                       endTime: schoolTime.end,
                     );
                   }
 
                   return InkWell(
-                    onTap: lesson.name == SchoolLesson.emptyLessonName
+                    onTap: SchoolLesson.isEmptyLessonName(lesson.name)
                         ? null
                         : () async {
-                            await showSchoolLessonHomePopUp(
+                            bool? showNewTodoEvent =
+                                await showSchoolLessonHomePopUp(
                               context,
                               lesson,
                               day,
                               schoolTime,
+                              currEvent,
                               heroString,
                             );
+
                             if (!mounted) return;
+                            setState(() {});
+
+                            if (showNewTodoEvent == null) return;
+                            if (!showNewTodoEvent) return;
+
+                            DateTime dateTime = Utils.getWeekDay(
+                              DateTime.now(),
+                              DateTime.monday,
+                            ).copyWith(
+                              hour: schoolTime.start.hour,
+                              minute: schoolTime.start.minute,
+                            );
+
+                            dateTime = dateTime.add(
+                              Duration(days: dayIndex - 1),
+                            );
+
+                            if (dateTime.isBefore(DateTime.now())) {
+                              dateTime = dateTime.add(const Duration(days: 7));
+                            }
+
+                            TodoEvent? event = TodoEvent(
+                              key: TimetableManager().getNextSchoolEventKey(),
+                              name: "",
+                              linkedSubjectName: lesson.name,
+                              endTime: dateTime,
+                              type: TodoType.test,
+                              desciption: "",
+                              finished: false,
+                            );
+
+                            event = await createNewTodoEventSheet(
+                              context,
+                              linkedSubjectName: lesson.name,
+                              event: event,
+                            );
+
+                            if (event == null) return;
+                            TimetableManager().addOrChangeTodoEvent(event);
+
+                            if (!mounted) return;
+                            Utils.showInfo(
+                              context,
+                              type: InfoType.success,
+                              msg:
+                                  "Task successfully created:\n${event.linkedSubjectName}, ${TodoEvent.typeToString(event.type)}: ${event.name}\n on ${Utils.dateToString(event.endTime)}",
+                            );
+
                             setState(() {});
                           },
                     child: Container(
@@ -304,6 +368,7 @@ class CustomPopUpShowLesson extends StatefulWidget {
   SchoolDay day;
   SchoolTime schoolTime;
   String heroString;
+  TodoEvent? event;
 
   CustomPopUpShowLesson({
     super.key,
@@ -311,6 +376,7 @@ class CustomPopUpShowLesson extends StatefulWidget {
     required this.day,
     required this.lesson,
     required this.schoolTime,
+    this.event,
   });
 
   @override
@@ -388,17 +454,68 @@ class _CustomPopUpShowLessonState extends State<CustomPopUpShowLesson> {
         const Spacer(
           flex: 2,
         ),
-        ElevatedButton(
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            child: const Icon(
-              Icons.close,
-              size: 42,
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                child: const Icon(
+                  Icons.close,
+                  size: 42,
+                ),
+              ),
             ),
-          ),
+            Visibility(
+              visible: widget.event == null,
+              replacement: ElevatedButton(
+                onPressed: widget.event == null
+                    ? null
+                    : () async {
+                        bool removeTodoEvent = await Utils.showBoolInputDialog(
+                          context,
+                          question:
+                              "Are you sure that you want to delete the Task: ${widget.event!.linkedSubjectName}, ${TodoEvent.typeToString(widget.event!.type)}",
+                          description:
+                              "(on ${Utils.dateToString(widget.event!.endTime)})",
+                        );
+                        if (!removeTodoEvent) return;
+
+                        TimetableManager().removeTodoEvent(widget.event!);
+
+                        if (!mounted) return;
+
+                        Navigator.of(context).pop();
+                      },
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  child: const Icon(
+                    Icons.remove_circle,
+                    color: Colors.red,
+                    size: 42,
+                  ),
+                ),
+              ),
+              child: ElevatedButton(
+                onPressed: () async {
+                  //true damit danach das create new TodoEventSheet aufgerufen wird
+                  Navigator.of(context).pop(true);
+                },
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  child: const Icon(
+                    Icons.add_box,
+                    size: 42,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ],
     );

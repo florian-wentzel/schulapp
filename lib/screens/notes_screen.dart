@@ -4,11 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/todo_event.dart';
 import 'package:schulapp/code_behind/time_table_manager.dart';
 import 'package:schulapp/code_behind/utils.dart';
-import 'package:schulapp/widgets/date_selection_button.dart';
 import 'package:schulapp/widgets/navigation_bar_drawer.dart';
-import 'package:schulapp/widgets/time_selection_button.dart';
 import 'package:schulapp/widgets/timetable_util_functions.dart';
 import 'package:schulapp/widgets/todo_event_list_item_widget.dart';
+import 'package:schulapp/widgets/todo_event_util_functions.dart';
 
 class NotesScreen extends StatefulWidget {
   static const route = "/notes";
@@ -38,7 +37,7 @@ class _NotesScreenState extends State<NotesScreen> {
           if (selectedSubjectName == null) return;
           if (!mounted) return;
 
-          TodoEvent? event = await _createNewTodoEventSheet(
+          TodoEvent? event = await createNewTodoEventSheet(
             context,
             linkedSubjectName: selectedSubjectName,
           );
@@ -70,7 +69,7 @@ class _NotesScreenState extends State<NotesScreen> {
             if (!mounted) return;
             if (selectedSubjectName == null) return;
 
-            TodoEvent? event = await _createNewTodoEventSheet(
+            TodoEvent? event = await createNewTodoEventSheet(
               context,
               linkedSubjectName: selectedSubjectName,
             );
@@ -104,7 +103,7 @@ class _NotesScreenState extends State<NotesScreen> {
                 body: TodoEventInfoPopUp(
                   event: event,
                   showEditGradeSheet: (event) async {
-                    TodoEvent? newEvent = await _createNewTodoEventSheet(
+                    TodoEvent? newEvent = await createNewTodoEventSheet(
                       context,
                       linkedSubjectName: event.linkedSubjectName,
                       event: event,
@@ -147,254 +146,6 @@ class _NotesScreenState extends State<NotesScreen> {
           a.name == b.name &&
           a.type == b.type &&
           a.linkedSubjectName == b.linkedSubjectName,
-    );
-  }
-
-  Future<TodoEvent?> _createNewTodoEventSheet(
-    BuildContext context, {
-    required String linkedSubjectName,
-    TodoEvent? event,
-  }) async {
-    const maxNameLength = TodoEvent.maxNameLength;
-    const maxDescriptionLength = TodoEvent.maxDescriptionLength;
-
-    TextEditingController nameController = TextEditingController();
-    nameController.text = event?.name ?? "";
-    TextEditingController descriptionController = TextEditingController();
-    descriptionController.text = event?.desciption ?? "";
-
-    DateSelectionButtonController endDateController =
-        DateSelectionButtonController(
-      date: Utils.getHomescreenTimetable()
-              ?.getNextLessonDate(linkedSubjectName) ??
-          DateTime.now(),
-    );
-    if (event != null) {
-      endDateController.date = event.endTime;
-    }
-
-    TodoType? type;
-
-    await showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      scrollControlDisabledMaxHeightRatio: 0.5,
-      builder: (context) {
-        return SingleChildScrollView(
-          child: Container(
-            margin: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  'Create new Task / Note\n$linkedSubjectName',
-                  style: Theme.of(context).textTheme.headlineMedium,
-                  textAlign: TextAlign.center,
-                ),
-                TextField(
-                  decoration: const InputDecoration(
-                    hintText: "Topic",
-                  ),
-                  maxLines: 1,
-                  maxLength: maxNameLength,
-                  textAlign: TextAlign.center,
-                  controller: nameController,
-                ),
-                const SizedBox(
-                  height: 12,
-                ),
-                TextField(
-                  decoration: const InputDecoration(
-                    hintText: "Extra info",
-                  ),
-                  maxLength: maxDescriptionLength,
-                  maxLines: 5,
-                  minLines: 1,
-                  textAlign: TextAlign.center,
-                  controller: descriptionController,
-                ),
-                const SizedBox(
-                  height: 12,
-                ),
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).canvasColor,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Text(
-                        "End date:",
-                        style: Theme.of(context).textTheme.bodyLarge,
-                        textAlign: TextAlign.left,
-                      ),
-                      const SizedBox(
-                        height: 16,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          Expanded(
-                            child: DateSelectionButton(
-                              controller: endDateController,
-                            ),
-                          ),
-                          TimeSelectionButton(
-                            controller: endDateController,
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(
-                  height: 12,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8),
-                        child: _customButton(
-                          text: "Exam",
-                          icon: TodoEvent.examIcon,
-                          onTap: () {
-                            type = TodoType.exam;
-                            Navigator.of(context).pop();
-                          },
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8),
-                        child: _customButton(
-                          text: "Test",
-                          icon: TodoEvent.testIcon,
-                          onTap: () {
-                            type = TodoType.test;
-                            Navigator.of(context).pop();
-                          },
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8),
-                        child: _customButton(
-                          text: "Presentation",
-                          icon: TodoEvent.presentationIcon,
-                          onTap: () {
-                            type = TodoType.presentation;
-                            Navigator.of(context).pop();
-                          },
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8),
-                        child: _customButton(
-                          text: "Homework",
-                          icon: TodoEvent.homeworkIcon,
-                          onTap: () {
-                            type = TodoType.homework;
-                            Navigator.of(context).pop();
-                          },
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(
-                  height: 12,
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text("Cancel"),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-
-    if (type == null) return null;
-
-    String name = nameController.text.trim();
-    String desciption = descriptionController.text.trim();
-
-    // if (name.isEmpty) {
-    //   if (mounted) {
-    //     Utils.showInfo(
-    //       context,
-    //       msg: "Name can not be empty!",
-    //       type: InfoType.error,
-    //     );
-    //   }
-    //   return null;
-    // }
-
-    return TodoEvent(
-      key: event?.key ?? TimetableManager().getNextSchoolEventKey(),
-      name: name,
-      desciption: desciption,
-      linkedSubjectName: linkedSubjectName,
-      endTime: endDateController.date,
-      type: type!,
-      finished: event?.finished ?? false,
-    );
-  }
-
-  Widget _customButton({
-    required String text,
-    IconData? icon,
-    required void Function()? onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          color: Theme.of(context).canvasColor,
-          borderRadius: BorderRadius.circular(16),
-          // shape: BoxShape.circle,
-        ),
-        child: Container(
-          margin: const EdgeInsets.symmetric(
-            horizontal: 4,
-            vertical: 8,
-          ),
-          padding: const EdgeInsets.symmetric(
-            horizontal: 4,
-            vertical: 8,
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              icon == null
-                  ? Container()
-                  : Icon(
-                      icon,
-                    ),
-              const SizedBox(
-                height: 8,
-              ),
-              Text(
-                text,
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }

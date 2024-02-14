@@ -102,4 +102,9 @@ class SchoolLesson {
       // events: [],
     );
   }
+
+  static bool isEmptyLessonName(String name) {
+    return name == SchoolLesson.emptyLessonName ||
+        (name.startsWith("-") && name.endsWith("-"));
+  }
 }
