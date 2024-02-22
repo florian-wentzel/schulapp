@@ -124,6 +124,16 @@ class _TimetableWidgetState extends State<TimetableWidget> {
                 day.lessons.length + 1,
                 (lessonIndex) {
                   if (lessonIndex == 0) {
+                    DateTime lessonDayTime =
+                        currMonday.add(Duration(days: dayIndex - 1));
+
+                    if (lessonDayTime.isBefore(
+                        DateTime.now().subtract(const Duration(days: 1)))) {
+                      lessonDayTime = lessonDayTime.add(
+                        const Duration(days: 7),
+                      );
+                    }
+
                     return Container(
                       color: dayIndex == DateTime.now().weekday
                           ? selectedColor
@@ -133,9 +143,20 @@ class _TimetableWidgetState extends State<TimetableWidget> {
                       child: Center(
                         child: FittedBox(
                           fit: BoxFit.contain,
-                          child: Text(
-                            day.name,
-                            textAlign: TextAlign.center,
+                          child: Column(
+                            children: [
+                              Text(
+                                day.name,
+                                textAlign: TextAlign.center,
+                              ),
+                              Text(
+                                Utils.dateToString(
+                                  lessonDayTime,
+                                  showYear: false,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
                           ),
                         ),
                       ),
