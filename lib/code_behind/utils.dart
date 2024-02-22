@@ -388,7 +388,10 @@ class Utils {
     return lessonPrefabsMap.values.toList();
   }
 
-  static String dateToString(DateTime date) {
+  static String dateToString(DateTime date, {bool showYear = true}) {
+    if (!showYear) {
+      return "${date.day}.${date.month}";
+    }
     return "${date.day}.${date.month}.${date.year}";
   }
 
