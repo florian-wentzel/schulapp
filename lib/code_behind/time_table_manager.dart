@@ -237,7 +237,7 @@ class TimetableManager {
   }) {
     for (int i = 0; i < todoEvents.length; i++) {
       TodoEvent event = todoEvents[i];
-      if (event.finished) continue;
+      // if (event.finished) continue;
       if (event.linkedSubjectName != linkedSubjectName) continue;
       if (event.endTime.year != lessonDayTime.year ||
           event.endTime.month != lessonDayTime.month ||

@@ -9,16 +9,60 @@ import 'package:schulapp/widgets/timetable_util_functions.dart';
 import 'package:schulapp/widgets/todo_event_list_item_widget.dart';
 import 'package:schulapp/widgets/todo_event_util_functions.dart';
 
+// ignore: must_be_immutable
 class NotesScreen extends StatefulWidget {
   static const route = "/notes";
 
-  const NotesScreen({super.key});
+  TodoEvent? todoEvent;
+
+  NotesScreen({super.key, this.todoEvent});
 
   @override
   State<NotesScreen> createState() => _NotesScreenState();
 }
 
 class _NotesScreenState extends State<NotesScreen> {
+  @override
+  void initState() {
+    super.initState();
+
+    Future.delayed(
+      Duration.zero,
+      () async {
+        if (widget.todoEvent != null) {
+          await Utils.showCustomPopUp(
+            context: context,
+            heroObject: widget.todoEvent!,
+            body: TodoEventInfoPopUp(
+              event: widget.todoEvent!,
+              showEditTodoEventSheet: (event) async {
+                TodoEvent? newEvent = await createNewTodoEventSheet(
+                  context,
+                  linkedSubjectName: event.linkedSubjectName,
+                  event: event,
+                );
+
+                return newEvent;
+              },
+            ),
+            flightShuttleBuilder: (p0, p1, p2, p3, p4) {
+              return Container(
+                color: Theme.of(context).cardColor,
+              );
+            },
+          );
+
+          //warten damit animation funktioniert
+          await Future.delayed(
+            const Duration(milliseconds: 500),
+          );
+
+          setState(() {});
+        }
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -102,7 +146,7 @@ class _NotesScreenState extends State<NotesScreen> {
                 heroObject: event,
                 body: TodoEventInfoPopUp(
                   event: event,
-                  showEditGradeSheet: (event) async {
+                  showEditTodoEventSheet: (event) async {
                     TodoEvent? newEvent = await createNewTodoEventSheet(
                       context,
                       linkedSubjectName: event.linkedSubjectName,
@@ -152,13 +196,13 @@ class _NotesScreenState extends State<NotesScreen> {
 
 // ignore: must_be_immutable
 class TodoEventInfoPopUp extends StatelessWidget {
-  Future<TodoEvent?> Function(TodoEvent event) showEditGradeSheet;
+  Future<TodoEvent?> Function(TodoEvent event) showEditTodoEventSheet;
   TodoEvent event;
 
   TodoEventInfoPopUp({
     super.key,
     required this.event,
-    required this.showEditGradeSheet,
+    required this.showEditTodoEventSheet,
   });
 
   @override
@@ -185,7 +229,7 @@ class TodoEventInfoPopUp extends StatelessWidget {
             ),
             IconButton(
               onPressed: () async {
-                TodoEvent? newEvent = await showEditGradeSheet(event);
+                TodoEvent? newEvent = await showEditTodoEventSheet(event);
 
                 if (newEvent == null) return;
 
@@ -205,12 +249,14 @@ class TodoEventInfoPopUp extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
           event.linkedSubjectName,
+          textAlign: TextAlign.center,
         ),
         Text(
           style: Theme.of(context).textTheme.headlineLarge?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
           event.name,
+          textAlign: TextAlign.center,
         ),
         const SizedBox(
           height: 24,

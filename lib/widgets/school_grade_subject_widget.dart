@@ -7,27 +7,34 @@ class SchoolGradeSubjectWidget extends StatelessWidget {
   SchoolGradeSubject subject;
   SchoolSemester semester;
   bool isFlightShuttleBuilder;
+  bool showName;
 
   SchoolGradeSubjectWidget({
     super.key,
     required this.subject,
     required this.semester,
     this.isFlightShuttleBuilder = false,
+    this.showName = true,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
+      width: MediaQuery.of(context).size.width,
       margin: const EdgeInsets.all(16),
       child: Row(
+        // alignment: Alignment.center,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                subject.name,
-                style: Theme.of(context).textTheme.headlineMedium,
+              Visibility(
+                visible: showName,
+                child: Text(
+                  subject.name,
+                  style: Theme.of(context).textTheme.headlineMedium,
+                ),
               ),
               Visibility(
                 visible: !isFlightShuttleBuilder,
@@ -36,32 +43,32 @@ class SchoolGradeSubjectWidget extends StatelessWidget {
                   child: SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Wrap(
-                        spacing: 8,
-                        direction: Axis.horizontal,
-                        children: List.generate(
-                          subject.gradeGroups.length,
-                          (gradeGroupsIndex) => Wrap(
-                            spacing: 8,
-                            children: List.generate(
-                              subject
-                                  .gradeGroups[gradeGroupsIndex].grades.length,
-                              (gradeIndex) => Text(
-                                subject.gradeGroups[gradeGroupsIndex]
-                                    .grades[gradeIndex]
-                                    .toString(),
-                                style: TextStyle(
-                                  color: subject.gradeGroups[gradeGroupsIndex]
-                                      .getGradeColor(gradeIndex),
-                                ),
+                      spacing: 8,
+                      direction: Axis.horizontal,
+                      children: List.generate(
+                        subject.gradeGroups.length,
+                        (gradeGroupsIndex) => Wrap(
+                          spacing: 8,
+                          children: List.generate(
+                            subject.gradeGroups[gradeGroupsIndex].grades.length,
+                            (gradeIndex) => Text(
+                              subject.gradeGroups[gradeGroupsIndex]
+                                  .grades[gradeIndex]
+                                  .toString(),
+                              style: TextStyle(
+                                color: subject.gradeGroups[gradeGroupsIndex]
+                                    .getGradeColor(gradeIndex),
                               ),
-                            )..add(
-                                (subject.gradeGroups[gradeGroupsIndex].grades
-                                        .isNotEmpty)
-                                    ? const Text("|")
-                                    : Container(),
-                              ),
-                          ),
-                        )),
+                            ),
+                          )..add(
+                              (subject.gradeGroups[gradeGroupsIndex].grades
+                                      .isNotEmpty)
+                                  ? const Text("|")
+                                  : Container(),
+                            ),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ),

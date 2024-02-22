@@ -11,11 +11,13 @@ import 'package:schulapp/code_behind/time_table_manager.dart';
 import 'package:schulapp/code_behind/todo_event.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/screens/grades_screen.dart';
+import 'package:schulapp/screens/notes_screen.dart';
 import 'package:schulapp/screens/semester/school_grade_subject_screen.dart';
 import 'package:schulapp/widgets/school_grade_subject_widget.dart';
 import 'package:schulapp/widgets/time_to_next_lesson_widget.dart';
 import 'package:schulapp/widgets/timetable_util_functions.dart';
 import 'package:schulapp/widgets/custom_pop_up.dart';
+import 'package:schulapp/widgets/todo_event_list_item_widget.dart';
 import 'package:schulapp/widgets/todo_event_util_functions.dart';
 
 // ignore: must_be_immutable
@@ -390,6 +392,7 @@ class _CustomPopUpShowLessonState extends State<CustomPopUpShowLesson> {
       heroObject: widget.heroString,
       color: Theme.of(context).cardColor,
       body: _body(context),
+      padding: const EdgeInsets.all(0),
     );
   }
 
@@ -399,126 +402,191 @@ class _CustomPopUpShowLessonState extends State<CustomPopUpShowLesson> {
         selectedSemester?.getSubjectByName(widget.lesson.name);
 
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          widget.lesson.name,
-          style: TextStyle(
-            color:
-                Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
-            // decoration: TextDecoration.underline,
-            fontSize: 42.0,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(
-          height: 4,
-        ),
         Container(
-          width: 150,
-          height: 35,
+          alignment: Alignment.center,
+          height: 20,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(16),
+              topRight: Radius.circular(16),
+            ),
             color: widget.lesson.color,
           ),
         ),
-        const SizedBox(
-          height: 12,
-        ),
-        FittedBox(
-          // fit: BoxFit.fitWidth,
-          child: Text(
-            "Room: ${widget.lesson.room}",
-            style: TextStyle(
-              color:
-                  Theme.of(context).textTheme.bodyLarge?.color ?? Colors.white,
-              fontSize: 42.0,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ),
-        Text(
-          widget.lesson.teacher,
-          style: TextStyle(
-            color: Theme.of(context).textTheme.bodyLarge?.color ?? Colors.white,
-            fontSize: 42.0,
-          ),
-          textAlign: TextAlign.center,
-        ),
-        const Spacer(),
-        _showGradesWidget(
-          context,
-          lesson: widget.lesson,
-          selectedSemester: selectedSemester,
-          selectedSubject: selectedSubject,
-        ),
-        const Spacer(
-          flex: 2,
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        Column(
           children: [
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                child: const Icon(
-                  Icons.close,
-                  size: 42,
-                ),
+            Text(
+              widget.lesson.name,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Theme.of(context).textTheme.titleLarge?.color ??
+                    Colors.white,
+                // decoration: TextDecoration.underline,
+                fontSize: 42.0,
+                fontWeight: FontWeight.bold,
               ),
             ),
-            Visibility(
-              visible: widget.event == null,
-              replacement: ElevatedButton(
-                onPressed: widget.event == null
-                    ? null
-                    : () async {
-                        bool removeTodoEvent = await Utils.showBoolInputDialog(
-                          context,
-                          question:
-                              "Are you sure that you want to delete the Task: ${widget.event!.linkedSubjectName}, ${TodoEvent.typeToString(widget.event!.type)}",
-                          description:
-                              "(on ${Utils.dateToString(widget.event!.endTime)})",
-                        );
-                        if (!removeTodoEvent) return;
-
-                        TimetableManager().removeTodoEvent(widget.event!);
-
-                        if (!mounted) return;
-
-                        Navigator.of(context).pop();
-                      },
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  child: const Icon(
-                    Icons.remove_circle,
-                    color: Colors.red,
-                    size: 42,
+            const SizedBox(
+              height: 12,
+            ),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Text(
+                    widget.lesson.teacher,
+                    style: TextStyle(
+                      color: Theme.of(context).textTheme.bodyLarge?.color ??
+                          Colors.white,
+                      fontSize: 42.0,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
                   ),
-                ),
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width / 10,
+                  ),
+                  Text(
+                    widget.lesson.room,
+                    style: TextStyle(
+                      color: Theme.of(context).textTheme.bodyLarge?.color ??
+                          Colors.white,
+                      fontSize: 42.0,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ),
-              child: ElevatedButton(
-                onPressed: () async {
-                  //true damit danach das create new TodoEventSheet aufgerufen wird
-                  Navigator.of(context).pop(true);
+            ),
+          ],
+        ),
+        Container(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const SizedBox(
+                height: 4,
+              ),
+              _showGradesWidget(
+                context,
+                lesson: widget.lesson,
+                selectedSemester: selectedSemester,
+                selectedSubject: selectedSubject,
+              ),
+              _showTodoEventWidget(
+                todoEvent: widget.event,
+              ),
+            ],
+          ),
+        ),
+        Container(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
                 },
                 child: Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   child: const Icon(
-                    Icons.add_box,
+                    Icons.close,
                     size: 42,
                   ),
                 ),
               ),
-            ),
-          ],
+              Visibility(
+                visible: widget.event == null,
+                replacement: ElevatedButton(
+                  onPressed: widget.event == null
+                      ? null
+                      : () async {
+                          bool removeTodoEvent =
+                              await Utils.showBoolInputDialog(
+                            context,
+                            question:
+                                "Are you sure that you want to delete the Task: ${widget.event!.linkedSubjectName}, ${TodoEvent.typeToString(widget.event!.type)}",
+                            description:
+                                "(on ${Utils.dateToString(widget.event!.endTime)})",
+                          );
+                          if (!removeTodoEvent) return;
+
+                          TimetableManager().removeTodoEvent(widget.event!);
+
+                          if (!mounted) return;
+
+                          Navigator.of(context).pop();
+                        },
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    child: const Icon(
+                      Icons.remove_circle,
+                      color: Colors.red,
+                      size: 42,
+                    ),
+                  ),
+                ),
+                child: ElevatedButton(
+                  onPressed: () async {
+                    //true damit danach das create new TodoEventSheet aufgerufen wird
+                    Navigator.of(context).pop(true);
+                  },
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    child: const Icon(
+                      Icons.add_box,
+                      size: 42,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     );
+  }
+
+//8.4
+  Widget _showTodoEventWidget({
+    TodoEvent? todoEvent,
+  }) {
+    if (todoEvent != null) {
+      return Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          color: Theme.of(context).canvasColor,
+        ),
+        padding: const EdgeInsets.all(8),
+        margin: const EdgeInsets.all(8),
+        child: TodoEventListItemWidget(
+          event: todoEvent,
+          removeHero: true,
+          onDeleteSwipe: () {},
+          onPressed: () {
+            todoEvent.finished = !todoEvent.finished;
+            //damit es gespeichert wird
+            TimetableManager().addOrChangeTodoEvent(todoEvent);
+            setState(() {});
+          },
+          onInfoPressed: () async {
+            context.go(NotesScreen.route, extra: todoEvent);
+          },
+        ),
+      );
+    }
+    return Container();
   }
 
   Widget _showGradesWidget(
@@ -552,6 +620,7 @@ class _CustomPopUpShowLessonState extends State<CustomPopUpShowLesson> {
           child: SchoolGradeSubjectWidget(
             subject: selectedSubject,
             semester: selectedSemester,
+            showName: false,
           ),
         ),
       );

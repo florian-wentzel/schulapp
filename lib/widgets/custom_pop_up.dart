@@ -11,12 +11,15 @@ class CustomPopUp extends StatefulWidget {
   Widget Function(BuildContext, Animation<double>, HeroFlightDirection,
       BuildContext, BuildContext)? flightShuttleBuilder;
 
+  EdgeInsets padding;
+
   CustomPopUp({
     super.key,
     required this.heroObject,
     required this.color,
     required this.body,
     this.flightShuttleBuilder,
+    this.padding = const EdgeInsets.all(16),
   });
 
   @override
@@ -40,7 +43,7 @@ class _CustomPopUpState extends State<CustomPopUp> {
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
               child: Container(
-                padding: const EdgeInsets.all(16),
+                padding: widget.padding,
                 decoration: BoxDecoration(
                   color: widget.color,
                   borderRadius: BorderRadius.circular(12),

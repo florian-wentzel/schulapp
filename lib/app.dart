@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:schulapp/code_behind/todo_event.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/screens/all_timetables_screen.dart';
 import 'package:schulapp/screens/grades_screen.dart';
@@ -33,7 +34,9 @@ final _router = GoRouter(
     ),
     GoRoute(
       path: NotesScreen.route,
-      builder: (context, state) => const NotesScreen(),
+      builder: (context, state) => NotesScreen(
+        todoEvent: state.extra as TodoEvent?,
+      ),
     ),
     GoRoute(
       path: SettingsScreen.route,
