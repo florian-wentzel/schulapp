@@ -6,6 +6,7 @@ import 'package:schulapp/widgets/periodic_updating_widget.dart';
 class TodoEventListItemWidget extends StatelessWidget {
   TodoEvent event;
   bool removeHero;
+  bool showTimeLeft;
   // Animation<double> animation;
   void Function() onPressed;
   void Function() onInfoPressed;
@@ -14,6 +15,7 @@ class TodoEventListItemWidget extends StatelessWidget {
   TodoEventListItemWidget({
     super.key,
     this.removeHero = false,
+    this.showTimeLeft = true,
     required this.event,
     required this.onInfoPressed,
     required this.onPressed,
@@ -60,9 +62,11 @@ class TodoEventListItemWidget extends StatelessWidget {
         onLongPress: onInfoPressed,
         subtitle: Text(
           event.name,
+          overflow: TextOverflow.ellipsis,
         ),
         title: Text(
           event.linkedSubjectName,
+          overflow: TextOverflow.clip,
           style: TextStyle(
             decoration: event.finished ? TextDecoration.lineThrough : null,
           ),
@@ -76,20 +80,22 @@ class TodoEventListItemWidget extends StatelessWidget {
           spacing: 12,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
-            PeriodicUpdatingWidget(
-              timerDuration: const Duration(seconds: 1),
-              updateWidget: () {
-                return Text(
-                  event.getEndTimeString(),
-                  style: event.isExpired()
-                      ? Theme.of(context)
-                          .textTheme
-                          .bodyLarge
-                          ?.copyWith(color: Colors.red)
-                      : Theme.of(context).textTheme.bodyLarge,
-                );
-              },
-            ),
+            showTimeLeft
+                ? PeriodicUpdatingWidget(
+                    timerDuration: const Duration(seconds: 1),
+                    updateWidget: () {
+                      return Text(
+                        event.getEndTimeString(),
+                        style: event.isExpired()
+                            ? Theme.of(context)
+                                .textTheme
+                                .bodyLarge
+                                ?.copyWith(color: Colors.red)
+                            : Theme.of(context).textTheme.bodyLarge,
+                      );
+                    },
+                  )
+                : const SizedBox(),
             IconButton(
               onPressed: onInfoPressed,
               icon: const Icon(Icons.info),

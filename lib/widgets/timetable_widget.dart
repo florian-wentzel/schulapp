@@ -572,6 +572,7 @@ class _CustomPopUpShowLessonState extends State<CustomPopUpShowLesson> {
         margin: const EdgeInsets.all(8),
         child: TodoEventListItemWidget(
           event: todoEvent,
+          showTimeLeft: false,
           removeHero: true,
           onDeleteSwipe: () {},
           onPressed: () {
