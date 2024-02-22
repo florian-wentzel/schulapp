@@ -194,7 +194,7 @@ class TimetableManager {
   }
 
   bool removeTodoEvent(TodoEvent event) {
-    if (event.key < 0 || event.key >= timetables.length) return false;
+    if (event.key < 0 || event.key >= todoEvents.length) return false;
     event.cancleNotification();
 
     todoEvents.remove(event);
