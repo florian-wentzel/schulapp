@@ -4,21 +4,26 @@ import 'package:schulapp/widgets/periodic_updating_widget.dart';
 
 // ignore: must_be_immutable
 class TodoEventListItemWidget extends StatelessWidget {
+  // Animation<double> animation;
+  void Function() onPressed;
+  void Function() onLongPressed;
+  void Function() onInfoPressed;
+  void Function() onDeleteSwipe;
+
   TodoEvent event;
   bool removeHero;
   bool showTimeLeft;
-  // Animation<double> animation;
-  void Function() onPressed;
-  void Function() onInfoPressed;
-  void Function() onDeleteSwipe;
+  bool isSelected;
 
   TodoEventListItemWidget({
     super.key,
     this.removeHero = false,
     this.showTimeLeft = true,
+    this.isSelected = false,
     required this.event,
     required this.onInfoPressed,
     required this.onPressed,
+    required this.onLongPressed,
     required this.onDeleteSwipe,
   });
 
@@ -59,7 +64,7 @@ class TodoEventListItemWidget extends StatelessWidget {
       child: ListTile(
         contentPadding: const EdgeInsets.all(8),
         onTap: onPressed,
-        onLongPress: onInfoPressed,
+        onLongPress: onLongPressed,
         subtitle: Text(
           event.name,
           overflow: TextOverflow.ellipsis,
@@ -69,11 +74,12 @@ class TodoEventListItemWidget extends StatelessWidget {
           overflow: TextOverflow.clip,
           style: TextStyle(
             decoration: event.finished ? TextDecoration.lineThrough : null,
+            fontWeight: isSelected ? FontWeight.bold : null,
           ),
         ),
         leading: Icon(
-          event.getIcon(),
-          color: event.getColor(),
+          isSelected ? Icons.check : event.getIcon(),
+          color: isSelected ? Colors.white : event.getColor(),
           size: 32,
         ),
         trailing: Wrap(

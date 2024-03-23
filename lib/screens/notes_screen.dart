@@ -8,6 +8,7 @@ import 'package:schulapp/widgets/navigation_bar_drawer.dart';
 import 'package:schulapp/widgets/timetable_util_functions.dart';
 import 'package:schulapp/widgets/todo_event_list_item_widget.dart';
 import 'package:schulapp/widgets/todo_event_util_functions.dart';
+import 'package:tuple/tuple.dart';
 
 // ignore: must_be_immutable
 class NotesScreen extends StatefulWidget {
@@ -22,6 +23,9 @@ class NotesScreen extends StatefulWidget {
 }
 
 class _NotesScreenState extends State<NotesScreen> {
+  List<TodoEvent> selectedTodoEvents = [];
+  bool isMultiselectionActive = false;
+
   @override
   void initState() {
     super.initState();
@@ -69,32 +73,35 @@ class _NotesScreenState extends State<NotesScreen> {
       drawer: NavigationBarDrawer(selectedRoute: NotesScreen.route),
       appBar: AppBar(
         title: const Text("Tasks / Notes"),
+        actions: !isMultiselectionActive
+            ? null
+            : [
+                IconButton(
+                  onPressed: _unselectAllItems,
+                  tooltip: "unselect all items",
+                  icon: const Icon(
+                    Icons.cancel,
+                  ),
+                ),
+                IconButton(
+                  onPressed: _finishOrUnfinishSelectedEvents,
+                  tooltip: "mark as (un)finished",
+                  icon: const Icon(
+                    Icons.check,
+                    color: Colors.green,
+                  ),
+                ),
+                IconButton(
+                  onPressed: _deleteSelectedEvents,
+                  tooltip: "delete selected items",
+                  icon: const Icon(
+                    Icons.delete,
+                    color: Colors.red,
+                  ),
+                ),
+              ],
       ),
-      floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.add),
-        onPressed: () async {
-          String? selectedSubjectName = await showSelectSubjectNameSheet(
-            context,
-            title: "Select Subject to add Task Or Note!",
-          );
-
-          if (selectedSubjectName == null) return;
-          if (!mounted) return;
-
-          TodoEvent? event = await createNewTodoEventSheet(
-            context,
-            linkedSubjectName: selectedSubjectName,
-          );
-
-          if (event == null) return;
-
-          TimetableManager().addOrChangeTodoEvent(event);
-
-          if (!mounted) return;
-
-          setState(() {});
-        },
-      ),
+      floatingActionButton: _floatingActionButton(),
       body: _body(),
     );
   }
@@ -107,7 +114,7 @@ class _NotesScreenState extends State<NotesScreen> {
           onPressed: () async {
             String? selectedSubjectName = await showSelectSubjectNameSheet(
               context,
-              title: "Select Subject to add Task Or Note!",
+              title: "Select Subject to add Task", // Or Note!
             );
 
             if (!mounted) return;
@@ -131,66 +138,277 @@ class _NotesScreenState extends State<NotesScreen> {
       );
     }
 
-    return ImplicitlyAnimatedList<TodoEvent>(
-      items: events,
-      itemBuilder: (context, animation, event, index) {
-        return SizeFadeTransition(
-          sizeFraction: 0.7,
-          animation: animation,
-          key: Key(event.key.toString()),
-          child: TodoEventListItemWidget(
-            event: event,
-            onInfoPressed: () async {
-              await Utils.showCustomPopUp(
-                context: context,
-                heroObject: event,
-                body: TodoEventInfoPopUp(
+    return Column(
+      children: [
+        Expanded(
+          child: ImplicitlyAnimatedList<TodoEvent>(
+            items: events,
+            itemBuilder: (context, animation, event, index) {
+              final bool isSelected = isMultiselectionActive
+                  ? _selectedTodoEventsContains(event)
+                  : false;
+              return SizeFadeTransition(
+                sizeFraction: 0.7,
+                animation: animation,
+                key: Key(event.key.toString()),
+                child: TodoEventListItemWidget(
                   event: event,
-                  showEditTodoEventSheet: (event) async {
-                    TodoEvent? newEvent = await createNewTodoEventSheet(
-                      context,
-                      linkedSubjectName: event.linkedSubjectName,
-                      event: event,
+                  isSelected: isSelected,
+                  onLongPressed: () {
+                    addOrActivateMultiselection(event);
+                  },
+                  onInfoPressed: () async {
+                    await Utils.showCustomPopUp(
+                      context: context,
+                      heroObject: event,
+                      body: TodoEventInfoPopUp(
+                        event: event,
+                        showEditTodoEventSheet: (event) async {
+                          TodoEvent? newEvent = await createNewTodoEventSheet(
+                            context,
+                            linkedSubjectName: event.linkedSubjectName,
+                            event: event,
+                          );
+
+                          return newEvent;
+                        },
+                      ),
+                      flightShuttleBuilder: (p0, p1, p2, p3, p4) {
+                        return Container(
+                          color: Theme.of(context).cardColor,
+                        );
+                      },
                     );
 
-                    return newEvent;
+                    //warten damit animation funktioniert
+                    await Future.delayed(
+                      const Duration(milliseconds: 500),
+                    );
+
+                    setState(() {});
+                  },
+                  onPressed: () {
+                    if (isMultiselectionActive) {
+                      addOrActivateMultiselection(event);
+                      return;
+                    }
+                    event.finished = !event.finished;
+                    //damit es gespeichert wird
+                    TimetableManager().addOrChangeTodoEvent(event);
+                    setState(() {});
+                  },
+                  onDeleteSwipe: () {
+                    setState(() {
+                      TimetableManager().removeTodoEvent(event);
+                    });
                   },
                 ),
-                flightShuttleBuilder: (p0, p1, p2, p3, p4) {
-                  return Container(
-                    color: Theme.of(context).cardColor,
-                  );
-                },
               );
-
-              //warten damit animation funktioniert
-              await Future.delayed(
-                const Duration(milliseconds: 500),
-              );
-
-              setState(() {});
             },
-            onPressed: () {
-              event.finished = !event.finished;
-              //damit es gespeichert wird
-              TimetableManager().addOrChangeTodoEvent(event);
-              setState(() {});
-            },
-            onDeleteSwipe: () {
-              setState(() {
-                TimetableManager().removeTodoEvent(event);
-              });
-            },
+            areItemsTheSame: (a, b) =>
+                a.desciption == b.desciption &&
+                a.endTime == b.endTime &&
+                a.name == b.name &&
+                a.type == b.type &&
+                a.linkedSubjectName == b.linkedSubjectName,
           ),
-        );
-      },
-      areItemsTheSame: (a, b) =>
-          a.desciption == b.desciption &&
-          a.endTime == b.endTime &&
-          a.name == b.name &&
-          a.type == b.type &&
-          a.linkedSubjectName == b.linkedSubjectName,
+        ),
+        multiSelectionButton(),
+      ],
     );
+  }
+
+  void addOrActivateMultiselection(TodoEvent event) {
+    if (!isMultiselectionActive) {
+      isMultiselectionActive = true;
+      _finishSelectedEvents = !event.finished;
+      _currentMultiSelectionButtonTextIndex = 0;
+    }
+    bool isSelected = _selectedTodoEventsContains(event);
+    if (isSelected) {
+      removeOrDisableMultiselection(event);
+    } else {
+      addToMultiselection(event);
+    }
+  }
+
+  bool _selectedTodoEventsContains(TodoEvent event) {
+    return selectedTodoEvents.contains(event);
+    // return selectedTodoEvents.any(
+    //   (element) {
+    //     return element.name == event.name &&
+    //         element.desciption == event.desciption &&
+    //         element.linkedSubjectName == event.linkedSubjectName;
+    //   },
+    // );
+  }
+
+  void addToMultiselection(TodoEvent event) {
+    selectedTodoEvents.add(event);
+    setState(() {});
+  }
+
+  void removeOrDisableMultiselection(TodoEvent event) {
+    if (!isMultiselectionActive) return;
+
+    bool isSelected = _selectedTodoEventsContains(event);
+
+    if (isSelected) {
+      removeFromMultiselection(event);
+    }
+    isMultiselectionActive = selectedTodoEvents.isNotEmpty;
+    setState(() {});
+  }
+
+  void removeFromMultiselection(TodoEvent event) {
+    selectedTodoEvents.remove(event);
+    setState(() {});
+  }
+
+  Widget? _floatingActionButton() {
+    if (isMultiselectionActive) return null;
+    return FloatingActionButton(
+      child: const Icon(Icons.add),
+      onPressed: () async {
+        String? selectedSubjectName = await showSelectSubjectNameSheet(
+          context,
+          title: "Select Subject to add Task", //Or Note!
+        );
+
+        if (selectedSubjectName == null) return;
+        if (!mounted) return;
+
+        TodoEvent? event = await createNewTodoEventSheet(
+          context,
+          linkedSubjectName: selectedSubjectName,
+        );
+
+        if (event == null) return;
+
+        TimetableManager().addOrChangeTodoEvent(event);
+
+        if (!mounted) return;
+
+        setState(() {});
+      },
+    );
+  }
+
+  int _currentMultiSelectionButtonTextIndex = 0;
+  Widget multiSelectionButton() {
+    if (!isMultiselectionActive) return Container();
+
+    final buttons = [
+      Tuple2<String, List<TodoEvent> Function(List<TodoEvent>)>(
+        "Select all finished Tasks",
+        (todoEvents) {
+          return todoEvents.where((element) => element.finished).toList();
+        },
+      ),
+      Tuple2<String, List<TodoEvent> Function(List<TodoEvent>)>(
+        "Select all expired Tasks",
+        (todoEvents) {
+          return todoEvents.where((element) => element.isExpired()).toList();
+        },
+      ),
+      Tuple2<String, List<TodoEvent> Function(List<TodoEvent>)>(
+        "Select all Tasks",
+        (todoEvents) {
+          return todoEvents;
+        },
+      ),
+    ];
+
+    return Container(
+      padding: const EdgeInsets.all(8),
+      child: ElevatedButton(
+        onPressed: () {
+          List<TodoEvent> Function(List<TodoEvent>) func =
+              buttons[_currentMultiSelectionButtonTextIndex].item2;
+
+          isMultiselectionActive = true;
+          selectedTodoEvents = func(TimetableManager().sortedTodoEvents);
+          _currentMultiSelectionButtonTextIndex++;
+          if (_currentMultiSelectionButtonTextIndex >= buttons.length) {
+            _currentMultiSelectionButtonTextIndex = 0;
+          }
+          setState(() {});
+        },
+        child: Text(buttons[_currentMultiSelectionButtonTextIndex].item1),
+      ),
+    );
+  }
+
+  void _unselectAllItems() {
+    if (!isMultiselectionActive) return;
+    isMultiselectionActive = false;
+    selectedTodoEvents.clear();
+    setState(() {});
+  }
+
+  bool _finishSelectedEvents = true;
+  Future<void> _finishOrUnfinishSelectedEvents() async {
+    if (!isMultiselectionActive) return;
+    final List<String> finishOrUnfinisString = [
+      "finish",
+      "unfinish",
+    ];
+    String finishString = finishOrUnfinisString[_finishSelectedEvents ? 0 : 1];
+    bool finishOrUnfinish = await Utils.showBoolInputDialog(
+      context,
+      question:
+          "Do you want to $finishString ${selectedTodoEvents.length} tasks?",
+    );
+    if (!finishOrUnfinish) return;
+
+    final copySelectedTodoEvents = List<TodoEvent>.from(
+      selectedTodoEvents,
+      growable: true,
+    );
+
+    for (TodoEvent event in copySelectedTodoEvents) {
+      event.finished = _finishSelectedEvents;
+
+      TimetableManager().addOrChangeTodoEvent(event);
+
+      await Future.delayed(
+        const Duration(milliseconds: 150),
+      );
+      setState(() {});
+    }
+    selectedTodoEvents.clear();
+    isMultiselectionActive = false;
+    setState(() {});
+
+    _finishSelectedEvents = !_finishSelectedEvents;
+  }
+
+  Future<void> _deleteSelectedEvents() async {
+    if (!isMultiselectionActive) return;
+
+    bool delete = await Utils.showBoolInputDialog(
+      context,
+      question: "Do you want to delete ${selectedTodoEvents.length} tasks?",
+    );
+
+    if (!delete) return;
+
+    isMultiselectionActive = false;
+    setState(() {});
+
+    final copySelectedTodoEvents = List.from(
+      selectedTodoEvents,
+      growable: false,
+    );
+
+    for (TodoEvent event in copySelectedTodoEvents) {
+      TimetableManager().removeTodoEvent(event);
+      await Future.delayed(
+        const Duration(milliseconds: 150),
+      );
+      setState(() {});
+    }
+    selectedTodoEvents.clear();
   }
 }
 
