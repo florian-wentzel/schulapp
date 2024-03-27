@@ -32,7 +32,13 @@ class _DateSelectionButtonState extends State<DateSelectionButton> {
 
         if (dateTime == null) return;
 
-        widget.controller.date = dateTime;
+        widget.controller.date = dateTime.copyWith(
+          hour: widget.controller.date.hour,
+          minute: widget.controller.date.minute,
+          second: widget.controller.date.second,
+          millisecond: widget.controller.date.millisecond,
+          microsecond: widget.controller.date.microsecond,
+        );
         setState(() {});
       },
       child: Text(Utils.dateToString(widget.controller.date)),

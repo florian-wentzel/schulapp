@@ -80,10 +80,38 @@ Future<TodoEvent?> createNewTodoEventSheet(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Text(
-                      "End date:",
-                      style: Theme.of(context).textTheme.bodyLarge,
-                      textAlign: TextAlign.left,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "End date:",
+                          style: Theme.of(context).textTheme.bodyLarge,
+                          textAlign: TextAlign.left,
+                        ),
+                        // IconButton(
+                        //   onPressed: () async {
+                        //     final timetable = Utils.getHomescreenTimetable();
+
+                        //     if (timetable == null) {
+                        //       Utils.showInfo(
+                        //         context,
+                        //         msg: "No Homescreen timetable selected!",
+                        //         type: InfoType.error,
+                        //       );
+                        //       return;
+                        //     }
+
+                        //     Utils.showCustomPopUp(
+                        //       context: context,
+                        //       heroObject: null,
+                        //       body: const Center(
+                        //         child: Text("test"),
+                        //       ),
+                        //     );
+                        //   },
+                        //   icon: const Icon(Icons.dataset_outlined),
+                        // ),
+                      ],
                     ),
                     const SizedBox(
                       height: 16,

@@ -33,6 +33,7 @@ class EexportTimetablePageState extends State<ExportTimetablePage> {
         Text(
           "Select timetable to export: ",
           style: Theme.of(context).textTheme.headlineLarge,
+          textAlign: TextAlign.center,
         ),
         _timetableList(),
         ElevatedButton(

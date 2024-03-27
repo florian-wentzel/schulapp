@@ -16,6 +16,36 @@ import 'package:schulapp/theme/themes.dart';
 //dann kann man hier auch noch ShellRoute hinzufügen
 final _router = GoRouter(
   routes: [
+    // ShellRoute(
+    //   builder: (context, state, child) {
+    //     // return CustomButtonNavigationBar();
+    //     print(state.fullPath);
+    //     return Scaffold(
+    //       body: Center(
+    //         child: child,
+    //       ),
+    //       bottomNavigationBar:
+    //           (state.fullPath == null || state.fullPath!.isEmpty)
+    //               ? null
+    //               : NavigationBar(
+    //                   destinations: const [
+    //                     NavigationDestination(
+    //                       icon: Icon(Icons.home),
+    //                       label: "Home",
+    //                     ),
+    //                     NavigationDestination(
+    //                       icon: Icon(Icons.home),
+    //                       label: "Grades",
+    //                     ),
+    //                     NavigationDestination(
+    //                       icon: Icon(Icons.check),
+    //                       label: "Tasks",
+    //                     ),
+    //                   ],
+    //                 ),
+    //     );
+    //   },
+    //   routes: [
     GoRoute(
       path: TimetableScreen.route,
       builder: (context, state) => TimetableScreen(
@@ -42,6 +72,8 @@ final _router = GoRouter(
       path: SettingsScreen.route,
       builder: (context, state) => const SettingsScreen(),
     ),
+    //   ],
+    // ),
   ],
 );
 

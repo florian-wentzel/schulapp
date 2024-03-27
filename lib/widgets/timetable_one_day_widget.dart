@@ -125,19 +125,53 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
               day.lessons.length + 1,
               (lessonIndex) {
                 if (lessonIndex == 0) {
-                  return Container(
-                    color: dayIndex == DateTime.now().weekday - 1
-                        ? selectedColor
-                        : unselectedColor,
-                    width: lessonWidth,
-                    height: lessonHeight,
-                    child: Center(
-                      child: FittedBox(
-                        fit: BoxFit.contain,
-                        child: Text(
-                          day.name,
-                          style: Theme.of(context).textTheme.headlineSmall,
-                          textAlign: TextAlign.center,
+                  DateTime lessonDayTime =
+                      currMonday.add(Duration(days: dayIndex - 1));
+
+                  if (lessonDayTime.isBefore(
+                      DateTime.now().subtract(const Duration(days: 1)))) {
+                    lessonDayTime = lessonDayTime.add(
+                      const Duration(days: 7),
+                    );
+                  }
+
+                  return InkWell(
+                    onTap: dayIndex != DateTime.now().weekday - 1
+                        ? () {
+                            int currDayIndex = Utils.getCurrentWeekDayIndex();
+                            _pageController.animateToPage(
+                              currDayIndex,
+                              duration: const Duration(milliseconds: 500),
+                              curve: Curves.easeInOutCirc,
+                            );
+                          }
+                        : null,
+                    child: Container(
+                      color: dayIndex == DateTime.now().weekday - 1
+                          ? selectedColor
+                          : unselectedColor,
+                      width: lessonWidth,
+                      height: lessonHeight,
+                      child: Center(
+                        child: FittedBox(
+                          fit: BoxFit.contain,
+                          child: Column(
+                            children: [
+                              Text(
+                                day.name,
+                                style:
+                                    Theme.of(context).textTheme.headlineSmall,
+                                textAlign: TextAlign.center,
+                              ),
+                              Text(
+                                Utils.dateToString(
+                                  lessonDayTime,
+                                  showYear: false,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
