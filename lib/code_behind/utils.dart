@@ -452,6 +452,12 @@ class Utils {
 
     return mondayOfCurrentWeek;
   }
+
+  static bool isMobileRatio(BuildContext context) {
+    final aspectRatio = Utils.getAspectRatio(context);
+
+    return (aspectRatio <= Utils.getMobileRatio());
+  }
 }
 
 enum InfoType {

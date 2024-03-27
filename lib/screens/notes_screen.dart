@@ -72,7 +72,7 @@ class _NotesScreenState extends State<NotesScreen> {
     return Scaffold(
       drawer: NavigationBarDrawer(selectedRoute: NotesScreen.route),
       appBar: AppBar(
-        title: const Text("Tasks / Notes"),
+        title: const Text("Tasks" /* / Notes"*/),
         actions: !isMultiselectionActive
             ? null
             : [

@@ -116,9 +116,8 @@ class _TimetableScreenState extends State<TimetableScreen> {
         ),
       );
     }
-    final aspectRatio = Utils.getAspectRatio(context);
 
-    if (aspectRatio <= Utils.getMobileRatio()) {
+    if (Utils.isMobileRatio(context)) {
       return TimetableOneDayWidget(
         timetable: widget.timetable!,
         showTodoEvents: widget.isHomeScreen,

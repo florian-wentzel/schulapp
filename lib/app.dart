@@ -11,69 +11,57 @@ import 'package:schulapp/screens/settings_screen.dart';
 import 'package:schulapp/screens/timetable_screen.dart';
 import 'package:schulapp/theme/theme_manager.dart';
 import 'package:schulapp/theme/themes.dart';
+import 'package:schulapp/widgets/custom_bottom_navigation_bar.dart';
 
 //wenn wir später noch ne BottomNavigationBar einfügen
 //dann kann man hier auch noch ShellRoute hinzufügen
 final _router = GoRouter(
   routes: [
-    // ShellRoute(
-    //   builder: (context, state, child) {
-    //     // return CustomButtonNavigationBar();
-    //     print(state.fullPath);
-    //     return Scaffold(
-    //       body: Center(
-    //         child: child,
-    //       ),
-    //       bottomNavigationBar:
-    //           (state.fullPath == null || state.fullPath!.isEmpty)
-    //               ? null
-    //               : NavigationBar(
-    //                   destinations: const [
-    //                     NavigationDestination(
-    //                       icon: Icon(Icons.home),
-    //                       label: "Home",
-    //                     ),
-    //                     NavigationDestination(
-    //                       icon: Icon(Icons.home),
-    //                       label: "Grades",
-    //                     ),
-    //                     NavigationDestination(
-    //                       icon: Icon(Icons.check),
-    //                       label: "Tasks",
-    //                     ),
-    //                   ],
-    //                 ),
-    //     );
-    //   },
-    //   routes: [
-    GoRoute(
-      path: TimetableScreen.route,
-      builder: (context, state) => TimetableScreen(
-        title: "Home",
-        timetable: Utils.getHomescreenTimetable(),
-        isHomeScreen: true,
-      ),
+    ShellRoute(
+      builder: (context, state, child) {
+        return Material(
+          child: Scaffold(
+            backgroundColor: Theme.of(context).canvasColor,
+            body: Center(
+              child: child,
+            ),
+            bottomNavigationBar: Utils.isMobileRatio(context)
+                ? CustomBottomNavigationBar(
+                    currRoute: state.fullPath ?? "",
+                  )
+                : null,
+          ),
+        );
+      },
+      routes: [
+        GoRoute(
+          path: TimetableScreen.route,
+          builder: (context, state) => TimetableScreen(
+            title: "Home",
+            timetable: Utils.getHomescreenTimetable(),
+            isHomeScreen: true,
+          ),
+        ),
+        GoRoute(
+          path: AllTimetablesScreen.route,
+          builder: (context, state) => const AllTimetablesScreen(),
+        ),
+        GoRoute(
+          path: GradesScreen.route,
+          builder: (context, state) => const GradesScreen(),
+        ),
+        GoRoute(
+          path: NotesScreen.route,
+          builder: (context, state) => NotesScreen(
+            todoEvent: state.extra as TodoEvent?,
+          ),
+        ),
+        GoRoute(
+          path: SettingsScreen.route,
+          builder: (context, state) => const SettingsScreen(),
+        ),
+      ],
     ),
-    GoRoute(
-      path: AllTimetablesScreen.route,
-      builder: (context, state) => const AllTimetablesScreen(),
-    ),
-    GoRoute(
-      path: GradesScreen.route,
-      builder: (context, state) => const GradesScreen(),
-    ),
-    GoRoute(
-      path: NotesScreen.route,
-      builder: (context, state) => NotesScreen(
-        todoEvent: state.extra as TodoEvent?,
-      ),
-    ),
-    GoRoute(
-      path: SettingsScreen.route,
-      builder: (context, state) => const SettingsScreen(),
-    ),
-    //   ],
-    // ),
   ],
 );
 

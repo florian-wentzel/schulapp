@@ -126,7 +126,7 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
               (lessonIndex) {
                 if (lessonIndex == 0) {
                   DateTime lessonDayTime =
-                      currMonday.add(Duration(days: dayIndex - 1));
+                      currMonday.add(Duration(days: dayIndex));
 
                   if (lessonDayTime.isBefore(
                       DateTime.now().subtract(const Duration(days: 1)))) {
