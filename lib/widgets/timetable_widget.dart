@@ -10,6 +10,7 @@ import 'package:schulapp/code_behind/time_table.dart';
 import 'package:schulapp/code_behind/time_table_manager.dart';
 import 'package:schulapp/code_behind/todo_event.dart';
 import 'package:schulapp/code_behind/utils.dart';
+import 'package:schulapp/extensions.dart';
 import 'package:schulapp/screens/grades_screen.dart';
 import 'package:schulapp/screens/notes_screen.dart';
 import 'package:schulapp/screens/semester/school_grade_subject_screen.dart';
@@ -138,9 +139,26 @@ class _TimetableWidgetState extends State<TimetableWidget> {
       String startString = schoolTime.getStartString();
       String endString = schoolTime.getEndString();
 
+      Color containerColor = unselectedColor;
+
+      bool addBreakWidget = false;
+
+      if (schoolTime.isCurrentlyRunning()) {
+        containerColor = selectedColor;
+      } else {
+        if (lessonIndex + 1 < tt.schoolTimes.length) {
+          final nextSchoolTime = tt.schoolTimes[lessonIndex + 1];
+          int currTimeInSec = Utils.nowInSeconds();
+          int currSchoolTimeEndInSec = schoolTime.end.toSeconds();
+          int nextSchoolTimeStartInSec = nextSchoolTime.start.toSeconds();
+
+          addBreakWidget = (currTimeInSec > currSchoolTimeEndInSec &&
+              currTimeInSec < nextSchoolTimeStartInSec);
+        }
+      }
+
       Widget widget = Container(
-        color:
-            schoolTime.isCurrentlyRunning() ? selectedColor : unselectedColor,
+        color: containerColor,
         width: lessonWidth,
         height: lessonHeight,
         child: Center(
@@ -163,10 +181,22 @@ class _TimetableWidgetState extends State<TimetableWidget> {
       );
 
       timeWidgets.add(widget);
+
+      if (addBreakWidget) {
+        timeWidgets.add(_createBreakHighlight());
+      }
     }
 
     return Column(
       children: timeWidgets,
+    );
+  }
+
+  Widget _createBreakHighlight() {
+    return Container(
+      color: selectedColor,
+      height: lessonHeight / 4,
+      width: lessonWidth,
     );
   }
 
@@ -299,11 +329,23 @@ class _TimetableWidgetState extends State<TimetableWidget> {
         );
       }
 
-      Color containerColor =
-          Utils.sameDay(currLessonDateTime, DateTime.now()) ||
-                  currSchoolTime.isCurrentlyRunning()
-              ? selectedColor
-              : unselectedColor;
+      Color containerColor = unselectedColor;
+
+      bool addBreakWidget = false;
+
+      if (Utils.sameDay(currLessonDateTime, DateTime.now()) ||
+          currSchoolTime.isCurrentlyRunning()) {
+        containerColor = selectedColor;
+      } else {
+        if (lessonIndex + 1 < tt.schoolTimes.length) {
+          final nextSchoolTime = tt.schoolTimes[lessonIndex + 1];
+          int currTimeInSec = Utils.nowInSeconds();
+          int currSchoolTimeEndInSec = currSchoolTime.end.toSeconds();
+          int nextSchoolTimeStartInSec = nextSchoolTime.start.toSeconds();
+          addBreakWidget = (currTimeInSec > currSchoolTimeEndInSec &&
+              currTimeInSec < nextSchoolTimeStartInSec);
+        }
+      }
 
       Widget lessonWidget = InkWell(
         onTap: SchoolLesson.isEmptyLessonName(lesson.name)
@@ -428,6 +470,10 @@ class _TimetableWidgetState extends State<TimetableWidget> {
       );
 
       lessonWidgets.add(lessonWidget);
+
+      if (addBreakWidget) {
+        lessonWidgets.add(_createBreakHighlight());
+      }
     }
 
     return Column(

@@ -5,6 +5,7 @@ import 'package:schulapp/code_behind/time_table.dart';
 import 'package:schulapp/code_behind/time_table_manager.dart';
 import 'package:schulapp/code_behind/todo_event.dart';
 import 'package:schulapp/code_behind/utils.dart';
+import 'package:schulapp/extensions.dart';
 import 'package:schulapp/widgets/time_to_next_lesson_widget.dart';
 import 'package:schulapp/widgets/timetable_util_functions.dart';
 import 'package:schulapp/widgets/todo_event_util_functions.dart';
@@ -94,55 +95,82 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
   Widget _createTimes() {
     final tt = widget.timetable;
 
-    return Column(
-      children: List.generate(
-        tt.schoolTimes.length + 1,
-        (int lessonIndex) {
-          if (lessonIndex == 0) {
-            return SizedBox(
-              width: lessonWidth,
-              height: lessonHeight,
-              child: Center(
-                child: TimeToNextLessonWidget(
-                  timetable: tt,
-                  onNewLessonCB: () {
-                    if (mounted) {
-                      setState(() {});
-                    }
-                  },
-                ),
-              ),
-            );
-          }
-          final schoolTime = tt.schoolTimes[lessonIndex - 1];
-          String startString = schoolTime.getStartString();
-          String endString = schoolTime.getEndString();
-          return Container(
-            color: schoolTime.isCurrentlyRunning()
-                ? selectedColor
-                : unselectedColor,
-            width: lessonWidth,
-            height: lessonHeight,
-            child: Center(
-              child: FittedBox(
-                fit: BoxFit.contain,
-                child: Column(
-                  children: [
-                    Text(
-                      startString,
-                      textAlign: TextAlign.center,
-                    ),
-                    Text(
-                      endString,
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          );
-        },
+    List<Widget> timeWidgets = [];
+
+    timeWidgets.add(
+      SizedBox(
+        width: lessonWidth,
+        height: lessonHeight,
+        child: Center(
+          child: TimeToNextLessonWidget(
+            timetable: tt,
+            onNewLessonCB: () {
+              if (mounted) {
+                setState(() {});
+              }
+            },
+          ),
+        ),
       ),
+    );
+
+    for (int lessonIndex = 0;
+        lessonIndex < tt.schoolTimes.length;
+        lessonIndex++) {
+      final schoolTime = tt.schoolTimes[lessonIndex];
+      String startString = schoolTime.getStartString();
+      String endString = schoolTime.getEndString();
+
+      Color containerColor = unselectedColor;
+
+      bool addBreakWidget = false;
+
+      if (schoolTime.isCurrentlyRunning()) {
+        containerColor = selectedColor;
+      } else {
+        if (lessonIndex + 1 < tt.schoolTimes.length) {
+          final nextSchoolTime = tt.schoolTimes[lessonIndex + 1];
+          int currTimeInSec = Utils.nowInSeconds();
+          int currSchoolTimeEndInSec = schoolTime.end.toSeconds();
+          int nextSchoolTimeStartInSec = nextSchoolTime.start.toSeconds();
+
+          addBreakWidget = (currTimeInSec > currSchoolTimeEndInSec &&
+              currTimeInSec < nextSchoolTimeStartInSec);
+        }
+      }
+
+      Widget timeWidget = Container(
+        color: containerColor,
+        width: lessonWidth,
+        height: lessonHeight,
+        child: Center(
+          child: FittedBox(
+            fit: BoxFit.contain,
+            child: Column(
+              children: [
+                Text(
+                  startString,
+                  textAlign: TextAlign.center,
+                ),
+                Text(
+                  endString,
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      timeWidgets.add(timeWidget);
+
+      if (addBreakWidget) {
+        timeWidgets.add(_createBreakHighlight());
+      }
+    }
+
+    return Column(
+      children: timeWidgets,
     );
   }
 
@@ -205,14 +233,25 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
     );
 
     for (int lessonIndex = 0; lessonIndex < day.lessons.length; lessonIndex++) {
-      final schoolTime = tt.schoolTimes[lessonIndex];
+      final currSchoolTime = tt.schoolTimes[lessonIndex];
       final lesson = day.lessons[lessonIndex];
       final heroString = "$lessonIndex:$dayIndex";
 
       Color containerColor = unselectedColor;
 
-      if (schoolTime.isCurrentlyRunning()) {
+      bool addBreakWidget = false;
+
+      if (currSchoolTime.isCurrentlyRunning()) {
         containerColor = selectedColor;
+      } else {
+        if (lessonIndex + 1 < tt.schoolTimes.length) {
+          final nextSchoolTime = tt.schoolTimes[lessonIndex + 1];
+          int currTimeInSec = Utils.nowInSeconds();
+          int currSchoolTimeEndInSec = currSchoolTime.end.toSeconds();
+          int nextSchoolTimeStartInSec = nextSchoolTime.start.toSeconds();
+          addBreakWidget = (currTimeInSec > currSchoolTimeEndInSec &&
+              currTimeInSec < nextSchoolTimeStartInSec);
+        }
       }
 
       TodoEvent? currEvent;
@@ -347,6 +386,10 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
       );
 
       lessonWidgets.add(lessonWidget);
+
+      if (addBreakWidget) {
+        lessonWidgets.add(_createBreakHighlight());
+      }
     }
 
     return Row(
@@ -358,6 +401,14 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
           children: lessonWidgets,
         ),
       ],
+    );
+  }
+
+  Widget _createBreakHighlight() {
+    return Container(
+      color: selectedColor,
+      height: lessonHeight / 4,
+      width: lessonWidth,
     );
   }
 
