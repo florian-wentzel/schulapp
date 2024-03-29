@@ -14,6 +14,15 @@ class TimeSelectionButton extends StatefulWidget {
 
 class _TimeSelectionButtonState extends State<TimeSelectionButton> {
   @override
+  void initState() {
+    widget.controller.onDateChangedCBs.add((p0) {
+      if (!mounted) return;
+      setState(() {});
+    });
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return ElevatedButton(
       onPressed: () async {

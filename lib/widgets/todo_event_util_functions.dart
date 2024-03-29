@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:schulapp/code_behind/time_table.dart';
 import 'package:schulapp/code_behind/time_table_manager.dart';
 import 'package:schulapp/code_behind/todo_event.dart';
 import 'package:schulapp/code_behind/utils.dart';
@@ -24,6 +25,39 @@ Future<TodoEvent?> createNewTodoEventSheet(
         Utils.getHomescreenTimetable()?.getNextLessonDate(linkedSubjectName) ??
             DateTime.now(),
   );
+
+  bool onDateChangedCBsAlreadyCalled = false;
+
+  endDateController.onDateChangedCBs.add((newDate) {
+    if (onDateChangedCBsAlreadyCalled) {
+      return; //so there is not infinity loop / Stackoverflow
+    }
+
+    final Timetable? homescreenTT = Utils.getHomescreenTimetable();
+    if (homescreenTT == null) return;
+
+    //because monday = 1 | we need to subtract 1
+    final dayIndex = newDate.weekday - 1;
+    if (dayIndex < 0 || dayIndex >= homescreenTT.schoolDays.length) {
+      return;
+    }
+
+    final day = homescreenTT.schoolDays[dayIndex];
+    for (int i = 0; i < day.lessons.length; i++) {
+      var lesson = day.lessons[i];
+      if (lesson.name == linkedSubjectName) {
+        onDateChangedCBsAlreadyCalled = true;
+        var time = homescreenTT.schoolTimes[i];
+        endDateController.date = newDate.copyWith(
+          hour: time.start.hour,
+          minute: time.start.minute,
+        );
+        onDateChangedCBsAlreadyCalled = false;
+        break;
+      }
+    }
+  });
+
   if (event != null) {
     endDateController.date = event.endTime;
   }

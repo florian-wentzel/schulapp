@@ -2,9 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/utils.dart';
 
 class DateSelectionButtonController {
-  DateTime date;
+  DateTime _date;
+  DateTime get date => _date;
+  set date(DateTime dateTime) {
+    _date = dateTime;
 
-  DateSelectionButtonController({required this.date});
+    for (var element in onDateChangedCBs) {
+      element.call(dateTime);
+    }
+  }
+
+  DateSelectionButtonController({required DateTime date}) : _date = date;
+
+  List<Function(DateTime)> onDateChangedCBs = [];
 }
 
 // ignore: must_be_immutable
