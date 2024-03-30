@@ -47,7 +47,9 @@ class _TimeToNextLessonWidgetState extends State<TimeToNextLessonWidget> {
   void onTimer(Timer timer) {
     if (_currTime == null) {
       _currTime = widget.timetable.getCurrentLessonOrBreakTime();
-      _onNewLesson();
+      if (_currTime != null) {
+        _onNewLesson();
+      }
     }
 
     _currTimeString = _getCurrTimeString();

@@ -59,8 +59,8 @@ class _TimetableScreenState extends State<TimetableScreen> {
               await createNewTimetable(context);
 
               if (!mounted) return;
-
-              context.go(TimetableScreen.route);
+              //not sure
+              setState(() {});
             },
           ),
           SpeedDialChild(
@@ -124,24 +124,27 @@ class _TimetableScreenState extends State<TimetableScreen> {
       );
     }
 
-    return Center(
-      child: SingleChildScrollView(
-        scrollDirection: Axis.vertical,
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                TimetableWidget(
-                  timetable: widget.timetable!,
-                  showTodoEvents: widget.isHomeScreen,
-                ),
-              ],
+    final width = MediaQuery.of(context).size.width;
+    final height =
+        MediaQuery.of(context).size.height - AppBar().preferredSize.height;
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.vertical,
+      child: Column(
+        children: [
+          SizedBox(
+            width: width,
+            height: height,
+            child: TimetableWidget(
+              timetable: widget.timetable!,
+              showTodoEvents: widget.isHomeScreen,
             ),
           ),
-        ),
+          // Container(
+          //   height: 120,
+          //   color: Colors.amber,
+          // ),
+        ],
       ),
     );
   }

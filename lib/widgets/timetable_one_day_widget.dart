@@ -205,7 +205,6 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
                   currEvent = TimetableManager().getRunningTodoEvent(
                     linkedSubjectName: lesson.name,
                     lessonDayTime: lessonDayTime,
-                    endTime: schoolTime.end,
                   );
                 }
 

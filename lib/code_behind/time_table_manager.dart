@@ -233,7 +233,6 @@ class TimetableManager {
   TodoEvent? getRunningTodoEvent({
     required String linkedSubjectName,
     required DateTime lessonDayTime,
-    required TimeOfDay endTime,
   }) {
     for (int i = 0; i < todoEvents.length; i++) {
       TodoEvent event = todoEvents[i];
