@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:schulapp/code_behind/school_day.dart';
 import 'package:schulapp/code_behind/school_lesson.dart';
 import 'package:schulapp/code_behind/time_table.dart';
 import 'package:schulapp/code_behind/time_table_manager.dart';
@@ -26,379 +25,400 @@ class TimetableOneDayWidget extends StatefulWidget {
 }
 
 class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
-  final PageController _pageController = PageController(
-    initialPage: Utils.getCurrentWeekDayIndex(),
-  );
+  static const double minLessonWidth = 100;
+  static const double minLessonHeight = 50;
+  static const int pagesCount = 1000;
+  //monday of curr week
+  static const int initialMondayPageIndex = pagesCount ~/ 2;
+
+  late final PageController _pageController;
+
+  double lessonHeight = minLessonHeight;
+  double lessonWidth = minLessonWidth;
+
+  late Color selectedColor;
+  late Color unselectedColor;
+
+  @override
+  void initState() {
+    int showNextWeek = 0;
+    if (DateTime.now().weekday == DateTime.sunday) {
+      showNextWeek = widget.timetable.schoolDays.length;
+    }
+    _pageController = PageController(
+      initialPage: initialMondayPageIndex +
+          Utils.getCurrentWeekDayIndex() +
+          showNextWeek,
+    );
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return PageView(
-      controller: _pageController,
-      children: _createDayWidgets(),
-    );
-  }
-
-  List<Widget> _createDayWidgets() {
-    Timetable tt = widget.timetable;
-    List<Widget> widgets = [];
-
-    const double minLessonWidth = 100;
-    const double minLessonHeight = 50;
-    double lessonWidth = (MediaQuery.of(context).size.width * 0.8) / 2;
+    lessonWidth = (MediaQuery.of(context).size.width * 0.8) / 2;
     if (lessonWidth < minLessonWidth) {
       lessonWidth = minLessonWidth;
     }
 
-    double lessonHeight = (MediaQuery.of(context).size.height * 0.8) /
+    lessonHeight = (MediaQuery.of(context).size.height * 0.8) /
         (widget.timetable.maxLessonCount + 1);
     if (lessonHeight < minLessonHeight) {
       lessonHeight = minLessonHeight;
     }
 
-    final selectedColor = Theme.of(context)
-        .colorScheme
-        .secondary
-        .withAlpha(30); // Color.fromARGB(30, 255, 255, 255);
+    selectedColor = Theme.of(context).colorScheme.secondary.withAlpha(30);
 
-    const unselectedColor = Colors.transparent;
+    unselectedColor = Colors.transparent;
 
-    DateTime currMonday = Utils.getWeekDay(DateTime.now(), DateTime.monday);
+    return PageView.builder(
+      controller: _pageController,
+      itemCount: pagesCount,
+      itemBuilder: (context, index) {
+        Timetable tt = widget.timetable;
 
-    for (int dayIndex = 0; dayIndex < tt.schoolDays.length; dayIndex++) {
-      SchoolDay day = tt.schoolDays[dayIndex];
-      Widget returnWidget = Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Column(
-            children: List.generate(
-              tt.schoolTimes.length + 1,
-              (int lessonIndex) {
-                if (lessonIndex == 0) {
-                  return SizedBox(
-                    width: lessonWidth,
-                    height: lessonHeight,
-                    child: Center(
-                      child: TimeToNextLessonWidget(
-                        timetable: tt,
-                        onNewLessonCB: () {
-                          if (mounted) {
-                            setState(() {});
-                          }
-                        },
-                      ),
+        int currDayIndex =
+            (index - initialMondayPageIndex) % tt.schoolDays.length;
+        int currWeekIndex =
+            (index - initialMondayPageIndex) ~/ tt.schoolDays.length;
+
+        DateTime currMonday = Utils.getWeekDay(DateTime.now(), DateTime.monday);
+
+        return _createDay(
+          dayIndex: currDayIndex,
+          currMonday: currMonday.add(Duration(days: 7 * currWeekIndex)),
+        );
+      },
+    );
+  }
+
+  Widget _createTimes() {
+    final tt = widget.timetable;
+
+    return Column(
+      children: List.generate(
+        tt.schoolTimes.length + 1,
+        (int lessonIndex) {
+          if (lessonIndex == 0) {
+            return SizedBox(
+              width: lessonWidth,
+              height: lessonHeight,
+              child: Center(
+                child: TimeToNextLessonWidget(
+                  timetable: tt,
+                  onNewLessonCB: () {
+                    if (mounted) {
+                      setState(() {});
+                    }
+                  },
+                ),
+              ),
+            );
+          }
+          final schoolTime = tt.schoolTimes[lessonIndex - 1];
+          String startString = schoolTime.getStartString();
+          String endString = schoolTime.getEndString();
+          return Container(
+            color: schoolTime.isCurrentlyRunning()
+                ? selectedColor
+                : unselectedColor,
+            width: lessonWidth,
+            height: lessonHeight,
+            child: Center(
+              child: FittedBox(
+                fit: BoxFit.contain,
+                child: Column(
+                  children: [
+                    Text(
+                      startString,
+                      textAlign: TextAlign.center,
                     ),
-                  );
+                    Text(
+                      endString,
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _createDay({
+    required DateTime currMonday,
+    required int dayIndex,
+  }) {
+    final tt = widget.timetable;
+    final day = tt.schoolDays[dayIndex];
+
+    List<Widget> lessonWidgets = [];
+
+    DateTime currLessonDateTime = currMonday.add(Duration(days: dayIndex));
+
+    lessonWidgets.add(
+      InkWell(
+        onTap: Utils.sameDay(currLessonDateTime, DateTime.now())
+            ? null
+            : () {
+                int currDayIndex = Utils.getCurrentWeekDayIndex();
+                int showNextWeek = 0;
+                if (DateTime.now().weekday == DateTime.sunday) {
+                  showNextWeek = widget.timetable.schoolDays.length;
                 }
-                final schoolTime = tt.schoolTimes[lessonIndex - 1];
-                String startString = schoolTime.getStartString();
-                String endString = schoolTime.getEndString();
-                return Container(
-                  color: schoolTime.isCurrentlyRunning()
-                      ? selectedColor
-                      : unselectedColor,
-                  width: lessonWidth,
-                  height: lessonHeight,
-                  child: Center(
-                    child: FittedBox(
+                _pageController.animateToPage(
+                  initialMondayPageIndex + currDayIndex + showNextWeek,
+                  duration: const Duration(milliseconds: 500),
+                  curve: Curves.easeInOutCirc,
+                );
+              },
+        child: Container(
+          color: Utils.sameDay(currLessonDateTime, DateTime.now())
+              ? selectedColor
+              : unselectedColor,
+          width: lessonWidth,
+          height: lessonHeight,
+          child: Center(
+            child: FittedBox(
+              fit: BoxFit.contain,
+              child: Column(
+                children: [
+                  Text(
+                    day.name,
+                    style: Theme.of(context).textTheme.headlineSmall,
+                    textAlign: TextAlign.center,
+                  ),
+                  Text(
+                    Utils.dateToString(
+                      currLessonDateTime,
+                      showYear: false,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    for (int lessonIndex = 0; lessonIndex < day.lessons.length; lessonIndex++) {
+      final schoolTime = tt.schoolTimes[lessonIndex];
+      final lesson = day.lessons[lessonIndex];
+      final heroString = "$lessonIndex:$dayIndex";
+
+      Color containerColor = unselectedColor;
+
+      if (schoolTime.isCurrentlyRunning()) {
+        containerColor = selectedColor;
+      }
+
+      TodoEvent? currEvent;
+
+      if (widget.showTodoEvents) {
+        currEvent = TimetableManager().getRunningTodoEvent(
+          linkedSubjectName: lesson.name,
+          lessonDayTime: currLessonDateTime,
+        );
+      }
+
+      Widget lessonWidget = InkWell(
+        onTap: SchoolLesson.isEmptyLessonName(lesson.name)
+            ? null
+            : () => _onLessonWidgetTap(
+                  dayIndex: dayIndex,
+                  lessonIndex: lessonIndex,
+                  heroString: heroString,
+                  currEvent: currEvent,
+                  eventEndTime: currLessonDateTime,
+                ),
+        child: Container(
+          color: containerColor,
+          width: lessonWidth,
+          height: lessonHeight,
+          child: Center(
+            child: Hero(
+              tag: heroString,
+              flightShuttleBuilder: (context, animation, __, ___, ____) {
+                const targetAlpha = 220;
+
+                return AnimatedBuilder(
+                  animation: animation,
+                  builder: (context, _) {
+                    return Container(
+                      width: lessonWidth * 0.8,
+                      height: lessonHeight * 0.8,
+                      decoration: BoxDecoration(
+                        color: ColorTween(
+                          begin: lesson.color,
+                          end: Theme.of(context)
+                              .cardColor
+                              .withAlpha(targetAlpha),
+                        ).lerp(animation.value),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    );
+                  },
+                );
+              },
+              child: Container(
+                width: lessonWidth * 0.8,
+                height: lessonHeight * 0.8,
+                padding: const EdgeInsets.symmetric(
+                  vertical: 4,
+                  horizontal: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: lesson.color,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    FittedBox(
                       fit: BoxFit.contain,
                       child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Text(
-                            startString,
+                            lesson.name,
                             textAlign: TextAlign.center,
+                            style: Theme.of(context).textTheme.labelSmall,
                           ),
                           Text(
-                            endString,
+                            lesson.room,
                             textAlign: TextAlign.center,
+                            style: Theme.of(context).textTheme.labelSmall,
+                            overflow: TextOverflow.fade,
                           ),
                         ],
                       ),
                     ),
-                  ),
-                );
-              },
-            ),
-          ),
-          Column(
-            children: List.generate(
-              day.lessons.length + 1,
-              (lessonIndex) {
-                if (lessonIndex == 0) {
-                  DateTime lessonDayTime =
-                      currMonday.add(Duration(days: dayIndex));
-
-                  if (lessonDayTime.isBefore(
-                      DateTime.now().subtract(const Duration(days: 1)))) {
-                    lessonDayTime = lessonDayTime.add(
-                      const Duration(days: 7),
-                    );
-                  }
-
-                  return InkWell(
-                    onTap: dayIndex != DateTime.now().weekday - 1
-                        ? () {
-                            int currDayIndex = Utils.getCurrentWeekDayIndex();
-                            _pageController.animateToPage(
-                              currDayIndex,
-                              duration: const Duration(milliseconds: 500),
-                              curve: Curves.easeInOutCirc,
-                            );
-                          }
-                        : null,
-                    child: Container(
-                      color: dayIndex == DateTime.now().weekday - 1
-                          ? selectedColor
-                          : unselectedColor,
-                      width: lessonWidth,
-                      height: lessonHeight,
-                      child: Center(
-                        child: FittedBox(
-                          fit: BoxFit.contain,
-                          child: Column(
-                            children: [
-                              Text(
-                                day.name,
-                                style:
-                                    Theme.of(context).textTheme.headlineSmall,
-                                textAlign: TextAlign.center,
-                              ),
-                              Text(
-                                Utils.dateToString(
-                                  lessonDayTime,
-                                  showYear: false,
+                    Visibility(
+                      visible: currEvent != null,
+                      child: Align(
+                        alignment: Alignment.bottomRight,
+                        child: Text(
+                          "!",
+                          textAlign: TextAlign.justify,
+                          style: GoogleFonts.dmSerifDisplay(
+                            textStyle: Theme.of(context)
+                                .textTheme
+                                .headlineMedium
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  foreground: Paint()
+                                    ..style = PaintingStyle.stroke
+                                    ..strokeWidth = 4
+                                    ..color = Theme.of(context).canvasColor,
                                 ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ],
                           ),
                         ),
                       ),
                     ),
-                  );
-                }
-                final schoolTime = tt.schoolTimes[lessonIndex - 1];
-                final lesson = day.lessons[lessonIndex - 1];
-                final heroString = "$lessonIndex:$dayIndex";
-
-                Color color = unselectedColor;
-
-                if (schoolTime.isCurrentlyRunning()) {
-                  color = selectedColor;
-                }
-
-                TodoEvent? currEvent;
-
-                if (widget.showTodoEvents) {
-                  DateTime lessonDayTime =
-                      currMonday.add(Duration(days: dayIndex)).copyWith(
-                            hour: schoolTime.start.hour,
-                            minute: schoolTime.start.minute,
-                          );
-
-                  if (lessonDayTime.isBefore(DateTime.now())) {
-                    lessonDayTime = lessonDayTime.add(
-                      const Duration(days: 7),
-                    );
-                  }
-
-                  currEvent = TimetableManager().getRunningTodoEvent(
-                    linkedSubjectName: lesson.name,
-                    lessonDayTime: lessonDayTime,
-                  );
-                }
-
-                return InkWell(
-                  onTap: SchoolLesson.isEmptyLessonName(lesson.name)
-                      ? null
-                      : () async {
-                          bool? showNewTodoEvent =
-                              await showSchoolLessonHomePopUp(
-                            context,
-                            lesson,
-                            day,
-                            schoolTime,
-                            currEvent,
-                            heroString,
-                          );
-
-                          if (!mounted) return;
-                          setState(() {});
-
-                          if (showNewTodoEvent == null) return;
-                          if (!showNewTodoEvent) return;
-
-                          DateTime dateTime = Utils.getWeekDay(
-                            DateTime.now(),
-                            DateTime.monday,
-                          ).copyWith(
-                            hour: schoolTime.start.hour,
-                            minute: schoolTime.start.minute,
-                          );
-
-                          dateTime = dateTime.add(
-                            Duration(days: dayIndex),
-                          );
-
-                          if (dateTime.isBefore(DateTime.now())) {
-                            dateTime = dateTime.add(const Duration(days: 7));
-                          }
-
-                          TodoEvent? event = TodoEvent(
-                            key: TimetableManager().getNextSchoolEventKey(),
-                            name: "",
-                            linkedSubjectName: lesson.name,
-                            endTime: dateTime,
-                            type: TodoType.test,
-                            desciption: "",
-                            finished: false,
-                          );
-
-                          event = await createNewTodoEventSheet(
-                            context,
-                            linkedSubjectName: lesson.name,
-                            event: event,
-                          );
-
-                          if (event == null) return;
-                          TimetableManager().addOrChangeTodoEvent(event);
-
-                          if (!mounted) return;
-                          Utils.showInfo(
-                            context,
-                            type: InfoType.success,
-                            msg:
-                                "Task successfully created:\n${event.linkedSubjectName}, ${TodoEvent.typeToString(event.type)}: ${event.name}\n on ${Utils.dateToString(event.endTime)}",
-                          );
-
-                          setState(() {});
-                        },
-                  child: Container(
-                    color: color,
-                    width: lessonWidth,
-                    height: lessonHeight,
-                    child: Center(
-                      child: Hero(
-                        tag: heroString,
-                        flightShuttleBuilder:
-                            (context, animation, __, ___, ____) {
-                          const targetAlpha = 220;
-
-                          return AnimatedBuilder(
-                            animation: animation,
-                            builder: (context, _) {
-                              return Container(
-                                width: lessonWidth * 0.8,
-                                height: lessonHeight * 0.8,
-                                decoration: BoxDecoration(
-                                  color: ColorTween(
-                                    begin: lesson.color,
-                                    end: Theme.of(context)
-                                        .cardColor
-                                        .withAlpha(targetAlpha),
-                                  ).lerp(animation.value),
-                                  borderRadius: BorderRadius.circular(12),
+                    Visibility(
+                      visible: currEvent != null,
+                      child: Align(
+                        alignment: Alignment.bottomRight,
+                        child: Text(
+                          "!",
+                          textAlign: TextAlign.justify,
+                          style: GoogleFonts.dmSerifDisplay(
+                            textStyle: Theme.of(context)
+                                .textTheme
+                                .headlineMedium
+                                ?.copyWith(
+                                  color: currEvent?.getColor(),
+                                  fontWeight: FontWeight.bold,
                                 ),
-                              );
-                            },
-                          );
-                        },
-                        child: Container(
-                          width: lessonWidth * 0.8,
-                          height: lessonHeight * 0.8,
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 4,
-                            horizontal: 8,
-                          ),
-                          // padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: lesson.color,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Stack(
-                            fit: StackFit.expand,
-                            children: [
-                              FittedBox(
-                                fit: BoxFit.contain,
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      lesson.name,
-                                      textAlign: TextAlign.center,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .labelSmall,
-                                    ),
-                                    Text(
-                                      lesson.room,
-                                      textAlign: TextAlign.center,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .labelSmall,
-                                      overflow: TextOverflow.fade,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Visibility(
-                                visible: currEvent != null,
-                                child: Align(
-                                  alignment: Alignment.bottomRight,
-                                  child: Text(
-                                    "!",
-                                    textAlign: TextAlign.justify,
-                                    style: GoogleFonts.dmSerifDisplay(
-                                      textStyle: Theme.of(context)
-                                          .textTheme
-                                          .headlineMedium
-                                          ?.copyWith(
-                                            fontWeight: FontWeight.bold,
-                                            foreground: Paint()
-                                              ..style = PaintingStyle.stroke
-                                              ..strokeWidth = 4
-                                              ..color =
-                                                  Theme.of(context).canvasColor,
-                                          ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              Visibility(
-                                visible: currEvent != null,
-                                child: Align(
-                                  alignment: Alignment.bottomRight,
-                                  child: Text(
-                                    "!",
-                                    textAlign: TextAlign.justify,
-                                    style: GoogleFonts.dmSerifDisplay(
-                                      textStyle: Theme.of(context)
-                                          .textTheme
-                                          .headlineMedium
-                                          ?.copyWith(
-                                            color: currEvent?.getColor(),
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
                           ),
                         ),
                       ),
                     ),
-                  ),
-                );
-              },
+                  ],
+                ),
+              ),
             ),
           ),
-        ],
+        ),
       );
-      widgets.add(returnWidget);
+
+      lessonWidgets.add(lessonWidget);
     }
 
-    return widgets;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        _createTimes(),
+        Column(
+          children: lessonWidgets,
+        ),
+      ],
+    );
+  }
+
+  void _onLessonWidgetTap({
+    required int dayIndex,
+    required int lessonIndex,
+    required String heroString,
+    required DateTime eventEndTime,
+    TodoEvent? currEvent,
+  }) async {
+    final day = widget.timetable.schoolDays[dayIndex];
+    final lesson = day.lessons[lessonIndex];
+    final schoolTime = widget.timetable.schoolTimes[lessonIndex];
+
+    bool? showNewTodoEvent = await showSchoolLessonHomePopUp(
+      context,
+      lesson,
+      day,
+      schoolTime,
+      currEvent,
+      heroString,
+    );
+
+    if (!mounted) return;
+    setState(() {});
+
+    if (showNewTodoEvent == null) return;
+    if (!showNewTodoEvent) return;
+
+    eventEndTime = eventEndTime.copyWith(
+      hour: schoolTime.start.hour,
+      minute: schoolTime.start.minute,
+    );
+
+    TodoEvent? event = TodoEvent(
+      key: TimetableManager().getNextSchoolEventKey(),
+      name: "",
+      linkedSubjectName: lesson.name,
+      endTime: eventEndTime,
+      type: TodoType.test,
+      desciption: "",
+      finished: false,
+    );
+
+    event = await createNewTodoEventSheet(
+      context,
+      linkedSubjectName: lesson.name,
+      event: event,
+    );
+
+    if (event == null) return;
+    TimetableManager().addOrChangeTodoEvent(event);
+
+    if (!mounted) return;
+    Utils.showInfo(
+      context,
+      type: InfoType.success,
+      msg:
+          "Task successfully created:\n${event.linkedSubjectName}, ${TodoEvent.typeToString(event.type)}: ${event.name}\n on ${Utils.dateToString(event.endTime)}",
+    );
+
+    setState(() {});
   }
 }

@@ -117,16 +117,34 @@ class _TimetableScreenState extends State<TimetableScreen> {
       );
     }
 
+    final width = MediaQuery.of(context).size.width;
+    double height =
+        MediaQuery.of(context).size.height - AppBar().preferredSize.height;
+
     if (Utils.isMobileRatio(context)) {
-      return TimetableOneDayWidget(
-        timetable: widget.timetable!,
-        showTodoEvents: widget.isHomeScreen,
+      height -= kBottomNavigationBarHeight;
+      height -= 2; //without you could scroll a little bit
+
+      return SingleChildScrollView(
+        scrollDirection: Axis.vertical,
+        child: Column(
+          children: [
+            SizedBox(
+              width: width,
+              height: height,
+              child: TimetableOneDayWidget(
+                timetable: widget.timetable!,
+                showTodoEvents: widget.isHomeScreen,
+              ),
+            ),
+            // Container(
+            //   height: height,
+            //   color: Colors.amber,
+            // ),
+          ],
+        ),
       );
     }
-
-    final width = MediaQuery.of(context).size.width;
-    final height =
-        MediaQuery.of(context).size.height - AppBar().preferredSize.height;
 
     return SingleChildScrollView(
       scrollDirection: Axis.vertical,

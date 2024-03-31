@@ -50,10 +50,7 @@ class _TimetableWidgetState extends State<TimetableWidget> {
 
   @override
   Widget build(BuildContext context) {
-    selectedColor = Theme.of(context)
-        .colorScheme
-        .secondary
-        .withAlpha(30); // Color.fromARGB(30, 255, 255, 255);
+    selectedColor = Theme.of(context).colorScheme.secondary.withAlpha(30);
 
     unselectedColor = Colors.transparent;
 
@@ -243,7 +240,7 @@ class _TimetableWidgetState extends State<TimetableWidget> {
 
     List<Widget> lessonWidgets = [];
 
-    DateTime currlessonDateTime = currMonday.add(Duration(days: dayIndex));
+    DateTime currLessonDateTime = currMonday.add(Duration(days: dayIndex));
     final nowMonday = Utils.getWeekDay(DateTime.now(), DateTime.monday);
     bool notTappable = Utils.sameDay(currMonday, nowMonday);
 
@@ -259,7 +256,7 @@ class _TimetableWidgetState extends State<TimetableWidget> {
                 );
               },
         child: Container(
-          color: Utils.sameDay(currlessonDateTime, DateTime.now())
+          color: Utils.sameDay(currLessonDateTime, DateTime.now())
               ? selectedColor
               : unselectedColor,
           width: lessonWidth,
@@ -275,7 +272,7 @@ class _TimetableWidgetState extends State<TimetableWidget> {
                   ),
                   Text(
                     Utils.dateToString(
-                      currlessonDateTime,
+                      currLessonDateTime,
                       showYear: false,
                     ),
                     textAlign: TextAlign.center,
@@ -298,12 +295,12 @@ class _TimetableWidgetState extends State<TimetableWidget> {
       if (widget.showTodoEvents) {
         currEvent = TimetableManager().getRunningTodoEvent(
           linkedSubjectName: lesson.name,
-          lessonDayTime: currlessonDateTime,
+          lessonDayTime: currLessonDateTime,
         );
       }
 
       Color containerColor =
-          Utils.sameDay(currlessonDateTime, DateTime.now()) ||
+          Utils.sameDay(currLessonDateTime, DateTime.now()) ||
                   currSchoolTime.isCurrentlyRunning()
               ? selectedColor
               : unselectedColor;
@@ -316,7 +313,7 @@ class _TimetableWidgetState extends State<TimetableWidget> {
                   lessonIndex: lessonIndex,
                   heroString: heroString,
                   currEvent: currEvent,
-                  eventEndTime: currlessonDateTime,
+                  eventEndTime: currLessonDateTime,
                 ),
         child: Container(
           color: containerColor,
