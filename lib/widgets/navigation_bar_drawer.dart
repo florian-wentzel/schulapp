@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:schulapp/screens/all_timetables_screen.dart';
 import 'package:schulapp/screens/grades_screen.dart';
-import 'package:schulapp/screens/notes_screen.dart';
+import 'package:schulapp/screens/holidays_screen.dart';
+import 'package:schulapp/screens/tasks_screen.dart';
 import 'package:schulapp/screens/settings_screen.dart';
 import 'package:schulapp/screens/timetable_screen.dart';
 
@@ -31,7 +32,7 @@ class NavigationBarDrawer extends StatefulWidget {
 }
 
 class _NavigationBarDrawerState extends State<NavigationBarDrawer> {
-  final List<CustomDestination> destinations = <CustomDestination>[
+  final List<CustomDestination?> destinations = <CustomDestination?>[
     CustomDestination(
       label: "Home",
       route: TimetableScreen.route,
@@ -57,6 +58,13 @@ class _NavigationBarDrawerState extends State<NavigationBarDrawer> {
       selectedIcon: const Icon(Icons.assignment),
     ),
     CustomDestination(
+      label: "Holidays",
+      route: HolidaysScreen.route,
+      icon: const Icon(Icons.card_giftcard_outlined),
+      selectedIcon: const Icon(Icons.card_giftcard),
+    ),
+    null,
+    CustomDestination(
       label: "Settings",
       route: SettingsScreen.route,
       icon: const Icon(Icons.settings_outlined),
@@ -74,9 +82,14 @@ class _NavigationBarDrawerState extends State<NavigationBarDrawer> {
 
   @override
   void initState() {
+    int nullCorrection = 0;
     for (int i = 0; i < destinations.length; i++) {
-      if (destinations[i].route == widget.selectedRoute) {
-        _selectedIndex = i;
+      if (destinations[i] == null) {
+        nullCorrection++;
+        continue;
+      }
+      if (destinations[i]!.route == widget.selectedRoute) {
+        _selectedIndex = i - nullCorrection;
         break;
       }
     }
@@ -108,7 +121,10 @@ class _NavigationBarDrawerState extends State<NavigationBarDrawer> {
           ),
         ),
         ...destinations.map(
-          (CustomDestination destination) {
+          (CustomDestination? destination) {
+            if (destination == null) {
+              return _divider();
+            }
             return NavigationDrawerDestination(
               label: Text(destination.label),
               icon: destination.icon,
@@ -116,13 +132,17 @@ class _NavigationBarDrawerState extends State<NavigationBarDrawer> {
             );
           },
         ),
-        _divider(),
       ],
     );
   }
 
   void _onDestinationSelected(int index) {
-    context.go(destinations[index].route);
+    int correctedIndex = index;
+    for (int i = 0; i <= index; i++) {
+      if (destinations[i] == null) correctedIndex++;
+    }
+    if (destinations[correctedIndex] == null) return;
+    context.go(destinations[correctedIndex]!.route);
   }
 
   Widget _divider() {

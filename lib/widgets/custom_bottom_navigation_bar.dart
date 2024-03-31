@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:schulapp/screens/grades_screen.dart';
-import 'package:schulapp/screens/notes_screen.dart';
+import 'package:schulapp/screens/tasks_screen.dart';
 import 'package:schulapp/screens/timetable_screen.dart';
 
 class CustomBottomNavigationBar extends StatefulWidget {

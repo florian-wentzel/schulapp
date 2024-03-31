@@ -12,7 +12,7 @@ import 'package:schulapp/code_behind/todo_event.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/extensions.dart';
 import 'package:schulapp/screens/grades_screen.dart';
-import 'package:schulapp/screens/notes_screen.dart';
+import 'package:schulapp/screens/tasks_screen.dart';
 import 'package:schulapp/screens/semester/school_grade_subject_screen.dart';
 import 'package:schulapp/widgets/school_grade_subject_widget.dart';
 import 'package:schulapp/widgets/time_to_next_lesson_widget.dart';

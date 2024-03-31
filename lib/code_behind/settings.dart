@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:schulapp/code_behind/federal_state.dart';
 import 'package:schulapp/code_behind/save_manager.dart';
 import 'package:schulapp/code_behind/school_semester.dart';
 
@@ -12,17 +13,20 @@ class Settings {
       "openMainSemesterAutomatically";
   static const themeModeKey = "theme";
   static const hiddenDebugModeKey = "hiddenDebugMode";
+  static const selectedFederalStateCodeKey = "selectedFederalState";
+
+  static int decimalPlaces = 1;
 
   ///if [null] firstTimetable shown
   String? _mainTimetableName;
+  //for now we only save the api key
+  String? _selectedFederalStateCode;
   String? _mainSemesterName;
   String? _themeMode;
   double? _timetableLessonWidth;
   bool? _showLessonNumbers;
   bool? _openMainSemesterAutomatically;
   bool? _hiddenDebugMode;
-
-  static int decimalPlaces = 1;
 
   ThemeMode get themeMode {
     if (_themeMode == ThemeMode.dark.toString()) {
@@ -91,6 +95,15 @@ class Settings {
     SaveManager().saveSettings(this);
   }
 
+  String? get selectedFederalStateCode {
+    return _selectedFederalStateCode;
+  }
+
+  void setSelectedFederalStateCode(FederalState? state) {
+    _selectedFederalStateCode = state?.apiCode;
+    SaveManager().saveSettings(this);
+  }
+
   String? get mainTimetableName {
     return _mainTimetableName;
   }
@@ -118,6 +131,7 @@ class Settings {
   Settings({
     String? mainTimetableName,
     String? mainSemesterName,
+    String? selectedFederalState,
     String? themeMode,
     double? timetableLessonWidth,
     bool? showLessonNumbers,
@@ -125,6 +139,7 @@ class Settings {
     bool? hiddenDebugMode,
   })  : _mainTimetableName = mainTimetableName,
         _mainSemesterName = mainSemesterName,
+        _selectedFederalStateCode = selectedFederalState,
         _themeMode = themeMode,
         _timetableLessonWidth = timetableLessonWidth,
         _showLessonNumbers = showLessonNumbers,
@@ -135,6 +150,7 @@ class Settings {
     return {
       mainTimetableNameKey: _mainTimetableName,
       mainSemesterNameKey: _mainSemesterName,
+      selectedFederalStateCodeKey: _selectedFederalStateCode,
       themeModeKey: _themeMode,
       showLessonNumbersKey: _showLessonNumbers,
       timetableLessonWidthKey: _timetableLessonWidth,
@@ -152,6 +168,7 @@ class Settings {
   static Settings fromJson(Map<String, dynamic> json) {
     String? mainTimetableName = json[mainTimetableNameKey];
     String? mainSemesterName = json[mainSemesterNameKey];
+    String? selectedFederalState = json[selectedFederalStateCodeKey];
     String? themeMode = json[themeModeKey];
     double? timetableLessonWidth = json[timetableLessonWidthKey];
     bool? showLessonNumbers = json[showLessonNumbersKey];
@@ -173,6 +190,7 @@ class Settings {
     return Settings(
       mainTimetableName: mainTimetableName,
       mainSemesterName: mainSemesterName,
+      selectedFederalState: selectedFederalState,
       themeMode: themeMode,
       timetableLessonWidth: timetableLessonWidth,
       showLessonNumbers: showLessonNumbers,

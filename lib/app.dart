@@ -6,15 +6,14 @@ import 'package:schulapp/code_behind/todo_event.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/screens/all_timetables_screen.dart';
 import 'package:schulapp/screens/grades_screen.dart';
-import 'package:schulapp/screens/notes_screen.dart';
+import 'package:schulapp/screens/holidays_screen.dart';
+import 'package:schulapp/screens/tasks_screen.dart';
 import 'package:schulapp/screens/settings_screen.dart';
 import 'package:schulapp/screens/timetable_screen.dart';
 import 'package:schulapp/theme/theme_manager.dart';
 import 'package:schulapp/theme/themes.dart';
 import 'package:schulapp/widgets/custom_bottom_navigation_bar.dart';
 
-//wenn wir später noch ne BottomNavigationBar einfügen
-//dann kann man hier auch noch ShellRoute hinzufügen
 final _router = GoRouter(
   routes: [
     ShellRoute(
@@ -55,6 +54,10 @@ final _router = GoRouter(
           builder: (context, state) => NotesScreen(
             todoEvent: state.extra as TodoEvent?,
           ),
+        ),
+        GoRoute(
+          path: HolidaysScreen.route,
+          builder: (context, state) => const HolidaysScreen(),
         ),
         GoRoute(
           path: SettingsScreen.route,

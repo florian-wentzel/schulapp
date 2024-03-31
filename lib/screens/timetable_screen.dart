@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:go_router/go_router.dart';
+import 'package:schulapp/code_behind/holidays.dart';
+import 'package:schulapp/code_behind/holidays_manager.dart';
 import 'package:schulapp/code_behind/time_table.dart';
+import 'package:schulapp/code_behind/time_table_manager.dart';
 import 'package:schulapp/code_behind/utils.dart';
+import 'package:schulapp/screens/holidays_screen.dart';
 import 'package:schulapp/screens/time_table/create_timetable_screen.dart';
 import 'package:schulapp/screens/time_table/import_export_timetable_screen.dart';
 import 'package:schulapp/widgets/timetable_widget.dart';
@@ -30,6 +34,14 @@ class TimetableScreen extends StatefulWidget {
 }
 
 class _TimetableScreenState extends State<TimetableScreen> {
+  Holidays? currentOrNextHolidays;
+
+  @override
+  void initState() {
+    _fetchHolidays();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -137,6 +149,7 @@ class _TimetableScreenState extends State<TimetableScreen> {
                 showTodoEvents: widget.isHomeScreen,
               ),
             ),
+            _holidaysWidget(),
             // Container(
             //   height: height,
             //   color: Colors.amber,
@@ -158,6 +171,7 @@ class _TimetableScreenState extends State<TimetableScreen> {
               showTodoEvents: widget.isHomeScreen,
             ),
           ),
+          _holidaysWidget(),
           // Container(
           //   height: 120,
           //   color: Colors.amber,
@@ -165,5 +179,43 @@ class _TimetableScreenState extends State<TimetableScreen> {
         ],
       ),
     );
+  }
+
+  Widget _holidaysWidget() {
+    if (currentOrNextHolidays == null) {
+      return Container();
+    }
+    final width = MediaQuery.of(context).size.width * 0.8;
+
+    return Column(
+      children: [
+        SizedBox(
+          width: width,
+          child: InkWell(
+            onTap: () {
+              context.go(HolidaysScreen.route);
+            },
+            child: HolidaysListItemWidget(
+              holidays: currentOrNextHolidays!,
+              showBackground: false,
+              showDateInfo: false,
+            ),
+          ),
+        ),
+        const SizedBox(
+          height: 32,
+        ),
+      ],
+    );
+  }
+
+  Future<void> _fetchHolidays() async {
+    final stateApiCode = TimetableManager().settings.selectedFederalStateCode;
+    if (stateApiCode == null) return;
+
+    currentOrNextHolidays = await HolidaysManager()
+        .getCurrOrNextHolidayForState(stateApiCode: stateApiCode);
+
+    setState(() {});
   }
 }
