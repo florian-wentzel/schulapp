@@ -5,6 +5,7 @@ import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/screens/semester/edit_school_grade_subject_screen.dart';
 import 'package:schulapp/widgets/date_selection_button.dart';
 import 'package:schulapp/widgets/school_grade_subject_widget.dart';
+import 'package:fl_chart/fl_chart.dart';
 
 // ignore: must_be_immutable
 class SchoolGradeSubjectScreen extends StatefulWidget {
@@ -65,6 +66,32 @@ class _SchoolGradeSubjectScreenState extends State<SchoolGradeSubjectScreen> {
           ),
           ...[_setGradeContainer()],
           const SizedBox(
+            height: 4,
+          ),
+          SizedBox(
+            height: 300,
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: AspectRatio(
+                aspectRatio: 1.70,
+                child: Padding(
+                  padding: const EdgeInsets.only(
+                    right: 18,
+                    top: 24,
+                    bottom: 12,
+                  ),
+                  child: LineChart(
+                    _createLineChartData(),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(
             height: 8,
           ),
           _bottomRow(),
@@ -73,6 +100,89 @@ class _SchoolGradeSubjectScreenState extends State<SchoolGradeSubjectScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  LineChartData _createLineChartData() {
+    List<FlSpot> spots = [];
+    List<Grade> grades = [];
+
+    for (GradeGroup gg in widget.subject.gradeGroups) {
+      for (Grade grade in gg.grades) {
+        grades.add(grade);
+      }
+    }
+
+    grades.sort(
+      (a, b) => a.date.compareTo(b.date),
+    );
+
+    double sum = 0;
+
+    for (int i = 0; i < grades.length; i++) {
+      sum += grades[i].grade;
+      final y = sum / (i + 1);
+      spots.add(
+        FlSpot((i + 1).toDouble(), y),
+      );
+    }
+
+    Grade? endSetGrade = widget.subject.endSetGrade;
+    if (endSetGrade != null) {
+      spots.add(
+        FlSpot(spots.length.toDouble(), endSetGrade.grade.toDouble()),
+      );
+    }
+    // const darkModeColor = Color(0xff37434d);
+    // const lightModeColor = Color(0xff37434d);
+
+    // final isLightMode =
+    //     MediaQuery.of(context).platformBrightness == Brightness.light;
+
+    // final currLineColor = isLightMode ? lightModeColor : darkModeColor;
+
+    return LineChartData(
+      // lineTouchData: const LineTouchData(enabled: false),
+      gridData: FlGridData(
+        show: true,
+        drawHorizontalLine: true,
+        verticalInterval: 1,
+        horizontalInterval: 5,
+        getDrawingVerticalLine: (value) {
+          return const FlLine(
+            color: Color(0xff37434d),
+            strokeWidth: 1,
+          );
+        },
+        getDrawingHorizontalLine: (value) {
+          return const FlLine(
+            color: Color(0xff37434d),
+            strokeWidth: 1,
+          );
+        },
+      ),
+      titlesData: const FlTitlesData(
+        topTitles: AxisTitles(
+          sideTitles: SideTitles(showTitles: false),
+        ),
+        rightTitles: AxisTitles(
+          sideTitles: SideTitles(showTitles: false),
+        ),
+        bottomTitles: AxisTitles(
+          sideTitles: SideTitles(
+            interval: 1,
+            reservedSize: 30,
+            showTitles: true,
+          ),
+        ),
+      ),
+      minY: 0,
+      maxY: 15,
+      lineBarsData: [
+        LineChartBarData(
+          spots: spots,
+        ),
+      ],
     );
   }
 

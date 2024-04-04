@@ -1,3 +1,4 @@
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:schulapp/code_behind/save_manager.dart';
@@ -30,6 +31,13 @@ class _SemesterScreenState extends State<SemesterScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Semester: ${widget.semester.name}"),
+        actions: [
+          IconButton(
+            tooltip: "Show Grades Graph",
+            onPressed: _showGradesGraphPressed,
+            icon: const Icon(Icons.info),
+          ),
+        ],
       ),
       floatingActionButton: SpeedDial(
         icon: Icons.add,
@@ -346,6 +354,130 @@ class _SemesterScreenState extends State<SemesterScreen> {
     );
 
     return subjects;
+  }
+
+  void _showGradesGraphPressed() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Grades'),
+          content: SizedBox(
+            height: MediaQuery.of(context).size.height * 0.3,
+            width: MediaQuery.of(context).size.width,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.only(
+                  right: 18,
+                  top: 24,
+                  bottom: 12,
+                ),
+                child: LineChart(
+                  _createLineChartData(),
+                ),
+              ),
+            ),
+          ),
+          actions: [
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text("OK"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  LineChartData _createLineChartData() {
+    List<FlSpot> spots = [];
+    List<Grade> grades = [];
+
+    for (SchoolGradeSubject subject in widget.semester.subjects) {
+      for (GradeGroup gg in subject.gradeGroups) {
+        for (Grade grade in gg.grades) {
+          grades.add(grade);
+        }
+      }
+    }
+
+    grades.sort(
+      (a, b) => a.date.compareTo(b.date),
+    );
+
+    double sum = 0;
+
+    for (int i = 0; i < grades.length; i++) {
+      sum += grades[i].grade;
+      final y = sum / (i + 1);
+
+      spots.add(
+        FlSpot((i + 1).toDouble(), y),
+      );
+    }
+
+    // Grade? endSetGrade = widget.subject.endSetGrade;
+    // spots.add(
+    //   FlSpot(spots.length.toDouble(), endSetGrade.grade.toDouble()),
+    // );
+    // const darkModeColor = Color(0xff37434d);
+    // const lightModeColor = Color(0xff37434d);
+
+    // final isLightMode =
+    //     MediaQuery.of(context).platformBrightness == Brightness.light;
+
+    // final currLineColor = isLightMode ? lightModeColor : darkModeColor;
+
+    return LineChartData(
+      // lineTouchData: const LineTouchData(enabled: false),
+      gridData: FlGridData(
+        show: true,
+        drawHorizontalLine: true,
+        drawVerticalLine: true,
+        verticalInterval: (spots.length ~/ 10).toDouble(),
+        horizontalInterval: 5,
+        getDrawingVerticalLine: (value) {
+          return const FlLine(
+            color: Color(0xff37434d),
+            strokeWidth: 1,
+          );
+        },
+        getDrawingHorizontalLine: (value) {
+          return const FlLine(
+            color: Color(0xff37434d),
+            strokeWidth: 1,
+          );
+        },
+      ),
+      titlesData: FlTitlesData(
+        topTitles: const AxisTitles(
+          sideTitles: SideTitles(showTitles: false),
+        ),
+        rightTitles: const AxisTitles(
+          sideTitles: SideTitles(showTitles: false),
+        ),
+        bottomTitles: AxisTitles(
+          sideTitles: SideTitles(
+            interval: (spots.length ~/ 10).toDouble(),
+            reservedSize: 30,
+            showTitles: true,
+          ),
+        ),
+      ),
+      minY: 0,
+      maxY: 15,
+      lineBarsData: [
+        LineChartBarData(
+          spots: spots,
+        ),
+      ],
+    );
   }
 }
 
