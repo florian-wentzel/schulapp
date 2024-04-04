@@ -105,23 +105,41 @@ class _SchoolGradeSubjectScreenState extends State<SchoolGradeSubjectScreen> {
 
   LineChartData _createLineChartData() {
     List<FlSpot> spots = [];
-    List<Grade> grades = [];
+    //gradeGroupIndex, grade
+    List<(int, Grade)> grades = [];
 
-    for (GradeGroup gg in widget.subject.gradeGroups) {
+    SchoolGradeSubject calcSubject = SchoolGradeSubject(
+      name: "calcSubject",
+      gradeGroups: List.generate(
+        widget.subject.gradeGroups.length,
+        (index) => GradeGroup(
+          name: widget.subject.gradeGroups[index].name,
+          percent: widget.subject.gradeGroups[index].percent,
+          grades: [],
+        ),
+      ),
+    );
+
+    for (int gradeGroupIndex = 0;
+        gradeGroupIndex < widget.subject.gradeGroups.length;
+        gradeGroupIndex++) {
+      GradeGroup gg = widget.subject.gradeGroups[gradeGroupIndex];
+
       for (Grade grade in gg.grades) {
-        grades.add(grade);
+        grades.add((gradeGroupIndex, grade));
       }
     }
 
     grades.sort(
-      (a, b) => a.date.compareTo(b.date),
+      (a, b) => a.$2.date.compareTo(b.$2.date),
     );
 
-    double sum = 0;
-
     for (int i = 0; i < grades.length; i++) {
-      sum += grades[i].grade;
-      final y = sum / (i + 1);
+      final gradeTuple = grades[i];
+      int gradeGroupIndex = gradeTuple.$1;
+      Grade grade = gradeTuple.$2;
+      calcSubject.gradeGroups[gradeGroupIndex].grades.add(grade);
+      final y = calcSubject.getGradeAverage();
       spots.add(
         FlSpot((i + 1).toDouble(), y),
       );
@@ -130,7 +148,7 @@ class _SchoolGradeSubjectScreenState extends State<SchoolGradeSubjectScreen> {
     Grade? endSetGrade = widget.subject.endSetGrade;
     if (endSetGrade != null) {
       spots.add(
-        FlSpot(spots.length.toDouble(), endSetGrade.grade.toDouble()),
+        FlSpot((spots.length + 1).toDouble(), endSetGrade.grade.toDouble()),
       );
     }
     // const darkModeColor = Color(0xff37434d);

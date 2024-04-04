@@ -397,25 +397,72 @@ class _SemesterScreenState extends State<SemesterScreen> {
 
   LineChartData _createLineChartData() {
     List<FlSpot> spots = [];
-    List<Grade> grades = [];
+    SchoolSemester calcSemester = SchoolSemester(
+      name: "calcSemester",
+      subjects: List.generate(
+        widget.semester.subjects.length,
+        (subjectIndex) {
+          SchoolGradeSubject subject = widget.semester.subjects[subjectIndex];
 
-    for (SchoolGradeSubject subject in widget.semester.subjects) {
-      for (GradeGroup gg in subject.gradeGroups) {
+          return SchoolGradeSubject(
+            name: subject.name,
+            gradeGroups: List.generate(
+              subject.gradeGroups.length,
+              (gradeGroupIndex) {
+                GradeGroup gradeGroup = subject.gradeGroups[gradeGroupIndex];
+
+                return GradeGroup(
+                  name: gradeGroup.name,
+                  percent: gradeGroup.percent,
+                  grades: [],
+                );
+              },
+            ),
+          );
+        },
+      ),
+    );
+
+    //subjectIndex, schoolGradeSubjectIndex, grade
+    List<(int, int, Grade)> grades = [];
+
+    for (int subjectIndex = 0;
+        subjectIndex < widget.semester.subjects.length;
+        subjectIndex++) {
+      SchoolGradeSubject subject = widget.semester.subjects[subjectIndex];
+
+      for (int gradeGroupIndex = 0;
+          gradeGroupIndex < subject.gradeGroups.length;
+          gradeGroupIndex++) {
+        GradeGroup gg = subject.gradeGroups[gradeGroupIndex];
+
         for (Grade grade in gg.grades) {
-          grades.add(grade);
+          grades.add((subjectIndex, gradeGroupIndex, grade));
         }
+      }
+
+      if (subject.endSetGrade != null) {
+        grades.add((subjectIndex, -1, subject.endSetGrade!));
       }
     }
 
     grades.sort(
-      (a, b) => a.date.compareTo(b.date),
+      (a, b) => a.$3.date.compareTo(b.$3.date),
     );
 
-    double sum = 0;
-
     for (int i = 0; i < grades.length; i++) {
-      sum += grades[i].grade;
-      final y = sum / (i + 1);
+      int subjectIndex = grades[i].$1;
+      int gradeGroupIndex = grades[i].$2;
+      Grade grade = grades[i].$3;
+
+      if (gradeGroupIndex == -1) {
+        calcSemester.subjects[subjectIndex].endSetGrade = grade;
+      } else {
+        calcSemester.subjects[subjectIndex].gradeGroups[gradeGroupIndex].grades
+            .add(grade);
+      }
+
+      final y = calcSemester.getGradeAverage();
 
       spots.add(
         FlSpot((i + 1).toDouble(), y),
@@ -434,13 +481,15 @@ class _SemesterScreenState extends State<SemesterScreen> {
 
     // final currLineColor = isLightMode ? lightModeColor : darkModeColor;
 
+    const verticalCount = 5;
+
     return LineChartData(
       // lineTouchData: const LineTouchData(enabled: false),
       gridData: FlGridData(
         show: true,
         drawHorizontalLine: true,
         drawVerticalLine: true,
-        verticalInterval: (spots.length ~/ 10).toDouble(),
+        verticalInterval: (spots.length ~/ verticalCount).toDouble(),
         horizontalInterval: 5,
         getDrawingVerticalLine: (value) {
           return const FlLine(
@@ -464,7 +513,7 @@ class _SemesterScreenState extends State<SemesterScreen> {
         ),
         bottomTitles: AxisTitles(
           sideTitles: SideTitles(
-            interval: (spots.length ~/ 10).toDouble(),
+            interval: (spots.length ~/ verticalCount).toDouble(),
             reservedSize: 30,
             showTitles: true,
           ),

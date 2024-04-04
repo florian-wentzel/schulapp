@@ -43,7 +43,7 @@ class SchoolSemester {
     return _subjects;
   }
 
-  set subject(value) {
+  set subjects(value) {
     _subjects = value;
   }
 
