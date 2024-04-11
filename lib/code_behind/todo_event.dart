@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/notification_manager.dart';
+import 'package:schulapp/l10n/app_localizations_manager.dart';
 
 class TodoEvent {
   static const String _nameKey = "name";
@@ -46,35 +47,44 @@ class TodoEvent {
   }
 
   String getEndTimeString() {
-    if (finished) return "Finished";
+    if (finished) {
+      return AppLocalizationsManager.localizations.strFinished;
+    }
 
     Duration timeLeft = endTime.difference(DateTime.now());
 
     if (timeLeft.inDays > 0) {
-      return "In ${timeLeft.inDays} days";
+      return AppLocalizationsManager.localizations.strInXDays(timeLeft.inDays);
     } else if (timeLeft.inDays < 0) {
-      return "Expired ${timeLeft.inDays.abs()} days ago";
+      return AppLocalizationsManager.localizations
+          .strExpiredXDaysAgo(timeLeft.inDays.abs());
     }
 
     if (timeLeft.inHours > 0) {
-      return "In ${timeLeft.inHours} hours";
+      return AppLocalizationsManager.localizations
+          .strInXHours(timeLeft.inHours);
     } else if (timeLeft.inHours < 0) {
-      return "Expired ${timeLeft.inHours.abs()} hours ago";
+      return AppLocalizationsManager.localizations
+          .strExpiredXHoursAgo(timeLeft.inHours.abs());
     }
 
     if (timeLeft.inMinutes > 0) {
-      return "In ${timeLeft.inMinutes} minutes";
+      return AppLocalizationsManager.localizations
+          .strInXMinutes(timeLeft.inMinutes);
     } else if (timeLeft.inMinutes < 0) {
-      return "Expired ${timeLeft.inMinutes.abs()} minutes ago";
+      return AppLocalizationsManager.localizations
+          .strExpiredXMinutesAgo(timeLeft.inMinutes.abs());
     }
 
     if (timeLeft.inSeconds > 0) {
-      return "In ${timeLeft.inSeconds} seconds";
+      return AppLocalizationsManager.localizations
+          .strInXSeconds(timeLeft.inSeconds);
     } else if (timeLeft.inSeconds < 0) {
-      return "Expired ${timeLeft.inSeconds.abs()} seconds ago";
+      return AppLocalizationsManager.localizations
+          .strExpiredXSecondsAgo(timeLeft.inSeconds.abs());
     }
 
-    return "now";
+    return AppLocalizationsManager.localizations.strNow;
   }
 
   IconData getIcon() {
@@ -181,10 +191,10 @@ class TodoEvent {
   static String typeToString(TodoType type) {
     return switchTodoType(
       type,
-      onExam: "Exam",
-      onTest: "Test",
-      onPresentation: "Presentation",
-      onHomework: "Homework",
+      onExam: AppLocalizationsManager.localizations.strExam,
+      onTest: AppLocalizationsManager.localizations.strTest,
+      onPresentation: AppLocalizationsManager.localizations.strPresentation,
+      onHomework: AppLocalizationsManager.localizations.strHomework,
     );
   }
 
@@ -194,13 +204,13 @@ class TodoEvent {
       id: key * notificationMultiplier,
       scheduledDateTime: endTime.subtract(const Duration(days: 1)),
       title: "$linkedSubjectName : ${TodoEvent.typeToString(type)}",
-      body: "Tomorrow",
+      body: AppLocalizationsManager.localizations.strTomorrow,
     );
     return NotificationManager().scheduleNotification(
       id: key * notificationMultiplier + 1,
       scheduledDateTime: endTime,
       title: "$linkedSubjectName : ${TodoEvent.typeToString(type)}",
-      body: "now",
+      body: AppLocalizationsManager.localizations.strNow,
     );
   }
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/save_manager.dart';
 import 'package:schulapp/code_behind/school_semester.dart';
 import 'package:schulapp/code_behind/utils.dart';
+import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/widgets/school_grade_subject_widget.dart';
 
 // ignore: must_be_immutable
@@ -30,8 +31,11 @@ class _EditSchoolGradeSubjectScreenState
       appBar: AppBar(
         title: Row(
           children: [
-            const Text("Edit: "),
-            Text(widget.subject.name),
+            Text(
+              AppLocalizationsManager.localizations.strEditSchoolGradeSubjectX(
+                widget.subject.name,
+              ),
+            ),
           ],
         ),
       ),
@@ -48,7 +52,8 @@ class _EditSchoolGradeSubjectScreenState
               onTap: () async {
                 String? name = await Utils.showStringInputDialog(
                   context,
-                  hintText: "Subject name",
+                  hintText:
+                      AppLocalizationsManager.localizations.strSubjectName,
                   maxInputLength: SchoolGradeSubject.maxNameLength,
                   autofocus: true,
                 );
@@ -60,7 +65,8 @@ class _EditSchoolGradeSubjectScreenState
                   if (mounted) {
                     Utils.showInfo(
                       context,
-                      msg: "Name can not be empty!",
+                      msg: AppLocalizationsManager
+                          .localizations.strNameCanNotBeEmpty,
                       type: InfoType.error,
                     );
                   }
@@ -107,17 +113,18 @@ class _EditSchoolGradeSubjectScreenState
 
                   setState(() {});
                 },
-                child: const Column(
+                child: Column(
                   children: [
-                    SizedBox(
+                    const SizedBox(
                       height: 12,
                     ),
-                    Icon(Icons.add),
-                    SizedBox(
+                    const Icon(Icons.add),
+                    const SizedBox(
                       height: 12,
                     ),
-                    Text("Add Gradegroup"),
-                    SizedBox(
+                    Text(
+                        AppLocalizationsManager.localizations.strAddGradegroup),
+                    const SizedBox(
                       height: 12,
                     ),
                   ],
@@ -153,7 +160,7 @@ class _EditSchoolGradeSubjectScreenState
                 onTap: () async {
                   String? newName = await Utils.showStringInputDialog(
                     context,
-                    hintText: "Name",
+                    hintText: AppLocalizationsManager.localizations.strName,
                     autofocus: true,
                     maxInputLength: GradeGroup.maxNameLength,
                   );
@@ -165,7 +172,8 @@ class _EditSchoolGradeSubjectScreenState
                     if (mounted) {
                       Utils.showInfo(
                         context,
-                        msg: "Name can not be empty!",
+                        msg: AppLocalizationsManager
+                            .localizations.strNameCanNotBeEmpty,
                         type: InfoType.error,
                       );
                     }
@@ -215,7 +223,10 @@ class _EditSchoolGradeSubjectScreenState
                   onPressed: () async {
                     bool awnser = await Utils.showBoolInputDialog(
                       context,
-                      question: "Do you want to delete: ${gg.name}?",
+                      question: AppLocalizationsManager.localizations
+                          .strDoYouWantToDeleteX(
+                        gg.name,
+                      ),
                     );
                     if (!awnser) return;
 
@@ -230,13 +241,19 @@ class _EditSchoolGradeSubjectScreenState
                     if (removed) {
                       Utils.showInfo(
                         context,
-                        msg: "$name successfully removed!",
+                        msg: AppLocalizationsManager.localizations
+                            .strSuccessfullyRemoved(
+                          name,
+                        ),
                         type: InfoType.success,
                       );
                     } else {
                       Utils.showInfo(
                         context,
-                        msg: "$name could not be removed!",
+                        msg: AppLocalizationsManager.localizations
+                            .strCouldNotBeRemoved(
+                          name,
+                        ),
                         type: InfoType.error,
                       );
                     }
@@ -269,15 +286,15 @@ class _EditSchoolGradeSubjectScreenState
           child: Column(
             children: [
               Text(
-                'Add Gradegroup',
+                AppLocalizationsManager.localizations.strAddGradegroup,
                 style: Theme.of(context).textTheme.headlineMedium,
               ),
               const SizedBox(
                 height: 12,
               ),
               TextField(
-                decoration: const InputDecoration(
-                  hintText: "Name",
+                decoration: InputDecoration(
+                  hintText: AppLocalizationsManager.localizations.strName,
                 ),
                 autofocus: true,
                 maxLines: 1,
@@ -291,7 +308,9 @@ class _EditSchoolGradeSubjectScreenState
                   createPressed = true;
                   Navigator.of(context).pop();
                 },
-                child: const Text("Create"),
+                child: Text(
+                  AppLocalizationsManager.localizations.strCreate,
+                ),
               ),
             ],
           ),
@@ -305,7 +324,7 @@ class _EditSchoolGradeSubjectScreenState
       if (mounted) {
         Utils.showInfo(
           context,
-          msg: "Name can not be empty!",
+          msg: AppLocalizationsManager.localizations.strNameCanNotBeEmpty,
           type: InfoType.error,
         );
       }

@@ -3,6 +3,7 @@ import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:schulapp/code_behind/time_table.dart';
 import 'package:schulapp/code_behind/time_table_manager.dart';
 import 'package:schulapp/code_behind/utils.dart';
+import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/screens/time_table/create_timetable_screen.dart';
 import 'package:schulapp/screens/time_table/import_export_timetable_screen.dart';
 import 'package:schulapp/screens/timetable_screen.dart';
@@ -23,7 +24,9 @@ class _AllTimetablesScreenState extends State<AllTimetablesScreen> {
     return Scaffold(
       drawer: NavigationBarDrawer(selectedRoute: AllTimetablesScreen.route),
       appBar: AppBar(
-        title: const Text("Timetables"),
+        title: Text(
+          AppLocalizationsManager.localizations.strTimetables,
+        ),
       ),
       floatingActionButton: SpeedDial(
         icon: Icons.add,
@@ -40,7 +43,7 @@ class _AllTimetablesScreenState extends State<AllTimetablesScreen> {
             child: const Icon(Icons.add),
             backgroundColor: Colors.indigo,
             foregroundColor: Colors.white,
-            label: 'Create new timetable',
+            label: AppLocalizationsManager.localizations.strCreateTimetable,
             onTap: () async {
               await createNewTimetable(context);
 
@@ -53,7 +56,7 @@ class _AllTimetablesScreenState extends State<AllTimetablesScreen> {
             child: const Icon(Icons.import_export),
             backgroundColor: Colors.lightBlue,
             foregroundColor: Colors.white,
-            label: 'Import / Export',
+            label: AppLocalizationsManager.localizations.strImportExport,
             onTap: () async {
               await Navigator.of(context).push(
                 MaterialPageRoute(
@@ -77,7 +80,9 @@ class _AllTimetablesScreenState extends State<AllTimetablesScreen> {
             await createNewTimetable(context);
             setState(() {});
           },
-          child: const Text("Create a Timetable"),
+          child: Text(
+            AppLocalizationsManager.localizations.strCreateTimetable,
+          ),
         ),
       );
     }
@@ -102,7 +107,9 @@ class _AllTimetablesScreenState extends State<AllTimetablesScreen> {
           MaterialPageRoute(
             builder: (context) => TimetableScreen(
               timetable: tt,
-              title: "Timetable: ${tt.name}",
+              title: AppLocalizationsManager.localizations.strTimetableWithName(
+                tt.name,
+              ),
             ),
           ),
         );
@@ -144,7 +151,10 @@ class _AllTimetablesScreenState extends State<AllTimetablesScreen> {
             onPressed: () async {
               bool delete = await Utils.showBoolInputDialog(
                 context,
-                question: "Do you want to delete ${tt.name}?",
+                question:
+                    AppLocalizationsManager.localizations.strDoYouWantToDeleteX(
+                  tt.name,
+                ),
               );
 
               if (!delete) return;
@@ -159,13 +169,19 @@ class _AllTimetablesScreenState extends State<AllTimetablesScreen> {
                 Utils.showInfo(
                   context,
                   type: InfoType.success,
-                  msg: "${tt.name} successfully removed!",
+                  msg: AppLocalizationsManager.localizations
+                      .strSuccessfullyRemoved(
+                    tt.name,
+                  ),
                 );
               } else {
                 Utils.showInfo(
                   context,
                   type: InfoType.error,
-                  msg: "${tt.name} could not be removed!",
+                  msg: AppLocalizationsManager.localizations
+                      .strCouldNotBeRemoved(
+                    tt.name,
+                  ),
                 );
               }
             },

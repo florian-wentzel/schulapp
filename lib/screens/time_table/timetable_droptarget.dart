@@ -6,6 +6,7 @@ import 'package:schulapp/code_behind/school_time.dart';
 import 'package:schulapp/code_behind/time_table.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/extensions.dart';
+import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/widgets/custom_pop_up.dart';
 
 // ignore: must_be_immutable
@@ -38,11 +39,11 @@ class _TimetableDroptargetState extends State<TimetableDroptarget> {
     //füge Zeiten hinzu
     dataColumn.insert(
       0,
-      const DataColumn(
+      DataColumn(
         label: Expanded(
           child: Center(
             child: Text(
-              "Times",
+              AppLocalizationsManager.localizations.strTimes,
               textAlign: TextAlign.center,
             ),
           ),
@@ -114,11 +115,14 @@ class _TimetableDroptargetState extends State<TimetableDroptarget> {
                   );
                 },
                 DragTarget(
-                  onWillAccept: (SchoolLessonPrefab? schoolLessonPrefab) {
-                    return schoolLessonPrefab != null;
+                  onWillAcceptWithDetails:
+                      (DragTargetDetails<SchoolLessonPrefab?>
+                          schoolLessonPrefab) {
+                    return schoolLessonPrefab.data != null;
                   },
-                  onAccept: (SchoolLessonPrefab schoolLessonPrefab) {
-                    lesson.setFromPrefab(schoolLessonPrefab);
+                  onAcceptWithDetails: (DragTargetDetails<SchoolLessonPrefab>
+                      schoolLessonPrefab) {
+                    lesson.setFromPrefab(schoolLessonPrefab.data);
                   },
                   builder: (context, accepted, rejected) {
                     const targetAlpha = 220;
@@ -297,7 +301,7 @@ class _CustomPopUpCreateTimetableState
           onTap: () async {
             String? input = await Utils.showStringInputDialog(
               context,
-              hintText: "Enter Subject name",
+              hintText: AppLocalizationsManager.localizations.strSubjectName,
               autofocus: true,
               maxInputLength: SchoolLesson.maxNameLength,
             );
@@ -309,7 +313,8 @@ class _CustomPopUpCreateTimetableState
               if (mounted) {
                 Utils.showInfo(
                   context,
-                  msg: "Name can not be empty!",
+                  msg: AppLocalizationsManager
+                      .localizations.strNameCanNotBeEmpty,
                   type: InfoType.error,
                 );
               }
@@ -335,8 +340,9 @@ class _CustomPopUpCreateTimetableState
         ),
         GestureDetector(
           onTap: () async {
-            Color? input = await Utils.showColorInputDialog(context,
-                hintText: "Select a color");
+            Color? input = await Utils.showColorInputDialog(
+              context,
+            );
 
             if (input == null) return;
 
@@ -421,19 +427,21 @@ class _CustomPopUpCreateTimetableState
             onTap: () async {
               String? input = await Utils.showStringInputDialog(
                 context,
-                hintText: "Enter a Room number",
+                hintText: AppLocalizationsManager.localizations.strRoom,
                 maxInputLength: SchoolLesson.maxRoomLength,
                 autofocus: true,
               );
 
               if (input == null) return;
-              input = input.trim(); //mach so leerzeichen weg und so
+              input = input.trim();
 
               if (input.isEmpty && mounted) {
                 bool? update = await Utils.showBoolInputDialog(
                   context,
-                  question:
-                      "Warning: your room name is empty do you want to continue?",
+                  question: AppLocalizationsManager.localizations
+                      .strWarningXIsEmptyContinue(
+                    AppLocalizationsManager.localizations.strRoom,
+                  ),
                 );
                 if (!update) {
                   return;
@@ -444,7 +452,7 @@ class _CustomPopUpCreateTimetableState
               setState(() {});
             },
             child: Text(
-              "Room: $_room",
+              AppLocalizationsManager.localizations.strRoomX(_room),
               style: TextStyle(
                 color: Theme.of(context).textTheme.bodyLarge?.color ??
                     Colors.white,
@@ -458,7 +466,7 @@ class _CustomPopUpCreateTimetableState
           onTap: () async {
             String? input = await Utils.showStringInputDialog(
               context,
-              hintText: "Enter a Teacher",
+              hintText: AppLocalizationsManager.localizations.strTeacher,
               autofocus: true,
             );
 
@@ -468,8 +476,10 @@ class _CustomPopUpCreateTimetableState
             if (input.isEmpty && mounted) {
               bool? update = await Utils.showBoolInputDialog(
                 context,
-                question:
-                    "Warning: Teacher name is empty do you want to continue?",
+                question: AppLocalizationsManager.localizations
+                    .strWarningXIsEmptyContinue(
+                  AppLocalizationsManager.localizations.strTeacher,
+                ),
               );
               if (!update) {
                 return;
@@ -645,7 +655,7 @@ class _CustomPopUpChangeSubjectTimeState
                 } else {
                   Utils.showInfo(
                     context,
-                    msg: "Time is not valid.",
+                    msg: AppLocalizationsManager.localizations.strTimeNotValid,
                     type: InfoType.error,
                   );
                 }

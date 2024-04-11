@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/screens/all_timetables_screen.dart';
 import 'package:schulapp/screens/grades_screen.dart';
 import 'package:schulapp/screens/holidays_screen.dart';
@@ -34,38 +35,38 @@ class NavigationBarDrawer extends StatefulWidget {
 class _NavigationBarDrawerState extends State<NavigationBarDrawer> {
   final List<CustomDestination?> destinations = <CustomDestination?>[
     CustomDestination(
-      label: "Home",
+      label: AppLocalizationsManager.localizations.strStartScreen,
       route: TimetableScreen.route,
       icon: const Icon(Icons.home_outlined),
       selectedIcon: const Icon(Icons.home),
     ),
     CustomDestination(
-      label: "Timetables",
+      label: AppLocalizationsManager.localizations.strTimetables,
       route: AllTimetablesScreen.route,
       icon: const Icon(Icons.dataset_outlined),
       selectedIcon: const Icon(Icons.dataset),
     ),
     CustomDestination(
-      label: "Grades",
+      label: AppLocalizationsManager.localizations.strGrades,
       route: GradesScreen.route,
       icon: const Icon(Icons.school_outlined),
       selectedIcon: const Icon(Icons.school),
     ),
     CustomDestination(
-      label: "Tasks", // / Notes",
+      label: AppLocalizationsManager.localizations.strTasks,
       route: NotesScreen.route,
       icon: const Icon(Icons.assignment_outlined),
       selectedIcon: const Icon(Icons.assignment),
     ),
     CustomDestination(
-      label: "Holidays",
+      label: AppLocalizationsManager.localizations.strHolidays,
       route: HolidaysScreen.route,
       icon: const Icon(Icons.card_giftcard_outlined),
       selectedIcon: const Icon(Icons.card_giftcard),
     ),
     null,
     CustomDestination(
-      label: "Settings",
+      label: AppLocalizationsManager.localizations.strSettings,
       route: SettingsScreen.route,
       icon: const Icon(Icons.settings_outlined),
       selectedIcon: const Icon(Icons.settings),

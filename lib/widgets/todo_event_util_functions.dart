@@ -3,6 +3,7 @@ import 'package:schulapp/code_behind/time_table.dart';
 import 'package:schulapp/code_behind/time_table_manager.dart';
 import 'package:schulapp/code_behind/todo_event.dart';
 import 'package:schulapp/code_behind/utils.dart';
+import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/widgets/date_selection_button.dart';
 import 'package:schulapp/widgets/time_selection_button.dart';
 
@@ -76,13 +77,13 @@ Future<TodoEvent?> createNewTodoEventSheet(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'Create new Task / Note\n$linkedSubjectName',
+                "${AppLocalizationsManager.localizations.strCreateATask}\n$linkedSubjectName",
                 style: Theme.of(context).textTheme.headlineMedium,
                 textAlign: TextAlign.center,
               ),
               TextField(
-                decoration: const InputDecoration(
-                  hintText: "Topic",
+                decoration: InputDecoration(
+                  hintText: AppLocalizationsManager.localizations.strTopic,
                 ),
                 maxLines: 1,
                 maxLength: maxNameLength,
@@ -93,8 +94,8 @@ Future<TodoEvent?> createNewTodoEventSheet(
                 height: 12,
               ),
               TextField(
-                decoration: const InputDecoration(
-                  hintText: "Extra info",
+                decoration: InputDecoration(
+                  hintText: AppLocalizationsManager.localizations.strExtraInfo,
                 ),
                 maxLength: maxDescriptionLength,
                 maxLines: 5,
@@ -118,7 +119,7 @@ Future<TodoEvent?> createNewTodoEventSheet(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          "End date:",
+                          AppLocalizationsManager.localizations.strEndDate,
                           style: Theme.of(context).textTheme.bodyLarge,
                           textAlign: TextAlign.left,
                         ),
@@ -177,7 +178,7 @@ Future<TodoEvent?> createNewTodoEventSheet(
                       padding: const EdgeInsets.symmetric(horizontal: 2),
                       child: customButton(
                         context,
-                        text: "Exam",
+                        text: AppLocalizationsManager.localizations.strExam,
                         icon: TodoEvent.examIcon,
                         onTap: () {
                           type = TodoType.exam;
@@ -191,7 +192,7 @@ Future<TodoEvent?> createNewTodoEventSheet(
                       padding: const EdgeInsets.symmetric(horizontal: 2),
                       child: customButton(
                         context,
-                        text: "Test",
+                        text: AppLocalizationsManager.localizations.strTest,
                         icon: TodoEvent.testIcon,
                         onTap: () {
                           type = TodoType.test;
@@ -205,7 +206,8 @@ Future<TodoEvent?> createNewTodoEventSheet(
                       padding: const EdgeInsets.symmetric(horizontal: 2),
                       child: customButton(
                         context,
-                        text: "Presentation",
+                        text: AppLocalizationsManager
+                            .localizations.strPresentation,
                         icon: TodoEvent.presentationIcon,
                         onTap: () {
                           type = TodoType.presentation;
@@ -219,7 +221,7 @@ Future<TodoEvent?> createNewTodoEventSheet(
                       padding: const EdgeInsets.symmetric(horizontal: 2),
                       child: customButton(
                         context,
-                        text: "Homework",
+                        text: AppLocalizationsManager.localizations.strHomework,
                         icon: TodoEvent.homeworkIcon,
                         onTap: () {
                           type = TodoType.homework;
@@ -237,7 +239,7 @@ Future<TodoEvent?> createNewTodoEventSheet(
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
-                child: const Text("Cancel"),
+                child: Text(AppLocalizationsManager.localizations.strCancel),
               ),
             ],
           ),

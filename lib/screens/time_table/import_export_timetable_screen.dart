@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/screens/time_table/export_timetable_page.dart';
 import 'package:schulapp/screens/time_table/import_timetable_page.dart';
 // import 'package:share_plus/share_plus.dart';
@@ -16,9 +17,13 @@ class _ImportExportTimetableScreenState
   static const animDuration = Duration(milliseconds: 350);
   static const animCurve = Curves.easeOut;
 
-  static const importExportString = "Import / Export Timetable";
-  static const importString = "Import Timetable";
-  static const exportString = "Export Timetable";
+  static final importExportString =
+      AppLocalizationsManager.localizations.strImportExportTimetable;
+  static final importString =
+      AppLocalizationsManager.localizations.strImportTimetable;
+  static final exportString =
+      AppLocalizationsManager.localizations.strExportTimetable;
+
   static const homePageIndex = 1;
 
   final PageController _pageController = PageController(
@@ -87,7 +92,9 @@ class _ImportExportTimetableScreenState
             setState(() {});
             _goToPage(0);
           },
-          child: const Text("Import"),
+          child: Text(
+            AppLocalizationsManager.localizations.strImport,
+          ),
         ),
         ElevatedButton(
           onPressed: () {
@@ -95,7 +102,9 @@ class _ImportExportTimetableScreenState
             setState(() {});
             _goToPage(2);
           },
-          child: const Text("Export"),
+          child: Text(
+            AppLocalizationsManager.localizations.strExport,
+          ),
         ),
       ],
     );

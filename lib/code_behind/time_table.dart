@@ -5,6 +5,7 @@ import 'package:schulapp/code_behind/school_lesson.dart';
 import 'package:schulapp/code_behind/school_time.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/extensions.dart';
+import 'package:schulapp/l10n/app_localizations_manager.dart';
 
 class Timetable {
   static const maxNameLength = 15;
@@ -98,7 +99,7 @@ class Timetable {
 
     return [
       SchoolDay(
-        name: "Monday",
+        name: AppLocalizationsManager.localizations.strMonday,
         lessons: List.generate(
           hoursCount,
           (index) => SchoolLesson(
@@ -110,7 +111,7 @@ class Timetable {
         ),
       ),
       SchoolDay(
-        name: "Tuesday",
+        name: AppLocalizationsManager.localizations.strTuesday,
         lessons: List.generate(
           hoursCount,
           (index) => SchoolLesson(
@@ -122,7 +123,7 @@ class Timetable {
         ),
       ),
       SchoolDay(
-        name: "Wednesday",
+        name: AppLocalizationsManager.localizations.strWednesday,
         lessons: List.generate(
           hoursCount,
           (index) => SchoolLesson(
@@ -134,7 +135,7 @@ class Timetable {
         ),
       ),
       SchoolDay(
-        name: "Thursday",
+        name: AppLocalizationsManager.localizations.strThursday,
         lessons: List.generate(
           hoursCount,
           (index) => SchoolLesson(
@@ -146,7 +147,7 @@ class Timetable {
         ),
       ),
       SchoolDay(
-        name: "Friday",
+        name: AppLocalizationsManager.localizations.strFriday,
         lessons: List.generate(
           hoursCount,
           (index) => SchoolLesson(
@@ -174,10 +175,14 @@ class Timetable {
     value = value.trim();
 
     if (value.isEmpty) {
-      throw Exception("Name can not be empty!");
+      throw Exception(
+        AppLocalizationsManager.localizations.strNameCanNotBeEmpty,
+      );
     }
     if (value.length > maxNameLength) {
-      throw Exception("Name is to long!");
+      throw Exception(
+        AppLocalizationsManager.localizations.strNameIsToLong,
+      );
     }
     _name = value;
   }

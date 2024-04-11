@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/todo_event.dart';
 import 'package:schulapp/code_behind/time_table_manager.dart';
 import 'package:schulapp/code_behind/utils.dart';
+import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/widgets/navigation_bar_drawer.dart';
 import 'package:schulapp/widgets/timetable_util_functions.dart';
 import 'package:schulapp/widgets/todo_event_list_item_widget.dart';
@@ -72,20 +73,23 @@ class _NotesScreenState extends State<NotesScreen> {
     return Scaffold(
       drawer: NavigationBarDrawer(selectedRoute: NotesScreen.route),
       appBar: AppBar(
-        title: const Text("Tasks" /* / Notes"*/),
+        title: Text(
+          AppLocalizationsManager.localizations.strTasks,
+        ),
         actions: !isMultiselectionActive
             ? null
             : [
                 IconButton(
                   onPressed: _unselectAllItems,
-                  tooltip: "unselect all items",
+                  tooltip: AppLocalizationsManager.localizations.strCancel,
                   icon: const Icon(
                     Icons.cancel,
                   ),
                 ),
                 IconButton(
                   onPressed: _finishOrUnfinishSelectedEvents,
-                  tooltip: "mark as (un)finished",
+                  tooltip:
+                      AppLocalizationsManager.localizations.strMarkAsUNfinished,
                   icon: const Icon(
                     Icons.check,
                     color: Colors.green,
@@ -93,7 +97,8 @@ class _NotesScreenState extends State<NotesScreen> {
                 ),
                 IconButton(
                   onPressed: _deleteSelectedEvents,
-                  tooltip: "delete selected items",
+                  tooltip: AppLocalizationsManager
+                      .localizations.strDeleteSelectedItems,
                   icon: const Icon(
                     Icons.delete,
                     color: Colors.red,
@@ -114,7 +119,8 @@ class _NotesScreenState extends State<NotesScreen> {
           onPressed: () async {
             String? selectedSubjectName = await showSelectSubjectNameSheet(
               context,
-              title: "Select Subject to add Task", // Or Note!
+              title: AppLocalizationsManager
+                  .localizations.strSelectSubjectToAddTaskTo,
             );
 
             if (!mounted) return;
@@ -133,7 +139,9 @@ class _NotesScreenState extends State<NotesScreen> {
 
             setState(() {});
           },
-          child: const Text("Create a Task / Note"),
+          child: Text(
+            AppLocalizationsManager.localizations.strCreateATask,
+          ),
         ),
       );
     }
@@ -272,7 +280,8 @@ class _NotesScreenState extends State<NotesScreen> {
       onPressed: () async {
         String? selectedSubjectName = await showSelectSubjectNameSheet(
           context,
-          title: "Select Subject to add Task", //Or Note!
+          title:
+              AppLocalizationsManager.localizations.strSelectSubjectToAddTaskTo,
         );
 
         if (selectedSubjectName == null) return;
@@ -300,19 +309,19 @@ class _NotesScreenState extends State<NotesScreen> {
 
     final buttons = [
       Tuple2<String, List<TodoEvent> Function(List<TodoEvent>)>(
-        "Select all finished Tasks",
+        AppLocalizationsManager.localizations.strSelectAllFinishedTasks,
         (todoEvents) {
           return todoEvents.where((element) => element.finished).toList();
         },
       ),
       Tuple2<String, List<TodoEvent> Function(List<TodoEvent>)>(
-        "Select all expired Tasks",
+        AppLocalizationsManager.localizations.strSelectAllExpiredTasks,
         (todoEvents) {
           return todoEvents.where((element) => element.isExpired()).toList();
         },
       ),
       Tuple2<String, List<TodoEvent> Function(List<TodoEvent>)>(
-        "Select all Tasks",
+        AppLocalizationsManager.localizations.strSelectAllTasks,
         (todoEvents) {
           return todoEvents;
         },
@@ -350,14 +359,17 @@ class _NotesScreenState extends State<NotesScreen> {
   Future<void> _finishOrUnfinishSelectedEvents() async {
     if (!isMultiselectionActive) return;
     final List<String> finishOrUnfinisString = [
-      "finish",
-      "unfinish",
+      AppLocalizationsManager.localizations.strFinish,
+      AppLocalizationsManager.localizations.strUnfinish,
     ];
     String finishString = finishOrUnfinisString[_finishSelectedEvents ? 0 : 1];
     bool finishOrUnfinish = await Utils.showBoolInputDialog(
       context,
       question:
-          "Do you want to $finishString ${selectedTodoEvents.length} tasks?",
+          AppLocalizationsManager.localizations.strDoYouWantToFinishXTasks(
+        selectedTodoEvents.length,
+        finishString,
+      ),
     );
     if (!finishOrUnfinish) return;
 
@@ -388,7 +400,10 @@ class _NotesScreenState extends State<NotesScreen> {
 
     bool delete = await Utils.showBoolInputDialog(
       context,
-      question: "Do you want to delete ${selectedTodoEvents.length} tasks?",
+      question:
+          AppLocalizationsManager.localizations.strDoYouWantToDeleteXTasks(
+        selectedTodoEvents.length,
+      ),
     );
 
     if (!delete) return;

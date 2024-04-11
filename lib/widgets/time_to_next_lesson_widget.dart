@@ -5,6 +5,7 @@ import 'package:schulapp/code_behind/school_time.dart';
 import 'package:schulapp/code_behind/time_table.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/extensions.dart';
+import 'package:schulapp/l10n/app_localizations_manager.dart';
 
 // ignore: must_be_immutable
 class TimeToNextLessonWidget extends StatefulWidget {
@@ -66,8 +67,8 @@ class _TimeToNextLessonWidgetState extends State<TimeToNextLessonWidget> {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          const Text(
-            "Time",
+          Text(
+            AppLocalizationsManager.localizations.strTimes,
             textAlign: TextAlign.center,
           ),
           Visibility(

@@ -7,6 +7,7 @@ import 'package:schulapp/code_behind/save_manager.dart';
 import 'package:schulapp/code_behind/time_table.dart';
 import 'package:schulapp/code_behind/time_table_manager.dart';
 import 'package:schulapp/code_behind/utils.dart';
+import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/screens/timetable_screen.dart';
 
 // ignore: must_be_immutable
@@ -31,7 +32,7 @@ class EexportTimetablePageState extends State<ExportTimetablePage> {
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         Text(
-          "Select timetable to export: ",
+          AppLocalizationsManager.localizations.strSelectTimetableToExport,
           style: Theme.of(context).textTheme.headlineLarge,
           textAlign: TextAlign.center,
         ),
@@ -40,7 +41,7 @@ class EexportTimetablePageState extends State<ExportTimetablePage> {
           onPressed: () {
             widget.goToHomePage();
           },
-          child: const Text("Back"),
+          child: Text(AppLocalizationsManager.localizations.strBack),
         ),
         const SizedBox(
           height: 16,
@@ -80,7 +81,9 @@ class EexportTimetablePageState extends State<ExportTimetablePage> {
               MaterialPageRoute(
                 builder: (context) => TimetableScreen(
                   timetable: timetable,
-                  title: "Timetable: ${timetable.name}",
+                  title: AppLocalizationsManager.localizations.strTimetableX(
+                    timetable.name,
+                  ),
                 ),
               ),
             );
@@ -101,7 +104,10 @@ class EexportTimetablePageState extends State<ExportTimetablePage> {
   Future<void> _exportTimetable(int index) async {
     Timetable timetable = TimetableManager().timetables[index];
 
-    Utils.showInfo(context, msg: "Exporting..");
+    Utils.showInfo(
+      context,
+      msg: AppLocalizationsManager.localizations.strExporting,
+    );
 
     try {
       SaveManager().cleanExports();
@@ -143,13 +149,14 @@ class EexportTimetablePageState extends State<ExportTimetablePage> {
       if (Platform.isAndroid || Platform.isIOS) {
         Utils.showInfo(
           context,
-          msg: "File saved in Downloads Directory.",
+          msg: AppLocalizationsManager
+              .localizations.strFileSavedInDownloadsDirectory,
           type: InfoType.success,
         );
       } else {
         Utils.showInfo(
           context,
-          msg: "Exporting Successful!",
+          msg: AppLocalizationsManager.localizations.strExportingSuccessful,
           type: InfoType.success,
         );
       }

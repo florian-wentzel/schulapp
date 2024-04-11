@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:archive/archive_io.dart';
 import 'package:path/path.dart';
+import 'package:schulapp/l10n/app_localizations_manager.dart';
 
 class ZipManager {
   static Directory zipToFolder(File selectedFile, Directory exportDir) {
@@ -35,7 +36,9 @@ class ZipManager {
     void Function(double)? onProgress,
   }) {
     if (!selectedDir.existsSync()) {
-      throw Exception("ZIP ERROR: SelectedDir does not Exist!");
+      throw Exception(
+        AppLocalizationsManager.localizations.strSelectedDirDoesNotExist,
+      );
     }
 
     var encoder = ZipFileEncoder();

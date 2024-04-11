@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/school_semester.dart';
 import 'package:schulapp/code_behind/time_table_manager.dart';
 import 'package:schulapp/code_behind/utils.dart';
+import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/screens/semester/semester_screen.dart';
 import 'package:schulapp/widgets/navigation_bar_drawer.dart';
 import 'package:schulapp/widgets/timetable_util_functions.dart';
@@ -45,7 +46,9 @@ class _GradesScreenState extends State<GradesScreen> {
     return Scaffold(
       drawer: NavigationBarDrawer(selectedRoute: GradesScreen.route),
       appBar: AppBar(
-        title: const Text("Grades"),
+        title: Text(
+          AppLocalizationsManager.localizations.strGrades,
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.add),
@@ -80,7 +83,9 @@ class _GradesScreenState extends State<GradesScreen> {
 
             setState(() {});
           },
-          child: const Text("Create a Semester"),
+          child: Text(
+            AppLocalizationsManager.localizations.strCreateSemester,
+          ),
         ),
       );
     }
@@ -161,7 +166,10 @@ class _GradesScreenState extends State<GradesScreen> {
               onPressed: () async {
                 SchoolSemester? editedSemester = await showCreateSemesterSheet(
                   context,
-                  headingText: "Edit Semester: ${semester.name}",
+                  headingText:
+                      AppLocalizationsManager.localizations.strEditSemester(
+                    semester.name,
+                  ),
                   initalNameValue: semester.name,
                 );
                 if (editedSemester == null) return;
@@ -182,7 +190,10 @@ class _GradesScreenState extends State<GradesScreen> {
               onPressed: () async {
                 bool delete = await Utils.showBoolInputDialog(
                   context,
-                  question: "Do you want to delete ${semester.name}?",
+                  question: AppLocalizationsManager.localizations
+                      .strDoYouWantToDeleteX(
+                    semester.name,
+                  ),
                 );
 
                 if (!delete) return;
@@ -197,13 +208,19 @@ class _GradesScreenState extends State<GradesScreen> {
                   Utils.showInfo(
                     context,
                     type: InfoType.success,
-                    msg: "${semester.name} successfully removed!",
+                    msg: AppLocalizationsManager.localizations
+                        .strSuccessfullyRemoved(
+                      semester.name,
+                    ),
                   );
                 } else {
                   Utils.showInfo(
                     context,
                     type: InfoType.error,
-                    msg: "${semester.name} could not be removed!",
+                    msg: AppLocalizationsManager.localizations
+                        .strCouldNotBeRemoved(
+                      semester.name,
+                    ),
                   );
                 }
               },

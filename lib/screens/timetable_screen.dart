@@ -6,6 +6,7 @@ import 'package:schulapp/code_behind/holidays_manager.dart';
 import 'package:schulapp/code_behind/time_table.dart';
 import 'package:schulapp/code_behind/time_table_manager.dart';
 import 'package:schulapp/code_behind/utils.dart';
+import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/screens/holidays_screen.dart';
 import 'package:schulapp/screens/time_table/create_timetable_screen.dart';
 import 'package:schulapp/screens/time_table/import_export_timetable_screen.dart';
@@ -66,7 +67,7 @@ class _TimetableScreenState extends State<TimetableScreen> {
             child: const Icon(Icons.add),
             backgroundColor: Colors.indigo,
             foregroundColor: Colors.white,
-            label: 'Create new timetable',
+            label: AppLocalizationsManager.localizations.strCreateTimetable,
             onTap: () async {
               await createNewTimetable(context);
 
@@ -80,7 +81,7 @@ class _TimetableScreenState extends State<TimetableScreen> {
             visible: widget.timetable != null,
             backgroundColor: Colors.blueAccent,
             foregroundColor: Colors.white,
-            label: 'Edit',
+            label: AppLocalizationsManager.localizations.strEdit,
             onTap: () async {
               if (widget.timetable == null) return;
 
@@ -99,7 +100,7 @@ class _TimetableScreenState extends State<TimetableScreen> {
             child: const Icon(Icons.import_export),
             backgroundColor: Colors.lightBlue,
             foregroundColor: Colors.white,
-            label: 'Import / Export',
+            label: AppLocalizationsManager.localizations.strImportExport,
             onTap: () async {
               await Navigator.of(context).push(
                 MaterialPageRoute(
@@ -124,7 +125,9 @@ class _TimetableScreenState extends State<TimetableScreen> {
             if (!mounted) return;
             context.go(TimetableScreen.route);
           },
-          child: const Text("Create a Timetable"),
+          child: Text(
+            AppLocalizationsManager.localizations.strCreateTimetable,
+          ),
         ),
       );
     }

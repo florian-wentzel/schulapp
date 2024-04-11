@@ -10,6 +10,7 @@ import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/time_table.dart';
 import 'package:schulapp/code_behind/time_table_manager.dart';
 import 'package:schulapp/code_behind/zip_manager.dart';
+import 'package:schulapp/l10n/app_localizations_manager.dart';
 
 class SaveManager {
   static final SaveManager _instance = SaveManager._privateConstructor();
@@ -386,7 +387,9 @@ class SaveManager {
 
     if (!timetableDir.existsSync()) {
       throw Exception(
-        "timetable dir could not be created: ${timetableDir.path}",
+        AppLocalizationsManager.localizations.strTimetableDirNotCreated(
+          timetableDir.path,
+        ),
       );
     }
 

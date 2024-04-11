@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/save_manager.dart';
 import 'package:schulapp/code_behind/time_table.dart';
 import 'package:schulapp/code_behind/utils.dart';
+import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/screens/time_table/create_timetable_screen.dart';
 
 // ignore: must_be_immutable
@@ -29,8 +30,8 @@ class _ImportTimetablePageState extends State<ImportTimetablePage> {
         const Spacer(),
         ElevatedButton(
           onPressed: _selectTimetable,
-          child: const Text(
-            "Select timetable file",
+          child: Text(
+            AppLocalizationsManager.localizations.strSelectTimetableFile,
           ),
         ),
         const Spacer(),
@@ -38,7 +39,9 @@ class _ImportTimetablePageState extends State<ImportTimetablePage> {
           onPressed: () {
             widget.goToHomePage();
           },
-          child: const Text("Back"),
+          child: Text(
+            AppLocalizationsManager.localizations.strBack,
+          ),
         ),
         const SizedBox(
           height: 16,
@@ -69,7 +72,7 @@ class _ImportTimetablePageState extends State<ImportTimetablePage> {
       if (mounted) {
         Utils.showInfo(
           context,
-          msg: "No file Selected!",
+          msg: AppLocalizationsManager.localizations.strNoFileSelected,
           type: InfoType.error,
         );
       }
@@ -81,7 +84,8 @@ class _ImportTimetablePageState extends State<ImportTimetablePage> {
       if (mounted) {
         Utils.showInfo(
           context,
-          msg: "Selected file does not exist!",
+          msg:
+              AppLocalizationsManager.localizations.strSelectedFileDoesNotExist,
           type: InfoType.error,
         );
       }
@@ -91,7 +95,7 @@ class _ImportTimetablePageState extends State<ImportTimetablePage> {
     if (mounted) {
       Utils.showInfo(
         context,
-        msg: "Importing timetable...",
+        msg: AppLocalizationsManager.localizations.strImportingTimetable,
       );
     }
     Timetable? timetable;
@@ -103,13 +107,13 @@ class _ImportTimetablePageState extends State<ImportTimetablePage> {
       if (timetable == null) {
         Utils.showInfo(
           context,
-          msg: "Importing failed!",
+          msg: AppLocalizationsManager.localizations.strImportingFailed,
           type: InfoType.error,
         );
       } else {
         Utils.showInfo(
           context,
-          msg: "Importing successful...",
+          msg: AppLocalizationsManager.localizations.strImportSuccessful,
           type: InfoType.success,
         );
       }

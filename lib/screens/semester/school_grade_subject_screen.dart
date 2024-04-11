@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/save_manager.dart';
 import 'package:schulapp/code_behind/school_semester.dart';
 import 'package:schulapp/code_behind/utils.dart';
+import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/screens/semester/edit_school_grade_subject_screen.dart';
 import 'package:schulapp/widgets/date_selection_button.dart';
 import 'package:schulapp/widgets/school_grade_subject_widget.dart';
@@ -30,8 +31,11 @@ class _SchoolGradeSubjectScreenState extends State<SchoolGradeSubjectScreen> {
       appBar: AppBar(
         title: Row(
           children: [
-            const Text("Subject: "),
-            Text(widget.subject.name),
+            Text(
+              AppLocalizationsManager.localizations.strSchoolGradeSubjectX(
+                widget.subject.name,
+              ),
+            ),
           ],
         ),
       ),
@@ -223,17 +227,17 @@ class _SchoolGradeSubjectScreenState extends State<SchoolGradeSubjectScreen> {
 
             SaveManager().saveSemester(widget.semester);
           },
-          child: const Column(
+          child: Column(
             children: [
-              SizedBox(
+              const SizedBox(
                 height: 12,
               ),
-              Icon(Icons.edit),
-              SizedBox(
+              const Icon(Icons.edit),
+              const SizedBox(
                 height: 12,
               ),
-              Text("Edit Subject"),
-              SizedBox(
+              Text(AppLocalizationsManager.localizations.strEditSubject),
+              const SizedBox(
                 height: 12,
               ),
             ],
@@ -245,7 +249,10 @@ class _SchoolGradeSubjectScreenState extends State<SchoolGradeSubjectScreen> {
 
             bool value = await Utils.showBoolInputDialog(
               context,
-              question: "Do you want to delete: ${widget.subject.name}?",
+              question:
+                  AppLocalizationsManager.localizations.strDoYouWantToDeleteX(
+                widget.subject.name,
+              ),
             );
 
             if (!value) return;
@@ -261,33 +268,38 @@ class _SchoolGradeSubjectScreenState extends State<SchoolGradeSubjectScreen> {
             if (removed) {
               Utils.showInfo(
                 context,
-                msg: "$name was successfully removed!",
+                msg: AppLocalizationsManager.localizations
+                    .strSuccessfullyRemoved(
+                  name,
+                ),
                 type: InfoType.success,
               );
             } else {
               Utils.showInfo(
                 context,
-                msg: "$name could not be removed!",
+                msg: AppLocalizationsManager.localizations.strCouldNotBeRemoved(
+                  name,
+                ),
                 type: InfoType.error,
               );
             }
 
             Navigator.of(context).pop();
           },
-          child: const Column(
+          child: Column(
             children: [
-              SizedBox(
+              const SizedBox(
                 height: 12,
               ),
-              Icon(
+              const Icon(
                 Icons.delete,
                 color: Colors.red,
               ),
-              SizedBox(
+              const SizedBox(
                 height: 12,
               ),
-              Text("Delete Subject"),
-              SizedBox(
+              Text(AppLocalizationsManager.localizations.strDeleteSubject),
+              const SizedBox(
                 height: 12,
               ),
             ],
@@ -428,13 +440,14 @@ class _SchoolGradeSubjectScreenState extends State<SchoolGradeSubjectScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  'Edit Grade',
+                  AppLocalizationsManager.localizations.strEditGrade,
                   style: Theme.of(context).textTheme.headlineMedium,
                   textAlign: TextAlign.center,
                 ),
                 TextField(
-                  decoration: const InputDecoration(
-                    hintText: "Extra info",
+                  decoration: InputDecoration(
+                    hintText:
+                        AppLocalizationsManager.localizations.strExtraInfo,
                   ),
                   maxLines: 1,
                   maxLength: maxInfoLength,
@@ -448,7 +461,7 @@ class _SchoolGradeSubjectScreenState extends State<SchoolGradeSubjectScreen> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     Text(
-                      "Date:",
+                      "${AppLocalizationsManager.localizations.strDate}:",
                       style: Theme.of(context).textTheme.bodyLarge,
                       textAlign: TextAlign.center,
                     ),
@@ -489,7 +502,7 @@ class _SchoolGradeSubjectScreenState extends State<SchoolGradeSubjectScreen> {
                         ),
                         child: Center(
                           child: Text(
-                            '$grade',
+                            "$grade",
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 24,
@@ -509,7 +522,9 @@ class _SchoolGradeSubjectScreenState extends State<SchoolGradeSubjectScreen> {
                     selectedGrade = grade.grade;
                     Navigator.of(context).pop();
                   },
-                  child: const Text("OK"),
+                  child: Text(
+                    AppLocalizationsManager.localizations.strOK,
+                  ),
                 ),
                 const SizedBox(
                   height: 8,
@@ -518,7 +533,9 @@ class _SchoolGradeSubjectScreenState extends State<SchoolGradeSubjectScreen> {
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
-                  child: const Text("Cancel"),
+                  child: Text(
+                    AppLocalizationsManager.localizations.strCancel,
+                  ),
                 ),
                 const SizedBox(
                   height: 8,
@@ -571,13 +588,14 @@ class _SchoolGradeSubjectScreenState extends State<SchoolGradeSubjectScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  'Edit Grade',
+                  AppLocalizationsManager.localizations.strEditGrade,
                   style: Theme.of(context).textTheme.headlineMedium,
                   textAlign: TextAlign.center,
                 ),
                 TextField(
-                  decoration: const InputDecoration(
-                    hintText: "Extra info",
+                  decoration: InputDecoration(
+                    hintText:
+                        AppLocalizationsManager.localizations.strExtraInfo,
                   ),
                   maxLines: 1,
                   maxLength: maxInfoLength,
@@ -591,7 +609,7 @@ class _SchoolGradeSubjectScreenState extends State<SchoolGradeSubjectScreen> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     Text(
-                      "Date:",
+                      "${AppLocalizationsManager.localizations.strDate}:",
                       style: Theme.of(context).textTheme.bodyLarge,
                       textAlign: TextAlign.center,
                     ),
@@ -651,7 +669,9 @@ class _SchoolGradeSubjectScreenState extends State<SchoolGradeSubjectScreen> {
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
-                  child: const Text("Cancel"),
+                  child: Text(
+                    AppLocalizationsManager.localizations.strCancel,
+                  ),
                 ),
               ],
             ),
@@ -931,7 +951,7 @@ class _SchoolGradeSubjectScreenState extends State<SchoolGradeSubjectScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  "Set Grade",
+                  AppLocalizationsManager.localizations.strSetEndGrade,
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
               ],

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/federal_state.dart';
 import 'package:schulapp/code_behind/save_manager.dart';
 import 'package:schulapp/code_behind/school_semester.dart';
+import 'package:schulapp/l10n/app_localizations_manager.dart';
 
 class Settings {
   static const mainTimetableNameKey = "mainTimetable";
@@ -12,6 +13,7 @@ class Settings {
   static const openMainSemesterAutomaticallyKey =
       "openMainSemesterAutomatically";
   static const themeModeKey = "theme";
+  static const languageCodeKey = "language";
   static const hiddenDebugModeKey = "hiddenDebugMode";
   static const selectedFederalStateCodeKey = "selectedFederalState";
 
@@ -23,6 +25,7 @@ class Settings {
   String? _selectedFederalStateCode;
   String? _mainSemesterName;
   String? _themeMode;
+  String? _languageCode;
   double? _timetableLessonWidth;
   bool? _showLessonNumbers;
   bool? _openMainSemesterAutomatically;
@@ -43,6 +46,15 @@ class Settings {
 
   set themeMode(ThemeMode mode) {
     _themeMode = mode.toString();
+    SaveManager().saveSettings(this);
+  }
+
+  String? get languageCode {
+    return _languageCode;
+  }
+
+  set languageCode(String? languageCode) {
+    _languageCode = languageCode;
     SaveManager().saveSettings(this);
   }
 
@@ -116,12 +128,12 @@ class Settings {
   List<GradeGroup> get defaultGradeGroups {
     return [
       GradeGroup(
-        name: "Written & Verbal grades",
+        name: AppLocalizationsManager.localizations.strWrittenAndVerbalGrades,
         percent: 67,
         grades: [],
       ),
       GradeGroup(
-        name: "Exam grades",
+        name: AppLocalizationsManager.localizations.strExamGrades,
         percent: 33,
         grades: [],
       ),
@@ -133,6 +145,7 @@ class Settings {
     String? mainSemesterName,
     String? selectedFederalState,
     String? themeMode,
+    String? languageCode,
     double? timetableLessonWidth,
     bool? showLessonNumbers,
     bool? openMainSemesterAutomatically,
@@ -141,6 +154,7 @@ class Settings {
         _mainSemesterName = mainSemesterName,
         _selectedFederalStateCode = selectedFederalState,
         _themeMode = themeMode,
+        _languageCode = languageCode,
         _timetableLessonWidth = timetableLessonWidth,
         _showLessonNumbers = showLessonNumbers,
         _openMainSemesterAutomatically = openMainSemesterAutomatically,
@@ -152,6 +166,7 @@ class Settings {
       mainSemesterNameKey: _mainSemesterName,
       selectedFederalStateCodeKey: _selectedFederalStateCode,
       themeModeKey: _themeMode,
+      languageCodeKey: _languageCode,
       showLessonNumbersKey: _showLessonNumbers,
       timetableLessonWidthKey: _timetableLessonWidth,
       openMainSemesterAutomaticallyKey: _openMainSemesterAutomatically,
@@ -170,6 +185,7 @@ class Settings {
     String? mainSemesterName = json[mainSemesterNameKey];
     String? selectedFederalState = json[selectedFederalStateCodeKey];
     String? themeMode = json[themeModeKey];
+    String? languageCode = json[languageCodeKey];
     double? timetableLessonWidth = json[timetableLessonWidthKey];
     bool? showLessonNumbers = json[showLessonNumbersKey];
     bool? openMainSemesterAutomatically =
@@ -192,6 +208,7 @@ class Settings {
       mainSemesterName: mainSemesterName,
       selectedFederalState: selectedFederalState,
       themeMode: themeMode,
+      languageCode: languageCode,
       timetableLessonWidth: timetableLessonWidth,
       showLessonNumbers: showLessonNumbers,
       openMainSemesterAutomatically: openMainSemesterAutomatically,

@@ -9,6 +9,7 @@ import 'package:schulapp/code_behind/time_table.dart';
 import 'package:schulapp/code_behind/time_table_manager.dart';
 import 'package:schulapp/code_behind/todo_event.dart';
 import 'package:schulapp/code_behind/utils.dart';
+import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/screens/time_table/create_timetable_screen.dart';
 import 'package:schulapp/screens/timetable_screen.dart';
 import 'package:schulapp/widgets/timetable_widget.dart';
@@ -21,10 +22,12 @@ Future<SchoolSemester?> createNewSemester(BuildContext context) async {
 
 Future<SchoolSemester?> showCreateSemesterSheet(
   BuildContext context, {
-  String headingText = 'Create Semester',
+  String? headingText,
   String? initalNameValue,
 }) async {
   const maxNameLength = SchoolSemester.maxNameLength;
+
+  headingText ??= AppLocalizationsManager.localizations.strCreateSemester;
 
   final textColor =
       Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white;
@@ -44,7 +47,7 @@ Future<SchoolSemester?> showCreateSemesterSheet(
         child: Column(
           children: [
             Text(
-              headingText,
+              headingText!,
               style: TextStyle(
                 color: textColor,
                 fontSize: 24.0, // Adjust the font size as needed
@@ -55,8 +58,8 @@ Future<SchoolSemester?> showCreateSemesterSheet(
               height: 12,
             ),
             TextField(
-              decoration: const InputDecoration(
-                hintText: "Name",
+              decoration: InputDecoration(
+                hintText: AppLocalizationsManager.localizations.strName,
               ),
               autofocus: true,
               maxLines: 1,
@@ -70,7 +73,7 @@ Future<SchoolSemester?> showCreateSemesterSheet(
                 createPressed = true;
                 Navigator.of(context).pop();
               },
-              child: const Text("Create"),
+              child: Text(AppLocalizationsManager.localizations.strCreate),
             ),
           ],
         ),
@@ -84,7 +87,7 @@ Future<SchoolSemester?> showCreateSemesterSheet(
     //show error
     Utils.showInfo(
       context,
-      msg: "Semester name can not be empty!",
+      msg: AppLocalizationsManager.localizations.strSemesterNameCanNotBeEmpty,
       type: InfoType.error,
     );
     return null;
@@ -134,7 +137,7 @@ Future<Timetable?> showCreateTimetableSheet(BuildContext context) async {
         child: Column(
           children: [
             Text(
-              'Create Timetable',
+              AppLocalizationsManager.localizations.strCreateTimetable,
               style: TextStyle(
                 color: textColor,
                 fontSize: 24.0, // Adjust the font size as needed
@@ -145,8 +148,8 @@ Future<Timetable?> showCreateTimetableSheet(BuildContext context) async {
               height: 12,
             ),
             TextField(
-              decoration: const InputDecoration(
-                hintText: "Name",
+              decoration: InputDecoration(
+                hintText: AppLocalizationsManager.localizations.strName,
               ),
               autofocus: true,
               maxLines: 1,
@@ -158,8 +161,8 @@ Future<Timetable?> showCreateTimetableSheet(BuildContext context) async {
               height: 12,
             ),
             TextField(
-              decoration: const InputDecoration(
-                hintText: "Lesson Count",
+              decoration: InputDecoration(
+                hintText: AppLocalizationsManager.localizations.strLessonCount,
               ),
               autofocus: false,
               maxLines: 1,
@@ -184,7 +187,7 @@ Future<Timetable?> showCreateTimetableSheet(BuildContext context) async {
 
                 Navigator.of(context).pop();
               },
-              child: const Text("Create"),
+              child: Text(AppLocalizationsManager.localizations.strCreate),
             ),
           ],
         ),
@@ -198,8 +201,11 @@ Future<Timetable?> showCreateTimetableSheet(BuildContext context) async {
 
   if (ttName.isEmpty) {
     //show error
-    Utils.showInfo(context,
-        msg: "Timetable name can not be empty!", type: InfoType.error);
+    Utils.showInfo(
+      context,
+      msg: AppLocalizationsManager.localizations.strTimetableNameCanNotBeEmpty,
+      type: InfoType.error,
+    );
     return null;
   }
   if (lessonCount == -1) {
@@ -209,8 +215,10 @@ Future<Timetable?> showCreateTimetableSheet(BuildContext context) async {
   if (lessonCount < minLessonCount || lessonCount > maxLessonCount) {
     Utils.showInfo(
       context,
-      msg:
-          "Lesson count must be greater than: $minLessonCount and less than: $maxLessonCount",
+      msg: AppLocalizationsManager.localizations.strLessonCountMustBeInRange(
+        maxLessonCount,
+        minLessonCount,
+      ),
       type: InfoType.error,
     );
     return null;
@@ -262,45 +270,19 @@ Future<String?> showSelectSubjectNameSheet(
 
   String? selectdSubjectName;
 
-  await showModalBottomSheet(
-    context: context,
-    scrollControlDisabledMaxHeightRatio: 0.6,
-    builder: (context) {
-      return Container(
-        margin: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              title,
-              style: Theme.of(context).textTheme.headlineMedium,
-              textAlign: TextAlign.center,
-            ),
-            Expanded(
-              child: Container(
-                margin: const EdgeInsets.all(16),
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).cardColor,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: ListView.builder(
-                  itemCount: selectedTimetablePrefabs.length,
-                  itemBuilder: (context, index) => ListTile(
-                    title: Text(selectedTimetablePrefabs[index].name),
-                    onTap: () {
-                      selectdSubjectName = selectedTimetablePrefabs[index].name;
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    },
+  await Utils.showListSelectionBottomSheet(
+    context,
+    title: title,
+    items: selectedTimetablePrefabs,
+    itemBuilder: (context, index) => ListTile(
+      title: Text(selectedTimetablePrefabs[index].name),
+      onTap: () {
+        selectdSubjectName = selectedTimetablePrefabs[index].name;
+        Navigator.of(context).pop();
+      },
+    ),
   );
+
   return selectdSubjectName;
 }
 
@@ -342,7 +324,10 @@ Future<Timetable?> showSelectTimetableSheet(
                       onPressed: () {
                         Navigator.of(context).push(MaterialPageRoute(
                           builder: (context) => TimetableScreen(
-                            title: "Timetable Info: ${timetables[index].name}",
+                            title: AppLocalizationsManager.localizations
+                                .strTimetableWithName(
+                              timetables[index].name,
+                            ),
                             timetable: timetables[index],
                           ),
                         ));

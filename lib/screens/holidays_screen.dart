@@ -4,6 +4,7 @@ import 'package:schulapp/code_behind/holidays.dart';
 import 'package:schulapp/code_behind/holidays_manager.dart';
 import 'package:schulapp/code_behind/time_table_manager.dart';
 import 'package:schulapp/code_behind/utils.dart';
+import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/widgets/navigation_bar_drawer.dart';
 
 class HolidaysScreen extends StatefulWidget {
@@ -15,10 +16,6 @@ class HolidaysScreen extends StatefulWidget {
 }
 
 class _HolidaysScreenState extends State<HolidaysScreen> {
-  static const String infoText =
-      "All date information is provided without guarantee. I assume no responsibility for the accuracy of the data, nor do I accept liability for any economic damages that may arise from the use of this data.";
-  static const String thanksText =
-      "Thank you to https://ferien-api.de/ for providing the holiday API free of charge.";
   String federalStateName = "";
 
   List<Holidays> allHolidays = [];
@@ -53,7 +50,11 @@ class _HolidaysScreenState extends State<HolidaysScreen> {
     return Scaffold(
       drawer: NavigationBarDrawer(selectedRoute: HolidaysScreen.route),
       appBar: AppBar(
-        title: Text("Holidays $federalStateName"),
+        title: Text(
+          AppLocalizationsManager.localizations.strHolidaysWithStateName(
+            federalStateName,
+          ),
+        ),
         actions: [
           IconButton(
             onPressed: _showInfoDialog,
@@ -71,7 +72,9 @@ class _HolidaysScreenState extends State<HolidaysScreen> {
       return Center(
         child: ElevatedButton(
           onPressed: _selectedFederalStateButtonPressed,
-          child: const Text("Select Federal State"),
+          child: Text(
+            AppLocalizationsManager.localizations.strSelectFederalState,
+          ),
         ),
       );
     }
@@ -80,7 +83,9 @@ class _HolidaysScreenState extends State<HolidaysScreen> {
       return Center(
         child: ElevatedButton(
           onPressed: _fetchHolidays,
-          child: const Text("Try again"),
+          child: Text(
+            AppLocalizationsManager.localizations.strTryAgain,
+          ),
         ),
       );
     }
@@ -107,13 +112,19 @@ class _HolidaysScreenState extends State<HolidaysScreen> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Information'),
-          content: const SingleChildScrollView(
+          title: Text(
+            AppLocalizationsManager.localizations.strInformation,
+          ),
+          content: SingleChildScrollView(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                Text(infoText),
-                Text(thanksText),
+                Text(
+                  AppLocalizationsManager.localizations.strHolidaysInfoText,
+                ),
+                Text(
+                  AppLocalizationsManager.localizations.strHolidaysThanksText,
+                ),
               ],
             ),
           ),
@@ -122,7 +133,9 @@ class _HolidaysScreenState extends State<HolidaysScreen> {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: const Text("OK"),
+              child: Text(
+                AppLocalizationsManager.localizations.strOK,
+              ),
             ),
           ],
         );
@@ -143,7 +156,7 @@ class _HolidaysScreenState extends State<HolidaysScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                "Select Federal State",
+                AppLocalizationsManager.localizations.strSelectFederalState,
                 style: Theme.of(context).textTheme.headlineMedium,
                 textAlign: TextAlign.center,
               ),
@@ -176,7 +189,9 @@ class _HolidaysScreenState extends State<HolidaysScreen> {
                   removeHolidays = true;
                   Navigator.of(context).pop();
                 },
-                child: const Text("Remove Holidays"),
+                child: Text(
+                  AppLocalizationsManager.localizations.strRemoveHolidays,
+                ),
               ),
             ],
           ),
@@ -270,7 +285,10 @@ class HolidaysListItemWidget extends StatelessWidget {
                           style: Theme.of(context).textTheme.bodyLarge,
                         ),
                         Text(
-                          "(${holidays.end.difference(holidays.start).inDays + 1} days)",
+                          AppLocalizationsManager.localizations
+                              .strHolidaysLengthXDays(
+                            holidays.end.difference(holidays.start).inDays + 1,
+                          ),
                           style: Theme.of(context).textTheme.bodyLarge,
                         ),
                       ],
@@ -292,11 +310,15 @@ class HolidaysListItemWidget extends StatelessWidget {
     Duration timeLeft = holidays.start.difference(DateTime.now());
 
     if (timeLeft.inDays > 0) {
-      return "In ${timeLeft.inDays} days";
+      return AppLocalizationsManager.localizations.strInXDays(
+        timeLeft.inDays,
+      );
     } else if (timeLeft.inDays < 0) {
       Duration timeUntilEnd = holidays.end.difference(DateTime.now());
 
-      return "Ends in ${timeUntilEnd.inDays + 1} days";
+      return AppLocalizationsManager.localizations.strEndsInXDays(
+        timeUntilEnd.inDays + 1,
+      );
     }
 
     return timeLeft.inDays.toString();

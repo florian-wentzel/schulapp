@@ -6,6 +6,7 @@ import 'package:schulapp/code_behind/school_lesson_prefab.dart';
 import 'package:schulapp/code_behind/school_semester.dart';
 import 'package:schulapp/code_behind/time_table.dart';
 import 'package:schulapp/code_behind/time_table_manager.dart';
+import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/widgets/custom_pop_up.dart';
 
 class Utils {
@@ -138,11 +139,13 @@ class Utils {
     }
   }
 
+  //TODO: update all showBoolInputDialog (showYesAndNoInsteadOfOK = true?)
   static Future<bool> showBoolInputDialog(
     BuildContext context, {
     required String question,
     String? description,
     bool autofocus = false,
+    bool showYesAndNoInsteadOfOK = false,
   }) async {
     bool? value = await showDialog<bool>(
       context: context,
@@ -155,13 +158,19 @@ class Utils {
               onPressed: () {
                 Navigator.pop(context, true);
               },
-              child: const Text('OK'),
+              child: Text(showYesAndNoInsteadOfOK
+                  ? AppLocalizationsManager.localizations.strYes
+                  : AppLocalizationsManager.localizations.strOK),
             ),
             TextButton(
               onPressed: () {
                 Navigator.pop(context, false);
               },
-              child: const Text('Cancel'),
+              child: Text(
+                showYesAndNoInsteadOfOK
+                    ? AppLocalizationsManager.localizations.strNo
+                    : AppLocalizationsManager.localizations.strCancel,
+              ),
             ),
           ],
         );
@@ -198,13 +207,13 @@ class Utils {
               onPressed: () {
                 Navigator.pop(context, textController.text);
               },
-              child: const Text('OK'),
+              child: Text(AppLocalizationsManager.localizations.strOK),
             ),
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: const Text('Cancel'),
+              child: Text(AppLocalizationsManager.localizations.strCancel),
             ),
           ],
         );
@@ -212,9 +221,10 @@ class Utils {
     );
   }
 
+  //TODO
   static Future<Color?> showColorInputDialog(
     BuildContext context, {
-    required String hintText,
+    String? hintText,
     String? title,
     Color? pickerColor,
   }) {
@@ -223,19 +233,19 @@ class Utils {
       builder: (BuildContext context) {
         return AlertDialog(
           title: title == null ? null : Text(title),
-          content: const Text("Colorpicker"),
+          content: Text(AppLocalizationsManager.localizations.strColorPicker),
           actions: <Widget>[
             TextButton(
               onPressed: () {
                 Navigator.pop(context, Colors.red);
               },
-              child: const Text('OK'),
+              child: Text(AppLocalizationsManager.localizations.strOK),
             ),
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: const Text('Cancel'),
+              child: Text(AppLocalizationsManager.localizations.strCancel),
             ),
           ],
         );
@@ -463,6 +473,63 @@ class Utils {
     return date1.year == date2.year &&
         date1.month == date2.month &&
         date1.day == date2.day;
+  }
+
+  static Future<T?> showListSelectionBottomSheet<T>(
+    BuildContext context, {
+    required String title,
+    String? underTitle,
+    required List<T> items,
+    required Widget? Function(BuildContext context, int index) itemBuilder,
+  }) async {
+    await showModalBottomSheet(
+      context: context,
+      scrollControlDisabledMaxHeightRatio: 0.6,
+      builder: (context) {
+        return Container(
+          margin: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                title,
+                style: Theme.of(context).textTheme.headlineMedium,
+                textAlign: TextAlign.center,
+              ),
+              underTitle == null
+                  ? Container()
+                  : Column(
+                      children: [
+                        const SizedBox(
+                          height: 12,
+                        ),
+                        Text(
+                          underTitle,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+              Expanded(
+                child: Container(
+                  margin: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).cardColor,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: ListView.builder(
+                    itemCount: items.length,
+                    itemBuilder: itemBuilder,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+    return null;
   }
 }
 

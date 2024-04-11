@@ -11,6 +11,7 @@ import 'package:schulapp/code_behind/time_table_manager.dart';
 import 'package:schulapp/code_behind/todo_event.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/extensions.dart';
+import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/screens/grades_screen.dart';
 import 'package:schulapp/screens/tasks_screen.dart';
 import 'package:schulapp/screens/semester/school_grade_subject_screen.dart';
@@ -254,8 +255,7 @@ class _TimetableWidgetState extends State<TimetableWidget> {
     Utils.showInfo(
       context,
       type: InfoType.success,
-      msg:
-          "Task successfully created:\n${event.linkedSubjectName}, ${TodoEvent.typeToString(event.type)}: ${event.name}\n on ${Utils.dateToString(event.endTime)}",
+      msg: AppLocalizationsManager.localizations.strTaskSuccessfullyCreated,
     );
 
     setState(() {});
@@ -631,10 +631,13 @@ class _CustomPopUpShowLessonState extends State<CustomPopUpShowLesson> {
                           bool removeTodoEvent =
                               await Utils.showBoolInputDialog(
                             context,
-                            question:
-                                "Are you sure that you want to delete the Task: ${widget.event!.linkedSubjectName}, ${TodoEvent.typeToString(widget.event!.type)}",
+                            question: AppLocalizationsManager.localizations
+                                .strDoYouWantToDeleteTaskX(
+                              widget.event!.linkedSubjectName,
+                            ),
                             description:
-                                "(on ${Utils.dateToString(widget.event!.endTime)})",
+                                "(${Utils.dateToString(widget.event!.endTime)})",
+                            showYesAndNoInsteadOfOK: true,
                           );
                           if (!removeTodoEvent) return;
 
@@ -751,9 +754,13 @@ class _CustomPopUpShowLessonState extends State<CustomPopUpShowLesson> {
     void Function() buttonFunc = () {};
 
     if (selectedSubject == null) {
-      errorMsg =
-          "Your Selected Semester does not\n contain a Subject named: ${lesson.name}";
-      buttonText = "Create a Subject named: ${lesson.name}";
+      errorMsg = AppLocalizationsManager.localizations
+          .strYourSelectedSemesterDoesNotContainSubjectNamedX(
+        lesson.name,
+      );
+      buttonText = AppLocalizationsManager.localizations.strCreateSubjectNamedX(
+        lesson.name,
+      );
       buttonFunc = () {
         selectedSemester!.subjects.add(
           SchoolGradeSubject(
@@ -768,9 +775,9 @@ class _CustomPopUpShowLessonState extends State<CustomPopUpShowLesson> {
       };
     }
     if (selectedSemester == null) {
-      errorMsg =
-          "You did not select a Semester\n to show on homescreen.\nGo to the Grades page\nand select a Semester:)";
-      buttonText = "Go to Grades screen";
+      errorMsg = AppLocalizationsManager
+          .localizations.strYouDidNotSelectASemesterToShowOnHomescreen;
+      buttonText = AppLocalizationsManager.localizations.strGoToGradesScreen;
       buttonFunc = () {
         context.go(GradesScreen.route);
       };

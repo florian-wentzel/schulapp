@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:schulapp/app.dart';
 import 'package:schulapp/code_behind/time_table_manager.dart';
+import 'package:schulapp/code_behind/utils.dart';
+import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/theme/theme_manager.dart';
 import 'package:schulapp/widgets/navigation_bar_drawer.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class SettingsScreen extends StatefulWidget {
   static const String route = "/settings";
@@ -28,7 +32,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Scaffold(
       drawer: NavigationBarDrawer(selectedRoute: SettingsScreen.route),
       appBar: AppBar(
-        title: const Text("Settings"),
+        title: Text(
+          AppLocalizationsManager.localizations.strSettings,
+        ),
       ),
       body: _body(),
     );
@@ -38,6 +44,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return ListView(
       children: [
         _themeSelector(),
+        _selectLanguage(),
         _openMainSemesterAutomatically(),
         _currentVersion(),
       ],
@@ -46,21 +53,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Widget _themeSelector() {
     return listItem(
-      title: "Theme",
+      title: AppLocalizationsManager.localizations.strTheme,
       body: [
         SegmentedButton<ThemeMode>(
-          segments: const <ButtonSegment<ThemeMode>>[
+          segments: <ButtonSegment<ThemeMode>>[
             ButtonSegment<ThemeMode>(
               value: ThemeMode.dark,
-              label: Text('dark'),
+              label: Text(
+                AppLocalizationsManager.localizations.strDark,
+              ),
             ),
             ButtonSegment<ThemeMode>(
               value: ThemeMode.system,
-              label: Text('system'),
+              label: Text(
+                AppLocalizationsManager.localizations.strSystem,
+              ),
             ),
             ButtonSegment<ThemeMode>(
               value: ThemeMode.light,
-              label: Text('light'),
+              label: Text(
+                AppLocalizationsManager.localizations.strLight,
+              ),
             ),
           ],
           selected: selection,
@@ -77,9 +90,47 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  Widget _selectLanguage() {
+    return listItem(
+      title: AppLocalizationsManager.localizations.strLanguage,
+      body: [
+        ElevatedButton(
+          onPressed: () {
+            Utils.showListSelectionBottomSheet(
+              context,
+              title: AppLocalizationsManager.localizations.strSelectLanguage,
+              items: AppLocalizations.supportedLocales,
+              itemBuilder: (itemContext, index) {
+                final currLocale = AppLocalizations.supportedLocales[index];
+
+                return Localizations.override(
+                  context: itemContext,
+                  locale: currLocale,
+                  child: Builder(builder: (builderContext) {
+                    return ListTile(
+                      title: Text(
+                        AppLocalizations.of(builderContext)!.language_name,
+                      ),
+                      onTap: () {
+                        MainApp.setLocale(context, currLocale);
+                        Navigator.of(itemContext).pop();
+                      },
+                    );
+                  }),
+                );
+              },
+            );
+          },
+          child: Text(AppLocalizationsManager.localizations.strChangeLanguage),
+        ),
+      ],
+    );
+  }
+
   Widget _openMainSemesterAutomatically() {
     return listItem(
-      title: "Open main semester automatically",
+      title: AppLocalizationsManager
+          .localizations.strOpenMainSemesterAutomatically,
       afterTitle: [
         Switch.adaptive(
           value: TimetableManager().settings.openMainSemesterAutomatically,
@@ -94,7 +145,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Widget _currentVersion() {
     return listItem(
-      title: "Version",
+      title: AppLocalizationsManager.localizations.strVersion,
       body: [
         //später wenn wir richtige Versionen haben kann man:
         //"package_info_plus" benutzten

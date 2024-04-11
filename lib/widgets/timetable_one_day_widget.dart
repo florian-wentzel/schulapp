@@ -6,6 +6,7 @@ import 'package:schulapp/code_behind/time_table_manager.dart';
 import 'package:schulapp/code_behind/todo_event.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/extensions.dart';
+import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/widgets/time_to_next_lesson_widget.dart';
 import 'package:schulapp/widgets/timetable_util_functions.dart';
 import 'package:schulapp/widgets/todo_event_util_functions.dart';
@@ -466,8 +467,7 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
     Utils.showInfo(
       context,
       type: InfoType.success,
-      msg:
-          "Task successfully created:\n${event.linkedSubjectName}, ${TodoEvent.typeToString(event.type)}: ${event.name}\n on ${Utils.dateToString(event.endTime)}",
+      msg: AppLocalizationsManager.localizations.strTaskSuccessfullyCreated,
     );
 
     setState(() {});

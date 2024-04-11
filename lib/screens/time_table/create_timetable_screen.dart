@@ -4,6 +4,7 @@ import 'package:schulapp/code_behind/school_lesson_prefab.dart';
 import 'package:schulapp/code_behind/time_table.dart';
 import 'package:schulapp/code_behind/time_table_manager.dart';
 import 'package:schulapp/code_behind/utils.dart';
+import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/screens/time_table/timetable_droptarget.dart';
 import 'package:schulapp/widgets/timetable_util_functions.dart';
 
@@ -49,7 +50,9 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
 
         bool? exit = await Utils.showBoolInputDialog(
           context,
-          question: "Do you want to exit without saving?",
+          question: AppLocalizationsManager
+              .localizations.strDoYouWantToExitWithoutSaving,
+          showYesAndNoInsteadOfOK: true,
         );
 
         _canPop = exit;
@@ -63,7 +66,8 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
             onTap: () async {
               String? name = await Utils.showStringInputDialog(
                 context,
-                hintText: "Enter Timetable name",
+                hintText:
+                    AppLocalizationsManager.localizations.strEnterTimetableName,
                 maxInputLength: Timetable.maxNameLength,
               );
 
@@ -74,7 +78,8 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
                 if (mounted) {
                   Utils.showInfo(
                     context,
-                    msg: "Name can not be empty!",
+                    msg: AppLocalizationsManager
+                        .localizations.strNameCanNotBeEmpty,
                     type: InfoType.error,
                   );
                 }
@@ -95,7 +100,11 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
 
               setState(() {});
             },
-            child: Text("Create a Timetable: ${widget.timetable.name}"),
+            child: Text(
+              AppLocalizationsManager.localizations.strCreateTimetableX(
+                widget.timetable.name,
+              ),
+            ),
           ),
         ),
         floatingActionButton: FloatingActionButton(
@@ -150,9 +159,9 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
                 //weil neuer timetable erstellt return true damit kann man später vielleicht was anfangen
                 Navigator.of(context).pop(true);
               },
-              child: const Text(
-                "SAVE",
-                style: TextStyle(
+              child: Text(
+                AppLocalizationsManager.localizations.strSave,
+                style: const TextStyle(
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -178,7 +187,8 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
             onTap: () async {
               Timetable? timetable = await showSelectTimetableSheet(
                 context,
-                title: "Select Timetable to import Subject from",
+                title: AppLocalizationsManager
+                    .localizations.strSelectTimetableToImportSubjectsFrom,
               );
 
               if (timetable == null) return;
@@ -195,9 +205,10 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
                 color: Theme.of(context).cardColor,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Center(
+              child: Center(
                 child: Text(
-                  "Import Subjects",
+                  AppLocalizationsManager
+                      .localizations.strImportSubjectsFromTimetable,
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -220,7 +231,8 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
               onTap: () async {
                 SchoolLessonPrefab? newPrefab =
                     await _showCreateNewPrefabBottomSheet(
-                  title: "Change School lesson",
+                  title: AppLocalizationsManager
+                      .localizations.strChangeSchoolLesson,
                   name: prefab.name,
                   room: prefab.room,
                   teacher: prefab.teacher,
@@ -231,8 +243,11 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
                 if (newPrefab == null) {
                   bool delete = await Utils.showBoolInputDialog(
                     context,
-                    question:
-                        "Do you want to delete this Subject: ${prefab.name}",
+                    question: AppLocalizationsManager.localizations
+                        .strDoYouWantToDeleteX(
+                      prefab.name,
+                    ),
+                    showYesAndNoInsteadOfOK: true,
                   );
 
                   if (delete) {
@@ -254,8 +269,10 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
 
                 bool updateLessons = await Utils.showBoolInputDialog(
                   context,
-                  question: "Do you want to update all Lessons?",
-                  description: "(rooms wont change)",
+                  question: AppLocalizationsManager
+                      .localizations.strDoYouWantToUpdateAllLessons,
+                  description:
+                      AppLocalizationsManager.localizations.strRoomsWontChange,
                 );
 
                 if (updateLessons) {
@@ -312,7 +329,7 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
   }
 
   Future<SchoolLessonPrefab?> _showCreateNewPrefabBottomSheet({
-    String title = "Create School lesson",
+    String title = "",
     String name = "",
     String room = "",
     String teacher = "",
@@ -320,6 +337,10 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
     bool showDeleteButton = false,
   }) async {
     const maxNameLength = 20;
+
+    if (title.isEmpty) {
+      title = AppLocalizationsManager.localizations.strCreateSchoolLesson;
+    }
 
     TextEditingController nameController = TextEditingController();
     nameController.text = name;
@@ -349,13 +370,14 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
                     fontSize: 24.0,
                     fontWeight: FontWeight.bold,
                   ),
+                  textAlign: TextAlign.center,
                 ),
                 const SizedBox(
                   height: 12,
                 ),
                 TextField(
-                  decoration: const InputDecoration(
-                    hintText: "Name",
+                  decoration: InputDecoration(
+                    hintText: AppLocalizationsManager.localizations.strName,
                   ),
                   autofocus: true,
                   maxLines: 1,
@@ -367,8 +389,8 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
                   height: 12,
                 ),
                 TextField(
-                  decoration: const InputDecoration(
-                    hintText: "Teacher",
+                  decoration: InputDecoration(
+                    hintText: AppLocalizationsManager.localizations.strTeacher,
                   ),
                   autofocus: false,
                   maxLines: 1,
@@ -379,8 +401,8 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
                   height: 12,
                 ),
                 TextField(
-                  decoration: const InputDecoration(
-                    hintText: "Room",
+                  decoration: InputDecoration(
+                    hintText: AppLocalizationsManager.localizations.strRoom,
                   ),
                   autofocus: false,
                   maxLines: 1,
@@ -407,7 +429,9 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
                     room = roomController.text.trim();
                     Navigator.of(context).pop();
                   },
-                  child: const Text("Create"),
+                  child: Text(
+                    AppLocalizationsManager.localizations.strCreate,
+                  ),
                 ),
                 const SizedBox(
                   height: 16,
@@ -418,7 +442,9 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
                     onPressed: () {
                       Navigator.of(context).pop();
                     },
-                    child: const Text("Cancle"),
+                    child: Text(
+                      AppLocalizationsManager.localizations.strCancel,
+                    ),
                   ),
                   child: ElevatedButton(
                     onPressed: () {

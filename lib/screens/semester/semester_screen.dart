@@ -7,6 +7,7 @@ import 'package:schulapp/code_behind/school_semester.dart';
 import 'package:schulapp/code_behind/time_table.dart';
 import 'package:schulapp/code_behind/time_table_manager.dart';
 import 'package:schulapp/code_behind/utils.dart';
+import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/screens/semester/school_grade_subject_screen.dart';
 import 'package:schulapp/widgets/school_grade_subject_widget.dart';
 
@@ -30,10 +31,14 @@ class _SemesterScreenState extends State<SemesterScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Semester: ${widget.semester.name}"),
+        title: Text(
+          AppLocalizationsManager.localizations.strSemesterX(
+            widget.semester.name,
+          ),
+        ),
         actions: [
           IconButton(
-            tooltip: "Show Grades Graph",
+            tooltip: AppLocalizationsManager.localizations.strShowGradesGraph,
             onPressed: _showGradesGraphPressed,
             icon: const Icon(Icons.info),
           ),
@@ -54,7 +59,7 @@ class _SemesterScreenState extends State<SemesterScreen> {
             child: const Icon(Icons.add),
             backgroundColor: Colors.indigo,
             foregroundColor: Colors.white,
-            label: 'Create new Subject',
+            label: AppLocalizationsManager.localizations.strCreateNewSubject,
             onTap: () async {
               final subject = await _showCreateSubjectSheet(context);
 
@@ -82,7 +87,8 @@ class _SemesterScreenState extends State<SemesterScreen> {
             child: const Icon(Icons.import_export),
             backgroundColor: Colors.blueAccent,
             foregroundColor: Colors.white,
-            label: 'Import',
+            label: AppLocalizationsManager
+                .localizations.strImportSubjectsFromTimetable,
             onTap: () async {
               final subjects = await _showImportSubjectsSheet(context);
 
@@ -146,7 +152,9 @@ class _SemesterScreenState extends State<SemesterScreen> {
                     setState(() {});
                     SaveManager().saveSemester(semester);
                   },
-                  child: const Text("Create new Subject"),
+                  child: Text(
+                    AppLocalizationsManager.localizations.strCreateNewSubject,
+                  ),
                 ),
                 TextButton(
                   onPressed: () async {
@@ -160,7 +168,10 @@ class _SemesterScreenState extends State<SemesterScreen> {
 
                     SaveManager().saveSemester(semester);
                   },
-                  child: const Text("Import Subjects"),
+                  child: Text(
+                    AppLocalizationsManager
+                        .localizations.strImportSubjectsFromTimetable,
+                  ),
                 ),
               ],
             ),
@@ -233,15 +244,16 @@ class _SemesterScreenState extends State<SemesterScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                "Create Subject",
+                AppLocalizationsManager.localizations.strCreateNewSubject,
                 style: Theme.of(context).textTheme.headlineMedium,
+                textAlign: TextAlign.center,
               ),
               const SizedBox(
                 height: 12,
               ),
               TextField(
-                decoration: const InputDecoration(
-                  hintText: "Name",
+                decoration: InputDecoration(
+                  hintText: AppLocalizationsManager.localizations.strName,
                 ),
                 autofocus: true,
                 maxLines: 1,
@@ -255,7 +267,9 @@ class _SemesterScreenState extends State<SemesterScreen> {
                   createPressed = true;
                   Navigator.of(context).pop();
                 },
-                child: const Text("Create"),
+                child: Text(
+                  AppLocalizationsManager.localizations.strCreate,
+                ),
               ),
             ],
           ),
@@ -271,7 +285,7 @@ class _SemesterScreenState extends State<SemesterScreen> {
       if (mounted) {
         Utils.showInfo(
           context,
-          msg: "Subject name can not be empty!",
+          msg: AppLocalizationsManager.localizations.strNameCanNotBeEmpty,
           type: InfoType.error,
         );
       }
@@ -287,53 +301,20 @@ class _SemesterScreenState extends State<SemesterScreen> {
   Future<List<SchoolGradeSubject>?> _showImportSubjectsSheet(
       BuildContext context) async {
     Timetable? timetable;
+    Utils.showListSelectionBottomSheet(
+      context,
+      title:
+          "${AppLocalizationsManager.localizations.strImportSubjectsFromTimetable}:",
+      items: TimetableManager().timetables,
+      itemBuilder: (context, index) {
+        final tt = TimetableManager().timetables[index];
 
-    await showModalBottomSheet(
-      context: context,
-      builder: (context) {
-        return Container(
-          margin: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              Text(
-                'Import Subjects',
-                style: Theme.of(context).textTheme.headlineMedium,
-              ),
-              const SizedBox(
-                height: 12,
-              ),
-              Text(
-                'Select Semester to import:',
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-              const SizedBox(
-                height: 12,
-              ),
-              Flexible(
-                fit: FlexFit.tight,
-                child: ListView.builder(
-                  itemCount: TimetableManager().timetables.length,
-                  itemBuilder: (context, index) {
-                    final tt = TimetableManager().timetables[index];
-
-                    return ListTile(
-                      onTap: () {
-                        timetable = tt;
-                        Navigator.of(context).pop();
-                      },
-                      title: Text(tt.name),
-                    );
-                  },
-                ),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text("Cancle"),
-              ),
-            ],
-          ),
+        return ListTile(
+          onTap: () {
+            timetable = tt;
+            Navigator.of(context).pop();
+          },
+          title: Text(tt.name),
         );
       },
     );
@@ -361,7 +342,9 @@ class _SemesterScreenState extends State<SemesterScreen> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Grades'),
+          title: Text(
+            AppLocalizationsManager.localizations.strGrades,
+          ),
           content: SizedBox(
             height: MediaQuery.of(context).size.height * 0.3,
             width: MediaQuery.of(context).size.width,
@@ -387,7 +370,9 @@ class _SemesterScreenState extends State<SemesterScreen> {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: const Text("OK"),
+              child: Text(
+                AppLocalizationsManager.localizations.strOK,
+              ),
             ),
           ],
         );
@@ -397,6 +382,7 @@ class _SemesterScreenState extends State<SemesterScreen> {
 
   LineChartData _createLineChartData() {
     List<FlSpot> spots = [];
+
     SchoolSemester calcSemester = SchoolSemester(
       name: "calcSemester",
       subjects: List.generate(
@@ -483,13 +469,19 @@ class _SemesterScreenState extends State<SemesterScreen> {
 
     const verticalCount = 5;
 
+    double verticalInterval = (spots.length ~/ verticalCount).toDouble();
+
+    if (verticalInterval == 0) {
+      verticalInterval = 1;
+    }
+
     return LineChartData(
       // lineTouchData: const LineTouchData(enabled: false),
       gridData: FlGridData(
         show: true,
         drawHorizontalLine: true,
         drawVerticalLine: true,
-        verticalInterval: (spots.length ~/ verticalCount).toDouble(),
+        verticalInterval: verticalInterval,
         horizontalInterval: 5,
         getDrawingVerticalLine: (value) {
           return const FlLine(
@@ -513,7 +505,7 @@ class _SemesterScreenState extends State<SemesterScreen> {
         ),
         bottomTitles: AxisTitles(
           sideTitles: SideTitles(
-            interval: (spots.length ~/ verticalCount).toDouble(),
+            interval: verticalInterval,
             reservedSize: 30,
             showTitles: true,
           ),
