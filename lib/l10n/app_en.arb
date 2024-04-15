@@ -1,6 +1,9 @@
 {
   "@@locale": "en",
   "language_name": "Englisch",
+  "version_0_1_2": "Added intro slider",
+  "version_0_1_1": "Added update informaion",
+  "version_0_1_0": "Added multiple Languages",
   "strStartScreen": "Home",
   "strTimetableDirNotCreated": "timetable dir could not be created: {timetablePath}",
   "@strTimetableDirNotCreated": {
@@ -60,7 +63,7 @@
   "strHolidaysThanksText": "Thank you to https://ferien-api.de/ for providing the holiday API free of charge.",
   "strHolidaysWithStateName": "Holidays {federalStateName}",
   "strHolidays": "Holidays",
-  "strSelectFederalState": "Select Federal State:",
+  "strSelectFederalState": "Select Federal State",
   "strTryAgain": "Try again",
   "strInformation": "Information",
   "strRemoveHolidays": "Remove Holidays",
@@ -143,5 +146,20 @@
   "strYouDidNotSelectASemesterToShowOnHomescreen": "You did not select a Semester\n to show on homescreen.\nGo to the Grades page\nand select a Semester:)",
   "strGoToGradesScreen": "Go to Grades screen",
   "strTopic": "Topic",
-  "strEndDate": "End date:"
+  "strEndDate": "End date:",
+  "strHello": "Hello!",
+  "strYouUpdatedYourAppWantToSeeNewFeatures": "Ohh you updated your app! Do you want to see the new features?",
+  "strShowNewFeatures": "Show new Features",
+  "strSchoolApp": "School App",
+  "strWelcomeToYourNewSchoolApp": "Welcome to your new School App!\nHere you can save not only your Timetables but also the ones from your friends!",
+  "strTimetable": "Timetable",
+  "strDoYouWantToCreateYourTimetable": "Do you want to create your Timetable?",
+  "strCreateYourSemesterAndLetTheAppHandleTheRest": "Create your semester and let the app handle the rest!",
+  "strFeelFreeToCreateATaskForTheFuture": "Feel free to create a Task for the future so you dont forget it:)\nOf course, you will get notified if you so desire!",
+  "strDoYouWantToSeeTheUpcomingHolidays": "Do you want to see the upcoming holidays?",
+  "strYourReadyToGetStarted": "Your ready to get started!",
+  "strStart": "Start!",
+  "strSkip": "Skip",
+  "strNext": "Next",
+  "strVersions": "Versions"
 }

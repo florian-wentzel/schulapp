@@ -17,6 +17,7 @@ void main() async {
   //erstmal beide gleichzeitig laden lassen und dann warten
   await initNotificationsFuture;
   await loadApplicationDocumentsDirectoryFuture;
+
   runApp(const MainApp());
 }
 

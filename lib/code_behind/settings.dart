@@ -16,6 +16,7 @@ class Settings {
   static const languageCodeKey = "language";
   static const hiddenDebugModeKey = "hiddenDebugMode";
   static const selectedFederalStateCodeKey = "selectedFederalState";
+  static const lastUsedVersionKey = "lastUsedVersion";
 
   static int decimalPlaces = 1;
 
@@ -26,6 +27,7 @@ class Settings {
   String? _mainSemesterName;
   String? _themeMode;
   String? _languageCode;
+  String? _lastUsedVersion;
   double? _timetableLessonWidth;
   bool? _showLessonNumbers;
   bool? _openMainSemesterAutomatically;
@@ -55,6 +57,15 @@ class Settings {
 
   set languageCode(String? languageCode) {
     _languageCode = languageCode;
+    SaveManager().saveSettings(this);
+  }
+
+  String? get lastUsedVersion {
+    return _lastUsedVersion;
+  }
+
+  set lastUsedVersion(String? lastUsedVersion) {
+    _lastUsedVersion = lastUsedVersion;
     SaveManager().saveSettings(this);
   }
 
@@ -146,6 +157,7 @@ class Settings {
     String? selectedFederalState,
     String? themeMode,
     String? languageCode,
+    String? lastUsedVersion,
     double? timetableLessonWidth,
     bool? showLessonNumbers,
     bool? openMainSemesterAutomatically,
@@ -155,6 +167,7 @@ class Settings {
         _selectedFederalStateCode = selectedFederalState,
         _themeMode = themeMode,
         _languageCode = languageCode,
+        _lastUsedVersion = lastUsedVersion,
         _timetableLessonWidth = timetableLessonWidth,
         _showLessonNumbers = showLessonNumbers,
         _openMainSemesterAutomatically = openMainSemesterAutomatically,
@@ -167,6 +180,7 @@ class Settings {
       selectedFederalStateCodeKey: _selectedFederalStateCode,
       themeModeKey: _themeMode,
       languageCodeKey: _languageCode,
+      lastUsedVersionKey: _lastUsedVersion,
       showLessonNumbersKey: _showLessonNumbers,
       timetableLessonWidthKey: _timetableLessonWidth,
       openMainSemesterAutomaticallyKey: _openMainSemesterAutomatically,
@@ -186,6 +200,7 @@ class Settings {
     String? selectedFederalState = json[selectedFederalStateCodeKey];
     String? themeMode = json[themeModeKey];
     String? languageCode = json[languageCodeKey];
+    String? lastUsedVersion = json[lastUsedVersionKey];
     double? timetableLessonWidth = json[timetableLessonWidthKey];
     bool? showLessonNumbers = json[showLessonNumbersKey];
     bool? openMainSemesterAutomatically =
@@ -209,6 +224,7 @@ class Settings {
       selectedFederalState: selectedFederalState,
       themeMode: themeMode,
       languageCode: languageCode,
+      lastUsedVersion: lastUsedVersion,
       timetableLessonWidth: timetableLessonWidth,
       showLessonNumbers: showLessonNumbers,
       openMainSemesterAutomatically: openMainSemesterAutomatically,

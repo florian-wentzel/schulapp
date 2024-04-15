@@ -275,15 +275,27 @@ class Utils {
     };
   }
 
-  static void showInfo(BuildContext context,
-      {required String msg, InfoType type = InfoType.normal}) {
+  static void showInfo(
+    BuildContext context, {
+    required String msg,
+    InfoType type = InfoType.normal,
+    Duration? duration,
+    SnackBarAction? actionWidget,
+  }) {
+    duration ??= const Duration(seconds: 4);
+    Color textColor =
+        Theme.of(context).textTheme.bodyLarge?.color ?? Colors.white;
     Color backgroundColor;
+
     switch (type) {
-      case InfoType.success:
-        backgroundColor = Colors.green;
-        break;
       case InfoType.normal:
         backgroundColor = Colors.white;
+        break;
+      case InfoType.info:
+        backgroundColor = Theme.of(context).cardColor.withAlpha(255);
+        break;
+      case InfoType.success:
+        backgroundColor = Colors.green;
         break;
       case InfoType.warning:
         backgroundColor = Colors.yellow;
@@ -292,11 +304,17 @@ class Utils {
         backgroundColor = Colors.red;
         break;
     }
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
+        action: actionWidget,
         backgroundColor: backgroundColor,
+        duration: duration,
         content: Text(
           msg,
+          style: TextStyle(
+            color: textColor,
+          ),
         ),
       ),
     );
@@ -535,6 +553,7 @@ class Utils {
 
 enum InfoType {
   normal,
+  info,
   success,
   warning,
   error,

@@ -13,6 +13,83 @@ class HolidaysScreen extends StatefulWidget {
 
   @override
   State<HolidaysScreen> createState() => _HolidaysScreenState();
+
+  static Future<bool> selectedFederalStateButtonPressed(
+    BuildContext context, {
+    void Function()? setState,
+    void Function()? fetchHolidays,
+  }) async {
+    FederalState? selectedFederalState;
+    bool removeHolidays = false;
+
+    await showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return Container(
+          margin: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                AppLocalizationsManager.localizations.strSelectFederalState,
+                style: Theme.of(context).textTheme.headlineMedium,
+                textAlign: TextAlign.center,
+              ),
+              Expanded(
+                child: Container(
+                  margin: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).cardColor,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: ListView.builder(
+                    itemCount: FederalStatesList.states.length,
+                    itemBuilder: (context, index) {
+                      FederalState state = FederalStatesList.states[index];
+
+                      return ListTile(
+                        title: Text(state.name),
+                        onTap: () {
+                          selectedFederalState = state;
+                          Navigator.of(context).pop();
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  removeHolidays = true;
+                  Navigator.of(context).pop();
+                },
+                child: Text(
+                  AppLocalizationsManager.localizations.strRemoveHolidays,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+
+    if (removeHolidays) {
+      TimetableManager().settings.setSelectedFederalStateCode(null);
+
+      setState?.call();
+    }
+
+    if (selectedFederalState == null) return false;
+
+    TimetableManager()
+        .settings
+        .setSelectedFederalStateCode(selectedFederalState);
+
+    fetchHolidays?.call();
+    setState?.call();
+    return true;
+  }
 }
 
 class _HolidaysScreenState extends State<HolidaysScreen> {
@@ -71,7 +148,15 @@ class _HolidaysScreenState extends State<HolidaysScreen> {
     if (TimetableManager().settings.selectedFederalStateCode == null) {
       return Center(
         child: ElevatedButton(
-          onPressed: _selectedFederalStateButtonPressed,
+          onPressed: () => HolidaysScreen.selectedFederalStateButtonPressed(
+            context,
+            fetchHolidays: _fetchHolidays,
+            setState: () {
+              if (mounted) {
+                setState(() {});
+              }
+            },
+          ),
           child: Text(
             AppLocalizationsManager.localizations.strSelectFederalState,
           ),
@@ -143,88 +228,21 @@ class _HolidaysScreenState extends State<HolidaysScreen> {
     );
   }
 
-  Future<void> _selectedFederalStateButtonPressed() async {
-    FederalState? selectedFederalState;
-    bool removeHolidays = false;
-
-    await showModalBottomSheet(
-      context: context,
-      builder: (context) {
-        return Container(
-          margin: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                AppLocalizationsManager.localizations.strSelectFederalState,
-                style: Theme.of(context).textTheme.headlineMedium,
-                textAlign: TextAlign.center,
-              ),
-              Expanded(
-                child: Container(
-                  margin: const EdgeInsets.all(16),
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).cardColor,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: ListView.builder(
-                    itemCount: FederalStatesList.states.length,
-                    itemBuilder: (context, index) {
-                      FederalState state = FederalStatesList.states[index];
-
-                      return ListTile(
-                        title: Text(state.name),
-                        onTap: () {
-                          selectedFederalState = state;
-                          Navigator.of(context).pop();
-                        },
-                      );
-                    },
-                  ),
-                ),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  removeHolidays = true;
-                  Navigator.of(context).pop();
-                },
-                child: Text(
-                  AppLocalizationsManager.localizations.strRemoveHolidays,
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-
-    if (removeHolidays) {
-      TimetableManager().settings.setSelectedFederalStateCode(null);
-
-      setState(() {});
-    }
-
-    if (selectedFederalState == null) return;
-
-    TimetableManager()
-        .settings
-        .setSelectedFederalStateCode(selectedFederalState);
-
-    _fetchHolidays();
-
-    if (mounted) {
-      setState(() {});
-    }
-  }
-
   Widget? _floatingActionButton() {
     if (TimetableManager().settings.selectedFederalStateCode == null) {
       return null;
     }
 
     return FloatingActionButton(
-      onPressed: _selectedFederalStateButtonPressed,
+      onPressed: () => HolidaysScreen.selectedFederalStateButtonPressed(
+        context,
+        fetchHolidays: _fetchHolidays,
+        setState: () {
+          if (mounted) {
+            setState(() {});
+          }
+        },
+      ),
       child: const Icon(Icons.location_on),
     );
   }

@@ -301,7 +301,7 @@ class _SemesterScreenState extends State<SemesterScreen> {
   Future<List<SchoolGradeSubject>?> _showImportSubjectsSheet(
       BuildContext context) async {
     Timetable? timetable;
-    Utils.showListSelectionBottomSheet(
+    await Utils.showListSelectionBottomSheet(
       context,
       title:
           "${AppLocalizationsManager.localizations.strImportSubjectsFromTimetable}:",

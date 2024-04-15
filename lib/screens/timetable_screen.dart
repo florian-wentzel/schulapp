@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:go_router/go_router.dart';
@@ -6,8 +7,11 @@ import 'package:schulapp/code_behind/holidays_manager.dart';
 import 'package:schulapp/code_behind/time_table.dart';
 import 'package:schulapp/code_behind/time_table_manager.dart';
 import 'package:schulapp/code_behind/utils.dart';
+import 'package:schulapp/code_behind/version_manager.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
+import 'package:schulapp/screens/hello_screen.dart';
 import 'package:schulapp/screens/holidays_screen.dart';
+import 'package:schulapp/screens/new_versions_screen.dart';
 import 'package:schulapp/screens/time_table/create_timetable_screen.dart';
 import 'package:schulapp/screens/time_table/import_export_timetable_screen.dart';
 import 'package:schulapp/widgets/timetable_widget.dart';
@@ -39,6 +43,9 @@ class _TimetableScreenState extends State<TimetableScreen> {
 
   @override
   void initState() {
+    WidgetsBinding.instance.addPostFrameCallback(
+      _postFrameCallback,
+    );
     _fetchHolidays();
     super.initState();
   }
@@ -220,5 +227,67 @@ class _TimetableScreenState extends State<TimetableScreen> {
         .getCurrOrNextHolidayForState(stateApiCode: stateApiCode);
 
     setState(() {});
+  }
+
+  void _postFrameCallback(Duration _) async {
+    final currVersion = await VersionManager().getVersionString();
+
+    if (!mounted) return;
+
+    //only for developers
+    if (kDebugMode && !VersionHolder.isVersionSaved(currVersion)) {
+      Utils.showInfo(
+        context,
+        msg:
+            "Current version: $currVersion is not safed in version_manager.dart/VersionHolder.versions\npls add it!",
+        type: InfoType.error,
+        duration: const Duration(seconds: 8),
+      );
+    }
+
+    final fistTimeOpening = VersionManager().isFirstTimeOpening();
+
+    if (!mounted) return;
+
+    if (fistTimeOpening) {
+      context.go(HelloScreen.route);
+      return;
+    }
+
+    final isNewVersionInstalled =
+        await VersionManager().isNewVersionInstalled();
+
+    if (!mounted) return;
+
+    if (isNewVersionInstalled) {
+      String? lastUsedVersion = TimetableManager().settings.lastUsedVersion;
+
+      if (lastUsedVersion == null) return;
+
+      Utils.showInfo(
+        context,
+        msg: AppLocalizationsManager
+            .localizations.strYouUpdatedYourAppWantToSeeNewFeatures,
+        type: InfoType.info,
+        duration: const Duration(seconds: 8),
+        actionWidget: SnackBarAction(
+          label: AppLocalizationsManager.localizations.strShowNewFeatures,
+          onPressed: () async {
+            Utils.hideCurrInfo(context);
+
+            await Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => NewVersionsScreen(
+                  lastUsedVersion: lastUsedVersion,
+                ),
+              ),
+            );
+
+            VersionManager().updateLastUsedVersion();
+          },
+        ),
+      );
+      VersionManager().updateLastUsedVersion();
+    }
   }
 }

@@ -5,9 +5,11 @@ import 'package:go_router/go_router.dart';
 import 'package:schulapp/code_behind/time_table_manager.dart';
 import 'package:schulapp/code_behind/todo_event.dart';
 import 'package:schulapp/code_behind/utils.dart';
+import 'package:schulapp/code_behind/version_manager.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/screens/all_timetables_screen.dart';
 import 'package:schulapp/screens/grades_screen.dart';
+import 'package:schulapp/screens/hello_screen.dart';
 import 'package:schulapp/screens/holidays_screen.dart';
 import 'package:schulapp/screens/tasks_screen.dart';
 import 'package:schulapp/screens/settings_screen.dart';
@@ -25,13 +27,17 @@ final _router = GoRouter(
         if (localizations != null) {
           AppLocalizationsManager.setLocalizations(localizations);
         }
+
+        final showBottomNavBar = Utils.isMobileRatio(context) &&
+            !VersionManager().isFirstTimeOpening();
+
         return Material(
           child: Scaffold(
             backgroundColor: Theme.of(context).canvasColor,
             body: Center(
               child: child,
             ),
-            bottomNavigationBar: Utils.isMobileRatio(context)
+            bottomNavigationBar: showBottomNavBar
                 ? CustomBottomNavigationBar(
                     currRoute: state.fullPath ?? "",
                   )
@@ -69,6 +75,10 @@ final _router = GoRouter(
         GoRoute(
           path: SettingsScreen.route,
           builder: (context, state) => const SettingsScreen(),
+        ),
+        GoRoute(
+          path: HelloScreen.route,
+          builder: (context, state) => const HelloScreen(),
         ),
       ],
     ),
