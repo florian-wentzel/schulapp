@@ -76,29 +76,31 @@ class _HelloScreenState extends State<HelloScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        PageView.builder(
-          controller: _pageController,
-          onPageChanged: (currPageIndex) {
-            _currPageIndex = currPageIndex;
-            setState(() {});
-          },
-          itemCount: _pages.length,
-          itemBuilder: (context, index) {
-            final page = _pages[index];
-            return _pageWidget(page);
-          },
-        ),
-        Align(
-          alignment: Alignment.bottomCenter,
-          child: Container(
-            padding: const EdgeInsets.all(8),
-            color: Theme.of(context).cardColor,
-            child: _bottomRow(),
+    return SafeArea(
+      child: Stack(
+        children: [
+          PageView.builder(
+            controller: _pageController,
+            onPageChanged: (currPageIndex) {
+              _currPageIndex = currPageIndex;
+              setState(() {});
+            },
+            itemCount: _pages.length,
+            itemBuilder: (context, index) {
+              final page = _pages[index];
+              return _pageWidget(page);
+            },
           ),
-        ),
-      ],
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              color: Theme.of(context).cardColor,
+              child: _bottomRow(),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
