@@ -1,6 +1,7 @@
 {
   "@@locale": "en",
   "language_name": "Englisch",
+  "version_0_1_3": "remade Settings-Manager",
   "version_0_1_2": "Added intro slider",
   "version_0_1_1": "Added update informaion",
   "version_0_1_0": "Added multiple Languages",

@@ -4,6 +4,7 @@ import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:go_router/go_router.dart';
 import 'package:schulapp/code_behind/holidays.dart';
 import 'package:schulapp/code_behind/holidays_manager.dart';
+import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/time_table.dart';
 import 'package:schulapp/code_behind/time_table_manager.dart';
 import 'package:schulapp/code_behind/utils.dart';
@@ -220,7 +221,9 @@ class _TimetableScreenState extends State<TimetableScreen> {
   }
 
   Future<void> _fetchHolidays() async {
-    final stateApiCode = TimetableManager().settings.selectedFederalStateCode;
+    final stateApiCode = TimetableManager().settings.getVar(
+          Settings.selectedFederalStateCodeKey,
+        );
     if (stateApiCode == null) return;
 
     currentOrNextHolidays = await HolidaysManager()
@@ -260,7 +263,9 @@ class _TimetableScreenState extends State<TimetableScreen> {
     if (!mounted) return;
 
     if (isNewVersionInstalled) {
-      String? lastUsedVersion = TimetableManager().settings.lastUsedVersion;
+      String? lastUsedVersion = TimetableManager().settings.getVar(
+            Settings.lastUsedVersionKey,
+          );
 
       if (lastUsedVersion == null) return;
 

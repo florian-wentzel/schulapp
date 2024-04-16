@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/time_table.dart';
 import 'package:schulapp/code_behind/time_table_manager.dart';
 import 'package:schulapp/code_behind/utils.dart';
@@ -98,8 +99,10 @@ class _AllTimetablesScreenState extends State<AllTimetablesScreen> {
   Widget _itemBuilder(BuildContext context, int index) {
     Timetable tt = TimetableManager().timetables[index];
 
-    String mainTimetableName =
-        TimetableManager().settings.mainTimetableName ?? "";
+    String mainTimetableName = TimetableManager().settings.getVar(
+              Settings.mainTimetableNameKey,
+            ) ??
+        "";
 
     return ListTile(
       onTap: () async {
@@ -128,9 +131,15 @@ class _AllTimetablesScreenState extends State<AllTimetablesScreen> {
             value: mainTimetableName == tt.name,
             onChanged: (bool value) {
               if (value) {
-                TimetableManager().settings.mainTimetableName = tt.name;
+                TimetableManager().settings.setVar(
+                      Settings.mainTimetableNameKey,
+                      tt.name,
+                    );
               } else {
-                TimetableManager().settings.mainTimetableName = null;
+                TimetableManager().settings.setVar(
+                      Settings.mainTimetableNameKey,
+                      null,
+                    );
               }
               setState(() {});
             },

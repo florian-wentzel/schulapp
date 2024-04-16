@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/school_lesson.dart';
 import 'package:schulapp/code_behind/school_lesson_prefab.dart';
 import 'package:schulapp/code_behind/school_semester.dart';
+import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/time_table.dart';
 import 'package:schulapp/code_behind/time_table_manager.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
@@ -343,10 +344,12 @@ class Utils {
     }
 
     try {
-      if (TimetableManager().settings.mainSemesterName != null) {
+      String? mainTimetableName =
+          TimetableManager().settings.getVar(Settings.mainTimetableNameKey);
+
+      if (mainTimetableName != null) {
         return TimetableManager().semesters.firstWhere(
-              (element) =>
-                  element.name == TimetableManager().settings.mainSemesterName,
+              (element) => element.name == mainTimetableName,
             );
       }
     } catch (_) {}
@@ -361,10 +364,12 @@ class Utils {
     }
 
     try {
-      if (TimetableManager().settings.mainTimetableName != null) {
+      String? mainTimetableName =
+          TimetableManager().settings.getVar(Settings.mainTimetableNameKey);
+
+      if (mainTimetableName != null) {
         return TimetableManager().timetables.firstWhere(
-              (element) =>
-                  element.name == TimetableManager().settings.mainTimetableName,
+              (element) => element.name == mainTimetableName,
             );
       }
     } catch (_) {}

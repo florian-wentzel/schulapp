@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/time_table_manager.dart';
 
 ///singelton damit es immer nur eine instanz gibt
@@ -11,11 +12,11 @@ class ThemeManager with ChangeNotifier {
   }
 
   ThemeMode get themeMode {
-    return TimetableManager().settings.themeMode;
+    return TimetableManager().settings.getVar(Settings.themeModeKey);
   }
 
   set themeMode(ThemeMode mode) {
-    TimetableManager().settings.themeMode = mode;
+    TimetableManager().settings.setVar(Settings.themeModeKey, mode);
     notifyListeners();
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/federal_state.dart';
 import 'package:schulapp/code_behind/holidays.dart';
 import 'package:schulapp/code_behind/holidays_manager.dart';
+import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/time_table_manager.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
@@ -75,16 +76,20 @@ class HolidaysScreen extends StatefulWidget {
     );
 
     if (removeHolidays) {
-      TimetableManager().settings.setSelectedFederalStateCode(null);
+      TimetableManager().settings.setVar(
+            Settings.selectedFederalStateCodeKey,
+            null,
+          );
 
       setState?.call();
     }
 
     if (selectedFederalState == null) return false;
 
-    TimetableManager()
-        .settings
-        .setSelectedFederalStateCode(selectedFederalState);
+    TimetableManager().settings.setVar(
+          Settings.selectedFederalStateCodeKey,
+          selectedFederalState?.apiCode,
+        );
 
     fetchHolidays?.call();
     setState?.call();
@@ -104,7 +109,10 @@ class _HolidaysScreenState extends State<HolidaysScreen> {
   }
 
   Future<void> _fetchHolidays() async {
-    String? stateCode = TimetableManager().settings.selectedFederalStateCode;
+    String? stateCode = TimetableManager().settings.getVar(
+          Settings.selectedFederalStateCodeKey,
+        );
+
     if (stateCode == null) return;
 
     allHolidays = await HolidaysManager().getAllHolidaysForState(
@@ -119,7 +127,9 @@ class _HolidaysScreenState extends State<HolidaysScreen> {
     federalStateName = FederalStatesList.states.firstWhere(
       (element) {
         return element.apiCode ==
-            TimetableManager().settings.selectedFederalStateCode;
+            TimetableManager().settings.getVar(
+                  Settings.selectedFederalStateCodeKey,
+                );
       },
       orElse: () => FederalState(name: "", officialCode: "", apiCode: ""),
     ).name;
@@ -145,7 +155,10 @@ class _HolidaysScreenState extends State<HolidaysScreen> {
   }
 
   Widget _body() {
-    if (TimetableManager().settings.selectedFederalStateCode == null) {
+    if (TimetableManager().settings.getVar(
+              Settings.selectedFederalStateCodeKey,
+            ) ==
+        null) {
       return Center(
         child: ElevatedButton(
           onPressed: () => HolidaysScreen.selectedFederalStateButtonPressed(
@@ -229,7 +242,10 @@ class _HolidaysScreenState extends State<HolidaysScreen> {
   }
 
   Widget? _floatingActionButton() {
-    if (TimetableManager().settings.selectedFederalStateCode == null) {
+    if (TimetableManager()
+            .settings
+            .getVar(Settings.selectedFederalStateCodeKey) ==
+        null) {
       return null;
     }
 

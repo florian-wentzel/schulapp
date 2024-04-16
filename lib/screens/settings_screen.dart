@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:schulapp/app.dart';
+import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/time_table_manager.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/code_behind/version_manager.dart';
@@ -135,9 +136,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
           .localizations.strOpenMainSemesterAutomatically,
       afterTitle: [
         Switch.adaptive(
-          value: TimetableManager().settings.openMainSemesterAutomatically,
+          value: TimetableManager().settings.getVar(
+                Settings.openMainSemesterAutomaticallyKey,
+              ),
           onChanged: (value) {
-            TimetableManager().settings.openMainSemesterAutomatically = value;
+            TimetableManager().settings.setVar(
+                  Settings.openMainSemesterAutomaticallyKey,
+                  value,
+                );
             setState(() {});
           },
         ),
@@ -151,8 +157,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) => NewVersionsScreen(
-              lastUsedVersion:
-                  TimetableManager().settings.lastUsedVersion ?? "",
+              lastUsedVersion: TimetableManager()
+                      .settings
+                      .getVar(Settings.lastUsedVersionKey) ??
+                  "",
             ),
           ),
         );

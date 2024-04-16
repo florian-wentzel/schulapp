@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/school_semester.dart';
+import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/time_table_manager.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
@@ -21,8 +22,9 @@ class _GradesScreenState extends State<GradesScreen> {
   void initState() {
     super.initState();
 
-    bool openMainSemsterAutomaticly =
-        TimetableManager().settings.openMainSemesterAutomatically;
+    bool openMainSemsterAutomaticly = TimetableManager().settings.getVar(
+          Settings.openMainSemesterAutomaticallyKey,
+        );
     if (!openMainSemsterAutomaticly) return;
     Future.delayed(Duration.zero, () {
       final mainSemester = Utils.getMainSemester();
@@ -101,7 +103,10 @@ class _GradesScreenState extends State<GradesScreen> {
 
   Widget itemBuilder(context, index) {
     final semester = TimetableManager().semesters[index];
-    final mainSemesterName = TimetableManager().settings.mainSemesterName ?? "";
+    final mainSemesterName = TimetableManager().settings.getVar(
+              Settings.mainSemesterNameKey,
+            ) ??
+        "";
     final heroString = semester.name;
 
     return Padding(
@@ -155,9 +160,15 @@ class _GradesScreenState extends State<GradesScreen> {
               value: mainSemesterName == semester.name,
               onChanged: (bool value) {
                 if (value) {
-                  TimetableManager().settings.mainSemesterName = semester.name;
+                  TimetableManager().settings.setVar(
+                        Settings.mainSemesterNameKey,
+                        semester.name,
+                      );
                 } else {
-                  TimetableManager().settings.mainSemesterName = null;
+                  TimetableManager().settings.setVar(
+                        Settings.mainSemesterNameKey,
+                        null,
+                      );
                 }
                 setState(() {});
               },

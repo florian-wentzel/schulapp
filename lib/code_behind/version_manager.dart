@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/time_table_manager.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 
@@ -27,13 +28,17 @@ class VersionManager {
   }
 
   bool isFirstTimeOpening() {
-    String? lastUsedVersion = TimetableManager().settings.lastUsedVersion;
+    String? lastUsedVersion = TimetableManager().settings.getVar(
+          Settings.lastUsedVersionKey,
+        );
 
     return lastUsedVersion == null;
   }
 
   Future<bool> isNewVersionInstalled() async {
-    String? lastUsedVersion = TimetableManager().settings.lastUsedVersion;
+    String? lastUsedVersion = TimetableManager().settings.getVar(
+          Settings.lastUsedVersionKey,
+        );
 
     if (lastUsedVersion == null) {
       return false;
@@ -49,7 +54,10 @@ class VersionManager {
   Future<void> updateLastUsedVersion() async {
     final currVersion = await getVersionString();
 
-    TimetableManager().settings.lastUsedVersion = currVersion;
+    TimetableManager().settings.setVar(
+          Settings.lastUsedVersionKey,
+          currVersion,
+        );
   }
 
   static int compareVersions(String v1, String v2) {
@@ -90,6 +98,7 @@ class VersionHolder {
   }
 
   static final Map<String, String> _versions = {
+    "0.1.3": AppLocalizationsManager.localizations.version_0_1_3,
     "0.1.2": AppLocalizationsManager.localizations.version_0_1_2,
     "0.1.1": AppLocalizationsManager.localizations.version_0_1_1,
     "0.1.0": AppLocalizationsManager.localizations.version_0_1_0,

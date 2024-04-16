@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:schulapp/code_behind/school_lesson_prefab.dart';
+import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/time_table.dart';
 import 'package:schulapp/code_behind/time_table_manager.dart';
 import 'package:schulapp/code_behind/utils.dart';
@@ -34,7 +35,7 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
     _lessonPrefabs = Utils.createLessonPrefabsFromTt(widget.timetable);
     _originalName = String.fromCharCodes(widget.timetable.name.codeUnits);
     widget.timetable.changeLessonNumberVisibility(
-      TimetableManager().settings.showLessonNumbers,
+      TimetableManager().settings.getVar(Settings.showLessonNumbersKey),
     );
     super.initState();
   }
@@ -135,9 +136,14 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
               height: 16,
             ),
             Switch.adaptive(
-              value: TimetableManager().settings.showLessonNumbers,
+              value: TimetableManager()
+                  .settings
+                  .getVar(Settings.showLessonNumbersKey),
               onChanged: (value) {
-                TimetableManager().settings.showLessonNumbers = value;
+                TimetableManager().settings.setVar(
+                      Settings.showLessonNumbersKey,
+                      value,
+                    );
                 widget.timetable.changeLessonNumberVisibility(value);
                 setState(() {});
               },

@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/time_table_manager.dart';
 import 'package:schulapp/code_behind/todo_event.dart';
 import 'package:schulapp/code_behind/utils.dart';
@@ -102,7 +103,10 @@ class _MainAppState extends State<MainApp> {
 
   void setLocale(Locale? newLocale) {
     _locale = newLocale;
-    TimetableManager().settings.languageCode = _locale?.languageCode;
+    TimetableManager().settings.setVar(
+          Settings.languageCodeKey,
+          _locale?.languageCode,
+        );
 
     setState(() {});
   }
@@ -117,8 +121,10 @@ class _MainAppState extends State<MainApp> {
   void initState() {
     ThemeManager().addListener(themeListener);
 
-    if (TimetableManager().settings.languageCode != null) {
-      setLocale(Locale(TimetableManager().settings.languageCode!));
+    if (TimetableManager().settings.getVar(Settings.languageCodeKey) != null) {
+      setLocale(
+        Locale(TimetableManager().settings.getVar(Settings.languageCodeKey)!),
+      );
     }
 
     super.initState();
