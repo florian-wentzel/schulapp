@@ -75,8 +75,9 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
     unselectedColor = Colors.transparent;
 
     return SizedBox(
-      width: lessonWidth * (2),
-      height: lessonHeight * (widget.timetable.schoolTimes.length + 1),
+      width: lessonWidth * 2,
+      height: lessonHeight * (widget.timetable.schoolTimes.length + 1) +
+          lessonHeight / 4, //_createBreakHighlight
       child: PageView.builder(
         controller: _pageController,
         itemCount: pagesCount,

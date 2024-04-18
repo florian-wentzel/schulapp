@@ -70,7 +70,8 @@ class _TimetableWidgetState extends State<TimetableWidget> {
 
     return SizedBox(
       width: lessonWidth * (widget.timetable.schoolDays.length + 1),
-      height: lessonHeight * (widget.timetable.maxLessonCount + 1),
+      height: lessonHeight * (widget.timetable.maxLessonCount + 1) +
+          lessonHeight / 4, //_createBreakHighlight
       child: PageView.builder(
         itemCount: pagesCount,
         controller: _pageController,

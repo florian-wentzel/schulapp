@@ -13,6 +13,7 @@ import 'package:schulapp/code_behind/todo_event.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/code_behind/version_manager.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
+import 'package:schulapp/screens/grades_screen.dart';
 import 'package:schulapp/screens/hello_screen.dart';
 import 'package:schulapp/screens/holidays_screen.dart';
 import 'package:schulapp/screens/new_versions_screen.dart';
@@ -156,62 +157,31 @@ class _TimetableScreenState extends State<TimetableScreen> {
       height -= kBottomNavigationBarHeight;
       height -= 2; //without you could scroll a little bit
 
-      return PageView(
-        scrollDirection: Axis.vertical,
-        controller: _verticalPageViewController,
-        children: [
-          SizedBox(
-            width: width,
-            height: height,
-            child: Stack(
-              children: [
-                SingleChildScrollView(
-                  physics: const NeverScrollableScrollPhysics(),
-                  scrollDirection: Axis.vertical,
-                  primary: false,
-                  child: Center(
-                    child: TimetableOneDayWidget(
-                      timetable: widget.timetable!,
-                      showTodoEvents: widget.isHomeScreen,
-                    ),
-                  ),
-                ),
-                // Align(
-                //   alignment: Alignment.bottomCenter,
-                //   child: InkWell(
-                //     onTap: () {
-                //       _verticalPageViewController.animateToPage(
-                //         1,
-                //         duration: const Duration(
-                //           milliseconds: 500,
-                //         ),
-                //         curve: Curves.easeInOutCirc,
-                //       );
-                //     },
-                //     child: Container(
-                //       width: width,
-                //       height: 30,
-                //       decoration: BoxDecoration(
-                //         color: Theme.of(context).cardColor,
-                //         borderRadius: const BorderRadius.only(
-                //           topLeft: Radius.circular(64),
-                //           topRight: Radius.circular(64),
-                //         ),
-                //       ),
-                //     ),
-                //   ),
-                // ),
-              ],
-            ),
-          ),
-          _statsPage(
-            width: width,
-            height: height,
-          ),
-        ],
+      return _timetableBuilder(
+        width: width,
+        height: height,
+        child: TimetableOneDayWidget(
+          timetable: widget.timetable!,
+          showTodoEvents: widget.isHomeScreen,
+        ),
       );
     }
 
+    return _timetableBuilder(
+      child: TimetableWidget(
+        timetable: widget.timetable!,
+        showTodoEvents: widget.isHomeScreen,
+      ),
+      width: width,
+      height: height,
+    );
+  }
+
+  Widget _timetableBuilder({
+    required Widget child,
+    required double width,
+    required double height,
+  }) {
     return PageView(
       scrollDirection: Axis.vertical,
       controller: _verticalPageViewController,
@@ -222,14 +192,19 @@ class _TimetableScreenState extends State<TimetableScreen> {
           child: Stack(
             children: [
               SingleChildScrollView(
-                physics: const NeverScrollableScrollPhysics(),
+                // physics: const NeverScrollableScrollPhysics(),
                 scrollDirection: Axis.vertical,
                 primary: false,
                 child: Center(
-                  child: TimetableWidget(
-                    timetable: widget.timetable!,
-                    showTodoEvents: widget.isHomeScreen,
-                  ),
+                  child: child,
+                ),
+              ),
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: Container(
+                  color: Colors.transparent,
+                  width: width,
+                  height: height / 3,
                 ),
               ),
               // Align(
@@ -273,32 +248,44 @@ class _TimetableScreenState extends State<TimetableScreen> {
     required double height,
   }) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       width: width,
       height: height,
       color: Theme.of(context).cardColor,
-      child: SingleChildScrollView(
-        scrollDirection: Axis.vertical,
-        physics: const NeverScrollableScrollPhysics(),
-        primary: false,
-        child: Column(
-          children: [
-            Text(
-              AppLocalizationsManager.localizations.strStatistics,
-              style: Theme.of(context).textTheme.displaySmall,
+      child: Stack(
+        children: [
+          SingleChildScrollView(
+            scrollDirection: Axis.vertical,
+            // physics: const NeverScrollableScrollPhysics(),
+            primary: false,
+            child: Column(
+              children: [
+                Text(
+                  AppLocalizationsManager.localizations.strStatistics,
+                  style: Theme.of(context).textTheme.displaySmall,
+                ),
+                _gradesChartWidget(),
+                const SizedBox(
+                  height: 8,
+                ),
+                _nextTaskWidget(),
+                _holidaysWidget(),
+                // Container(
+                //   height: height,
+                //   color: Colors.amber,
+                // ),
+              ],
             ),
-            _gradesChartWidget(),
-            const SizedBox(
-              height: 8,
+          ),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Container(
+              color: Colors.transparent,
+              width: width,
+              height: height / 3,
             ),
-            _nextTaskWidget(),
-            _holidaysWidget(),
-            // Container(
-            //   height: height,
-            //   color: Colors.amber,
-            // ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -319,7 +306,6 @@ class _TimetableScreenState extends State<TimetableScreen> {
       width: width,
       height: 180,
       decoration: BoxDecoration(
-        // color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Stack(
@@ -328,8 +314,8 @@ class _TimetableScreenState extends State<TimetableScreen> {
             PieChartData(
               pieTouchData: PieTouchData(
                 touchCallback: (FlTouchEvent event, pieTouchResponse) {
-                  if (!event.isInterestedForInteractions ||
-                      pieTouchResponse == null ||
+                  //if (!event.isInterestedForInteractions ||
+                  if (pieTouchResponse == null ||
                       pieTouchResponse.touchedSection == null) {
                     _pieChartTouchedIndex = -1;
                     return;
@@ -350,9 +336,14 @@ class _TimetableScreenState extends State<TimetableScreen> {
             ),
           ),
           Center(
-            child: Text(
-              semester.getGradeAverageString(),
-              style: Theme.of(context).textTheme.headlineSmall,
+            child: GestureDetector(
+              onTap: () {
+                context.go(GradesScreen.route);
+              },
+              child: Text(
+                semester.getGradeAverageString(),
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
             ),
           ),
         ],
@@ -392,6 +383,13 @@ class _TimetableScreenState extends State<TimetableScreen> {
 
     int index = 0;
     for (int key in grades.keys) {
+      String title = key.toString();
+      bool selected = index == _pieChartTouchedIndex;
+
+      if (selected && grades[key] != null) {
+        title = "x ${grades[key]?.toString() ?? key.toString()}";
+      }
+
       list.add(
         PieChartSectionData(
           borderSide: BorderSide(
@@ -399,9 +397,8 @@ class _TimetableScreenState extends State<TimetableScreen> {
             color: Theme.of(context).canvasColor,
           ),
           color: Utils.getGradeColor(key),
-          title: key.toString(),
-          radius:
-              index == _pieChartTouchedIndex ? selectedRadius : defaultRadius,
+          title: title,
+          radius: selected ? selectedRadius : defaultRadius,
           value: grades[key]! / numberOfGrades,
         ),
       );
@@ -476,7 +473,7 @@ class _TimetableScreenState extends State<TimetableScreen> {
         ),
       );
     }
-    final width = MediaQuery.of(context).size.width * 0.8;
+    final width = MediaQuery.of(context).size.width;
 
     return Column(
       children: [
