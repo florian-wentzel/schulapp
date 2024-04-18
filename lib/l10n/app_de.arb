@@ -1,6 +1,7 @@
 {
   "@@locale": "de",
   "language_name": "Deutsch",
+  "version_0_1_4": "Statistik zur Startseite hinzugefügt",
   "version_0_1_3": "Einstellungs-Manager überarbeitet",
   "version_0_1_2": "Hinzufügen des Tutorials",
   "version_0_1_1": "Update Informationen hinzugefügt",
@@ -154,5 +155,6 @@
   "strStart": "Start!",
   "strSkip": "Überspringen",
   "strNext": "Nächste",
-  "strVersions": "Versionen"
+  "strVersions": "Versionen",
+  "strStatistics": "Statistik"
 }

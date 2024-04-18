@@ -345,7 +345,7 @@ class Utils {
 
     try {
       String? mainTimetableName =
-          TimetableManager().settings.getVar(Settings.mainTimetableNameKey);
+          TimetableManager().settings.getVar(Settings.mainSemesterNameKey);
 
       if (mainTimetableName != null) {
         return TimetableManager().semesters.firstWhere(

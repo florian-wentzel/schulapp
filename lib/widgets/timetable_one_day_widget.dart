@@ -57,13 +57,15 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
 
   @override
   Widget build(BuildContext context) {
-    lessonWidth = (MediaQuery.of(context).size.width * 0.8) / 2;
+    lessonWidth = MediaQuery.of(context).size.width * 0.8 / 2;
     if (lessonWidth < minLessonWidth) {
       lessonWidth = minLessonWidth;
     }
 
-    lessonHeight = (MediaQuery.of(context).size.height * 0.8) /
+    lessonHeight = MediaQuery.of(context).size.height *
+        0.8 /
         (widget.timetable.maxLessonCount + 1);
+
     if (lessonHeight < minLessonHeight) {
       lessonHeight = minLessonHeight;
     }
@@ -72,24 +74,29 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
 
     unselectedColor = Colors.transparent;
 
-    return PageView.builder(
-      controller: _pageController,
-      itemCount: pagesCount,
-      itemBuilder: (context, index) {
-        Timetable tt = widget.timetable;
+    return SizedBox(
+      width: lessonWidth * (2),
+      height: lessonHeight * (widget.timetable.schoolTimes.length + 1),
+      child: PageView.builder(
+        controller: _pageController,
+        itemCount: pagesCount,
+        itemBuilder: (context, index) {
+          Timetable tt = widget.timetable;
 
-        int currDayIndex =
-            (index - initialMondayPageIndex) % tt.schoolDays.length;
-        int currWeekIndex =
-            (index - initialMondayPageIndex) ~/ tt.schoolDays.length;
+          int currDayIndex =
+              (index - initialMondayPageIndex) % tt.schoolDays.length;
+          int currWeekIndex =
+              (index - initialMondayPageIndex) ~/ tt.schoolDays.length;
 
-        DateTime currMonday = Utils.getWeekDay(DateTime.now(), DateTime.monday);
+          DateTime currMonday =
+              Utils.getWeekDay(DateTime.now(), DateTime.monday);
 
-        return _createDay(
-          dayIndex: currDayIndex,
-          currMonday: currMonday.add(Duration(days: 7 * currWeekIndex)),
-        );
-      },
+          return _createDay(
+            dayIndex: currDayIndex,
+            currMonday: currMonday.add(Duration(days: 7 * currWeekIndex)),
+          );
+        },
+      ),
     );
   }
 

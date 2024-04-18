@@ -68,12 +68,16 @@ class _TimetableWidgetState extends State<TimetableWidget> {
       lessonHeight = minLessonHeight;
     }
 
-    return PageView.builder(
-      itemCount: pagesCount,
-      controller: _pageController,
-      itemBuilder: (context, index) {
-        return _createPage(index);
-      },
+    return SizedBox(
+      width: lessonWidth * (widget.timetable.schoolDays.length + 1),
+      height: lessonHeight * (widget.timetable.maxLessonCount + 1),
+      child: PageView.builder(
+        itemCount: pagesCount,
+        controller: _pageController,
+        itemBuilder: (context, index) {
+          return _createPage(index);
+        },
+      ),
     );
   }
 
@@ -99,13 +103,10 @@ class _TimetableWidgetState extends State<TimetableWidget> {
 
     return Center(
       child: SingleChildScrollView(
-        scrollDirection: Axis.vertical,
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: dayWidgets,
-          ),
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: dayWidgets,
         ),
       ),
     );

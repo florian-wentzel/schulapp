@@ -1,24 +1,30 @@
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:go_router/go_router.dart';
 import 'package:schulapp/code_behind/holidays.dart';
 import 'package:schulapp/code_behind/holidays_manager.dart';
+import 'package:schulapp/code_behind/school_semester.dart';
 import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/time_table.dart';
 import 'package:schulapp/code_behind/time_table_manager.dart';
+import 'package:schulapp/code_behind/todo_event.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/code_behind/version_manager.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/screens/hello_screen.dart';
 import 'package:schulapp/screens/holidays_screen.dart';
 import 'package:schulapp/screens/new_versions_screen.dart';
+import 'package:schulapp/screens/tasks_screen.dart';
 import 'package:schulapp/screens/time_table/create_timetable_screen.dart';
 import 'package:schulapp/screens/time_table/import_export_timetable_screen.dart';
 import 'package:schulapp/widgets/timetable_widget.dart';
 import 'package:schulapp/widgets/timetable_util_functions.dart';
 import 'package:schulapp/widgets/navigation_bar_drawer.dart';
 import 'package:schulapp/widgets/timetable_one_day_widget.dart';
+import 'package:schulapp/widgets/todo_event_list_item_widget.dart';
+import 'package:schulapp/widgets/todo_event_util_functions.dart';
 
 // ignore: must_be_immutable
 class TimetableScreen extends StatefulWidget {
@@ -40,6 +46,8 @@ class TimetableScreen extends StatefulWidget {
 }
 
 class _TimetableScreenState extends State<TimetableScreen> {
+  final _verticalPageViewController = PageController();
+
   Holidays? currentOrNextHolidays;
 
   @override
@@ -148,18 +156,142 @@ class _TimetableScreenState extends State<TimetableScreen> {
       height -= kBottomNavigationBarHeight;
       height -= 2; //without you could scroll a little bit
 
-      return SingleChildScrollView(
+      return PageView(
         scrollDirection: Axis.vertical,
+        controller: _verticalPageViewController,
+        children: [
+          SizedBox(
+            width: width,
+            height: height,
+            child: Stack(
+              children: [
+                SingleChildScrollView(
+                  physics: const NeverScrollableScrollPhysics(),
+                  scrollDirection: Axis.vertical,
+                  primary: false,
+                  child: Center(
+                    child: TimetableOneDayWidget(
+                      timetable: widget.timetable!,
+                      showTodoEvents: widget.isHomeScreen,
+                    ),
+                  ),
+                ),
+                // Align(
+                //   alignment: Alignment.bottomCenter,
+                //   child: InkWell(
+                //     onTap: () {
+                //       _verticalPageViewController.animateToPage(
+                //         1,
+                //         duration: const Duration(
+                //           milliseconds: 500,
+                //         ),
+                //         curve: Curves.easeInOutCirc,
+                //       );
+                //     },
+                //     child: Container(
+                //       width: width,
+                //       height: 30,
+                //       decoration: BoxDecoration(
+                //         color: Theme.of(context).cardColor,
+                //         borderRadius: const BorderRadius.only(
+                //           topLeft: Radius.circular(64),
+                //           topRight: Radius.circular(64),
+                //         ),
+                //       ),
+                //     ),
+                //   ),
+                // ),
+              ],
+            ),
+          ),
+          _statsPage(
+            width: width,
+            height: height,
+          ),
+        ],
+      );
+    }
+
+    return PageView(
+      scrollDirection: Axis.vertical,
+      controller: _verticalPageViewController,
+      children: [
+        SizedBox(
+          width: width,
+          height: height,
+          child: Stack(
+            children: [
+              SingleChildScrollView(
+                physics: const NeverScrollableScrollPhysics(),
+                scrollDirection: Axis.vertical,
+                primary: false,
+                child: Center(
+                  child: TimetableWidget(
+                    timetable: widget.timetable!,
+                    showTodoEvents: widget.isHomeScreen,
+                  ),
+                ),
+              ),
+              // Align(
+              //   alignment: Alignment.bottomCenter,
+              //   child: InkWell(
+              //     onTap: () {
+              //       _verticalPageViewController.animateToPage(
+              //         1,
+              //         duration: const Duration(
+              //           milliseconds: 500,
+              //         ),
+              //         curve: Curves.easeInOutCirc,
+              //       );
+              //     },
+              //     child: Container(
+              //       width: width,
+              //       height: 30,
+              //       decoration: BoxDecoration(
+              //         color: Theme.of(context).cardColor,
+              //         borderRadius: const BorderRadius.only(
+              //           topLeft: Radius.circular(64),
+              //           topRight: Radius.circular(64),
+              //         ),
+              //       ),
+              //     ),
+              //   ),
+              // ),
+            ],
+          ),
+        ),
+        _statsPage(
+          width: width,
+          height: height,
+        ),
+      ],
+    );
+  }
+
+  Widget _statsPage({
+    required double width,
+    required double height,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      width: width,
+      height: height,
+      color: Theme.of(context).cardColor,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.vertical,
+        physics: const NeverScrollableScrollPhysics(),
+        primary: false,
         child: Column(
           children: [
-            SizedBox(
-              width: width,
-              height: height,
-              child: TimetableOneDayWidget(
-                timetable: widget.timetable!,
-                showTodoEvents: widget.isHomeScreen,
-              ),
+            Text(
+              AppLocalizationsManager.localizations.strStatistics,
+              style: Theme.of(context).textTheme.displaySmall,
             ),
+            _gradesChartWidget(),
+            const SizedBox(
+              height: 8,
+            ),
+            _nextTaskWidget(),
             _holidaysWidget(),
             // Container(
             //   height: height,
@@ -167,34 +299,182 @@ class _TimetableScreenState extends State<TimetableScreen> {
             // ),
           ],
         ),
-      );
-    }
+      ),
+    );
+  }
 
-    return SingleChildScrollView(
-      scrollDirection: Axis.vertical,
-      child: Column(
+  int _pieChartTouchedIndex = -1;
+
+  Widget _gradesChartWidget() {
+    SchoolSemester? semester = Utils.getMainSemester();
+
+    if (semester == null) return Container();
+
+    final sections = _generatePieChartSecions(semester);
+    if (sections == null) return Container();
+
+    final width = MediaQuery.of(context).size.width * 0.8;
+
+    return Container(
+      width: width,
+      height: 180,
+      decoration: BoxDecoration(
+        // color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Stack(
         children: [
-          SizedBox(
-            width: width,
-            height: height,
-            child: TimetableWidget(
-              timetable: widget.timetable!,
-              showTodoEvents: widget.isHomeScreen,
+          PieChart(
+            PieChartData(
+              pieTouchData: PieTouchData(
+                touchCallback: (FlTouchEvent event, pieTouchResponse) {
+                  if (!event.isInterestedForInteractions ||
+                      pieTouchResponse == null ||
+                      pieTouchResponse.touchedSection == null) {
+                    _pieChartTouchedIndex = -1;
+                    return;
+                  }
+                  _pieChartTouchedIndex =
+                      pieTouchResponse.touchedSection!.touchedSectionIndex;
+
+                  setState(() {});
+                },
+              ),
+              borderData: FlBorderData(
+                show: false,
+              ),
+              sectionsSpace: 0,
+              sections: sections,
+              centerSpaceRadius: 30,
+              centerSpaceColor: semester.getColor(),
             ),
           ),
-          _holidaysWidget(),
-          // Container(
-          //   height: 120,
-          //   color: Colors.amber,
-          // ),
+          Center(
+            child: Text(
+              semester.getGradeAverageString(),
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+          ),
         ],
       ),
     );
   }
 
+  List<PieChartSectionData>? _generatePieChartSecions(SchoolSemester semester) {
+    const defaultRadius = 40.0;
+    const selectedRadius = 60.0;
+    List<PieChartSectionData> list = [];
+    int numberOfGrades = 0;
+
+    //grade, count
+    Map<int, int> grades = {};
+    for (final subject in semester.subjects) {
+      for (final gradeGroup in subject.gradeGroups) {
+        for (final grade in gradeGroup.grades) {
+          if (grades[grade.grade] == null) {
+            grades[grade.grade] = 1;
+          } else {
+            grades[grade.grade] = grades[grade.grade]! + 1;
+          }
+          numberOfGrades++;
+        }
+      }
+    }
+
+    grades = Map.fromEntries(
+      grades.entries.toList()
+        ..sort(
+          (e1, e2) => e1.key.compareTo(e2.key),
+        ),
+    );
+
+    if (numberOfGrades == 0) return null;
+
+    int index = 0;
+    for (int key in grades.keys) {
+      list.add(
+        PieChartSectionData(
+          borderSide: BorderSide(
+            width: 0,
+            color: Theme.of(context).canvasColor,
+          ),
+          color: Utils.getGradeColor(key),
+          title: key.toString(),
+          radius:
+              index == _pieChartTouchedIndex ? selectedRadius : defaultRadius,
+          value: grades[key]! / numberOfGrades,
+        ),
+      );
+      index++;
+    }
+
+    return list;
+  }
+
+  Widget _nextTaskWidget() {
+    TodoEvent? nextTodoEvent = TimetableManager().sortedTodoEvents.firstOrNull;
+
+    if (nextTodoEvent == null) return Container();
+
+    return TodoEventListItemWidget(
+      event: nextTodoEvent,
+      onPressed: () {
+        nextTodoEvent.finished = !nextTodoEvent.finished;
+        //damit es gespeichert wird
+        TimetableManager().addOrChangeTodoEvent(nextTodoEvent);
+        setState(() {});
+      },
+      onInfoPressed: () async {
+        await Utils.showCustomPopUp(
+          context: context,
+          heroObject: nextTodoEvent,
+          body: TodoEventInfoPopUp(
+            event: nextTodoEvent,
+            showEditTodoEventSheet: (event) async {
+              TodoEvent? newEvent = await createNewTodoEventSheet(
+                context,
+                linkedSubjectName: event.linkedSubjectName,
+                event: event,
+              );
+
+              return newEvent;
+            },
+          ),
+          flightShuttleBuilder: (p0, p1, p2, p3, p4) {
+            return Container(
+              color: Theme.of(context).cardColor,
+            );
+          },
+        );
+
+        //warten damit animation funktioniert
+        await Future.delayed(
+          const Duration(milliseconds: 500),
+        );
+
+        setState(() {});
+      },
+      onLongPressed: () {},
+      onDeleteSwipe: () {},
+    );
+  }
+
   Widget _holidaysWidget() {
     if (currentOrNextHolidays == null) {
-      return Container();
+      return ElevatedButton(
+        onPressed: () => HolidaysScreen.selectedFederalStateButtonPressed(
+          context,
+          fetchHolidays: _fetchHolidays,
+          setState: () {
+            if (mounted) {
+              setState(() {});
+            }
+          },
+        ),
+        child: Text(
+          AppLocalizationsManager.localizations.strSelectFederalState,
+        ),
+      );
     }
     final width = MediaQuery.of(context).size.width * 0.8;
 
