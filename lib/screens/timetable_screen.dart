@@ -192,21 +192,21 @@ class _TimetableScreenState extends State<TimetableScreen> {
           child: Stack(
             children: [
               SingleChildScrollView(
-                // physics: const NeverScrollableScrollPhysics(),
+                physics: const NeverScrollableScrollPhysics(),
                 scrollDirection: Axis.vertical,
                 primary: false,
                 child: Center(
                   child: child,
                 ),
               ),
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: Container(
-                  color: Colors.transparent,
-                  width: width,
-                  height: height / 3,
-                ),
-              ),
+              // Align(
+              //   alignment: Alignment.bottomCenter,
+              //   child: Container(
+              //     color: Colors.transparent,
+              //     width: width,
+              //     height: height / 3,
+              //   ),
+              // ),
               // Align(
               //   alignment: Alignment.bottomCenter,
               //   child: InkWell(
@@ -256,7 +256,7 @@ class _TimetableScreenState extends State<TimetableScreen> {
         children: [
           SingleChildScrollView(
             scrollDirection: Axis.vertical,
-            // physics: const NeverScrollableScrollPhysics(),
+            physics: const NeverScrollableScrollPhysics(),
             primary: false,
             child: Column(
               children: [
@@ -277,14 +277,14 @@ class _TimetableScreenState extends State<TimetableScreen> {
               ],
             ),
           ),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Container(
-              color: Colors.transparent,
-              width: width,
-              height: height / 3,
-            ),
-          ),
+          // Align(
+          //   alignment: Alignment.bottomCenter,
+          //   child: Container(
+          //     color: Colors.transparent,
+          //     width: width,
+          //     height: height / 3,
+          //   ),
+          // ),
         ],
       ),
     );
@@ -336,7 +336,7 @@ class _TimetableScreenState extends State<TimetableScreen> {
             ),
           ),
           Center(
-            child: GestureDetector(
+            child: InkWell(
               onTap: () {
                 context.go(GradesScreen.route);
               },
