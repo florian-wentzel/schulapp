@@ -218,7 +218,7 @@ class _HelloScreenState extends State<HelloScreen> {
   }
 
   void _selectState() async {
-    bool selected = await HolidaysScreen.selectedFederalStateButtonPressed(
+    bool selected = await HolidaysScreen.selectFederalStateButtonPressed(
       context,
     );
 

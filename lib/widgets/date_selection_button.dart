@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/utils.dart';
 
 class DateSelectionButtonController {
+  DateTime? firstDate, lastDate;
+
   DateTime _date;
   DateTime get date => _date;
   set date(DateTime dateTime) {
@@ -35,9 +37,11 @@ class _DateSelectionButtonState extends State<DateSelectionButton> {
         DateTime? dateTime = await showDatePicker(
           context: context,
           //min
-          firstDate: DateTime.fromMillisecondsSinceEpoch(0),
+          firstDate: widget.controller.firstDate ??
+              DateTime.fromMillisecondsSinceEpoch(0),
           //This number is the max
-          lastDate: DateTime.fromMillisecondsSinceEpoch(8640000000000000),
+          lastDate: widget.controller.lastDate ??
+              DateTime.fromMillisecondsSinceEpoch(8640000000000000),
         );
 
         if (dateTime == null) return;

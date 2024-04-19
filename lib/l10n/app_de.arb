@@ -1,6 +1,8 @@
 {
   "@@locale": "de",
   "language_name": "Deutsch",
+  "version_0_1_6": "Benutzerdefinierte Ferien hinzugefügt",
+  "version_0_1_5": "Benutzerdefinierte Fachnamen zu Aufgaben hinzugefügt",
   "version_0_1_4": "Statistik zur Startseite hinzugefügt",
   "version_0_1_3": "Einstellungs-Manager überarbeitet",
   "version_0_1_2": "Hinzufügen des Tutorials",
@@ -63,6 +65,7 @@
   "strRemoveHolidays": "Ferien entfernen",
   "strHolidaysLengthXDays": "{days} Tag(e)",
   "strEndsInXDays": "Endet in {days} Tage(n)",
+  "strEndsToday": "Endet heute :(",
   "strSettings": "Einstellungen",
   "strTheme": "Anzeige",
   "strDark": "Dunkel",
@@ -156,5 +159,11 @@
   "strSkip": "Überspringen",
   "strNext": "Nächste",
   "strVersions": "Versionen",
-  "strStatistics": "Statistik"
+  "strStatistics": "Statistik",
+  "strCustomSubject": "Benutzerdefiniertes Fach",
+  "strEditCustomHolidays": "Benutzerdefinierte Ferien anpassen",
+  "strHolidaysEnd": "Ferienende",
+  "strHolidaysStart": "Ferienanfang",
+  "strCreateCustomHolidays": "Benutzerdefinierte Ferien erstellen",
+  "strHolidaysDateError": "Es scheint ein Problem mit den Daten vorzuliegen!"
 }

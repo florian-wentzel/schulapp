@@ -27,11 +27,19 @@ class SettingsVar<T> {
   }
 
   dynamic toNormalType() {
-    return saveCustomType?.call(value) ?? value;
+    try {
+      return saveCustomType?.call(value) ?? value;
+    } catch (e) {
+      return value;
+    }
   }
 
   void fromNormalType(dynamic type) {
-    value = loadCustomType?.call(type) ?? type ?? defaultValue;
+    try {
+      value = loadCustomType?.call(type) ?? type ?? defaultValue;
+    } catch (e) {
+      value = defaultValue;
+    }
   }
 }
 
@@ -48,6 +56,7 @@ class Settings {
   static const hiddenDebugModeKey = "hiddenDebugMode";
   static const selectedFederalStateCodeKey = "selectedFederalState";
   static const lastUsedVersionKey = "lastUsedVersion";
+  static const customHolidaysKey = "customHolidays";
 
   static int decimalPlaces = 1;
 
@@ -64,6 +73,10 @@ class Settings {
     SettingsVar<String?>(
       key: mainSemesterNameKey,
       defaultValue: null,
+    ),
+    SettingsVar<String>(
+      key: customHolidaysKey,
+      defaultValue: "[]",
     ),
     //for now we only save the api key
     SettingsVar<ThemeMode>(

@@ -1,6 +1,8 @@
 {
   "@@locale": "en",
   "language_name": "Englisch",
+  "version_0_1_6": "Added custom holidays",
+  "version_0_1_5": "Added custom subject names to Tasks-screen",
   "version_0_1_4": "Added statistics page to Homescreen",
   "version_0_1_3": "Remade Settings-Manager",
   "version_0_1_2": "Added intro slider",
@@ -71,6 +73,7 @@
   "strRemoveHolidays": "Remove Holidays",
   "strHolidaysLengthXDays": "{days} day(s)",
   "strEndsInXDays": "Ends in {days} day(s)",
+  "strEndsToday": "Ends today :(",
   "strSettings": "Settings",
   "strTheme": "Theme",
   "strDark": "dark",
@@ -164,5 +167,11 @@
   "strSkip": "Skip",
   "strNext": "Next",
   "strVersions": "Versions",
-  "strStatistics": "Statistics"
+  "strStatistics": "Statistics",
+  "strCustomSubject": "Custom Subject",
+  "strEditCustomHolidays": "Edit custom Holidays",
+  "strHolidaysEnd": "End of Holidays",
+  "strHolidaysStart": "Start of Holidays",
+  "strCreateCustomHolidays": "Create custom Holidays",
+  "strHolidaysDateError": "There appears to be an issue with your dates!"
 }

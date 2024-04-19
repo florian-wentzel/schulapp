@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:schulapp/code_behind/federal_state.dart';
 import 'package:schulapp/code_behind/holidays.dart';
 import 'package:schulapp/code_behind/holidays_manager.dart';
@@ -6,6 +7,7 @@ import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/time_table_manager.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
+import 'package:schulapp/screens/holidays/edit_custom_holidays_screen.dart';
 import 'package:schulapp/widgets/navigation_bar_drawer.dart';
 
 class HolidaysScreen extends StatefulWidget {
@@ -15,7 +17,7 @@ class HolidaysScreen extends StatefulWidget {
   @override
   State<HolidaysScreen> createState() => _HolidaysScreenState();
 
-  static Future<bool> selectedFederalStateButtonPressed(
+  static Future<bool> selectFederalStateButtonPressed(
     BuildContext context, {
     void Function()? setState,
     void Function()? fetchHolidays,
@@ -117,6 +119,7 @@ class _HolidaysScreenState extends State<HolidaysScreen> {
 
     allHolidays = await HolidaysManager().getAllHolidaysForState(
       stateApiCode: stateCode,
+      withCustomHolidays: true,
     );
 
     setState(() {});
@@ -161,7 +164,7 @@ class _HolidaysScreenState extends State<HolidaysScreen> {
         null) {
       return Center(
         child: ElevatedButton(
-          onPressed: () => HolidaysScreen.selectedFederalStateButtonPressed(
+          onPressed: () => HolidaysScreen.selectFederalStateButtonPressed(
             context,
             fetchHolidays: _fetchHolidays,
             setState: () {
@@ -249,17 +252,44 @@ class _HolidaysScreenState extends State<HolidaysScreen> {
       return null;
     }
 
-    return FloatingActionButton(
-      onPressed: () => HolidaysScreen.selectedFederalStateButtonPressed(
-        context,
-        fetchHolidays: _fetchHolidays,
-        setState: () {
-          if (mounted) {
-            setState(() {});
-          }
-        },
-      ),
-      child: const Icon(Icons.location_on),
+    return SpeedDial(
+      icon: Icons.more_horiz_outlined,
+      activeIcon: Icons.close,
+      spacing: 3,
+      useRotationAnimation: true,
+      tooltip: '',
+      animationCurve: Curves.elasticInOut,
+      children: [
+        SpeedDialChild(
+          child: const Icon(Icons.location_on),
+          backgroundColor: Colors.indigo,
+          foregroundColor: Colors.white,
+          label: AppLocalizationsManager.localizations.strSelectFederalState,
+          onTap: () => HolidaysScreen.selectFederalStateButtonPressed(
+            context,
+            fetchHolidays: _fetchHolidays,
+            setState: () {
+              if (mounted) {
+                setState(() {});
+              }
+            },
+          ),
+        ),
+        SpeedDialChild(
+          child: const Icon(Icons.edit),
+          backgroundColor: Colors.blueAccent,
+          foregroundColor: Colors.white,
+          label: AppLocalizationsManager.localizations.strEditCustomHolidays,
+          onTap: () async {
+            await Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const EditCustomHolidaysScreen(),
+              ),
+            );
+            _fetchHolidays();
+          },
+        ),
+      ],
     );
   }
 }
@@ -269,12 +299,14 @@ class HolidaysListItemWidget extends StatelessWidget {
   Holidays holidays;
   bool showBackground;
   bool showDateInfo;
+  void Function(Holidays holidays)? onDeletePressed;
 
   HolidaysListItemWidget({
     super.key,
     required this.holidays,
     this.showBackground = true,
     this.showDateInfo = true,
+    this.onDeletePressed,
   });
 
   @override
@@ -292,7 +324,7 @@ class HolidaysListItemWidget extends StatelessWidget {
         children: [
           Expanded(
             child: Text(
-              _transformName(holidays.name),
+              _transformName(holidays),
               style: Theme.of(context).textTheme.headlineSmall,
             ),
           ),
@@ -301,10 +333,18 @@ class HolidaysListItemWidget extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              Text(
-                _getDaysLeftString(holidays),
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
+              onDeletePressed != null
+                  ? IconButton(
+                      onPressed: () => onDeletePressed?.call(holidays),
+                      icon: const Icon(
+                        Icons.delete,
+                        color: Colors.red,
+                      ),
+                    )
+                  : Text(
+                      _getDaysLeftString(holidays),
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
               const SizedBox(width: 18),
               showDateInfo
                   ? Column(
@@ -335,7 +375,12 @@ class HolidaysListItemWidget extends StatelessWidget {
     );
   }
 
-  String _transformName(String name) {
+  String _transformName(Holidays holidays) {
+    String name = holidays.name;
+    if (holidays.slug == Holidays.custom ||
+        holidays.stateCode == Holidays.custom) {
+      return name;
+    }
     List<String> words = name.split(" ");
     return _capitalizeWords(words.first);
   }
@@ -355,7 +400,7 @@ class HolidaysListItemWidget extends StatelessWidget {
       );
     }
 
-    return timeLeft.inDays.toString();
+    return AppLocalizationsManager.localizations.strEndsToday;
   }
 
   String _capitalizeWords(String input) {

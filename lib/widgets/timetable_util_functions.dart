@@ -261,12 +261,26 @@ Future<bool?> showSchoolLessonHomePopUp(
 Future<String?> showSelectSubjectNameSheet(
   BuildContext context, {
   required String title,
+  bool allowCustomNames = false,
 }) async {
   Timetable? selectedTimetable = Utils.getHomescreenTimetable();
   if (selectedTimetable == null) return null;
 
   List<SchoolLessonPrefab> selectedTimetablePrefabs =
       Utils.createLessonPrefabsFromTt(selectedTimetable);
+
+  selectedTimetablePrefabs.sort(
+    (a, b) => a.name.compareTo(b.name),
+  );
+
+  selectedTimetablePrefabs.add(
+    SchoolLessonPrefab(
+      name: AppLocalizationsManager.localizations.strCustomSubject,
+      room: "",
+      teacher: "",
+      color: Colors.transparent,
+    ),
+  );
 
   String? selectdSubjectName;
 

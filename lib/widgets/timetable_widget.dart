@@ -338,15 +338,15 @@ class _TimetableWidgetState extends State<TimetableWidget> {
       if (Utils.sameDay(currLessonDateTime, DateTime.now()) ||
           currSchoolTime.isCurrentlyRunning()) {
         containerColor = selectedColor;
-      } else {
-        if (lessonIndex + 1 < tt.schoolTimes.length) {
-          final nextSchoolTime = tt.schoolTimes[lessonIndex + 1];
-          int currTimeInSec = Utils.nowInSeconds();
-          int currSchoolTimeEndInSec = currSchoolTime.end.toSeconds();
-          int nextSchoolTimeStartInSec = nextSchoolTime.start.toSeconds();
-          addBreakWidget = (currTimeInSec > currSchoolTimeEndInSec &&
-              currTimeInSec < nextSchoolTimeStartInSec);
-        }
+      }
+
+      if (lessonIndex + 1 < tt.schoolTimes.length) {
+        final nextSchoolTime = tt.schoolTimes[lessonIndex + 1];
+        int currTimeInSec = Utils.nowInSeconds();
+        int currSchoolTimeEndInSec = currSchoolTime.end.toSeconds();
+        int nextSchoolTimeStartInSec = nextSchoolTime.start.toSeconds();
+        addBreakWidget = (currTimeInSec > currSchoolTimeEndInSec &&
+            currTimeInSec < nextSchoolTimeStartInSec);
       }
 
       Widget lessonWidget = InkWell(

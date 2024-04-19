@@ -70,7 +70,7 @@ class _TimetableScreenState extends State<TimetableScreen> {
           ? NavigationBarDrawer(selectedRoute: TimetableScreen.route)
           : null,
       floatingActionButton: SpeedDial(
-        icon: Icons.add,
+        icon: Icons.more_horiz_outlined,
         activeIcon: Icons.close,
         spacing: 3,
         useRotationAnimation: true,
@@ -459,7 +459,7 @@ class _TimetableScreenState extends State<TimetableScreen> {
   Widget _holidaysWidget() {
     if (currentOrNextHolidays == null) {
       return ElevatedButton(
-        onPressed: () => HolidaysScreen.selectedFederalStateButtonPressed(
+        onPressed: () => HolidaysScreen.selectFederalStateButtonPressed(
           context,
           fetchHolidays: _fetchHolidays,
           setState: () {

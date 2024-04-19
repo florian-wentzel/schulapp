@@ -1,6 +1,8 @@
 //https://ferien-api.de/
 
 class Holidays {
+  static const custom = "custom";
+
   final DateTime _start; //ISO8601 (UTC)	Ferienbeginn
   final DateTime _end; // ISO8601 (UTC)	Ferienende
   final String _stateCode; //	Zweistelliger Code des Bundeslandes
@@ -16,9 +18,9 @@ class Holidays {
   Holidays({
     required DateTime start,
     required DateTime end,
-    required String stateCode,
     required String name,
-    required String slug,
+    String stateCode = custom,
+    String slug = custom,
   })  : _slug = slug,
         _name = name,
         _stateCode = stateCode,

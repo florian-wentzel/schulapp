@@ -2,12 +2,20 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:schulapp/code_behind/holidays.dart';
+import 'package:schulapp/code_behind/settings.dart';
+import 'package:schulapp/code_behind/time_table_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HolidaysManager {
   static const String cacheKey = 'cached_holidays';
   static const String cacheStateKey = "cached_holiday_state";
   static const String cacheYearKey = "cached_holiday_year";
+
+  static const nameKey = "name";
+  static const startKey = "start";
+  static const endKey = "end";
+  static const stateCodeKey = "stateCode";
+  static const slugKey = "slug";
 
   //https://ferien-api.de/
   static const apiUrl = "https://ferien-api.de/api/v1/holidays/";
@@ -31,6 +39,8 @@ class HolidaysManager {
 
   Future<List<Holidays>> getAllHolidaysForState({
     required String stateApiCode,
+    bool withCustomHolidays = true,
+    bool sorted = true,
   }) async {
     final currYear = DateTime.now().year;
     final cachedYear = await _getCachedYear();
@@ -42,6 +52,14 @@ class HolidaysManager {
         stateApiCode == cachedStateCode) {
       List<Holidays>? cachedHolidays = await _getCachedHolidayData();
       if (cachedHolidays != null) {
+        if (withCustomHolidays) {
+          cachedHolidays.addAll(getCustomHolidays());
+        }
+        if (sorted) {
+          cachedHolidays.sort(
+            (a, b) => a.start.compareTo(b.start),
+          );
+        }
         return cachedHolidays;
       }
     }
@@ -79,7 +97,67 @@ class HolidaysManager {
       );
     }
 
+    if (withCustomHolidays) {
+      allHolidays.addAll(getCustomHolidays());
+    }
+
+    if (sorted) {
+      allHolidays.sort(
+        (a, b) => a.start.compareTo(b.start),
+      );
+    }
+
     return allHolidays;
+  }
+
+  static List<Holidays> getCustomHolidays() {
+    try {
+      String holidaysString = TimetableManager().settings.getVar<String>(
+            Settings.customHolidaysKey,
+          );
+
+      List<Map<String, dynamic>> jsonList =
+          (jsonDecode(holidaysString) as List).cast();
+
+      return _jsonToHolidaysList(jsonList);
+    } catch (e) {
+      print('Error: $e');
+      return [];
+    }
+  }
+
+  static void setCustomHolidays(List<Holidays> customHolidays) {
+    try {
+      List<Map<String, dynamic>> holidaysJson =
+          _holidaysListToJson(customHolidays);
+
+      String jsonString = jsonEncode(holidaysJson);
+
+      TimetableManager().settings.setVar<String>(
+            Settings.customHolidaysKey,
+            jsonString,
+          );
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
+
+  static List<Map<String, dynamic>> _holidaysListToJson(List<Holidays> list) {
+    List<Map<String, dynamic>> jsonList = [];
+
+    for (final holidays in list) {
+      jsonList.add(
+        {
+          nameKey: holidays.name,
+          startKey: holidays.start.toIso8601String(),
+          endKey: holidays.end.toIso8601String(),
+          stateCodeKey: holidays.stateCode,
+          slugKey: holidays.slug,
+        },
+      );
+    }
+
+    return jsonList;
   }
 
   static List<Holidays> _jsonToHolidaysList(
@@ -88,11 +166,11 @@ class HolidaysManager {
       jsonList.length,
       (index) {
         final json = jsonList[index];
-        final start = DateTime.parse(json["start"]);
-        final end = DateTime.parse(json["end"]);
-        String stateCode = json["stateCode"];
-        String name = json["name"];
-        String slug = json["slug"];
+        final start = DateTime.parse(json[startKey]);
+        final end = DateTime.parse(json[endKey]);
+        String stateCode = json[stateCodeKey];
+        String name = json[nameKey];
+        String slug = json[slugKey];
 
         return Holidays(
           start: start,

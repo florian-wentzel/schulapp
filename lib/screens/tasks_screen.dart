@@ -287,6 +287,35 @@ class _NotesScreenState extends State<NotesScreen> {
         if (selectedSubjectName == null) return;
         if (!mounted) return;
 
+        if (selectedSubjectName ==
+            AppLocalizationsManager.localizations.strCustomSubject) {
+          String? customName = await Utils.showStringInputDialog(
+            context,
+            hintText: AppLocalizationsManager.localizations.strCustomSubject,
+            autofocus: true,
+            maxInputLength: 30,
+          );
+
+          if (customName == null) {
+            return;
+          }
+
+          if (customName.isEmpty) {
+            if (!mounted) return;
+
+            Utils.showInfo(
+              context,
+              msg: AppLocalizationsManager.localizations.strNameCanNotBeEmpty,
+              type: InfoType.error,
+            );
+            return;
+          }
+
+          selectedSubjectName = customName;
+        }
+
+        if (!mounted) return;
+
         TodoEvent? event = await createNewTodoEventSheet(
           context,
           linkedSubjectName: selectedSubjectName,

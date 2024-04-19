@@ -30,7 +30,7 @@ class _AllTimetablesScreenState extends State<AllTimetablesScreen> {
         ),
       ),
       floatingActionButton: SpeedDial(
-        icon: Icons.add,
+        icon: Icons.more_horiz_outlined,
         activeIcon: Icons.close,
         spacing: 3,
         useRotationAnimation: true,

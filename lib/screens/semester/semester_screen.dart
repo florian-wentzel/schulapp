@@ -45,7 +45,7 @@ class _SemesterScreenState extends State<SemesterScreen> {
         ],
       ),
       floatingActionButton: SpeedDial(
-        icon: Icons.add,
+        icon: Icons.more_horiz_outlined,
         activeIcon: Icons.close,
         spacing: 3,
         useRotationAnimation: true,
