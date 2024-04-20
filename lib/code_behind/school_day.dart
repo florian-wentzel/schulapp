@@ -4,12 +4,16 @@ class SchoolDay {
   static const nameKey = "name";
   static const lessonsKey = "lessons";
 
-  final String _name;
+  String _name;
 
   final List<SchoolLesson> _lessons;
 
   String get name => _name;
   List<SchoolLesson> get lessons => _lessons;
+
+  set name(value) {
+    _name = value;
+  }
 
   SchoolDay({
     required String name,

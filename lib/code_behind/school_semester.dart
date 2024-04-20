@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:schulapp/code_behind/save_manager.dart';
 import 'package:schulapp/code_behind/settings.dart';
+import 'package:schulapp/code_behind/time_table_manager.dart';
 import 'package:schulapp/code_behind/utils.dart';
 
 class SchoolSemester {
@@ -130,6 +132,23 @@ class SchoolSemester {
       );
     }
     return null;
+  }
+
+  void translateGradeGroups() {
+    List<GradeGroup> defaultGradeGroups = TimetableManager().settings.getVar(
+          Settings.defaultGradeGroupsKey,
+        );
+
+    for (final subject in _subjects) {
+      for (int i = 0; i < defaultGradeGroups.length; i++) {
+        if (i >= subject.gradeGroups.length) continue;
+
+        final gradeGroup = subject.gradeGroups[i];
+        gradeGroup.name = defaultGradeGroups[i].name;
+      }
+    }
+
+    SaveManager().saveSemester(this);
   }
 }
 

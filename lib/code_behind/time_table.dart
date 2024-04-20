@@ -1,5 +1,6 @@
 // import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/material.dart';
+import 'package:schulapp/code_behind/save_manager.dart';
 import 'package:schulapp/code_behind/school_day.dart';
 import 'package:schulapp/code_behind/school_lesson.dart';
 import 'package:schulapp/code_behind/school_time.dart';
@@ -348,5 +349,15 @@ class Timetable {
         (index) => schoolDays[index].toJson(),
       ),
     };
+  }
+
+  void translateDayNames() {
+    List<SchoolDay> defaultSchoolDays = Timetable.defaultSchoolDays(0);
+    for (int i = 0; i < defaultSchoolDays.length; i++) {
+      if (i >= _schoolDays.length) continue;
+
+      _schoolDays[i].name = defaultSchoolDays[i].name;
+    }
+    SaveManager().saveTimeTable(this);
   }
 }

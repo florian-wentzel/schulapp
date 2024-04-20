@@ -5,10 +5,15 @@ import 'package:schulapp/l10n/app_localizations_manager.dart';
 
 class SettingsVar<T> {
   String key;
+
+  T? _value;
+  T Function() defaultValue;
+
   T? Function(dynamic value)? loadCustomType;
   String Function(T type)? saveCustomType;
-  T? _value;
-  T defaultValue;
+
+  //für settings die noch nicht gespeichert werden aber übersetzt werden müssen
+  final bool _alwaysReturnDefaultValue;
 
   SettingsVar({
     required this.key,
@@ -16,14 +21,19 @@ class SettingsVar<T> {
     this.loadCustomType,
     this.saveCustomType,
     T? value,
-  }) : _value = value;
+    bool alwaysReturnDefaultValue = false,
+  })  : _value = value,
+        _alwaysReturnDefaultValue = alwaysReturnDefaultValue;
 
   T get value {
-    return _value ?? defaultValue;
+    if (_alwaysReturnDefaultValue) {
+      return defaultValue.call();
+    }
+    return _value ?? defaultValue.call();
   }
 
   set value(T value) {
-    _value = value ?? defaultValue;
+    _value = value ?? defaultValue.call();
   }
 
   dynamic toNormalType() {
@@ -38,7 +48,7 @@ class SettingsVar<T> {
     try {
       value = loadCustomType?.call(type) ?? type ?? defaultValue;
     } catch (e) {
-      value = defaultValue;
+      value = defaultValue.call();
     }
   }
 }
@@ -64,24 +74,24 @@ class Settings {
     ///if [null] firstTimetable shown
     SettingsVar<String?>(
       key: mainTimetableNameKey,
-      defaultValue: null,
+      defaultValue: () => null,
     ),
     SettingsVar<String?>(
       key: selectedFederalStateCodeKey,
-      defaultValue: null,
+      defaultValue: () => null,
     ),
     SettingsVar<String?>(
       key: mainSemesterNameKey,
-      defaultValue: null,
+      defaultValue: () => null,
     ),
     SettingsVar<String>(
       key: customHolidaysKey,
-      defaultValue: "[]",
+      defaultValue: () => "[]",
     ),
     //for now we only save the api key
     SettingsVar<ThemeMode>(
       key: themeModeKey,
-      defaultValue: ThemeMode.system,
+      defaultValue: () => ThemeMode.system,
       saveCustomType: (type) {
         return type.toString();
       },
@@ -100,31 +110,36 @@ class Settings {
     ),
     SettingsVar<String?>(
       key: languageCodeKey,
-      defaultValue: null,
+      defaultValue: () => null,
     ),
     SettingsVar<String?>(
       key: lastUsedVersionKey,
-      defaultValue: null,
+      defaultValue: () => null,
     ),
     SettingsVar<double>(
       key: timetableLessonWidthKey,
-      defaultValue: 100,
+      defaultValue: () => 100,
     ),
     SettingsVar<bool>(
       key: showLessonNumbersKey,
-      defaultValue: false,
+      defaultValue: () => false,
     ),
     SettingsVar<bool>(
       key: openMainSemesterAutomaticallyKey,
-      defaultValue: true,
+      defaultValue: () => true,
     ),
     SettingsVar<bool>(
       key: hiddenDebugModeKey,
-      defaultValue: false,
+      defaultValue: () => false,
+    ),
+    SettingsVar<List<GradeGroup>>(
+      key: defaultGradeGroupsKey,
+      defaultValue: () => _defaultGradeGroups,
+      alwaysReturnDefaultValue: true,
     ),
   ];
 
-  List<GradeGroup> get defaultGradeGroups {
+  static List<GradeGroup> get _defaultGradeGroups {
     return [
       GradeGroup(
         name: AppLocalizationsManager.localizations.strWrittenAndVerbalGrades,

@@ -31,10 +31,6 @@ class _NewVersionsScreenState extends State<NewVersionsScreen> {
 
   Widget _body() {
     return ListView.builder(
-      prototypeItem: const ListTile(
-        title: Text(""),
-        subtitle: Text(""),
-      ),
       itemCount: VersionHolder.versions.keys.length,
       itemBuilder: (context, index) {
         String version = VersionHolder.versions.keys.elementAt(index);

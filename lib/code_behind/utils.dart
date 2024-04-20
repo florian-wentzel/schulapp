@@ -291,6 +291,7 @@ class Utils {
     switch (type) {
       case InfoType.normal:
         backgroundColor = Colors.white;
+        textColor = Colors.black;
         break;
       case InfoType.info:
         backgroundColor = Theme.of(context).cardColor.withAlpha(255);
@@ -300,6 +301,7 @@ class Utils {
         break;
       case InfoType.warning:
         backgroundColor = Colors.yellow;
+        textColor = Colors.black;
         break;
       case InfoType.error:
         backgroundColor = Colors.red;
@@ -501,9 +503,10 @@ class Utils {
   static Future<T?> showListSelectionBottomSheet<T>(
     BuildContext context, {
     required String title,
-    String? underTitle,
     required List<T> items,
     required Widget? Function(BuildContext context, int index) itemBuilder,
+    String? underTitle,
+    Widget? bottomAction,
   }) async {
     await showModalBottomSheet(
       context: context,
@@ -547,6 +550,7 @@ class Utils {
                   ),
                 ),
               ),
+              bottomAction ?? Container(),
             ],
           ),
         );

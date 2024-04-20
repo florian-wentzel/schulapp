@@ -4,6 +4,7 @@ import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:schulapp/code_behind/save_manager.dart';
 import 'package:schulapp/code_behind/school_lesson_prefab.dart';
 import 'package:schulapp/code_behind/school_semester.dart';
+import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/time_table.dart';
 import 'package:schulapp/code_behind/time_table_manager.dart';
 import 'package:schulapp/code_behind/utils.dart';
@@ -294,7 +295,9 @@ class _SemesterScreenState extends State<SemesterScreen> {
 
     return SchoolGradeSubject(
       name: name,
-      gradeGroups: TimetableManager().settings.defaultGradeGroups,
+      gradeGroups: TimetableManager().settings.getVar(
+            Settings.defaultGradeGroupsKey,
+          ),
     );
   }
 
@@ -329,7 +332,9 @@ class _SemesterScreenState extends State<SemesterScreen> {
       (index) {
         return SchoolGradeSubject(
           name: lessonPrefabs[index].name,
-          gradeGroups: TimetableManager().settings.defaultGradeGroups,
+          gradeGroups: TimetableManager().settings.getVar(
+                Settings.defaultGradeGroupsKey,
+              ),
         );
       },
     );

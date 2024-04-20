@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:schulapp/app.dart';
+import 'package:schulapp/code_behind/school_semester.dart';
 import 'package:schulapp/code_behind/settings.dart';
+import 'package:schulapp/code_behind/time_table.dart';
 import 'package:schulapp/code_behind/time_table_manager.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/code_behind/version_manager.dart';
@@ -98,8 +100,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
       title: AppLocalizationsManager.localizations.strLanguage,
       body: [
         ElevatedButton(
-          onPressed: () {
-            Utils.showListSelectionBottomSheet(
+          onPressed: () async {
+            await Utils.showListSelectionBottomSheet(
               context,
               title: AppLocalizationsManager.localizations.strSelectLanguage,
               items: AppLocalizations.supportedLocales,
@@ -112,11 +114,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   child: Builder(builder: (builderContext) {
                     return ListTile(
                       title: Text(
-                        AppLocalizations.of(builderContext)!.language_name,
+                        AppLocalizations.of(builderContext)?.language_name ??
+                            "Error",
                       ),
-                      onTap: () {
+                      onTap: () async {
                         MainApp.setLocale(context, currLocale);
                         Navigator.of(itemContext).pop();
+                        await Future.delayed(
+                          const Duration(milliseconds: 250),
+                        );
+                        _showUpdateTimetableDayNamesAndSemesterGradeGroups();
                       },
                     );
                   }),
@@ -128,6 +135,90 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
       ],
     );
+  }
+
+  Future<void> _showUpdateTimetableDayNamesAndSemesterGradeGroups() async {
+    List<Timetable> timetables = TimetableManager().timetables;
+
+    await _showCheckBoxList(
+      title: AppLocalizationsManager
+          .localizations.strWhichTimetableWouldYouLikeToTranslate,
+      underTitle: AppLocalizationsManager.localizations.strOnlyTheDayNames,
+      list: timetables,
+      getName: (item) => item.name,
+      updateItem: (item) {
+        item.translateDayNames();
+      },
+    );
+
+    List<SchoolSemester> semesters = TimetableManager().semesters;
+
+    await _showCheckBoxList(
+      title: AppLocalizationsManager
+          .localizations.strWhichSemestersWouldYouLikeToTranslate,
+      underTitle: AppLocalizationsManager.localizations.strOnlyTheGradeGroups,
+      list: semesters,
+      getName: (item) => item.name,
+      updateItem: (item) {
+        item.translateGradeGroups();
+      },
+    );
+
+    if (!mounted) return;
+
+    Utils.showInfo(
+      context,
+      msg: AppLocalizationsManager.localizations.strSuccessfullyTranslated,
+      type: InfoType.success,
+    );
+  }
+
+  Future<void> _showCheckBoxList<T>({
+    required String title,
+    required String underTitle,
+    required List<T> list,
+    required String Function(T item) getName,
+    required void Function(T item) updateItem,
+  }) async {
+    List<bool> selectedCheckbox = List.generate(
+      list.length,
+      (index) => false,
+    );
+
+    bool okPressed = false;
+
+    await Utils.showListSelectionBottomSheet(
+      context,
+      title: title,
+      underTitle: underTitle,
+      items: list,
+      bottomAction: ElevatedButton(
+        onPressed: () {
+          okPressed = true;
+          Navigator.of(context).pop();
+        },
+        child: Text(AppLocalizationsManager.localizations.strOK),
+      ),
+      itemBuilder: (context, index) {
+        final timetable = list[index];
+        return ListTileWithCheckBox(
+          title: getName(timetable),
+          value: selectedCheckbox[index],
+          onValueChanged: (value) {
+            selectedCheckbox[index] = value;
+          },
+        );
+      },
+    );
+
+    if (!okPressed) return;
+
+    for (int i = 0; i < list.length; i++) {
+      final item = list[i];
+      if (selectedCheckbox[i]) {
+        updateItem(item);
+      }
+    }
   }
 
   Widget _openMainSemesterAutomatically() {
@@ -224,6 +315,46 @@ class _SettingsScreenState extends State<SettingsScreen> {
               : Container(),
           ...body ?? [Container()],
         ],
+      ),
+    );
+  }
+}
+
+// ignore: must_be_immutable
+class ListTileWithCheckBox extends StatefulWidget {
+  String title;
+  bool value;
+
+  void Function(bool value) onValueChanged;
+
+  ListTileWithCheckBox({
+    super.key,
+    required this.title,
+    required this.value,
+    required this.onValueChanged,
+  });
+
+  @override
+  State<ListTileWithCheckBox> createState() => _ListTileWithCheckBoxState();
+}
+
+class _ListTileWithCheckBoxState extends State<ListTileWithCheckBox> {
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      onTap: () {
+        widget.value = !widget.value;
+        widget.onValueChanged.call(widget.value);
+        setState(() {});
+      },
+      title: Text(widget.title),
+      trailing: Checkbox(
+        value: widget.value,
+        onChanged: (value) {
+          widget.value = value ?? false;
+          widget.onValueChanged.call(widget.value);
+          setState(() {});
+        },
       ),
     );
   }

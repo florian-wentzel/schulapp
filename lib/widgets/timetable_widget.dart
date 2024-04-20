@@ -6,6 +6,7 @@ import 'package:schulapp/code_behind/school_day.dart';
 import 'package:schulapp/code_behind/school_lesson.dart';
 import 'package:schulapp/code_behind/school_semester.dart';
 import 'package:schulapp/code_behind/school_time.dart';
+import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/time_table.dart';
 import 'package:schulapp/code_behind/time_table_manager.dart';
 import 'package:schulapp/code_behind/todo_event.dart';
@@ -767,7 +768,9 @@ class _CustomPopUpShowLessonState extends State<CustomPopUpShowLesson> {
         selectedSemester!.subjects.add(
           SchoolGradeSubject(
             name: lesson.name,
-            gradeGroups: TimetableManager().settings.defaultGradeGroups,
+            gradeGroups: TimetableManager().settings.getVar(
+                  Settings.defaultGradeGroupsKey,
+                ),
           ),
         );
         if (mounted) {

@@ -1,6 +1,7 @@
 {
   "@@locale": "de",
   "language_name": "Deutsch",
+  "version_0_1_7": "Übersetzen der Semester Bewertungsgruppen und der Stundenplannamen",
   "version_0_1_6": "Benutzerdefinierte Ferien hinzugefügt",
   "version_0_1_5": "Benutzerdefinierte Fachnamen zu Aufgaben hinzugefügt",
   "version_0_1_4": "Statistik zur Startseite hinzugefügt",
@@ -165,5 +166,10 @@
   "strHolidaysEnd": "Ferienende",
   "strHolidaysStart": "Ferienanfang",
   "strCreateCustomHolidays": "Benutzerdefinierte Ferien erstellen",
-  "strHolidaysDateError": "Es scheint ein Problem mit den Daten vorzuliegen!"
+  "strHolidaysDateError": "Es scheint ein Problem mit den Daten vorzuliegen!",
+  "strWhichTimetableWouldYouLikeToTranslate": "Welchen Stundenplan möchtest du übersetzen?",
+  "strOnlyTheDayNames": "(Nur die Tagesnamen)",
+  "strWhichSemestersWouldYouLikeToTranslate": "Welches Semester möchtest du übersetzen?",
+  "strOnlyTheGradeGroups": "(Nur die Bewertungsgruppen)",
+  "strSuccessfullyTranslated": "Erfolgreich übersetzt!"
 }

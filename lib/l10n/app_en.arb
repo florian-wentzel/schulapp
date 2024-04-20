@@ -1,6 +1,7 @@
 {
   "@@locale": "en",
   "language_name": "Englisch",
+  "version_0_1_7": "Translate semester grade groups and timetable names",
   "version_0_1_6": "Added custom holidays",
   "version_0_1_5": "Added custom subject names to Tasks-screen",
   "version_0_1_4": "Added statistics page to Homescreen",
@@ -173,5 +174,10 @@
   "strHolidaysEnd": "End of Holidays",
   "strHolidaysStart": "Start of Holidays",
   "strCreateCustomHolidays": "Create custom Holidays",
-  "strHolidaysDateError": "There appears to be an issue with your dates!"
+  "strHolidaysDateError": "There appears to be an issue with your dates!",
+  "strWhichTimetableWouldYouLikeToTranslate": "Which Timetable would you like to Translate?",
+  "strOnlyTheDayNames": "(Only the Day names)",
+  "strWhichSemestersWouldYouLikeToTranslate": "Which Semesters would you like to Translate?",
+  "strOnlyTheGradeGroups": "(Only the Gradegroups)",
+  "strSuccessfullyTranslated": "Successfully translated!"
 }

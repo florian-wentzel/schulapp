@@ -68,6 +68,10 @@ class SaveManager {
       print("Errorcount while loading: $errorCount");
     }
 
+    timeTables.sort(
+      (a, b) => a.name.compareTo(b.name),
+    );
+
     return timeTables;
   }
 
@@ -357,6 +361,10 @@ class SaveManager {
     if (errorCount != 0) {
       print("Errorcount while loading: $errorCount");
     }
+
+    semesters.sort(
+      (a, b) => a.name.compareTo(b.name),
+    );
 
     return semesters;
   }
