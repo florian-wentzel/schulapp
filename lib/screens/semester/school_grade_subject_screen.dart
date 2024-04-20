@@ -328,9 +328,11 @@ class _SchoolGradeSubjectScreenState extends State<SchoolGradeSubjectScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                gg.name,
-                style: Theme.of(context).textTheme.titleLarge,
+              Expanded(
+                child: Text(
+                  gg.name,
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
               ),
               Text(
                 "${gg.percent} %",
@@ -950,9 +952,11 @@ class _SchoolGradeSubjectScreenState extends State<SchoolGradeSubjectScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  AppLocalizationsManager.localizations.strSetEndGrade,
-                  style: Theme.of(context).textTheme.titleLarge,
+                Expanded(
+                  child: Text(
+                    AppLocalizationsManager.localizations.strSetEndGrade,
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
                 ),
               ],
             ),
