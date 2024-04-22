@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:schulapp/code_behind/grade.dart';
+import 'package:schulapp/code_behind/grade_group.dart';
 import 'package:schulapp/code_behind/save_manager.dart';
+import 'package:schulapp/code_behind/school_grade_subject.dart';
 import 'package:schulapp/code_behind/school_semester.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';

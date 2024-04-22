@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/save_manager.dart';
-import 'package:schulapp/code_behind/school_semester.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
+
+import 'grade_group.dart';
 
 class SettingsVar<T> {
   String key;
@@ -88,7 +89,6 @@ class Settings {
       key: customHolidaysKey,
       defaultValue: () => "[]",
     ),
-    //for now we only save the api key
     SettingsVar<ThemeMode>(
       key: themeModeKey,
       defaultValue: () => ThemeMode.system,
@@ -108,6 +108,8 @@ class Settings {
         return null;
       },
     ),
+    // SettingsVar<>(key: key, defaultValue: defaultValue,),
+    //for now we only save the api key
     SettingsVar<String?>(
       key: languageCodeKey,
       defaultValue: () => null,
