@@ -209,6 +209,7 @@ class _HelloScreenState extends State<HelloScreen> {
     final event = await createNewTodoEventSheet(
       context,
       linkedSubjectName: "Test",
+      isCustomEvent: true,
     );
 
     if (event == null) return;

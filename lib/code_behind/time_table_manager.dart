@@ -236,10 +236,31 @@ class TimetableManager {
     for (int i = 0; i < todoEvents.length; i++) {
       TodoEvent event = todoEvents[i];
       // if (event.finished) continue;
+      // if (event.customEvent) continue;
       if (event.linkedSubjectName != linkedSubjectName) continue;
       if (event.endTime.year != lessonDayTime.year ||
           event.endTime.month != lessonDayTime.month ||
           event.endTime.day != lessonDayTime.day) {
+        continue;
+      }
+
+      return event;
+    }
+    return null;
+  }
+
+  TodoEvent? getCustomTodoEventForDay({
+    required DateTime day,
+  }) {
+    for (int i = 0; i < todoEvents.length; i++) {
+      TodoEvent event = todoEvents[i];
+
+      // if (event.finished) continue;
+      if (!event.isCustomEvent) continue;
+
+      if (event.endTime.year != day.year ||
+          event.endTime.month != day.month ||
+          event.endTime.day != day.day) {
         continue;
       }
 

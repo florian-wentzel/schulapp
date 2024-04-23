@@ -1,6 +1,7 @@
 {
   "@@locale": "en",
   "language_name": "Englisch",
+  "version_0_1_8": "Added custom subject task visuals",
   "version_0_1_7": "Translate semester grade groups and timetable names",
   "version_0_1_6": "Added custom holidays",
   "version_0_1_5": "Added custom subject names to Tasks-screen",

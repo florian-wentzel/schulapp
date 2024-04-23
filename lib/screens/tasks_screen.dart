@@ -117,18 +117,25 @@ class _NotesScreenState extends State<NotesScreen> {
       return Center(
         child: ElevatedButton(
           onPressed: () async {
-            String? selectedSubjectName = await showSelectSubjectNameSheet(
+            //selectedSubjectName, isCustomName
+            (String, bool)? selectedSubjectTuple =
+                await showSelectSubjectNameSheet(
               context,
               title: AppLocalizationsManager
                   .localizations.strSelectSubjectToAddTaskTo,
+              allowCustomNames: true,
             );
 
             if (!mounted) return;
-            if (selectedSubjectName == null) return;
+            if (selectedSubjectTuple == null) return;
+
+            String? selectedSubjectName = selectedSubjectTuple.$1;
+            bool? isCustomTask = selectedSubjectTuple.$2;
 
             TodoEvent? event = await createNewTodoEventSheet(
               context,
               linkedSubjectName: selectedSubjectName,
+              isCustomEvent: isCustomTask,
             );
 
             if (event == null) return;
@@ -278,47 +285,25 @@ class _NotesScreenState extends State<NotesScreen> {
     return FloatingActionButton(
       child: const Icon(Icons.add),
       onPressed: () async {
-        String? selectedSubjectName = await showSelectSubjectNameSheet(
+        //selectedSubjectName, isCustomTask
+        (String, bool)? selectedSubjectNameTuple =
+            await showSelectSubjectNameSheet(
           context,
           title:
               AppLocalizationsManager.localizations.strSelectSubjectToAddTaskTo,
+          allowCustomNames: true,
         );
 
-        if (selectedSubjectName == null) return;
+        if (selectedSubjectNameTuple == null) return;
         if (!mounted) return;
 
-        if (selectedSubjectName ==
-            AppLocalizationsManager.localizations.strCustomSubject) {
-          String? customName = await Utils.showStringInputDialog(
-            context,
-            hintText: AppLocalizationsManager.localizations.strCustomSubject,
-            autofocus: true,
-            maxInputLength: 30,
-          );
-
-          if (customName == null) {
-            return;
-          }
-
-          if (customName.isEmpty) {
-            if (!mounted) return;
-
-            Utils.showInfo(
-              context,
-              msg: AppLocalizationsManager.localizations.strNameCanNotBeEmpty,
-              type: InfoType.error,
-            );
-            return;
-          }
-
-          selectedSubjectName = customName;
-        }
-
-        if (!mounted) return;
+        String selectedSubjectName = selectedSubjectNameTuple.$1;
+        bool isCustomTask = selectedSubjectNameTuple.$2;
 
         TodoEvent? event = await createNewTodoEventSheet(
           context,
           linkedSubjectName: selectedSubjectName,
+          isCustomEvent: isCustomTask,
         );
 
         if (event == null) return;

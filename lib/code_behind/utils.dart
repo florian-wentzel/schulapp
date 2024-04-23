@@ -558,6 +558,22 @@ class Utils {
     );
     return null;
   }
+
+  static bool isCustomTask({
+    required String linkedSubjectName,
+  }) {
+    Timetable? selectedTimetable = Utils.getHomescreenTimetable();
+    if (selectedTimetable == null) return false;
+
+    List<SchoolLessonPrefab> selectedTimetablePrefabs =
+        Utils.createLessonPrefabsFromTt(selectedTimetable);
+
+    final isCustomTask = !selectedTimetablePrefabs.any(
+      (element) => element.name == linkedSubjectName,
+    );
+
+    return isCustomTask;
+  }
 }
 
 enum InfoType {

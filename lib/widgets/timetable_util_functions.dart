@@ -258,7 +258,7 @@ Future<bool?> showSchoolLessonHomePopUp(
   );
 }
 
-Future<String?> showSelectSubjectNameSheet(
+Future<(String, bool)?> showSelectSubjectNameSheet(
   BuildContext context, {
   required String title,
   bool allowCustomNames = false,
@@ -273,14 +273,16 @@ Future<String?> showSelectSubjectNameSheet(
     (a, b) => a.name.compareTo(b.name),
   );
 
-  selectedTimetablePrefabs.add(
-    SchoolLessonPrefab(
-      name: AppLocalizationsManager.localizations.strCustomSubject,
-      room: "",
-      teacher: "",
-      color: Colors.transparent,
-    ),
-  );
+  if (allowCustomNames) {
+    selectedTimetablePrefabs.add(
+      SchoolLessonPrefab(
+        name: AppLocalizationsManager.localizations.strCustomSubject,
+        room: "",
+        teacher: "",
+        color: Colors.transparent,
+      ),
+    );
+  }
 
   String? selectdSubjectName;
 
@@ -297,7 +299,38 @@ Future<String?> showSelectSubjectNameSheet(
     ),
   );
 
-  return selectdSubjectName;
+  if (selectdSubjectName == null) return null;
+
+  if (selectdSubjectName !=
+      AppLocalizationsManager.localizations.strCustomSubject) {
+    return (selectdSubjectName!, false);
+  }
+
+  String? customName = await Utils.showStringInputDialog(
+    context,
+    hintText: AppLocalizationsManager.localizations.strCustomSubject,
+    autofocus: true,
+    maxInputLength: 30,
+  );
+
+  if (customName == null) return null;
+
+  customName = customName.trim();
+
+  if (customName.isEmpty) {
+    Utils.showInfo(
+      context,
+      msg: AppLocalizationsManager.localizations.strNameCanNotBeEmpty,
+      type: InfoType.error,
+    );
+    return null;
+  }
+
+  bool isCustomTask = Utils.isCustomTask(
+    linkedSubjectName: customName,
+  );
+
+  return (customName, isCustomTask);
 }
 
 Future<Timetable?> showSelectTimetableSheet(

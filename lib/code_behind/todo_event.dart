@@ -9,6 +9,7 @@ class TodoEvent {
   static const String _typeKey = "type";
   static const String _desciptionKey = "desciption";
   static const String _finishedKey = "finished";
+  static const String _customEventKey = "isCustomEvent";
   static const int notificationMultiplier = 10;
 
   static const IconData homeworkIcon = Icons.assignment;
@@ -21,6 +22,7 @@ class TodoEvent {
   int key;
   final String name;
   final String linkedSubjectName;
+  final bool isCustomEvent;
 
   DateTime endTime;
   TodoType type;
@@ -38,6 +40,7 @@ class TodoEvent {
     required this.type,
     required this.desciption,
     required this.finished,
+    required this.isCustomEvent,
   });
 
   bool isExpired() {
@@ -105,6 +108,7 @@ class TodoEvent {
       _typeKey: type.toString(),
       _desciptionKey: desciption,
       _finishedKey: finished,
+      _customEventKey: isCustomEvent,
     };
   }
 
@@ -115,6 +119,7 @@ class TodoEvent {
     TodoType type = todoTypeFromString(json[_typeKey]);
     String desciption = json[_desciptionKey];
     bool finished = json[_finishedKey];
+    bool customEvent = json[_customEventKey] ?? false;
 
     return TodoEvent(
       key: key,
@@ -123,6 +128,7 @@ class TodoEvent {
       endTime: endTime,
       type: type,
       desciption: desciption,
+      isCustomEvent: customEvent,
       finished: finished,
     );
   }
@@ -185,6 +191,7 @@ class TodoEvent {
       type: type,
       desciption: desciption,
       finished: finished,
+      isCustomEvent: isCustomEvent,
     );
   }
 

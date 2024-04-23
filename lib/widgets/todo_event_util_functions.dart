@@ -10,6 +10,7 @@ import 'package:schulapp/widgets/time_selection_button.dart';
 Future<TodoEvent?> createNewTodoEventSheet(
   BuildContext context, {
   required String linkedSubjectName,
+  bool? isCustomEvent,
   TodoEvent? event,
 }) async {
   const maxNameLength = TodoEvent.maxNameLength;
@@ -19,6 +20,8 @@ Future<TodoEvent?> createNewTodoEventSheet(
   nameController.text = event?.name ?? "";
   TextEditingController descriptionController = TextEditingController();
   descriptionController.text = event?.desciption ?? "";
+
+  isCustomEvent ??= event?.isCustomEvent ?? false;
 
   DateSelectionButtonController endDateController =
       DateSelectionButtonController(
@@ -272,6 +275,7 @@ Future<TodoEvent?> createNewTodoEventSheet(
     endTime: endDateController.date,
     type: type!,
     finished: event?.finished ?? false,
+    isCustomEvent: isCustomEvent,
   );
 }
 

@@ -243,6 +243,7 @@ class _TimetableWidgetState extends State<TimetableWidget> {
       endTime: eventEndTime,
       type: TodoType.test,
       desciption: "",
+      isCustomEvent: false,
       finished: false,
     );
 
@@ -278,6 +279,10 @@ class _TimetableWidgetState extends State<TimetableWidget> {
     final nowMonday = Utils.getWeekDay(DateTime.now(), DateTime.monday);
     bool notTappable = Utils.sameDay(currMonday, nowMonday);
 
+    final customTask = TimetableManager().getCustomTodoEventForDay(
+      day: currLessonDateTime,
+    );
+
     lessonWidgets.add(
       InkWell(
         onTap: notTappable
@@ -296,20 +301,73 @@ class _TimetableWidgetState extends State<TimetableWidget> {
           width: lessonWidth,
           height: lessonHeight,
           child: Center(
-            child: FittedBox(
-              fit: BoxFit.contain,
-              child: Column(
+            child: SizedBox(
+              width: lessonWidth * 0.8,
+              height: lessonHeight * 0.8,
+              child: Stack(
+                alignment: Alignment.center,
                 children: [
-                  Text(
-                    day.name,
-                    textAlign: TextAlign.center,
-                  ),
-                  Text(
-                    Utils.dateToString(
-                      currLessonDateTime,
-                      showYear: false,
+                  FittedBox(
+                    fit: BoxFit.contain,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          day.name,
+                          style: Theme.of(context).textTheme.headlineSmall,
+                          textAlign: TextAlign.center,
+                        ),
+                        Text(
+                          Utils.dateToString(
+                            currLessonDateTime,
+                            showYear: false,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
                     ),
-                    textAlign: TextAlign.center,
+                  ),
+                  Visibility(
+                    visible: customTask != null,
+                    child: Align(
+                      alignment: Alignment.bottomRight,
+                      child: Text(
+                        "!",
+                        textAlign: TextAlign.justify,
+                        style: GoogleFonts.dmSerifDisplay(
+                          textStyle: Theme.of(context)
+                              .textTheme
+                              .headlineMedium
+                              ?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                foreground: Paint()
+                                  ..style = PaintingStyle.stroke
+                                  ..strokeWidth = 4
+                                  ..color = Theme.of(context).canvasColor,
+                              ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Visibility(
+                    visible: customTask != null,
+                    child: Align(
+                      alignment: Alignment.bottomRight,
+                      child: Text(
+                        "!",
+                        textAlign: TextAlign.justify,
+                        style: GoogleFonts.dmSerifDisplay(
+                          textStyle: Theme.of(context)
+                              .textTheme
+                              .headlineMedium
+                              ?.copyWith(
+                                color: customTask?.getColor(),
+                                fontWeight: FontWeight.bold,
+                              ),
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),

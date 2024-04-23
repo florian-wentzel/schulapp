@@ -82,15 +82,23 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
         controller: _pageController,
         itemCount: pagesCount,
         itemBuilder: (context, index) {
+          final correctedPageIndex = index - initialMondayPageIndex;
           Timetable tt = widget.timetable;
 
-          int currDayIndex =
-              (index - initialMondayPageIndex) % tt.schoolDays.length;
-          int currWeekIndex =
-              (index - initialMondayPageIndex) ~/ tt.schoolDays.length;
+          int currDayIndex = correctedPageIndex % tt.schoolDays.length;
+          int currWeekIndex;
 
-          DateTime currMonday =
-              Utils.getWeekDay(DateTime.now(), DateTime.monday);
+          if (correctedPageIndex < 0) {
+            currWeekIndex =
+                (correctedPageIndex - currDayIndex) ~/ tt.schoolDays.length;
+          } else {
+            currWeekIndex = correctedPageIndex ~/ tt.schoolDays.length;
+          }
+
+          DateTime currMonday = Utils.getWeekDay(
+            DateTime.now(),
+            DateTime.monday,
+          );
 
           return _createDay(
             dayIndex: currDayIndex,
@@ -194,6 +202,10 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
 
     DateTime currLessonDateTime = currMonday.add(Duration(days: dayIndex));
 
+    final customTask = TimetableManager().getCustomTodoEventForDay(
+      day: currLessonDateTime,
+    );
+
     lessonWidgets.add(
       InkWell(
         onTap: Utils.sameDay(currLessonDateTime, DateTime.now())
@@ -217,21 +229,71 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
           width: lessonWidth,
           height: lessonHeight,
           child: Center(
-            child: FittedBox(
-              fit: BoxFit.contain,
-              child: Column(
+            child: SizedBox(
+              width: lessonWidth * 0.8,
+              height: lessonHeight * 0.8,
+              child: Stack(
+                alignment: Alignment.center,
                 children: [
-                  Text(
-                    day.name,
-                    style: Theme.of(context).textTheme.headlineSmall,
-                    textAlign: TextAlign.center,
-                  ),
-                  Text(
-                    Utils.dateToString(
-                      currLessonDateTime,
-                      showYear: false,
+                  FittedBox(
+                    fit: BoxFit.contain,
+                    child: Column(
+                      children: [
+                        Text(
+                          day.name,
+                          style: Theme.of(context).textTheme.headlineSmall,
+                          textAlign: TextAlign.center,
+                        ),
+                        Text(
+                          Utils.dateToString(
+                            currLessonDateTime,
+                            showYear: false,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
                     ),
-                    textAlign: TextAlign.center,
+                  ),
+                  Visibility(
+                    visible: customTask != null,
+                    child: Align(
+                      alignment: Alignment.bottomRight,
+                      child: Text(
+                        "!",
+                        textAlign: TextAlign.justify,
+                        style: GoogleFonts.dmSerifDisplay(
+                          textStyle: Theme.of(context)
+                              .textTheme
+                              .headlineMedium
+                              ?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                foreground: Paint()
+                                  ..style = PaintingStyle.stroke
+                                  ..strokeWidth = 4
+                                  ..color = Theme.of(context).canvasColor,
+                              ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Visibility(
+                    visible: customTask != null,
+                    child: Align(
+                      alignment: Alignment.bottomRight,
+                      child: Text(
+                        "!",
+                        textAlign: TextAlign.justify,
+                        style: GoogleFonts.dmSerifDisplay(
+                          textStyle: Theme.of(context)
+                              .textTheme
+                              .headlineMedium
+                              ?.copyWith(
+                                color: customTask?.getColor(),
+                                fontWeight: FontWeight.bold,
+                              ),
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -459,6 +521,7 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
       endTime: eventEndTime,
       type: TodoType.test,
       desciption: "",
+      isCustomEvent: false,
       finished: false,
     );
 
