@@ -101,7 +101,9 @@ class _ImportTimetablePageState extends State<ImportTimetablePage> {
     Timetable? timetable;
     try {
       timetable = SaveManager().importTimetable(selectedFile);
-    } catch (e) {}
+    } catch (e) {
+      debugPrint(e.toString());
+    }
 
     if (mounted) {
       if (timetable == null) {

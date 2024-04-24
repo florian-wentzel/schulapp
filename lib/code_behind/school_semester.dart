@@ -118,7 +118,7 @@ class SchoolSemester {
         ),
       );
     } catch (e) {
-      print(e);
+      debugPrint(e.toString());
     }
 
     return semester;

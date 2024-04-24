@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/todo_event.dart';
 import 'package:schulapp/code_behind/school_semester.dart';
 import 'package:schulapp/code_behind/settings.dart';
@@ -94,7 +95,7 @@ class TimetableManager {
         bool removed = removeTimetable(tt);
 
         if (!removed) {
-          print("timetable ${tt.name} could not be removed");
+          debugPrint("timetable ${tt.name} could not be removed");
         }
       }
     }
@@ -107,7 +108,7 @@ class TimetableManager {
       bool removed = _timetables!.remove(tt);
 
       if (!removed) {
-        print("timetable ${tt.name} could not be removed");
+        debugPrint("timetable ${tt.name} could not be removed");
       }
     }
 
@@ -155,7 +156,7 @@ class TimetableManager {
         bool removed = removeSemester(semester);
 
         if (!removed) {
-          print("Semester ${semester.name} could not be removed");
+          debugPrint("Semester ${semester.name} could not be removed");
         }
       }
     }
@@ -167,7 +168,7 @@ class TimetableManager {
       bool removed = semesters.remove(sem);
 
       if (!removed) {
-        print("semester ${sem.name} could not be removed");
+        debugPrint("semester ${sem.name} could not be removed");
       }
     }
 

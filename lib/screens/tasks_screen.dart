@@ -482,6 +482,7 @@ class TodoEventInfoPopUp extends StatelessWidget {
 
                 TimetableManager().addOrChangeTodoEvent(newEvent);
 
+                if (!context.mounted) return;
                 Navigator.pop(context);
               },
               icon: const Icon(

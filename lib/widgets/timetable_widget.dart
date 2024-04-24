@@ -705,7 +705,7 @@ class _CustomPopUpShowLessonState extends State<CustomPopUpShowLesson> {
 
                           TimetableManager().removeTodoEvent(widget.event!);
 
-                          if (!mounted) return;
+                          if (!context.mounted) return;
 
                           Navigator.of(context).pop();
                         },

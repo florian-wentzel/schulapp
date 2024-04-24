@@ -76,9 +76,6 @@ class _TimetableScreenState extends State<TimetableScreen> {
         useRotationAnimation: true,
         tooltip: '',
         animationCurve: Curves.elasticInOut,
-
-        // onOpen: () => print('OPENING DIAL'),
-        // onClose: () => print('DIAL CLOSED'),
         children: [
           SpeedDialChild(
             child: const Icon(Icons.add),

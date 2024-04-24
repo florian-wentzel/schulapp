@@ -13,12 +13,12 @@ enum ShareResult {
 class MultiPlatformManager {
   static Future<ShareResult> shareFile(File exportFile) async {
     if (kIsWeb) {
-      if (kDebugMode) print("WARNING: Share Timetable not Implemented!");
+      debugPrint("WARNING: Share Timetable not Implemented!");
       return ShareResult.error;
     }
 
     if (Platform.isAndroid) {
-      if (kDebugMode) print("WARNING: Share Timetable not Implemented!");
+      debugPrint("WARNING: Share Timetable not Implemented!");
       // try {
       //   final intent = AndroidIntent(
       //     action: 'android.intent.action.VIEW',
@@ -29,7 +29,7 @@ class MultiPlatformManager {
 
       //   await intent.launch();
       // } catch (e) {
-      //   print("Error opening file explorer: $e");
+      //   debugPrint("Error opening file explorer: $e");
       // }
       // Intent intent = new Intent(Intent.ACTION_VIEW);
       //   Uri uri = Uri.parse("file://" + filePath);
@@ -43,7 +43,7 @@ class MultiPlatformManager {
       return ShareResult.success;
     }
     if (Platform.isIOS) {
-      if (kDebugMode) print("WARNING: Share Timetable not Implemented!");
+      debugPrint("WARNING: Share Timetable not Implemented!");
       return ShareResult.success;
     }
     if (Platform.isWindows) {
@@ -57,7 +57,7 @@ class MultiPlatformManager {
         );
         return ShareResult.success;
       } on Exception catch (e) {
-        if (kDebugMode) print(e);
+        debugPrint(e.toString());
         return ShareResult.error;
       }
     }
@@ -73,7 +73,7 @@ class MultiPlatformManager {
         );
         return ShareResult.success;
       } catch (e) {
-        if (kDebugMode) print(e);
+        debugPrint(e.toString());
         return ShareResult.error;
       }
     }

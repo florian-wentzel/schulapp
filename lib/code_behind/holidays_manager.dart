@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/holidays.dart';
 import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/time_table_manager.dart';
@@ -81,11 +82,11 @@ class HolidaysManager {
 
         allHolidays = _jsonToHolidaysList(jsonList);
       } else {
-        print('Failed to load post: ${response.statusCode}');
+        debugPrint('Failed to load post: ${response.statusCode}');
         return [];
       }
     } catch (e) {
-      print('Error: $e');
+      debugPrint('Error: $e');
       return [];
     }
 
@@ -121,7 +122,7 @@ class HolidaysManager {
 
       return _jsonToHolidaysList(jsonList);
     } catch (e) {
-      print('Error: $e');
+      debugPrint('Error: $e');
       return [];
     }
   }
@@ -138,7 +139,7 @@ class HolidaysManager {
             jsonString,
           );
     } catch (e) {
-      print('Error: $e');
+      debugPrint('Error: $e');
     }
   }
 

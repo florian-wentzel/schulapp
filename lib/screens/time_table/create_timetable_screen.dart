@@ -33,6 +33,9 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
   @override
   void initState() {
     _lessonPrefabs = Utils.createLessonPrefabsFromTt(widget.timetable);
+    _lessonPrefabs.sort(
+      (a, b) => a.name.compareTo(b.name),
+    );
     _originalName = String.fromCharCodes(widget.timetable.name.codeUnits);
     widget.timetable.changeLessonNumberVisibility(
       TimetableManager().settings.getVar(Settings.showLessonNumbersKey),
@@ -45,11 +48,12 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
     return PopScope(
       canPop: _canPop,
       onPopInvoked: (didPop) async {
+        debugPrint("Test");
         if (_canPop) {
           return;
         }
 
-        bool? exit = await Utils.showBoolInputDialog(
+        bool exit = await Utils.showBoolInputDialog(
           context,
           question: AppLocalizationsManager
               .localizations.strDoYouWantToExitWithoutSaving,
@@ -57,9 +61,10 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
         );
 
         _canPop = exit;
+
         setState(() {});
 
-        if (_canPop && mounted) Navigator.of(context).pop();
+        if (_canPop && context.mounted) Navigator.of(context).pop();
       },
       child: Scaffold(
         appBar: AppBar(
@@ -76,7 +81,7 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
               name = name.trim();
 
               if (name.isEmpty) {
-                if (mounted) {
+                if (context.mounted) {
                   Utils.showInfo(
                     context,
                     msg: AppLocalizationsManager
@@ -90,7 +95,7 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
               try {
                 widget.timetable.name = name;
               } catch (e) {
-                if (mounted) {
+                if (context.mounted) {
                   Utils.showInfo(
                     context,
                     msg: e.toString(),

@@ -323,7 +323,7 @@ class _EditSchoolGradeSubjectScreenState
     if (!createPressed) return null;
     String name = nameController.text.trim();
     if (name.isEmpty) {
-      if (mounted) {
+      if (context.mounted) {
         Utils.showInfo(
           context,
           msg: AppLocalizationsManager.localizations.strNameCanNotBeEmpty,

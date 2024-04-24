@@ -55,9 +55,6 @@ class _SemesterScreenState extends State<SemesterScreen> {
         useRotationAnimation: true,
         tooltip: '',
         animationCurve: Curves.elasticInOut,
-
-        // onOpen: () => print('OPENING DIAL'),
-        // onClose: () => print('DIAL CLOSED'),
         children: [
           SpeedDialChild(
             child: const Icon(Icons.add),
@@ -286,7 +283,7 @@ class _SemesterScreenState extends State<SemesterScreen> {
     String name = nameController.text.trim();
 
     if (name.isEmpty) {
-      if (mounted) {
+      if (context.mounted) {
         Utils.showInfo(
           context,
           msg: AppLocalizationsManager.localizations.strNameCanNotBeEmpty,

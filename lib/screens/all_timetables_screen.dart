@@ -36,9 +36,6 @@ class _AllTimetablesScreenState extends State<AllTimetablesScreen> {
         useRotationAnimation: true,
         tooltip: '',
         animationCurve: Curves.elasticInOut,
-
-        // onOpen: () => print('OPENING DIAL'),
-        // onClose: () => print('DIAL CLOSED'),
         children: [
           SpeedDialChild(
             child: const Icon(Icons.add),
@@ -172,7 +169,7 @@ class _AllTimetablesScreenState extends State<AllTimetablesScreen> {
 
               setState(() {});
 
-              if (!mounted) return;
+              if (!context.mounted) return;
 
               if (removed) {
                 Utils.showInfo(

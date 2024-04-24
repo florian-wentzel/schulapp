@@ -85,11 +85,13 @@ Future<SchoolSemester?> showCreateSemesterSheet(
 
   if (nameController.text.trim().isEmpty) {
     //show error
-    Utils.showInfo(
-      context,
-      msg: AppLocalizationsManager.localizations.strSemesterNameCanNotBeEmpty,
-      type: InfoType.error,
-    );
+    if (context.mounted) {
+      Utils.showInfo(
+        context,
+        msg: AppLocalizationsManager.localizations.strSemesterNameCanNotBeEmpty,
+        type: InfoType.error,
+      );
+    }
     return null;
   }
 
@@ -105,6 +107,8 @@ Future<bool?> createNewTimetable(BuildContext context) async {
   if (tt == null) return null;
 
   // bool? createdNewTimetable =
+  if (!context.mounted) return null;
+
   return Navigator.of(context).push<bool>(
     MaterialPageRoute(
       builder: (context) => CreateTimeTableScreen(timetable: tt),
@@ -201,11 +205,14 @@ Future<Timetable?> showCreateTimetableSheet(BuildContext context) async {
 
   if (ttName.isEmpty) {
     //show error
-    Utils.showInfo(
-      context,
-      msg: AppLocalizationsManager.localizations.strTimetableNameCanNotBeEmpty,
-      type: InfoType.error,
-    );
+    if (context.mounted) {
+      Utils.showInfo(
+        context,
+        msg:
+            AppLocalizationsManager.localizations.strTimetableNameCanNotBeEmpty,
+        type: InfoType.error,
+      );
+    }
     return null;
   }
   if (lessonCount == -1) {
@@ -213,14 +220,16 @@ Future<Timetable?> showCreateTimetableSheet(BuildContext context) async {
     lessonCount = defaultLessonCountValue;
   }
   if (lessonCount < minLessonCount || lessonCount > maxLessonCount) {
-    Utils.showInfo(
-      context,
-      msg: AppLocalizationsManager.localizations.strLessonCountMustBeInRange(
-        maxLessonCount,
-        minLessonCount,
-      ),
-      type: InfoType.error,
-    );
+    if (context.mounted) {
+      Utils.showInfo(
+        context,
+        msg: AppLocalizationsManager.localizations.strLessonCountMustBeInRange(
+          maxLessonCount,
+          minLessonCount,
+        ),
+        type: InfoType.error,
+      );
+    }
     return null;
   }
 
@@ -306,6 +315,8 @@ Future<(String, bool)?> showSelectSubjectNameSheet(
     return (selectdSubjectName!, false);
   }
 
+  if (!context.mounted) return null;
+
   String? customName = await Utils.showStringInputDialog(
     context,
     hintText: AppLocalizationsManager.localizations.strCustomSubject,
@@ -318,11 +329,13 @@ Future<(String, bool)?> showSelectSubjectNameSheet(
   customName = customName.trim();
 
   if (customName.isEmpty) {
-    Utils.showInfo(
-      context,
-      msg: AppLocalizationsManager.localizations.strNameCanNotBeEmpty,
-      type: InfoType.error,
-    );
+    if (context.mounted) {
+      Utils.showInfo(
+        context,
+        msg: AppLocalizationsManager.localizations.strNameCanNotBeEmpty,
+        type: InfoType.error,
+      );
+    }
     return null;
   }
 

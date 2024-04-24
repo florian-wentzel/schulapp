@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:document_file_save_plus/document_file_save_plus.dart';
 import 'package:path_provider/path_provider.dart';
@@ -60,12 +61,12 @@ class SaveManager {
         }
         timeTables.add(tt);
       } catch (e) {
-        print('Error reading or parsing the JSON file: $e');
+        debugPrint('Error reading or parsing the JSON file: $e');
       }
     }
 
     if (errorCount != 0) {
-      print("Errorcount while loading: $errorCount");
+      debugPrint("Errorcount while loading: $errorCount");
     }
 
     timeTables.sort(
@@ -88,7 +89,7 @@ class SaveManager {
     Map<String, dynamic> jsonData = json.decode(jsonString);
 
     // Now you can work with the loaded JSON data
-    print(jsonData);
+    debugPrint(jsonData.toString());
 
     return Timetable.fromJson(jsonData);
   }
@@ -197,7 +198,7 @@ class SaveManager {
       applicationDocumentsDirectory = dir;
     } catch (e) {
       applicationDocumentsDirectory = null;
-      print(e);
+      debugPrint(e.toString());
     }
   }
 
@@ -354,12 +355,12 @@ class SaveManager {
         }
         semesters.add(semester);
       } catch (e) {
-        print('Error reading or parsing the JSON file: $e');
+        debugPrint('Error reading or parsing the JSON file: $e');
       }
     }
 
     if (errorCount != 0) {
-      print("Errorcount while loading: $errorCount");
+      debugPrint("Errorcount while loading: $errorCount");
     }
 
     semesters.sort(
@@ -380,7 +381,7 @@ class SaveManager {
 
     Map<String, dynamic> jsonData = json.decode(jsonString);
 
-    print(jsonData);
+    debugPrint(jsonData.toString());
 
     return SchoolSemester.fromJson(jsonData);
   }

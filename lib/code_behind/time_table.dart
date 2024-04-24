@@ -330,7 +330,7 @@ class Timetable {
         ),
       );
     } catch (e) {
-      print(e);
+      debugPrint(e.toString());
     }
 
     return timetable;
