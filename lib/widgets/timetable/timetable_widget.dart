@@ -17,12 +17,12 @@ import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/screens/grades_screen.dart';
 import 'package:schulapp/screens/tasks_screen.dart';
 import 'package:schulapp/screens/semester/school_grade_subject_screen.dart';
-import 'package:schulapp/widgets/school_grade_subject_widget.dart';
-import 'package:schulapp/widgets/time_to_next_lesson_widget.dart';
-import 'package:schulapp/widgets/timetable_util_functions.dart';
+import 'package:schulapp/widgets/semester/school_grade_subject_widget.dart';
+import 'package:schulapp/widgets/timetable/time_to_next_lesson_widget.dart';
+import 'package:schulapp/code_behind/timetable_util_functions.dart';
 import 'package:schulapp/widgets/custom_pop_up.dart';
-import 'package:schulapp/widgets/todo_event_list_item_widget.dart';
-import 'package:schulapp/widgets/todo_event_util_functions.dart';
+import 'package:schulapp/widgets/task/todo_event_list_item_widget.dart';
+import 'package:schulapp/code_behind/todo_event_util_functions.dart';
 
 // ignore: must_be_immutable
 class TimetableWidget extends StatefulWidget {
@@ -463,7 +463,7 @@ class _TimetableWidgetState extends State<TimetableWidget> {
                   fit: StackFit.expand,
                   children: [
                     FittedBox(
-                      fit: BoxFit.contain,
+                      fit: BoxFit.scaleDown,
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
@@ -471,14 +471,17 @@ class _TimetableWidgetState extends State<TimetableWidget> {
                           Text(
                             lesson.name,
                             textAlign: TextAlign.center,
-                            style: Theme.of(context).textTheme.labelSmall,
+                            style: Theme.of(context).textTheme.headlineSmall,
                           ),
-                          Text(
-                            lesson.room,
-                            textAlign: TextAlign.center,
-                            style: Theme.of(context).textTheme.labelSmall,
-                            overflow: TextOverflow.fade,
-                          ),
+                          lesson.room.isEmpty
+                              ? Container()
+                              : Text(
+                                  lesson.room,
+                                  textAlign: TextAlign.center,
+                                  style:
+                                      Theme.of(context).textTheme.headlineSmall,
+                                  overflow: TextOverflow.fade,
+                                ),
                         ],
                       ),
                     ),

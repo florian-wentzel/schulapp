@@ -13,7 +13,7 @@ import 'package:schulapp/code_behind/time_table_manager.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/screens/semester/school_grade_subject_screen.dart';
-import 'package:schulapp/widgets/school_grade_subject_widget.dart';
+import 'package:schulapp/widgets/semester/school_grade_subject_widget.dart';
 
 // ignore: must_be_immutable
 class SemesterScreen extends StatefulWidget {

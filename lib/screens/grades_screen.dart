@@ -6,7 +6,7 @@ import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/screens/semester/semester_screen.dart';
 import 'package:schulapp/widgets/navigation_bar_drawer.dart';
-import 'package:schulapp/widgets/timetable_util_functions.dart';
+import 'package:schulapp/code_behind/timetable_util_functions.dart';
 
 class GradesScreen extends StatefulWidget {
   static const route = "/grades";

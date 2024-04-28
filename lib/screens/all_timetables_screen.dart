@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:schulapp/app.dart';
 import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/time_table.dart';
 import 'package:schulapp/code_behind/time_table_manager.dart';
@@ -8,7 +9,7 @@ import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/screens/time_table/create_timetable_screen.dart';
 import 'package:schulapp/screens/time_table/import_export_timetable_screen.dart';
 import 'package:schulapp/screens/timetable_screen.dart';
-import 'package:schulapp/widgets/timetable_util_functions.dart';
+import 'package:schulapp/code_behind/timetable_util_functions.dart';
 import 'package:schulapp/widgets/navigation_bar_drawer.dart';
 
 class AllTimetablesScreen extends StatefulWidget {
@@ -22,6 +23,7 @@ class AllTimetablesScreen extends StatefulWidget {
 class _AllTimetablesScreenState extends State<AllTimetablesScreen> {
   @override
   Widget build(BuildContext context) {
+    MainApp.changeNavBarVisibilitySecure(context, value: true);
     return Scaffold(
       drawer: NavigationBarDrawer(selectedRoute: AllTimetablesScreen.route),
       appBar: AppBar(

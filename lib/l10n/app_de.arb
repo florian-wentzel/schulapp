@@ -1,6 +1,7 @@
 {
   "@@locale": "de",
   "language_name": "Deutsch",
+  "version_0_2_0": "Stundenplan Bearbeitungsscreen erneuert",
   "version_0_1_8": "Benutzerdefinierte Aufgabe wird nun neben Tagesnamen angezeigt",
   "version_0_1_7": "Übersetzen der Semester Bewertungsgruppen und der Stundenplannamen",
   "version_0_1_6": "Benutzerdefinierte Ferien hinzugefügt",
@@ -109,7 +110,6 @@
   "strYes": "Ja",
   "strNo": "Nein",
   "strEnterTimetableName": "Stundenplan Name",
-  "strCreateTimetableX": "Stundenplan erstellen: {name}",
   "strSave": "Speichern",
   "strSelectTimetableToImportSubjectsFrom": "Stundenplan auswählen von dem Fächer importiert werden sollen:",
   "strChangeSchoolLesson": "Fach bearbeiten",

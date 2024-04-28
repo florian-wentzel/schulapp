@@ -80,7 +80,7 @@ class Utils {
     removeEmptySchoolLessons(
       timetable,
       shouldChangeLesson: (schoolLesson) {
-        return schoolLesson.name == SchoolLesson.emptyLessonName;
+        return SchoolLesson.isEmptyLessonName(schoolLesson.name);
       },
       updateSchoolLesson: (schoolLesson, lessonIndex) {
         schoolLesson.name = "-${lessonIndex + 1}-";
@@ -98,7 +98,7 @@ class Utils {
       },
       updateSchoolLesson: (schoolLesson, lessonIndex) {
         schoolLesson.name = SchoolLesson.emptyLessonName;
-        schoolLesson.room = SchoolLesson.emptyLessonName;
+        schoolLesson.room = "";
       },
     );
   }
@@ -138,6 +138,10 @@ class Utils {
         }
       }
     }
+  }
+
+  static bool isScreenOnTop(BuildContext context) {
+    return ModalRoute.of(context)?.isCurrent ?? false;
   }
 
   //TODO: update all showBoolInputDialog (showYesAndNoInsteadOfOK = true?)
@@ -184,11 +188,13 @@ class Utils {
   static Future<String?> showStringInputDialog(
     BuildContext context, {
     required String hintText,
+    bool autofocus = true,
     String? title,
-    bool autofocus = false,
-    int? maxInputLength,
+    String? initText,
+    int maxInputLength = 20,
   }) async {
     TextEditingController textController = TextEditingController();
+    textController.text = initText ?? "";
 
     return showDialog<String>(
       context: context,

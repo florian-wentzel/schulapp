@@ -32,18 +32,23 @@ final _router = GoRouter(
         final showBottomNavBar = Utils.isMobileRatio(context) &&
             !VersionManager().isFirstTimeOpening();
 
-        return Material(
-          child: Scaffold(
-            backgroundColor: Theme.of(context).canvasColor,
-            body: Center(
-              child: child,
-            ),
-            bottomNavigationBar: showBottomNavBar
-                ? CustomBottomNavigationBar(
-                    currRoute: state.fullPath ?? "",
-                  )
-                : null,
-          ),
+        return ValueListenableBuilder<bool>(
+          valueListenable: MainApp.showBottomnavBar,
+          builder: (context, value, _) {
+            return Material(
+              child: Scaffold(
+                backgroundColor: Theme.of(context).canvasColor,
+                body: Center(
+                  child: child,
+                ),
+                bottomNavigationBar: showBottomNavBar && value
+                    ? CustomBottomNavigationBar(
+                        currRoute: state.fullPath ?? "",
+                      )
+                    : null,
+              ),
+            );
+          },
         );
       },
       routes: [
@@ -87,6 +92,24 @@ final _router = GoRouter(
 );
 
 class MainApp extends StatefulWidget {
+  static ValueNotifier<bool> showBottomnavBar = ValueNotifier<bool>(true);
+
+  ///secure just means that only the current screen can update the visibility
+  static void changeNavBarVisibilitySecure(
+    BuildContext context, {
+    required bool value,
+  }) {
+    if (Utils.isScreenOnTop(context)) {
+      changeNavBarVisibility(value);
+    }
+  }
+
+  static void changeNavBarVisibility(bool value) {
+    Future.delayed(Duration.zero, () {
+      showBottomnavBar.value = value;
+    });
+  }
+
   const MainApp({super.key});
 
   @override

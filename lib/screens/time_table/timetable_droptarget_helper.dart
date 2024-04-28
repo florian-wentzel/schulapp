@@ -1,215 +1,44 @@
 import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/school_day.dart';
 import 'package:schulapp/code_behind/school_lesson.dart';
-import 'package:schulapp/code_behind/school_lesson_prefab.dart';
 import 'package:schulapp/code_behind/school_time.dart';
+import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/time_table.dart';
+import 'package:schulapp/code_behind/time_table_manager.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/extensions.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/widgets/custom_pop_up.dart';
 
-// ignore: must_be_immutable
-class TimetableDroptarget extends StatefulWidget {
-  Timetable timetable;
-  TimetableDroptarget({super.key, required this.timetable});
-
-  @override
-  State<TimetableDroptarget> createState() => _TimetableDroptargetState();
-}
-
-class _TimetableDroptargetState extends State<TimetableDroptarget> {
-  @override
-  Widget build(BuildContext context) {
-    Timetable tt = widget.timetable;
-    List<DataColumn> dataColumn = List.generate(
-      tt.schoolDays.length,
-      (index) => DataColumn(
-        label: Expanded(
-          child: Center(
-            child: Text(
-              tt.schoolDays[index].name,
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
+void onLessonWidgetTap(
+  BuildContext context, {
+  required Timetable timetable,
+  required SchoolLesson lesson,
+  required SchoolDay day,
+  required SchoolTime schoolTime,
+  required String heroString,
+  required void Function() setState,
+}) async {
+  await Navigator.push(
+    context,
+    PageRouteBuilder(
+      opaque: false,
+      pageBuilder: (BuildContext context, _, __) => CustomPopUpCreateTimetable(
+        heroString: heroString,
+        schoolDay: day,
+        schoolLesson: lesson,
+        schoolTime: schoolTime,
       ),
-    );
+      barrierDismissible: true,
+      fullscreenDialog: true,
+    ),
+  );
 
-    //füge Zeiten hinzu
-    dataColumn.insert(
-      0,
-      DataColumn(
-        label: Expanded(
-          child: Center(
-            child: Text(
-              AppLocalizationsManager.localizations.strTimes,
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ),
-      ),
-    );
+  timetable.changeLessonNumberVisibility(
+    TimetableManager().settings.getVar(Settings.showLessonNumbersKey),
+  );
 
-    List<DataRow> dataRow = List.generate(
-      tt.maxLessonCount,
-      (rowIndex) {
-        return DataRow(
-          // selected: rowIndex == 2,
-          cells: List.generate(
-            dataColumn.length,
-            (cellIndex) {
-              if (cellIndex == 0) {
-                final startString = tt.schoolTimes[rowIndex].getStartString();
-                final endString = tt.schoolTimes[rowIndex].getEndString();
-                final text = Text(
-                  "$startString\n$endString",
-                  textAlign: TextAlign.center,
-                );
-                return DataCell(
-                  Center(
-                    child: Hero(
-                      tag: tt.schoolTimes[rowIndex],
-                      child: text,
-                    ),
-                  ),
-                  onTap: () async {
-                    await Utils.showCustomPopUp(
-                      context: context,
-                      heroObject: tt.schoolTimes[rowIndex],
-                      flightShuttleBuilder: (p0, animation, p2, p3, p4) {
-                        return AnimatedBuilder(
-                          animation: animation,
-                          builder: (context, child) {
-                            return Container(
-                              color: ColorTween(
-                                begin: Colors.transparent,
-                                end: Theme.of(context).cardColor.withAlpha(220),
-                              ).lerp(animation.value),
-                            );
-                          },
-                        );
-                      },
-                      body: CustomPopUpChangeSubjectTime(
-                        schoolTime: tt.schoolTimes[rowIndex],
-                      ),
-                    );
-                    setState(() {});
-                  },
-                );
-              }
-              //dadurch das wir jz eine Zeile mehr haben durch die Zeit müssen wir einen Index abziehen..
-              int correctCellIndex = cellIndex - 1;
-              final heroString = "$rowIndex:$correctCellIndex";
-              final schoolDay = tt.schoolDays[correctCellIndex];
-              final lesson = schoolDay.lessons[rowIndex];
-
-              return DataCell(
-                onTap: () {
-                  _showPopUp(
-                    context,
-                    lesson,
-                    schoolDay,
-                    widget.timetable.schoolTimes[rowIndex],
-                    heroString,
-                  );
-                },
-                DragTarget(
-                  onWillAcceptWithDetails:
-                      (DragTargetDetails<SchoolLessonPrefab?>
-                          schoolLessonPrefab) {
-                    return schoolLessonPrefab.data != null;
-                  },
-                  onAcceptWithDetails: (DragTargetDetails<SchoolLessonPrefab>
-                      schoolLessonPrefab) {
-                    lesson.setFromPrefab(schoolLessonPrefab.data);
-                  },
-                  builder: (context, accepted, rejected) {
-                    const targetAlpha = 220;
-                    ColorTween colorAnimation = ColorTween(
-                      begin: lesson.color,
-                      end: Theme.of(context).cardColor.withAlpha(targetAlpha),
-                    );
-                    return Center(
-                      child: Hero(
-                        tag: heroString,
-                        flightShuttleBuilder:
-                            (context, animation, __, ___, ____) {
-                          return AnimatedBuilder(
-                            animation: animation,
-                            builder: (context, _) {
-                              return Container(
-                                width: 100,
-                                decoration: BoxDecoration(
-                                  color: colorAnimation.lerp(animation.value),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              );
-                            },
-                          );
-                        },
-                        child: AnimatedContainer(
-                          duration: const Duration(seconds: 1),
-                          width: 100,
-                          // margin: const EdgeInsets.symmetric(vertical: 12),
-                          // padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: lesson.color,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Center(
-                            child: Text(
-                              lesson.name,
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              );
-            },
-          ),
-        );
-      },
-    );
-
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: DataTable(
-        columns: dataColumn,
-        rows: dataRow,
-        columnSpacing: 25,
-        horizontalMargin: 25,
-      ),
-    );
-  }
-
-  void _showPopUp(
-    BuildContext context,
-    SchoolLesson lesson,
-    SchoolDay day,
-    SchoolTime schoolTime,
-    String heroString,
-  ) async {
-    await Navigator.push(
-      context,
-      PageRouteBuilder(
-        opaque: false,
-        pageBuilder: (BuildContext context, _, __) =>
-            CustomPopUpCreateTimetable(
-          heroString: heroString,
-          schoolDay: day,
-          schoolLesson: lesson,
-          schoolTime: schoolTime,
-        ),
-        barrierDismissible: true,
-        fullscreenDialog: true,
-      ),
-    );
-    setState(() {});
-  }
+  setState.call();
 }
 
 // ignore: must_be_immutable
@@ -302,6 +131,7 @@ class _CustomPopUpCreateTimetableState
             String? input = await Utils.showStringInputDialog(
               context,
               hintText: AppLocalizationsManager.localizations.strSubjectName,
+              initText: _name,
               autofocus: true,
               maxInputLength: SchoolLesson.maxNameLength,
             );
@@ -428,6 +258,7 @@ class _CustomPopUpCreateTimetableState
               String? input = await Utils.showStringInputDialog(
                 context,
                 hintText: AppLocalizationsManager.localizations.strRoom,
+                initText: _room,
                 maxInputLength: SchoolLesson.maxRoomLength,
                 autofocus: true,
               );
@@ -467,6 +298,7 @@ class _CustomPopUpCreateTimetableState
             String? input = await Utils.showStringInputDialog(
               context,
               hintText: AppLocalizationsManager.localizations.strTeacher,
+              initText: _teacher,
               autofocus: true,
             );
 

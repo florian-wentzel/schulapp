@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:go_router/go_router.dart';
+import 'package:schulapp/app.dart';
 import 'package:schulapp/code_behind/holidays.dart';
 import 'package:schulapp/code_behind/holidays_manager.dart';
 import 'package:schulapp/code_behind/school_semester.dart';
@@ -20,12 +21,12 @@ import 'package:schulapp/screens/new_versions_screen.dart';
 import 'package:schulapp/screens/tasks_screen.dart';
 import 'package:schulapp/screens/time_table/create_timetable_screen.dart';
 import 'package:schulapp/screens/time_table/import_export_timetable_screen.dart';
-import 'package:schulapp/widgets/timetable_widget.dart';
-import 'package:schulapp/widgets/timetable_util_functions.dart';
+import 'package:schulapp/widgets/timetable/timetable_widget.dart';
+import 'package:schulapp/code_behind/timetable_util_functions.dart';
 import 'package:schulapp/widgets/navigation_bar_drawer.dart';
-import 'package:schulapp/widgets/timetable_one_day_widget.dart';
-import 'package:schulapp/widgets/todo_event_list_item_widget.dart';
-import 'package:schulapp/widgets/todo_event_util_functions.dart';
+import 'package:schulapp/widgets/timetable/timetable_one_day_widget.dart';
+import 'package:schulapp/widgets/task/todo_event_list_item_widget.dart';
+import 'package:schulapp/code_behind/todo_event_util_functions.dart';
 
 // ignore: must_be_immutable
 class TimetableScreen extends StatefulWidget {
@@ -51,6 +52,8 @@ class _TimetableScreenState extends State<TimetableScreen> {
 
   Holidays? currentOrNextHolidays;
 
+  int _currPageIndex = 0;
+
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback(
@@ -62,6 +65,11 @@ class _TimetableScreenState extends State<TimetableScreen> {
 
   @override
   Widget build(BuildContext context) {
+    MainApp.changeNavBarVisibilitySecure(
+      context,
+      value: true,
+    );
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
@@ -69,64 +77,70 @@ class _TimetableScreenState extends State<TimetableScreen> {
       drawer: widget.isHomeScreen
           ? NavigationBarDrawer(selectedRoute: TimetableScreen.route)
           : null,
-      floatingActionButton: SpeedDial(
-        icon: Icons.more_horiz_outlined,
-        activeIcon: Icons.close,
-        spacing: 3,
-        useRotationAnimation: true,
-        tooltip: '',
-        animationCurve: Curves.elasticInOut,
-        children: [
-          SpeedDialChild(
-            child: const Icon(Icons.add),
-            backgroundColor: Colors.indigo,
-            foregroundColor: Colors.white,
-            label: AppLocalizationsManager.localizations.strCreateTimetable,
-            onTap: () async {
-              await createNewTimetable(context);
-
-              if (!mounted) return;
-              //not sure
-              setState(() {});
-            },
-          ),
-          SpeedDialChild(
-            child: const Icon(Icons.edit),
-            visible: widget.timetable != null,
-            backgroundColor: Colors.blueAccent,
-            foregroundColor: Colors.white,
-            label: AppLocalizationsManager.localizations.strEdit,
-            onTap: () async {
-              if (widget.timetable == null) return;
-
-              await Navigator.of(context).push<bool>(
-                MaterialPageRoute(
-                  builder: (context) => CreateTimeTableScreen(
-                    timetable: widget.timetable!,
-                  ),
-                ),
-              );
-
-              setState(() {});
-            },
-          ),
-          SpeedDialChild(
-            child: const Icon(Icons.import_export),
-            backgroundColor: Colors.lightBlue,
-            foregroundColor: Colors.white,
-            label: AppLocalizationsManager.localizations.strImportExport,
-            onTap: () async {
-              await Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const ImportExportTimetableScreen(),
-                ),
-              );
-              setState(() {});
-            },
-          ),
-        ],
-      ),
+      floatingActionButton: _floatingActionButton(context),
       body: _body(),
+    );
+  }
+
+  Widget? _floatingActionButton(BuildContext context) {
+    if (_currPageIndex != 0) return null;
+
+    return SpeedDial(
+      icon: Icons.more_horiz_outlined,
+      activeIcon: Icons.close,
+      spacing: 3,
+      useRotationAnimation: true,
+      tooltip: '',
+      animationCurve: Curves.elasticInOut,
+      children: [
+        SpeedDialChild(
+          child: const Icon(Icons.add),
+          backgroundColor: Colors.indigo,
+          foregroundColor: Colors.white,
+          label: AppLocalizationsManager.localizations.strCreateTimetable,
+          onTap: () async {
+            await createNewTimetable(context);
+
+            if (!mounted) return;
+            //not sure
+            setState(() {});
+          },
+        ),
+        SpeedDialChild(
+          child: const Icon(Icons.edit),
+          visible: widget.timetable != null,
+          backgroundColor: Colors.blueAccent,
+          foregroundColor: Colors.white,
+          label: AppLocalizationsManager.localizations.strEdit,
+          onTap: () async {
+            if (widget.timetable == null) return;
+
+            await Navigator.of(context).push<bool>(
+              MaterialPageRoute(
+                builder: (context) => CreateTimeTableScreen(
+                  timetable: widget.timetable!,
+                ),
+              ),
+            );
+
+            setState(() {});
+          },
+        ),
+        SpeedDialChild(
+          child: const Icon(Icons.import_export),
+          backgroundColor: Colors.lightBlue,
+          foregroundColor: Colors.white,
+          label: AppLocalizationsManager.localizations.strImportExport,
+          onTap: () async {
+            await Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const ImportExportTimetableScreen(),
+              ),
+            );
+            setState(() {});
+          },
+        ),
+      ],
     );
   }
 
@@ -182,6 +196,10 @@ class _TimetableScreenState extends State<TimetableScreen> {
     return PageView(
       scrollDirection: Axis.vertical,
       controller: _verticalPageViewController,
+      onPageChanged: (value) {
+        _currPageIndex = value;
+        setState(() {});
+      },
       children: [
         SizedBox(
           width: width,

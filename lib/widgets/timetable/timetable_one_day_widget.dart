@@ -7,9 +7,9 @@ import 'package:schulapp/code_behind/todo_event.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/extensions.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
-import 'package:schulapp/widgets/time_to_next_lesson_widget.dart';
-import 'package:schulapp/widgets/timetable_util_functions.dart';
-import 'package:schulapp/widgets/todo_event_util_functions.dart';
+import 'package:schulapp/widgets/timetable/time_to_next_lesson_widget.dart';
+import 'package:schulapp/code_behind/timetable_util_functions.dart';
+import 'package:schulapp/code_behind/todo_event_util_functions.dart';
 
 // ignore: must_be_immutable
 class TimetableOneDayWidget extends StatefulWidget {
@@ -388,7 +388,7 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
                   fit: StackFit.expand,
                   children: [
                     FittedBox(
-                      fit: BoxFit.contain,
+                      fit: BoxFit.scaleDown,
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
@@ -396,14 +396,17 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
                           Text(
                             lesson.name,
                             textAlign: TextAlign.center,
-                            style: Theme.of(context).textTheme.labelSmall,
+                            style: Theme.of(context).textTheme.headlineSmall,
                           ),
-                          Text(
-                            lesson.room,
-                            textAlign: TextAlign.center,
-                            style: Theme.of(context).textTheme.labelSmall,
-                            overflow: TextOverflow.fade,
-                          ),
+                          lesson.room.isEmpty
+                              ? Container()
+                              : Text(
+                                  lesson.room,
+                                  textAlign: TextAlign.center,
+                                  style:
+                                      Theme.of(context).textTheme.headlineSmall,
+                                  overflow: TextOverflow.fade,
+                                ),
                         ],
                       ),
                     ),

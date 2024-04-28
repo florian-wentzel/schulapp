@@ -6,9 +6,9 @@ import 'package:schulapp/code_behind/time_table_manager.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/widgets/navigation_bar_drawer.dart';
-import 'package:schulapp/widgets/timetable_util_functions.dart';
-import 'package:schulapp/widgets/todo_event_list_item_widget.dart';
-import 'package:schulapp/widgets/todo_event_util_functions.dart';
+import 'package:schulapp/code_behind/timetable_util_functions.dart';
+import 'package:schulapp/widgets/task/todo_event_list_item_widget.dart';
+import 'package:schulapp/code_behind/todo_event_util_functions.dart';
 import 'package:tuple/tuple.dart';
 
 // ignore: must_be_immutable

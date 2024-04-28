@@ -5,7 +5,7 @@ import 'package:schulapp/code_behind/school_grade_subject.dart';
 import 'package:schulapp/code_behind/school_semester.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
-import 'package:schulapp/widgets/school_grade_subject_widget.dart';
+import 'package:schulapp/widgets/semester/school_grade_subject_widget.dart';
 
 // ignore: must_be_immutable
 class EditSchoolGradeSubjectScreen extends StatefulWidget {
@@ -56,6 +56,7 @@ class _EditSchoolGradeSubjectScreenState
                   context,
                   hintText:
                       AppLocalizationsManager.localizations.strSubjectName,
+                  initText: widget.subject.name,
                   maxInputLength: SchoolGradeSubject.maxNameLength,
                   autofocus: true,
                 );
@@ -163,6 +164,7 @@ class _EditSchoolGradeSubjectScreenState
                   String? newName = await Utils.showStringInputDialog(
                     context,
                     hintText: AppLocalizationsManager.localizations.strName,
+                    initText: gg.name,
                     autofocus: true,
                     maxInputLength: GradeGroup.maxNameLength,
                   );

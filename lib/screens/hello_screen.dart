@@ -5,8 +5,8 @@ import 'package:schulapp/code_behind/version_manager.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/screens/holidays_screen.dart';
 import 'package:schulapp/screens/timetable_screen.dart';
-import 'package:schulapp/widgets/timetable_util_functions.dart';
-import 'package:schulapp/widgets/todo_event_util_functions.dart';
+import 'package:schulapp/code_behind/timetable_util_functions.dart';
+import 'package:schulapp/code_behind/todo_event_util_functions.dart';
 
 class HelloScreen extends StatefulWidget {
   static const route = "/hello";
