@@ -396,15 +396,14 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
                           Text(
                             lesson.name,
                             textAlign: TextAlign.center,
-                            style: Theme.of(context).textTheme.headlineSmall,
+                            style: Theme.of(context).textTheme.bodyLarge,
                           ),
                           lesson.room.isEmpty
                               ? Container()
                               : Text(
                                   lesson.room,
                                   textAlign: TextAlign.center,
-                                  style:
-                                      Theme.of(context).textTheme.headlineSmall,
+                                  style: Theme.of(context).textTheme.bodyLarge,
                                   overflow: TextOverflow.fade,
                                 ),
                         ],
