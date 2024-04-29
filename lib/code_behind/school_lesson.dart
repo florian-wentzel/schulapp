@@ -107,4 +107,13 @@ class SchoolLesson {
     return name == SchoolLesson.emptyLessonName ||
         (name.startsWith("-") && name.endsWith("-"));
   }
+
+  SchoolLesson clone() {
+    return SchoolLesson(
+      name: name,
+      room: room,
+      teacher: teacher,
+      color: color.withRed(color.red),
+    );
+  }
 }

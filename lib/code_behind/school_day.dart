@@ -43,4 +43,14 @@ class SchoolDay {
       lessons: ls,
     );
   }
+
+  SchoolDay clone() {
+    return SchoolDay(
+      name: name,
+      lessons: List.generate(
+        lessons.length,
+        (index) => lessons[index].clone(),
+      ),
+    );
+  }
 }

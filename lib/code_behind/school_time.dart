@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/utils.dart';
+import 'package:schulapp/extensions.dart';
 
 class SchoolTime {
   static const startKey = "start";
@@ -68,5 +69,12 @@ class SchoolTime {
 
     // Check if nowDate is between startDate and endDate
     return nowDate.isAfter(startDate) && nowDate.isBefore(endDate);
+  }
+
+  SchoolTime clone() {
+    return SchoolTime(
+      start: start.add(),
+      end: end.add(),
+    );
   }
 }

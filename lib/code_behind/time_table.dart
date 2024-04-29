@@ -163,9 +163,9 @@ class Timetable {
   }
 
   String _name;
-  final int _maxLessonCount;
-  final List<SchoolDay> _schoolDays;
-  final List<SchoolTime> _schoolTimes;
+  int _maxLessonCount;
+  List<SchoolDay> _schoolDays;
+  List<SchoolTime> _schoolTimes;
 
   String get name => _name;
   int get maxLessonCount => _maxLessonCount;
@@ -359,5 +359,27 @@ class Timetable {
       _schoolDays[i].name = defaultSchoolDays[i].name;
     }
     SaveManager().saveTimeTable(this);
+  }
+
+  Timetable copy() {
+    return Timetable(
+      name: name,
+      maxLessonCount: maxLessonCount,
+      schoolDays: List.generate(
+        schoolDays.length,
+        (index) => schoolDays[index].clone(),
+      ),
+      schoolTimes: List.generate(
+        schoolTimes.length,
+        (index) => schoolTimes[index].clone(),
+      ),
+    );
+  }
+
+  void setValuesFrom(Timetable ttCopy) {
+    _name = ttCopy.name;
+    _maxLessonCount = ttCopy.maxLessonCount;
+    _schoolDays = ttCopy.schoolDays;
+    _schoolTimes = ttCopy.schoolTimes;
   }
 }

@@ -115,13 +115,22 @@ class _TimetableScreenState extends State<TimetableScreen> {
           onTap: () async {
             if (widget.timetable == null) return;
 
-            await Navigator.of(context).push<bool>(
+            final ttCopy = widget.timetable!.copy();
+
+            bool? newTtCreated = await Navigator.of(context).push<bool>(
               MaterialPageRoute(
                 builder: (context) => CreateTimeTableScreen(
                   timetable: widget.timetable!,
                 ),
               ),
             );
+
+            newTtCreated ??= false;
+
+            if (!newTtCreated) {
+              //reset timetable
+              widget.timetable!.setValuesFrom(ttCopy);
+            }
 
             setState(() {});
           },
