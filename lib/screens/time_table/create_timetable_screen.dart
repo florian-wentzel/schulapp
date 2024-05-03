@@ -140,21 +140,8 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
           scrollDirection: Axis.horizontal,
           child: Row(
             children: [
-              Switch.adaptive(
-                value: TimetableManager()
-                    .settings
-                    .getVar(Settings.showLessonNumbersKey),
-                onChanged: (value) {
-                  TimetableManager().settings.setVar(
-                        Settings.showLessonNumbersKey,
-                        value,
-                      );
-                  widget.timetable.changeLessonNumberVisibility(value);
-                  setState(() {});
-                },
-              ),
               const SizedBox(
-                width: 16,
+                width: 12,
               ),
               ElevatedButton(
                 onPressed: () async {
@@ -176,6 +163,74 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
+              ),
+              const SizedBox(
+                width: 16,
+              ),
+              Switch.adaptive(
+                value: TimetableManager()
+                    .settings
+                    .getVar(Settings.showLessonNumbersKey),
+                onChanged: (value) {
+                  TimetableManager().settings.setVar(
+                        Settings.showLessonNumbersKey,
+                        value,
+                      );
+                  widget.timetable.changeLessonNumberVisibility(value);
+                  setState(() {});
+                },
+              ),
+              const SizedBox(
+                width: 16,
+              ),
+              ElevatedButton(
+                onPressed: widget.timetable.maxLessonCount >=
+                        Timetable.maxMaxLessonCount
+                    ? null
+                    : () async {
+                        bool addLesson = await Utils.showBoolInputDialog(
+                          context,
+                          question: AppLocalizationsManager
+                              .localizations.strDoYouWantToAddALesson,
+                          showYesAndNoInsteadOfOK: true,
+                        );
+
+                        if (!addLesson) return;
+
+                        widget.timetable.addLesson();
+                        bool value = TimetableManager().settings.getVar(
+                              Settings.showLessonNumbersKey,
+                            );
+                        widget.timetable.changeLessonNumberVisibility(value);
+                        setState(() {});
+                      },
+                child: const Icon(Icons.add),
+              ),
+              const SizedBox(
+                width: 16,
+              ),
+              ElevatedButton(
+                onPressed: widget.timetable.maxLessonCount <=
+                        Timetable.minMaxLessonCount
+                    ? null
+                    : () async {
+                        bool removeLesson = await Utils.showBoolInputDialog(
+                          context,
+                          question: AppLocalizationsManager
+                              .localizations.strDoYouWantToRemoveTheLastLesson,
+                          showYesAndNoInsteadOfOK: true,
+                        );
+
+                        if (!removeLesson) return;
+
+                        widget.timetable.removeLesson();
+                        bool value = TimetableManager().settings.getVar(
+                              Settings.showLessonNumbersKey,
+                            );
+                        widget.timetable.changeLessonNumberVisibility(value);
+                        setState(() {});
+                      },
+                child: const Icon(Icons.remove),
               ),
             ],
           ),

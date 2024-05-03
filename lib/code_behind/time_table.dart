@@ -81,6 +81,16 @@ class Timetable {
     );
   }
 
+  static final List<String> weekNames = [
+    AppLocalizationsManager.localizations.strMonday,
+    AppLocalizationsManager.localizations.strTuesday,
+    AppLocalizationsManager.localizations.strWednesday,
+    AppLocalizationsManager.localizations.strThursday,
+    AppLocalizationsManager.localizations.strFriday,
+    AppLocalizationsManager.localizations.strSaturday,
+    AppLocalizationsManager.localizations.strSunday,
+  ];
+
   static List<SchoolDay> defaultSchoolDays(int hoursCount) {
     // final lessons = List.generate(
     //   hoursCount,
@@ -381,5 +391,40 @@ class Timetable {
     _maxLessonCount = ttCopy.maxLessonCount;
     _schoolDays = ttCopy.schoolDays;
     _schoolTimes = ttCopy.schoolTimes;
+  }
+
+  void addLesson() {
+    if (maxLessonCount >= Timetable.maxMaxLessonCount) {
+      return;
+    }
+    for (var day in _schoolDays) {
+      day.addLesson();
+    }
+    final secondLastLesson = _schoolTimes[_schoolTimes.length - 2];
+    final lastLesson = _schoolTimes.last;
+
+    final breakLength =
+        lastLesson.start.toMinutes() - secondLastLesson.end.toMinutes();
+    final lessonLength =
+        lastLesson.end.toMinutes() - lastLesson.start.toMinutes();
+
+    final start = lastLesson.end.add(minutes: breakLength);
+    final end = start.add(minutes: lessonLength);
+
+    _schoolTimes.add(
+      SchoolTime(start: start, end: end),
+    );
+    _maxLessonCount++;
+  }
+
+  void removeLesson() {
+    if (maxLessonCount <= Timetable.minMaxLessonCount) {
+      return;
+    }
+    for (var day in _schoolDays) {
+      day.removeLesson();
+    }
+    _schoolTimes.removeLast();
+    _maxLessonCount--;
   }
 }

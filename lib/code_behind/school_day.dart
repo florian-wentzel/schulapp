@@ -53,4 +53,12 @@ class SchoolDay {
       ),
     );
   }
+
+  void addLesson() {
+    _lessons.add(SchoolLesson.defaultSchoolLesson);
+  }
+
+  void removeLesson() {
+    _lessons.removeLast();
+  }
 }

@@ -185,6 +185,75 @@ class Utils {
     return value ?? false;
   }
 
+  static Future<double?> showRangeInputDialog(
+    BuildContext context, {
+    required double minValue,
+    required double maxValue,
+    required double startValue,
+    String textAfterValue = "",
+    double distToSnapToPoint = 2,
+    int precision = 0,
+    bool onlyIntegers = false,
+    String? title,
+    List<double>? snapPoints,
+  }) async {
+    double currValue = startValue;
+    snapPoints ??= [];
+
+    return showDialog<double>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: title == null ? null : Text(title),
+          content: StatefulBuilder(builder: (context, snapshot) {
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(
+                  child: Slider.adaptive(
+                    value: currValue,
+                    min: minValue,
+                    max: maxValue,
+                    onChanged: (value) {
+                      for (double snapPoint in snapPoints ?? []) {
+                        double dist = (snapPoint - value).abs();
+                        if (dist < distToSnapToPoint) {
+                          value = snapPoint;
+                        }
+                      }
+                      snapshot.call(
+                        () {
+                          currValue = value;
+                        },
+                      );
+                    },
+                  ),
+                ),
+                Text(
+                  "${currValue.toStringAsFixed(precision)} $textAfterValue",
+                ),
+              ],
+            );
+          }),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context, currValue);
+              },
+              child: Text(AppLocalizationsManager.localizations.strOK),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text(AppLocalizationsManager.localizations.strCancel),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   static Future<String?> showStringInputDialog(
     BuildContext context, {
     required String hintText,
