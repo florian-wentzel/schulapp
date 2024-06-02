@@ -1,6 +1,7 @@
 {
   "@@locale": "en",
   "language_name": "Englisch",
+  "version_0_2_2": "Updated grades average",
   "version_0_2_1": "Remade create new timetable functionality",
   "version_0_2_0": "Remade Edit-timetable-screen",
   "version_0_1_8": "Added custom subject task visuals",

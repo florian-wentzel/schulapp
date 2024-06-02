@@ -1,6 +1,7 @@
 {
   "@@locale": "de",
   "language_name": "Deutsch",
+  "version_0_2_2": "Notendurchschnitt überarbeitet",
   "version_0_2_1": "Neuen Stundenplan erstellen überarbeitet",
   "version_0_2_0": "Stundenplan Bearbeitungsscreen erneuert",
   "version_0_1_8": "Benutzerdefinierte Aufgabe wird nun neben Tagesnamen angezeigt",

@@ -142,7 +142,7 @@ class _GradesScreenState extends State<GradesScreen> {
                   child: Padding(
                     padding: const EdgeInsets.all(8),
                     child: Text(
-                      semester.getGradeAverageString(),
+                      semester.getGradePointsAverageString(),
                       style: Theme.of(context).textTheme.displaySmall,
                       textAlign: TextAlign.center,
                     ),

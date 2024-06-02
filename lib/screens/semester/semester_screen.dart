@@ -116,7 +116,8 @@ class _SemesterScreenState extends State<SemesterScreen> {
         SliverPersistentHeader(
           delegate: CircleHeaderDelegate(
             heroString: widget.heroString,
-            text: widget.semester.getGradeAverageString(),
+            text: widget.semester.getGradePointsAverageString(),
+            buttomText: widget.semester.getGradeAverageString(),
             color: widget.semester.getColor(),
           ),
           floating: false,
@@ -530,11 +531,13 @@ class _SemesterScreenState extends State<SemesterScreen> {
 class CircleHeaderDelegate extends SliverPersistentHeaderDelegate {
   String heroString;
   String text;
+  String buttomText;
   Color color;
 
   CircleHeaderDelegate({
     required this.heroString,
     required this.text,
+    required this.buttomText,
     required this.color,
   });
 
@@ -570,9 +573,17 @@ class CircleHeaderDelegate extends SliverPersistentHeaderDelegate {
               widthFactor: 0.5,
               child: FittedBox(
                 fit: BoxFit.scaleDown,
-                child: Text(
-                  text,
-                  style: Theme.of(context).textTheme.displayMedium,
+                child: Column(
+                  children: [
+                    Text(
+                      text,
+                      style: Theme.of(context).textTheme.displayMedium,
+                    ),
+                    Text(
+                      buttomText,
+                      style: Theme.of(context).textTheme.headlineMedium,
+                    ),
+                  ],
                 ),
               ),
             ),

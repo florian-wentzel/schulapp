@@ -827,13 +827,11 @@ class _SetTimetableBreaksWidgetState extends State<SetTimetableBreaksWidget> {
               },
             ),
             onReorder: (oldIndex, newIndex) {
-              try {
-                int buffer = widget.lessons[oldIndex];
-                widget.lessons[oldIndex] = widget.lessons[newIndex];
-                widget.lessons[newIndex] = buffer;
-              } catch (e) {
-                debugPrint(e.toString());
+              if (oldIndex < newIndex) {
+                newIndex -= 1;
               }
+              final int item = widget.lessons.removeAt(oldIndex);
+              widget.lessons.insert(newIndex, item);
               setState(() {});
             },
           ),

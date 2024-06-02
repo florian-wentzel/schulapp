@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:schulapp/code_behind/grade.dart';
 import 'package:schulapp/code_behind/school_grade_subject.dart';
 import 'package:schulapp/code_behind/school_semester.dart';
 import 'package:schulapp/code_behind/utils.dart';
@@ -18,62 +19,65 @@ class SchoolGradeSubjectWidget extends StatelessWidget {
     this.showName = true,
   });
 
+  List<Grade?> grades = [];
+
   @override
   Widget build(BuildContext context) {
+    grades = _generateGrades();
+
     return Container(
       width: MediaQuery.of(context).size.width,
+      height: 60,
       margin: const EdgeInsets.all(16),
       child: Row(
-        // alignment: Alignment.center,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Visibility(
-                visible: showName,
-                child: Text(
-                  subject.name,
-                  style: Theme.of(context).textTheme.headlineMedium,
-                ),
-              ),
-              Visibility(
-                visible: !isFlightShuttleBuilder,
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Wrap(
-                      spacing: 8,
-                      direction: Axis.horizontal,
-                      children: List.generate(
-                        subject.gradeGroups.length,
-                        (gradeGroupsIndex) => Wrap(
-                          spacing: 8,
-                          children: List.generate(
-                            subject.gradeGroups[gradeGroupsIndex].grades.length,
-                            (gradeIndex) => Text(
-                              subject.gradeGroups[gradeGroupsIndex]
-                                  .grades[gradeIndex]
-                                  .toString(),
-                              style: TextStyle(
-                                color: subject.gradeGroups[gradeGroupsIndex]
-                                    .getGradeColor(gradeIndex),
-                              ),
-                            ),
-                          )..add(
-                              (subject.gradeGroups[gradeGroupsIndex].grades
-                                      .isNotEmpty)
-                                  ? const Text("|")
-                                  : Container(),
-                            ),
-                        ),
-                      ),
+          Flexible(
+            child: Row(
+              children: [
+                Visibility(
+                  visible: showName,
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      subject.name,
+                      textAlign: TextAlign.left,
+                      style: Theme.of(context).textTheme.headlineMedium,
                     ),
                   ),
                 ),
-              ),
-            ],
+                const SizedBox(
+                  width: 8,
+                ),
+                if (isFlightShuttleBuilder)
+                  Container()
+                else
+                  Flexible(
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      scrollDirection: Axis.horizontal,
+                      itemCount: grades.length,
+                      itemBuilder: (context, index) {
+                        final grade = grades[index];
+
+                        if (grade == null) {
+                          return const Center(child: Text("|  "));
+                        }
+
+                        return Center(
+                          child: Text(
+                            "${grade.toString()}  ",
+                            style: TextStyle(
+                              color: Utils.getGradeColor(grade.grade),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+              ],
+            ),
           ),
           Container(
             width: isFlightShuttleBuilder ? 80 : null,
@@ -98,5 +102,20 @@ class SchoolGradeSubjectWidget extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  List<Grade?> _generateGrades() {
+    List<Grade?> grades = [];
+
+    for (var gradeGroup in subject.gradeGroups) {
+      for (var grade in gradeGroup.grades) {
+        grades.add(grade);
+      }
+      if (gradeGroup.grades.isNotEmpty) {
+        grades.add(null);
+      }
+    }
+
+    return grades;
   }
 }

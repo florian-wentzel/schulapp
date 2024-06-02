@@ -365,7 +365,7 @@ class _TimetableScreenState extends State<TimetableScreen> {
                 context.go(GradesScreen.route);
               },
               child: Text(
-                semester.getGradeAverageString(),
+                semester.getGradePointsAverageString(),
                 style: Theme.of(context).textTheme.headlineSmall,
               ),
             ),
