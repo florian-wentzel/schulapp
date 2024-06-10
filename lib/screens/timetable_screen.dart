@@ -522,10 +522,10 @@ class _TimetableScreenState extends State<TimetableScreen> {
   }
 
   Future<void> _fetchHolidays() async {
-    final stateApiCode = TimetableManager().settings.getVar(
+    String? stateApiCode = TimetableManager().settings.getVar(
           Settings.selectedFederalStateCodeKey,
         );
-    if (stateApiCode == null) return;
+    stateApiCode ??= "";
 
     currentOrNextHolidays = await HolidaysManager()
         .getCurrOrNextHolidayForState(stateApiCode: stateApiCode);

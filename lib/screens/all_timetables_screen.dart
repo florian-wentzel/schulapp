@@ -119,16 +119,19 @@ class _AllTimetablesScreenState extends State<AllTimetablesScreen> {
         setState(() {});
       },
       title: Text(tt.name),
-      leading: Text(
-        (index + 1).toString(),
-        style: Theme.of(context).textTheme.bodyLarge,
-      ),
+      // leading: Text(
+      //   (index + 1).toString(),
+      //   style: Theme.of(context).textTheme.bodyLarge,
+      // ),
       trailing: Wrap(
         spacing: 12, // space between two icons
+        crossAxisAlignment: WrapCrossAlignment.center,
         children: <Widget>[
-          Switch.adaptive(
+          Checkbox.adaptive(
             value: mainTimetableName == tt.name,
-            onChanged: (bool value) {
+            onChanged: (bool? value) {
+              assert(value != null);
+              if (value == null) return;
               if (value) {
                 TimetableManager().settings.setVar(
                       Settings.mainTimetableNameKey,

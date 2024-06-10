@@ -111,6 +111,9 @@ class _HolidaysScreenState extends State<HolidaysScreen> {
   }
 
   Future<void> _fetchHolidays() async {
+    allHolidays = HolidaysManager.getCustomHolidays();
+    setState(() {});
+
     String? stateCode = TimetableManager().settings.getVar(
           Settings.selectedFederalStateCodeKey,
         );
@@ -127,15 +130,7 @@ class _HolidaysScreenState extends State<HolidaysScreen> {
 
   @override
   Widget build(BuildContext context) {
-    federalStateName = FederalStatesList.states.firstWhere(
-      (element) {
-        return element.apiCode ==
-            TimetableManager().settings.getVar(
-                  Settings.selectedFederalStateCodeKey,
-                );
-      },
-      orElse: () => FederalState(name: "", officialCode: "", apiCode: ""),
-    ).name;
+    federalStateName = _getFederalStateName();
 
     return Scaffold(
       drawer: NavigationBarDrawer(selectedRoute: HolidaysScreen.route),
@@ -157,11 +152,25 @@ class _HolidaysScreenState extends State<HolidaysScreen> {
     );
   }
 
+  String _getFederalStateName() {
+    final apiCode = TimetableManager().settings.getVar(
+          Settings.selectedFederalStateCodeKey,
+        );
+
+    return FederalStatesList.states.firstWhere(
+      (element) {
+        return element.apiCode == apiCode;
+      },
+      orElse: () => FederalState(name: "", officialCode: "", apiCode: ""),
+    ).name;
+  }
+
   Widget _body() {
     if (TimetableManager().settings.getVar(
-              Settings.selectedFederalStateCodeKey,
-            ) ==
-        null) {
+                  Settings.selectedFederalStateCodeKey,
+                ) ==
+            null &&
+        allHolidays.isEmpty) {
       return Center(
         child: ElevatedButton(
           onPressed: () => HolidaysScreen.selectFederalStateButtonPressed(
@@ -199,7 +208,13 @@ class _HolidaysScreenState extends State<HolidaysScreen> {
 
   Widget _itemBuilder(context, index) {
     final holidays = allHolidays[index];
-    if (holidays.end.isBefore(DateTime.now())) {
+    if (holidays.end.isBefore(DateTime.now().copyWith(
+      hour: 0,
+      microsecond: 0,
+      millisecond: 0,
+      second: 0,
+      minute: 0,
+    ))) {
       return Container();
     }
 
@@ -245,12 +260,13 @@ class _HolidaysScreenState extends State<HolidaysScreen> {
   }
 
   Widget? _floatingActionButton() {
-    if (TimetableManager()
-            .settings
-            .getVar(Settings.selectedFederalStateCodeKey) ==
-        null) {
-      return null;
-    }
+    // if (TimetableManager()
+    //             .settings
+    //             .getVar(Settings.selectedFederalStateCodeKey) ==
+    //         null &&
+    //     allHolidays.isEmpty) {
+    //   return null;
+    // }
 
     return SpeedDial(
       icon: Icons.more_horiz_outlined,
@@ -270,6 +286,13 @@ class _HolidaysScreenState extends State<HolidaysScreen> {
             fetchHolidays: _fetchHolidays,
             setState: () {
               if (mounted) {
+                if (TimetableManager().settings.getVar(
+                          Settings.selectedFederalStateCodeKey,
+                        ) ==
+                    null) {
+                  allHolidays.clear();
+                  _fetchHolidays();
+                }
                 setState(() {});
               }
             },
@@ -299,6 +322,7 @@ class HolidaysListItemWidget extends StatelessWidget {
   Holidays holidays;
   bool showBackground;
   bool showDateInfo;
+  bool textLineThrough;
   void Function(Holidays holidays)? onDeletePressed;
 
   HolidaysListItemWidget({
@@ -306,11 +330,21 @@ class HolidaysListItemWidget extends StatelessWidget {
     required this.holidays,
     this.showBackground = true,
     this.showDateInfo = true,
+    this.textLineThrough = false,
     this.onDeletePressed,
   });
 
   @override
   Widget build(BuildContext context) {
+    TextStyle? textStyle =
+        Theme.of(context).textTheme.headlineSmall?.copyWith();
+
+    if (textLineThrough) {
+      textStyle = textStyle?.copyWith(
+        decoration: TextDecoration.lineThrough,
+      );
+    }
+
     return Container(
       margin: const EdgeInsets.all(8),
       padding: const EdgeInsets.all(8),
@@ -325,7 +359,7 @@ class HolidaysListItemWidget extends StatelessWidget {
           Expanded(
             child: Text(
               _transformName(holidays),
-              style: Theme.of(context).textTheme.headlineSmall,
+              style: textStyle,
             ),
           ),
           const SizedBox(width: 8),
@@ -386,21 +420,44 @@ class HolidaysListItemWidget extends StatelessWidget {
   }
 
   String _getDaysLeftString(Holidays holidays) {
-    Duration timeLeft = holidays.start.difference(DateTime.now());
+    final now = DateTime.now().copyWith(
+      microsecond: 0,
+      millisecond: 0,
+      second: 0,
+      minute: 0,
+      hour: 0,
+    );
+    //sollte nie aufgerufen werden aber man weiß ja nie
+    if (now.isAfter(holidays.end)) {
+      return AppLocalizationsManager.localizations.strAlreadyOver;
+    }
 
-    if (timeLeft.inDays > 0) {
+    if (now.isBefore(holidays.start)) {
+      Duration timeLeft = holidays.start.difference(now);
+      if (timeLeft.inDays == 1) {
+        return AppLocalizationsManager.localizations.strStartsTomorrow;
+      }
       return AppLocalizationsManager.localizations.strInXDays(
         timeLeft.inDays,
       );
-    } else if (timeLeft.inDays < 0) {
-      Duration timeUntilEnd = holidays.end.difference(DateTime.now());
+    } else if (now == holidays.start && now == holidays.end) {
+      return AppLocalizationsManager.localizations.strToday;
+    } else if (now == holidays.start) {
+      return AppLocalizationsManager.localizations.strStartsToday;
+    } else if (now.isBefore(holidays.end)) {
+      Duration timeLeft = holidays.end.difference(now);
 
+      if (timeLeft.inDays == 1) {
+        return AppLocalizationsManager.localizations.strEndsTomorrow;
+      }
       return AppLocalizationsManager.localizations.strEndsInXDays(
-        timeUntilEnd.inDays + 1,
+        timeLeft.inDays,
       );
+    } else if (now == holidays.end) {
+      return AppLocalizationsManager.localizations.strEndsToday;
     }
 
-    return AppLocalizationsManager.localizations.strEndsToday;
+    return "";
   }
 
   String _capitalizeWords(String input) {

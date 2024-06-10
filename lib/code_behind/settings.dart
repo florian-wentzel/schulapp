@@ -65,6 +65,7 @@ class Settings {
   static const themeModeKey = "theme";
   static const languageCodeKey = "language";
   static const hiddenDebugModeKey = "hiddenDebugMode";
+  //represents the API-Code
   static const selectedFederalStateCodeKey = "selectedFederalState";
   static const lastUsedVersionKey = "lastUsedVersion";
   static const customHolidaysKey = "customHolidays";

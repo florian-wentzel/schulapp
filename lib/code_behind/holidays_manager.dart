@@ -26,16 +26,34 @@ class HolidaysManager {
   Future<Holidays?> getCurrOrNextHolidayForState({
     required String stateApiCode,
   }) async {
+    final now = DateTime.now().copyWith(
+      microsecond: 0,
+      millisecond: 0,
+      second: 0,
+      minute: 0,
+      hour: 0,
+    );
+
     List<Holidays> allHolidays =
         await getAllHolidaysForState(stateApiCode: stateApiCode);
 
-    for (Holidays holidays in allHolidays) {
-      if (holidays.end.isBefore(DateTime.now())) {
+    int latestHolidaysIndex = -1;
+
+    for (int i = 0; i < allHolidays.length; i++) {
+      final currHolidays = allHolidays[i];
+      if (currHolidays.end.isBefore(now)) {
         continue;
       }
-      return holidays;
+
+      if (latestHolidaysIndex == -1 ||
+          allHolidays[latestHolidaysIndex].start.isAfter(currHolidays.start)) {
+        latestHolidaysIndex = i;
+      }
     }
-    return null;
+
+    if (latestHolidaysIndex == -1) return null;
+
+    return allHolidays[latestHolidaysIndex];
   }
 
   Future<List<Holidays>> getAllHolidaysForState({
@@ -50,7 +68,8 @@ class HolidaysManager {
     if (cachedYear != null &&
         currYear == cachedYear &&
         cachedStateCode != null &&
-        stateApiCode == cachedStateCode) {
+        stateApiCode == cachedStateCode &&
+        stateApiCode.isNotEmpty) {
       List<Holidays>? cachedHolidays = await _getCachedHolidayData();
       if (cachedHolidays != null) {
         if (withCustomHolidays) {
@@ -65,37 +84,48 @@ class HolidaysManager {
       }
     }
 
-    final url = Uri.parse("$apiUrl$stateApiCode/$currYear");
-
     List<Holidays> allHolidays = [];
-    String responseBody = "";
-    try {
-      final httpClient = HttpClient();
-      final request = await httpClient.getUrl(url);
-      final response = await request.close();
+    if (stateApiCode.isNotEmpty) {
+      final url = Uri.parse("$apiUrl$stateApiCode/$currYear");
 
-      if (response.statusCode == HttpStatus.ok) {
-        responseBody = await response.transform(utf8.decoder).join();
+      String responseBody = "";
+      try {
+        final httpClient = HttpClient();
+        final request = await httpClient.getUrl(url);
+        final response = await request.close();
 
-        List<Map<String, dynamic>> jsonList =
-            (jsonDecode(responseBody) as List).cast();
+        if (response.statusCode == HttpStatus.ok) {
+          responseBody = await response.transform(utf8.decoder).join();
 
-        allHolidays = _jsonToHolidaysList(jsonList);
-      } else {
-        debugPrint('Failed to load post: ${response.statusCode}');
+          List<Map<String, dynamic>> jsonList =
+              (jsonDecode(responseBody) as List).cast();
+
+          allHolidays = _jsonToHolidaysList(jsonList);
+        } else {
+          debugPrint('Failed to load post: ${response.statusCode}');
+          if (withCustomHolidays) {
+            allHolidays = getCustomHolidays();
+            if (sorted) {
+              allHolidays.sort(
+                (a, b) => a.start.compareTo(b.start),
+              );
+            }
+            return allHolidays;
+          }
+          return [];
+        }
+      } catch (e) {
+        debugPrint('Error: $e');
         return [];
       }
-    } catch (e) {
-      debugPrint('Error: $e');
-      return [];
-    }
 
-    if (allHolidays.isNotEmpty) {
-      _cacheHolidayData(
-        holidaysString: responseBody,
-        stateCode: stateApiCode,
-        year: currYear,
-      );
+      if (allHolidays.isNotEmpty) {
+        _cacheHolidayData(
+          holidaysString: responseBody,
+          stateCode: stateApiCode,
+          year: currYear,
+        );
+      }
     }
 
     if (withCustomHolidays) {

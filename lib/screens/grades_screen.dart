@@ -156,9 +156,11 @@ class _GradesScreenState extends State<GradesScreen> {
           spacing: 12,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
-            Switch.adaptive(
+            Checkbox.adaptive(
               value: mainSemesterName == semester.name,
-              onChanged: (bool value) {
+              onChanged: (bool? value) {
+                assert(value != null);
+                if (value == null) return;
                 if (value) {
                   TimetableManager().settings.setVar(
                         Settings.mainSemesterNameKey,

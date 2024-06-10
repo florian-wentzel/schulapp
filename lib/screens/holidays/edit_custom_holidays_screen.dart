@@ -45,6 +45,10 @@ class _EditCustomHolidaysScreenState extends State<EditCustomHolidaysScreen> {
       );
     }
 
+    customHolidays.sort(
+      (a, b) => a.start.compareTo(b.start),
+    );
+
     return ListView.builder(
       itemCount: customHolidays.length,
       itemBuilder: (context, index) => _itemBuilder(
@@ -55,8 +59,18 @@ class _EditCustomHolidaysScreenState extends State<EditCustomHolidaysScreen> {
   }
 
   Widget _itemBuilder(BuildContext context, Holidays holidays) {
+    final alreadyEnded = DateTime.now()
+        .copyWith(
+          microsecond: 0,
+          millisecond: 0,
+          second: 0,
+          minute: 0,
+          hour: 0,
+        )
+        .isAfter(holidays.end);
     return HolidaysListItemWidget(
       holidays: holidays,
+      textLineThrough: alreadyEnded,
       onDeletePressed: (holidays) {
         final customHolidaysList = HolidaysManager.getCustomHolidays();
         Holidays? holidaysToDelete;
@@ -109,17 +123,13 @@ class _EditCustomHolidaysScreenState extends State<EditCustomHolidaysScreen> {
 
     startDateController.onDateChangedCBs.add(
       (dateTime) {
-        endDateController.firstDate = dateTime.add(
-          const Duration(days: 1),
-        );
+        endDateController.firstDate = dateTime;
       },
     );
 
     endDateController.onDateChangedCBs.add(
       (dateTime) {
-        startDateController.lastDate = dateTime.subtract(
-          const Duration(days: 1),
-        );
+        startDateController.lastDate = dateTime;
       },
     );
 
@@ -246,8 +256,7 @@ class _EditCustomHolidaysScreenState extends State<EditCustomHolidaysScreen> {
       return;
     }
 
-    if (startDateController.date == endDateController.date ||
-        startDateController.date.isAfter(endDateController.date)) {
+    if (startDateController.date.isAfter(endDateController.date)) {
       if (!mounted) return;
 
       Utils.showInfo(
