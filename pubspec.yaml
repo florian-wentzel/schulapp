@@ -1,7 +1,7 @@
 name: schulapp
 description: "A new Flutter project."
 publish_to: "none"
-version: 0.2.3
+version: 0.2.4
 
 environment:
   sdk: ">=3.2.0 <4.0.0"

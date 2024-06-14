@@ -649,6 +649,16 @@ class Utils {
 
     return isCustomTask;
   }
+
+  static int getWeekIndex(DateTime date) {
+    DateTime firstDayOfYear = DateTime(date.year, 1, 1);
+
+    int daysDifference = date.difference(firstDayOfYear).inDays;
+
+    int weekIndex = daysDifference ~/ 7 + 1;
+
+    return weekIndex;
+  }
 }
 
 enum InfoType {

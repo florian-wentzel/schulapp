@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:document_file_save_plus/document_file_save_plus.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:schulapp/code_behind/special_lesson.dart';
 import 'package:schulapp/code_behind/todo_event.dart';
 import 'package:schulapp/code_behind/school_semester.dart';
 import 'package:schulapp/code_behind/settings.dart';
@@ -32,8 +33,10 @@ class SaveManager {
   static const String todoEventSaveName = "todos.json";
   static const String timetableFileName = "timetable.json";
   static const String semesterFileName = "semester.json";
+  static const String specialLessonsDirName = "special-lessons";
   static const String timetableExportExtension = ".zip"; //".timetable";
   static const String todosKey = "todos";
+  static const String itemsKey = "items";
 
   Directory? applicationDocumentsDirectory;
 
@@ -264,6 +267,18 @@ class SaveManager {
     return dir;
   }
 
+  Directory getSpecialLessonsDirForTimetable(Timetable timetable) {
+    String timetbaleDirPath = join(getTimetablesDir().path, timetable.name);
+    String specialLessonsDirPath =
+        join(timetbaleDirPath, specialLessonsDirName);
+
+    final dir = Directory(specialLessonsDirPath);
+
+    dir.createSync();
+
+    return dir;
+  }
+
   Directory getSemestersDir() {
     String mainDirPath = getMainSaveDir().path;
 
@@ -460,6 +475,90 @@ class SaveManager {
       );
     } catch (e) {
       return [];
+    }
+  }
+
+  String getSpecialLessonsFileName(int year, int weekIndex) {
+    return "$year-$weekIndex.json";
+  }
+
+  List<SpecialLesson> getSpecialLessonsForWeek({
+    required Timetable timetable,
+    required int year,
+    required int weekIndex,
+  }) {
+    final specialLessonsDir = getSpecialLessonsDirForTimetable(timetable);
+    final specialLessonsDirPath = join(
+        specialLessonsDir.path, getSpecialLessonsFileName(year, weekIndex));
+    final specialLessonsJsonFile = File(specialLessonsDirPath);
+
+    if (!specialLessonsJsonFile.existsSync()) {
+      return [];
+    }
+
+    String jsonString = specialLessonsJsonFile.readAsStringSync();
+
+    Map<String, dynamic> jsonData = json.decode(jsonString);
+
+    List<Map<String, dynamic>> jsonList = (jsonData[itemsKey] as List).cast();
+
+    List<SpecialLesson> specialLessons = [];
+
+    for (int i = 0; i < jsonList.length; i++) {
+      final json = jsonList[i];
+      final type = json[SpecialLesson.typeKey];
+
+      if (type == CancelledSpecialLesson.type) {
+        specialLessons.add(
+          CancelledSpecialLesson.fromJson(json),
+        );
+      } //you can just add other types here..
+    }
+
+    SpecialLesson.sortSpecialLessons(specialLessons);
+
+    return specialLessons;
+  }
+
+  bool saveCurrSpecialLessonsWeek({
+    required Timetable timetable,
+  }) {
+    if (timetable.currSpecialLessonsWeekKey == null ||
+        timetable.currSpecialLessonsWeek == null) return false;
+
+    if (timetable.currSpecialLessonsWeekKey?.isEmpty ?? true) {
+      return false;
+    }
+
+    final dir = getSpecialLessonsDirForTimetable(timetable);
+    final specialLessonsWeekFilePath =
+        join(dir.path, timetable.currSpecialLessonsWeekKey);
+
+    //if empty delete file to free space
+    if (timetable.currSpecialLessonsWeek?.isEmpty == true) {
+      final file = File(specialLessonsWeekFilePath);
+      if (file.existsSync()) {
+        file.deleteSync();
+      }
+      return true;
+    }
+
+    Map<String, dynamic> json = {
+      itemsKey: List<Map<String, dynamic>>.generate(
+        timetable.currSpecialLessonsWeek?.length ?? 0,
+        (index) => timetable.currSpecialLessonsWeek![index].toJson(),
+      ),
+    };
+
+    String fileContent = jsonEncode(json);
+
+    try {
+      File(
+        specialLessonsWeekFilePath,
+      ).writeAsStringSync(fileContent);
+      return true;
+    } catch (e) {
+      return false;
     }
   }
 

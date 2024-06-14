@@ -347,65 +347,68 @@ class HolidaysListItemWidget extends StatelessWidget {
 
     return Container(
       margin: const EdgeInsets.all(8),
-      padding: const EdgeInsets.all(8),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
         color:
             showBackground ? Theme.of(context).cardColor : Colors.transparent,
       ),
-      child: Row(
-        // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Column(
         children: [
-          Expanded(
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  _transformName(holidays),
+                  style: textStyle,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(
+                width: 8,
+              ),
+              Visibility(
+                visible: onDeletePressed == null,
+                replacement: IconButton(
+                  onPressed: () => onDeletePressed?.call(holidays),
+                  icon: const Icon(
+                    Icons.delete,
+                    color: Colors.red,
+                  ),
+                ),
+                child: Text(
+                  _getDaysLeftString(holidays),
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(
+            height: 8,
+          ),
+          Visibility(
+            visible: showDateInfo,
             child: Text(
-              _transformName(holidays),
-              style: textStyle,
+              Utils.dateToString(holidays.start),
+              style: Theme.of(context).textTheme.bodyLarge,
             ),
           ),
-          const SizedBox(width: 8),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              onDeletePressed != null
-                  ? IconButton(
-                      onPressed: () => onDeletePressed?.call(holidays),
-                      icon: const Icon(
-                        Icons.delete,
-                        color: Colors.red,
-                      ),
-                    )
-                  : Text(
-                      _getDaysLeftString(holidays),
-                      style: Theme.of(context).textTheme.bodyLarge,
-                    ),
-              const SizedBox(width: 18),
-              showDateInfo
-                  ? Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          Utils.dateToString(holidays.start),
-                          style: Theme.of(context).textTheme.bodyLarge,
-                        ),
-                        Text(
-                          Utils.dateToString(holidays.end),
-                          style: Theme.of(context).textTheme.bodyLarge,
-                        ),
-                        Text(
-                          AppLocalizationsManager.localizations
-                              .strHolidaysLengthXDays(
-                            holidays.end.difference(holidays.start).inDays + 1,
-                          ),
-                          style: Theme.of(context).textTheme.bodyLarge,
-                        ),
-                      ],
-                    )
-                  : Container(),
-            ],
+          Visibility(
+            visible: showDateInfo && holidays.start != holidays.end,
+            child: Text(
+              Utils.dateToString(holidays.end),
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
           ),
         ],
       ),
+      // Text(
+      //   AppLocalizationsManager.localizations.strHolidaysLengthXDays(
+      //     holidays.end.difference(holidays.start).inDays + 1,
+      //   ),
+      //   style: Theme.of(context).textTheme.bodyLarge,
+      // ),
     );
   }
 

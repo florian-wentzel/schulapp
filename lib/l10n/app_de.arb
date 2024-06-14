@@ -1,6 +1,7 @@
 {
   "@@locale": "de",
   "language_name": "Deutsch",
+  "version_0_2_4": "Stundenausfälle hinzugefügt und Ferien UI überarbeitet",
   "version_0_2_3": "Ferien überarbeitet und andere Fehlerbehebungen",
   "version_0_2_2": "Notendurchschnitt überarbeitet",
   "version_0_2_1": "Neuen Stundenplan erstellen überarbeitet",

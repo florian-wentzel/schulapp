@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:schulapp/code_behind/special_lesson.dart';
 import 'package:schulapp/code_behind/todo_event.dart';
 import 'package:schulapp/code_behind/school_semester.dart';
 import 'package:schulapp/code_behind/settings.dart';
@@ -268,5 +269,92 @@ class TimetableManager {
       return event;
     }
     return null;
+  }
+
+  bool isSpecialLesson({
+    required Timetable timetable,
+    required int year,
+    required int weekIndex,
+    required int schoolDayIndex,
+    required int schoolTimeIndex,
+  }) {
+    final currSpecialLessonsKey =
+        SaveManager().getSpecialLessonsFileName(year, weekIndex);
+    if (timetable.currSpecialLessonsWeekKey != currSpecialLessonsKey) {
+      timetable.currSpecialLessonsWeek = SaveManager().getSpecialLessonsForWeek(
+        timetable: timetable,
+        year: year,
+        weekIndex: weekIndex,
+      );
+      timetable.currSpecialLessonsWeekKey = currSpecialLessonsKey;
+    }
+
+    final specialLesson = timetable.currSpecialLessonsWeek?.any(
+          (element) =>
+              element.dayIndex == schoolDayIndex &&
+              element.timeIndex == schoolTimeIndex,
+        ) ??
+        false;
+
+    return specialLesson;
+  }
+
+  void setSpecialLesson({
+    required Timetable timetable,
+    required int year,
+    required int weekIndex,
+    required CancelledSpecialLesson specialLesson,
+  }) {
+    final currSpecialLessonsKey =
+        SaveManager().getSpecialLessonsFileName(year, weekIndex);
+
+    if (timetable.currSpecialLessonsWeekKey != currSpecialLessonsKey) {
+      timetable.currSpecialLessonsWeek = SaveManager().getSpecialLessonsForWeek(
+        timetable: timetable,
+        year: year,
+        weekIndex: weekIndex,
+      );
+      timetable.currSpecialLessonsWeekKey = currSpecialLessonsKey;
+    }
+
+    timetable.currSpecialLessonsWeek?.add(specialLesson);
+
+    SaveManager().saveCurrSpecialLessonsWeek(
+      timetable: timetable,
+    );
+  }
+
+  void removeSpecialLesson({
+    required Timetable timetable,
+    required int year,
+    required int weekIndex,
+    required int dayIndex,
+    required int timeIndex,
+  }) {
+    final currSpecialLessonsKey =
+        SaveManager().getSpecialLessonsFileName(year, weekIndex);
+
+    if (timetable.currSpecialLessonsWeekKey != currSpecialLessonsKey) {
+      timetable.currSpecialLessonsWeek = SaveManager().getSpecialLessonsForWeek(
+        timetable: timetable,
+        year: year,
+        weekIndex: weekIndex,
+      );
+      timetable.currSpecialLessonsWeekKey = currSpecialLessonsKey;
+    }
+
+    try {
+      final specialLesson = timetable.currSpecialLessonsWeek?.firstWhere(
+        (element) =>
+            element.dayIndex == dayIndex && element.timeIndex == timeIndex,
+      );
+      timetable.currSpecialLessonsWeek?.remove(specialLesson);
+    } catch (e) {
+      //
+    }
+
+    SaveManager().saveCurrSpecialLessonsWeek(
+      timetable: timetable,
+    );
   }
 }

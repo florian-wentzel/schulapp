@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:schulapp/code_behind/school_lesson.dart';
+import 'package:schulapp/code_behind/special_lesson.dart';
 import 'package:schulapp/code_behind/time_table.dart';
 import 'package:schulapp/code_behind/time_table_manager.dart';
 import 'package:schulapp/code_behind/todo_event.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/extensions.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
+import 'package:schulapp/widgets/strike_through_container.dart';
 import 'package:schulapp/widgets/timetable/time_to_next_lesson_widget.dart';
 import 'package:schulapp/code_behind/timetable_util_functions.dart';
 import 'package:schulapp/code_behind/todo_event_util_functions.dart';
@@ -40,6 +42,9 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
 
   late Color selectedColor;
   late Color unselectedColor;
+
+  late int currWeekIndex;
+  late int currYear;
 
   @override
   void initState() {
@@ -100,9 +105,16 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
             DateTime.monday,
           );
 
+          currMonday = currMonday.add(
+            Duration(days: 7 * currWeekIndex),
+          );
+
+          this.currWeekIndex = Utils.getWeekIndex(currMonday);
+          currYear = currMonday.year;
+
           return _createDay(
             dayIndex: currDayIndex,
-            currMonday: currMonday.add(Duration(days: 7 * currWeekIndex)),
+            currMonday: currMonday,
           );
         },
       ),
@@ -334,6 +346,16 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
         );
       }
 
+      final StrikeThroughContainerController containerController =
+          StrikeThroughContainerController();
+
+      containerController.strikeThrough = tt.isSpecialLesson(
+        schoolDayIndex: dayIndex,
+        schoolTimeIndex: lessonIndex,
+        weekIndex: currWeekIndex,
+        year: currYear,
+      );
+
       Widget lessonWidget = InkWell(
         onTap: SchoolLesson.isEmptyLessonName(lesson.name)
             ? null
@@ -344,6 +366,28 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
                   currEvent: currEvent,
                   eventEndTime: currLessonDateTime,
                 ),
+        onLongPress: SchoolLesson.isEmptyLessonName(lesson.name)
+            ? null
+            : () {
+                containerController.changeStrikeThrough();
+                if (containerController.strikeThrough) {
+                  tt.setSpecialLesson(
+                    weekIndex: currWeekIndex,
+                    year: currYear,
+                    specialLesson: CancelledSpecialLesson(
+                      dayIndex: dayIndex,
+                      timeIndex: lessonIndex,
+                    ),
+                  );
+                } else {
+                  tt.removeSpecialLesson(
+                    year: currYear,
+                    weekIndex: currWeekIndex,
+                    dayIndex: dayIndex,
+                    timeIndex: lessonIndex,
+                  );
+                }
+              },
         child: Container(
           color: containerColor,
           width: lessonWidth,
@@ -373,84 +417,89 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
                   },
                 );
               },
-              child: Container(
-                width: lessonWidth * 0.8,
-                height: lessonHeight * 0.8,
-                padding: const EdgeInsets.symmetric(
-                  vertical: 4,
-                  horizontal: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: lesson.color,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text(
-                            lesson.name,
-                            textAlign: TextAlign.center,
-                            style: Theme.of(context).textTheme.bodyLarge,
-                          ),
-                          lesson.room.isEmpty
-                              ? Container()
-                              : Text(
-                                  lesson.room,
-                                  textAlign: TextAlign.center,
-                                  style: Theme.of(context).textTheme.bodyLarge,
-                                  overflow: TextOverflow.fade,
-                                ),
-                        ],
+              child: StrikeThroughContainer(
+                key: UniqueKey(),
+                controller: containerController,
+                child: Container(
+                  width: lessonWidth * 0.8,
+                  height: lessonHeight * 0.8,
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 4,
+                    horizontal: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: lesson.color,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text(
+                              lesson.name,
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context).textTheme.bodyLarge,
+                            ),
+                            lesson.room.isEmpty
+                                ? Container()
+                                : Text(
+                                    lesson.room,
+                                    textAlign: TextAlign.center,
+                                    style:
+                                        Theme.of(context).textTheme.bodyLarge,
+                                    overflow: TextOverflow.fade,
+                                  ),
+                          ],
+                        ),
                       ),
-                    ),
-                    Visibility(
-                      visible: currEvent != null,
-                      child: Align(
-                        alignment: Alignment.bottomRight,
-                        child: Text(
-                          "!",
-                          textAlign: TextAlign.justify,
-                          style: GoogleFonts.dmSerifDisplay(
-                            textStyle: Theme.of(context)
-                                .textTheme
-                                .headlineMedium
-                                ?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  foreground: Paint()
-                                    ..style = PaintingStyle.stroke
-                                    ..strokeWidth = 4
-                                    ..color = Theme.of(context).canvasColor,
-                                ),
+                      Visibility(
+                        visible: currEvent != null,
+                        child: Align(
+                          alignment: Alignment.bottomRight,
+                          child: Text(
+                            "!",
+                            textAlign: TextAlign.justify,
+                            style: GoogleFonts.dmSerifDisplay(
+                              textStyle: Theme.of(context)
+                                  .textTheme
+                                  .headlineMedium
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    foreground: Paint()
+                                      ..style = PaintingStyle.stroke
+                                      ..strokeWidth = 4
+                                      ..color = Theme.of(context).canvasColor,
+                                  ),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    Visibility(
-                      visible: currEvent != null,
-                      child: Align(
-                        alignment: Alignment.bottomRight,
-                        child: Text(
-                          "!",
-                          textAlign: TextAlign.justify,
-                          style: GoogleFonts.dmSerifDisplay(
-                            textStyle: Theme.of(context)
-                                .textTheme
-                                .headlineMedium
-                                ?.copyWith(
-                                  color: currEvent?.getColor(),
-                                  fontWeight: FontWeight.bold,
-                                ),
+                      Visibility(
+                        visible: currEvent != null,
+                        child: Align(
+                          alignment: Alignment.bottomRight,
+                          child: Text(
+                            "!",
+                            textAlign: TextAlign.justify,
+                            style: GoogleFonts.dmSerifDisplay(
+                              textStyle: Theme.of(context)
+                                  .textTheme
+                                  .headlineMedium
+                                  ?.copyWith(
+                                    color: currEvent?.getColor(),
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),

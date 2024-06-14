@@ -697,120 +697,130 @@ class _SchoolGradeSubjectScreenState extends State<SchoolGradeSubjectScreen> {
   Widget _gradeNumberItemPopUp(GradeGroup gg, int index) {
     Grade grade = gg.grades[index];
 
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            IconButton(
-              onPressed: () async {
-                Navigator.pop(context);
+    final width = MediaQuery.of(context).size.width;
+    final height = MediaQuery.of(context).size.height;
 
-                //warten damit animation funktioniert
-                await Future.delayed(
-                  const Duration(milliseconds: 500),
-                );
+    return SizedBox(
+      width: width,
+      height: height,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              IconButton(
+                onPressed: () async {
+                  Navigator.pop(context);
 
-                gg.grades.removeAt(index);
-                setState(() {});
-                SaveManager().saveSemester(widget.semester);
-              },
-              icon: const Icon(
-                Icons.delete,
-                color: Colors.red,
-                size: 32,
-              ),
-            ),
-            IconButton(
-              onPressed: () async {
-                Navigator.pop(context);
+                  //warten damit animation funktioniert
+                  await Future.delayed(
+                    const Duration(milliseconds: 500),
+                  );
 
-                Grade? newGrade = await _showEditGradeSheet(grade);
-                if (newGrade == null) {
                   gg.grades.removeAt(index);
-                } else {
-                  gg.grades[index] = newGrade;
-                }
-                setState(() {});
-                SaveManager().saveSemester(widget.semester);
-              },
-              icon: const Icon(
-                Icons.edit,
-                // color: Colors.red,
-                size: 32,
+                  setState(() {});
+                  SaveManager().saveSemester(widget.semester);
+                },
+                icon: const Icon(
+                  Icons.delete,
+                  color: Colors.red,
+                  size: 32,
+                ),
+              ),
+              IconButton(
+                onPressed: () async {
+                  Navigator.pop(context);
+
+                  Grade? newGrade = await _showEditGradeSheet(grade);
+                  if (newGrade == null) {
+                    gg.grades.removeAt(index);
+                  } else {
+                    gg.grades[index] = newGrade;
+                  }
+                  setState(() {});
+                  SaveManager().saveSemester(widget.semester);
+                },
+                icon: const Icon(
+                  Icons.edit,
+                  // color: Colors.red,
+                  size: 32,
+                ),
+              ),
+            ],
+          ),
+          Flexible(
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  Text(
+                    gg.name,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Theme.of(context).textTheme.titleLarge?.color ??
+                          Colors.white,
+                      // decoration: TextDecoration.underline,
+                      fontSize: 42.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 32,
+                  ),
+                  Container(
+                    width: 100,
+                    height: 100,
+                    decoration: BoxDecoration(
+                      // borderRadius: BorderRadius.circular(16),
+                      shape: BoxShape.circle,
+                      color: Utils.getGradeColor(grade.grade),
+                    ),
+                    child: Center(
+                      child: Text(
+                        grade.toString(),
+                        style: Theme.of(context).textTheme.displaySmall,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 32,
+                  ),
+                  Visibility(
+                    visible: grade.info.isNotEmpty,
+                    child: Text(
+                      grade.info,
+                      style: TextStyle(
+                        color: Theme.of(context).textTheme.bodyLarge?.color ??
+                            Colors.white,
+                        fontSize: 42.0,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  Text(
+                    Utils.dateToString(grade.date),
+                    style: TextStyle(
+                      color: Theme.of(context).textTheme.bodyLarge?.color ??
+                          Colors.white,
+                      fontSize: 42.0,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
-        GestureDetector(
-          child: Text(
-            style: TextStyle(
-              color:
-                  Theme.of(context).textTheme.titleLarge?.color ?? Colors.white,
-              // decoration: TextDecoration.underline,
-              fontSize: 42.0,
-              fontWeight: FontWeight.bold,
-            ),
-            gg.name,
           ),
-        ),
-        const SizedBox(
-          height: 16,
-        ),
-        GestureDetector(
-          child: Container(
-            width: 100,
-            height: 100,
-            decoration: BoxDecoration(
-              // borderRadius: BorderRadius.circular(16),
-              shape: BoxShape.circle,
-              color: Utils.getGradeColor(grade.grade),
-            ),
-            child: Center(
-              child: Text(
-                grade.toString(),
-                style: Theme.of(context).textTheme.displaySmall,
-              ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Icon(
+              Icons.check,
+              size: 42,
             ),
           ),
-        ),
-        const Spacer(),
-        const SizedBox(
-          height: 12,
-        ),
-        Visibility(
-          visible: grade.info.isNotEmpty,
-          child: Text(
-            grade.info,
-            style: TextStyle(
-              color:
-                  Theme.of(context).textTheme.bodyLarge?.color ?? Colors.white,
-              fontSize: 42.0,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ),
-        Text(
-          Utils.dateToString(grade.date),
-          style: TextStyle(
-            color: Theme.of(context).textTheme.bodyLarge?.color ?? Colors.white,
-            fontSize: 42.0,
-          ),
-          textAlign: TextAlign.center,
-        ),
-        const Spacer(
-          flex: 2,
-        ),
-        ElevatedButton(
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-          child: const Icon(
-            Icons.check,
-            size: 42,
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 

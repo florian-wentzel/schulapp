@@ -4,6 +4,8 @@ import 'package:schulapp/code_behind/save_manager.dart';
 import 'package:schulapp/code_behind/school_day.dart';
 import 'package:schulapp/code_behind/school_lesson.dart';
 import 'package:schulapp/code_behind/school_time.dart';
+import 'package:schulapp/code_behind/special_lesson.dart';
+import 'package:schulapp/code_behind/time_table_manager.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/extensions.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
@@ -181,6 +183,10 @@ class Timetable {
   int get maxLessonCount => _maxLessonCount;
   List<SchoolDay> get schoolDays => _schoolDays;
   List<SchoolTime> get schoolTimes => _schoolTimes;
+
+  //year-weekIndex um zu wissen welche woche gespeichert wird
+  String? currSpecialLessonsWeekKey;
+  List<SpecialLesson>? currSpecialLessonsWeek;
 
   set name(String value) {
     value = value.trim();
@@ -426,5 +432,48 @@ class Timetable {
     }
     _schoolTimes.removeLast();
     _maxLessonCount--;
+  }
+
+  bool isSpecialLesson({
+    required int year,
+    required int weekIndex,
+    required int schoolDayIndex,
+    required int schoolTimeIndex,
+  }) {
+    return TimetableManager().isSpecialLesson(
+      timetable: this,
+      year: year,
+      weekIndex: weekIndex,
+      schoolDayIndex: schoolDayIndex,
+      schoolTimeIndex: schoolTimeIndex,
+    );
+  }
+
+  void setSpecialLesson({
+    required int weekIndex,
+    required int year,
+    required CancelledSpecialLesson specialLesson,
+  }) {
+    TimetableManager().setSpecialLesson(
+      timetable: this,
+      year: year,
+      weekIndex: weekIndex,
+      specialLesson: specialLesson,
+    );
+  }
+
+  void removeSpecialLesson({
+    required int year,
+    required int weekIndex,
+    required int dayIndex,
+    required int timeIndex,
+  }) {
+    TimetableManager().removeSpecialLesson(
+      timetable: this,
+      year: year,
+      weekIndex: weekIndex,
+      dayIndex: dayIndex,
+      timeIndex: timeIndex,
+    );
   }
 }

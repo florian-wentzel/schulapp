@@ -1,6 +1,7 @@
 {
   "@@locale": "en",
   "language_name": "Englisch",
+  "version_0_2_4": "Added lesson cancellations and redesigned holiday UI",
   "version_0_2_3": "Holidays revised and other bug fixes",
   "version_0_2_2": "Updated grades average",
   "version_0_2_1": "Remade create new timetable functionality",

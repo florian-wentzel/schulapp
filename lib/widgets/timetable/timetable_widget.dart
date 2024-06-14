@@ -8,6 +8,7 @@ import 'package:schulapp/code_behind/school_lesson.dart';
 import 'package:schulapp/code_behind/school_semester.dart';
 import 'package:schulapp/code_behind/school_time.dart';
 import 'package:schulapp/code_behind/settings.dart';
+import 'package:schulapp/code_behind/special_lesson.dart';
 import 'package:schulapp/code_behind/time_table.dart';
 import 'package:schulapp/code_behind/time_table_manager.dart';
 import 'package:schulapp/code_behind/todo_event.dart';
@@ -18,6 +19,7 @@ import 'package:schulapp/screens/grades_screen.dart';
 import 'package:schulapp/screens/tasks_screen.dart';
 import 'package:schulapp/screens/semester/school_grade_subject_screen.dart';
 import 'package:schulapp/widgets/semester/school_grade_subject_widget.dart';
+import 'package:schulapp/widgets/strike_through_container.dart';
 import 'package:schulapp/widgets/timetable/time_to_next_lesson_widget.dart';
 import 'package:schulapp/code_behind/timetable_util_functions.dart';
 import 'package:schulapp/widgets/custom_pop_up.dart';
@@ -51,6 +53,9 @@ class _TimetableWidgetState extends State<TimetableWidget> {
 
   late Color selectedColor;
   late Color unselectedColor;
+
+  late int currWeekIndex;
+  late int currYear;
 
   @override
   Widget build(BuildContext context) {
@@ -91,6 +96,9 @@ class _TimetableWidgetState extends State<TimetableWidget> {
 
     DateTime currMonday = Utils.getWeekDay(DateTime.now(), DateTime.monday)
         .add(Duration(days: 7 * currWeekIndex));
+
+    this.currWeekIndex = Utils.getWeekIndex(currMonday);
+    currYear = currMonday.year;
 
     List<Widget> dayWidgets = [];
 
@@ -408,6 +416,15 @@ class _TimetableWidgetState extends State<TimetableWidget> {
         addBreakWidget = (currTimeInSec > currSchoolTimeEndInSec &&
             currTimeInSec < nextSchoolTimeStartInSec);
       }
+      final StrikeThroughContainerController containerController =
+          StrikeThroughContainerController();
+
+      containerController.strikeThrough = tt.isSpecialLesson(
+        schoolDayIndex: dayIndex,
+        schoolTimeIndex: lessonIndex,
+        weekIndex: currWeekIndex,
+        year: currYear,
+      );
 
       Widget lessonWidget = InkWell(
         onTap: SchoolLesson.isEmptyLessonName(lesson.name)
@@ -419,6 +436,28 @@ class _TimetableWidgetState extends State<TimetableWidget> {
                   currEvent: currEvent,
                   eventEndTime: currLessonDateTime,
                 ),
+        onLongPress: SchoolLesson.isEmptyLessonName(lesson.name)
+            ? null
+            : () {
+                containerController.changeStrikeThrough();
+                if (containerController.strikeThrough) {
+                  tt.setSpecialLesson(
+                    weekIndex: currWeekIndex,
+                    year: currYear,
+                    specialLesson: CancelledSpecialLesson(
+                      dayIndex: dayIndex,
+                      timeIndex: lessonIndex,
+                    ),
+                  );
+                } else {
+                  tt.removeSpecialLesson(
+                    year: currYear,
+                    weekIndex: currWeekIndex,
+                    dayIndex: dayIndex,
+                    timeIndex: lessonIndex,
+                  );
+                }
+              },
         child: Container(
           color: containerColor,
           width: lessonWidth,
@@ -448,84 +487,89 @@ class _TimetableWidgetState extends State<TimetableWidget> {
                   },
                 );
               },
-              child: Container(
-                width: lessonWidth * 0.8,
-                height: lessonHeight * 0.8,
-                padding: const EdgeInsets.symmetric(
-                  vertical: 4,
-                  horizontal: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: lesson.color,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text(
-                            lesson.name,
-                            textAlign: TextAlign.center,
-                            style: Theme.of(context).textTheme.bodyLarge,
-                          ),
-                          lesson.room.isEmpty
-                              ? Container()
-                              : Text(
-                                  lesson.room,
-                                  textAlign: TextAlign.center,
-                                  style: Theme.of(context).textTheme.bodyLarge,
-                                  overflow: TextOverflow.fade,
-                                ),
-                        ],
+              child: StrikeThroughContainer(
+                key: UniqueKey(),
+                controller: containerController,
+                child: Container(
+                  width: lessonWidth * 0.8,
+                  height: lessonHeight * 0.8,
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 4,
+                    horizontal: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: lesson.color,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text(
+                              lesson.name,
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context).textTheme.bodyLarge,
+                            ),
+                            lesson.room.isEmpty
+                                ? Container()
+                                : Text(
+                                    lesson.room,
+                                    textAlign: TextAlign.center,
+                                    style:
+                                        Theme.of(context).textTheme.bodyLarge,
+                                    overflow: TextOverflow.fade,
+                                  ),
+                          ],
+                        ),
                       ),
-                    ),
-                    Visibility(
-                      visible: currEvent != null,
-                      child: Align(
-                        alignment: Alignment.bottomRight,
-                        child: Text(
-                          "!",
-                          textAlign: TextAlign.justify,
-                          style: GoogleFonts.dmSerifDisplay(
-                            textStyle: Theme.of(context)
-                                .textTheme
-                                .headlineMedium
-                                ?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  foreground: Paint()
-                                    ..style = PaintingStyle.stroke
-                                    ..strokeWidth = 4
-                                    ..color = Theme.of(context).canvasColor,
-                                ),
+                      Visibility(
+                        visible: currEvent != null,
+                        child: Align(
+                          alignment: Alignment.bottomRight,
+                          child: Text(
+                            "!",
+                            textAlign: TextAlign.justify,
+                            style: GoogleFonts.dmSerifDisplay(
+                              textStyle: Theme.of(context)
+                                  .textTheme
+                                  .headlineMedium
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    foreground: Paint()
+                                      ..style = PaintingStyle.stroke
+                                      ..strokeWidth = 4
+                                      ..color = Theme.of(context).canvasColor,
+                                  ),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    Visibility(
-                      visible: currEvent != null,
-                      child: Align(
-                        alignment: Alignment.bottomRight,
-                        child: Text(
-                          "!",
-                          textAlign: TextAlign.justify,
-                          style: GoogleFonts.dmSerifDisplay(
-                            textStyle: Theme.of(context)
-                                .textTheme
-                                .headlineMedium
-                                ?.copyWith(
-                                  color: currEvent?.getColor(),
-                                  fontWeight: FontWeight.bold,
-                                ),
+                      Visibility(
+                        visible: currEvent != null,
+                        child: Align(
+                          alignment: Alignment.bottomRight,
+                          child: Text(
+                            "!",
+                            textAlign: TextAlign.justify,
+                            style: GoogleFonts.dmSerifDisplay(
+                              textStyle: Theme.of(context)
+                                  .textTheme
+                                  .headlineMedium
+                                  ?.copyWith(
+                                    color: currEvent?.getColor(),
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -584,22 +628,20 @@ class _CustomPopUpShowLessonState extends State<CustomPopUpShowLesson> {
         selectedSemester?.getSubjectByName(widget.lesson.name);
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Container(
-          alignment: Alignment.center,
-          height: 20,
-          decoration: BoxDecoration(
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(16),
-              topRight: Radius.circular(16),
-            ),
-            color: widget.lesson.color,
-          ),
-        ),
         Column(
           children: [
+            Container(
+              alignment: Alignment.center,
+              height: 20,
+              decoration: BoxDecoration(
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(16),
+                  topRight: Radius.circular(16),
+                ),
+                color: widget.lesson.color,
+              ),
+            ),
             Text(
               widget.lesson.name,
               textAlign: TextAlign.center,
@@ -611,61 +653,67 @@ class _CustomPopUpShowLessonState extends State<CustomPopUpShowLesson> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(
-              height: 12,
-            ),
-            FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Text(
-                    widget.lesson.teacher,
-                    style: TextStyle(
-                      color: Theme.of(context).textTheme.bodyLarge?.color ??
-                          Colors.white,
-                      fontSize: 42.0,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
-                  ),
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width / 10,
-                  ),
-                  Text(
-                    widget.lesson.room,
-                    style: TextStyle(
-                      color: Theme.of(context).textTheme.bodyLarge?.color ??
-                          Colors.white,
-                      fontSize: 42.0,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            ),
           ],
         ),
-        Container(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const SizedBox(
-                height: 4,
-              ),
-              _showGradesWidget(
-                context,
-                lesson: widget.lesson,
-                selectedSemester: selectedSemester,
-                selectedSubject: selectedSubject,
-              ),
-              _showTodoEventWidget(
-                todoEvent: widget.event,
-              ),
-            ],
+        const SizedBox(
+          height: 16,
+        ),
+        Flexible(
+          fit: FlexFit.tight,
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Text(
+                        widget.lesson.teacher,
+                        style: TextStyle(
+                          color: Theme.of(context).textTheme.bodyLarge?.color ??
+                              Colors.white,
+                          fontSize: 42.0,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                      ),
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width / 10,
+                      ),
+                      Text(
+                        widget.lesson.room,
+                        style: TextStyle(
+                          color: Theme.of(context).textTheme.bodyLarge?.color ??
+                              Colors.white,
+                          fontSize: 42.0,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _showGradesWidget(
+                        context,
+                        lesson: widget.lesson,
+                        selectedSemester: selectedSemester,
+                        selectedSubject: selectedSubject,
+                      ),
+                      _showTodoEventWidget(
+                        todoEvent: widget.event,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
         Container(
