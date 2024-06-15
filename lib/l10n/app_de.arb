@@ -1,6 +1,7 @@
 {
   "@@locale": "de",
   "language_name": "Deutsch",
+  "version_0_2_5": "Backup- und Wiederherstellungsfunktion hinzugefügt",
   "version_0_2_4": "Stundenausfälle hinzugefügt und Ferien UI überarbeitet",
   "version_0_2_3": "Ferien überarbeitet und andere Fehlerbehebungen",
   "version_0_2_2": "Notendurchschnitt überarbeitet",
@@ -198,5 +199,20 @@
   "strSuccessfullyAddedBreak": "Pause erfolgreich hinzugefügt!",
   "strAddBreak": "Pause hinzufügen",
   "strDoYouWantToRemoveTheLastLesson": "Möchtest Du die letzte Stunde entfernen?",
-  "strDoYouWantToAddALesson": "Möchtest Du eine Stunde hinzufügen?"
+  "strDoYouWantToAddALesson": "Möchtest Du eine Stunde hinzufügen?",
+  "strSecureBackupFileDoesNot": "Die \"Secure-Backup\"-Datei existiert nicht! (wissen Sie, was Sie tun?)",
+  "strFilesHaveBeenDeleteOrAddedBackup": "Es wurden Dateien aus dem Backup hinzugefügt oder entfernt!",
+  "strVersionOfAppDoesNotMatchWithBackup": "Die Version Ihrer App stimmt nicht mit der Version des Backups überein!",
+  "strBackup": "Sicherungskopie",
+  "strCreateBackup": "Sicherungskopie erstellen",
+  "strRestoreBackup": "Sicherungskopie laden",
+  "strTheBackupIsNotEncrypted": "Das Backup ist nicht verschlüsselt!",
+  "strAreYouSureThatYouWantToCreateABackup": "Sind Sie sicher, dass Sie eine Sicherungskopie erstellen möchten?",
+  "strBackupFailed": "Sicherung fehlgeschlagen!",
+  "strBackupSuccessfullyCreatedUnder": "Sicherung erfolgreich erstellt!\n{path}",
+  "strAllOfYourDataWillBeOverwritten": "Alle Ihre Daten werden überschrieben!",
+  "strAreYouSureThatYouWantToRestoreYourData": "Sind Sie sicher, dass Sie Ihre Daten wiederherstellen möchten?",
+  "strDoYouWantToContinue": "Möchten Sie fortfahren?",
+  "strRestoreFailed": "Wiederherstellung fehlgeschlagen!\n{path}",
+  "strRestoredSuccessfully": "Daten erfolgreich wiederhergestellt!\n{path}"
 }

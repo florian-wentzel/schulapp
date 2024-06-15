@@ -151,6 +151,8 @@ class Utils {
     String? description,
     bool autofocus = false,
     bool showYesAndNoInsteadOfOK = false,
+    bool markTrueAsRed = false,
+    bool markFalseAsRed = false,
   }) async {
     bool? value = await showDialog<bool>(
       context: context,
@@ -160,6 +162,11 @@ class Utils {
           content: description == null ? null : Text(description),
           actions: <Widget>[
             TextButton(
+              style: markTrueAsRed
+                  ? TextButton.styleFrom(
+                      foregroundColor: Colors.red,
+                    )
+                  : null,
               onPressed: () {
                 Navigator.pop(context, true);
               },
@@ -168,6 +175,11 @@ class Utils {
                   : AppLocalizationsManager.localizations.strOK),
             ),
             TextButton(
+              style: markFalseAsRed
+                  ? TextButton.styleFrom(
+                      foregroundColor: Colors.red,
+                    )
+                  : null,
               onPressed: () {
                 Navigator.pop(context, false);
               },

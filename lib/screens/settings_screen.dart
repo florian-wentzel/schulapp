@@ -1,5 +1,7 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:schulapp/app.dart';
+import 'package:schulapp/code_behind/backup_manager.dart';
 import 'package:schulapp/code_behind/school_semester.dart';
 import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/time_table.dart';
@@ -51,6 +53,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _themeSelector(),
         _selectLanguage(),
         _openMainSemesterAutomatically(),
+        _createBackup(),
         _currentVersion(),
       ],
     );
@@ -242,6 +245,38 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  Widget _createBackup() {
+    return listItem(
+      title: AppLocalizationsManager.localizations.strBackup,
+      body: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Expanded(
+              child: ElevatedButton(
+                onPressed: _backupButtonPressed,
+                child: Text(
+                  AppLocalizationsManager.localizations.strCreateBackup,
+                ),
+              ),
+            ),
+            const SizedBox(
+              width: 8,
+            ),
+            Expanded(
+              child: ElevatedButton(
+                onPressed: _restoreButtonPressed,
+                child: Text(
+                  AppLocalizationsManager.localizations.strRestoreBackup,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
   Widget _currentVersion() {
     return InkWell(
       onTap: () {
@@ -317,6 +352,152 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ],
       ),
     );
+  }
+
+  Future<void> _backupButtonPressed() async {
+    final backupData = await Utils.showBoolInputDialog(
+      context,
+      question:
+          AppLocalizationsManager.localizations.strTheBackupIsNotEncrypted,
+      description: AppLocalizationsManager
+          .localizations.strAreYouSureThatYouWantToCreateABackup,
+      showYesAndNoInsteadOfOK: true,
+      markTrueAsRed: true,
+    );
+
+    if (!backupData) return;
+
+    String? selectedDirectory = await FilePicker.platform.getDirectoryPath();
+
+    if (selectedDirectory == null) {
+      if (mounted) {
+        Utils.showInfo(
+          context,
+          msg: AppLocalizationsManager.localizations.strNoFileSelected,
+          type: InfoType.warning,
+        );
+      }
+      return;
+    }
+
+    final backupFile = await BackupManager.createBackupAt(
+      path: selectedDirectory,
+    );
+
+    if (backupFile == null) {
+      if (mounted) {
+        Utils.showInfo(
+          context,
+          msg: AppLocalizationsManager.localizations.strBackupFailed,
+          type: InfoType.error,
+        );
+      }
+      return;
+    }
+
+    await Future.delayed(
+      const Duration(milliseconds: 250),
+    );
+
+    if (mounted) {
+      Utils.showInfo(
+        context,
+        msg: AppLocalizationsManager.localizations
+            .strBackupSuccessfullyCreatedUnder(
+          backupFile.path,
+        ),
+        type: InfoType.success,
+      );
+    }
+  }
+
+  Future<void> _restoreButtonPressed() async {
+    final restoreData = await Utils.showBoolInputDialog(
+      context,
+      question: AppLocalizationsManager
+          .localizations.strAllOfYourDataWillBeOverwritten,
+      description: AppLocalizationsManager
+          .localizations.strAreYouSureThatYouWantToRestoreYourData,
+      showYesAndNoInsteadOfOK: true,
+      markTrueAsRed: true,
+    );
+
+    if (!restoreData) return;
+
+    FilePickerResult? result;
+    try {
+      result = await FilePicker.platform.pickFiles(
+        allowMultiple: false,
+        type: FileType.custom,
+        allowedExtensions: [
+          "zip",
+          BackupManager.backupExportExtension.replaceAll(".", "")
+        ],
+      );
+    } on Exception {
+      result = await FilePicker.platform.pickFiles(
+        allowMultiple: false,
+        type: FileType.any,
+      );
+    }
+
+    if (result == null) {
+      if (mounted) {
+        Utils.showInfo(
+          context,
+          msg: AppLocalizationsManager.localizations.strNoFileSelected,
+          type: InfoType.error,
+        );
+      }
+      return;
+    }
+
+    final selectedFilePath = result.files.single.path!;
+
+    final backupRestored = await BackupManager.restoreBackupFrom(
+      path: selectedFilePath,
+      onErrorCB: (error) async {
+        return await Utils.showBoolInputDialog(
+          context,
+          question: error,
+          description:
+              AppLocalizationsManager.localizations.strDoYouWantToContinue,
+          markTrueAsRed: true,
+          showYesAndNoInsteadOfOK: true,
+        );
+      },
+    );
+
+    if (!backupRestored) {
+      if (mounted) {
+        Utils.showInfo(
+          context,
+          msg: AppLocalizationsManager.localizations.strRestoreFailed(
+            selectedFilePath,
+          ),
+          type: InfoType.error,
+        );
+      }
+      return;
+    }
+
+    TimetableManager().markAllDataToBeReloaded();
+
+    if (mounted) {
+      Utils.showInfo(
+        context,
+        msg: AppLocalizationsManager.localizations.strRestoredSuccessfully(
+          selectedFilePath,
+        ),
+        type: InfoType.success,
+      );
+
+      selection = {
+        ThemeManager().themeMode,
+      };
+      ThemeManager().themeMode = ThemeManager().themeMode;
+      setState(() {});
+    }
   }
 }
 

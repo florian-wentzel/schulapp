@@ -135,7 +135,6 @@ class _MainAppState extends State<MainApp> {
   }
 
   void themeListener() {
-    //wenn man den State setzten kann dann setzte ihn..
     if (!mounted) return;
     setState(() {});
   }

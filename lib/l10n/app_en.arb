@@ -1,6 +1,7 @@
 {
   "@@locale": "en",
   "language_name": "Englisch",
+  "version_0_2_5": "Added backup and restore functionality",
   "version_0_2_4": "Added lesson cancellations and redesigned holiday UI",
   "version_0_2_3": "Holidays revised and other bug fixes",
   "version_0_2_2": "Updated grades average",
@@ -206,5 +207,20 @@
   "strSuccessfullyAddedBreak": "Break successfully added!",
   "strAddBreak": "Add Break",
   "strDoYouWantToRemoveTheLastLesson": "Do you want to remove the last Lesson?",
-  "strDoYouWantToAddALesson": "Do you want to add a Lesson?"
+  "strDoYouWantToAddALesson": "Do you want to add a Lesson?",
+  "strSecureBackupFileDoesNot": "Secure-Backup file does not exist! (do you know what you're doing?)",
+  "strFilesHaveBeenDeleteOrAddedBackup": "Files have been deleted or added to the backup!",
+  "strVersionOfAppDoesNotMatchWithBackup": "The version of your app does not match the version of the backup!",
+  "strBackup": "Backup",
+  "strCreateBackup": "Backup-Data",
+  "strRestoreBackup": "Restore-Data",
+  "strTheBackupIsNotEncrypted": "The backup is not encrypted!",
+  "strAreYouSureThatYouWantToCreateABackup": "Are you sure that you want to create a backup?",
+  "strBackupFailed": "Backup failed!",
+  "strBackupSuccessfullyCreatedUnder": "Backup successfully created!\n{path}",
+  "strAllOfYourDataWillBeOverwritten": "All of your data will be overwritten!",
+  "strAreYouSureThatYouWantToRestoreYourData": "Are you sure that you want to restore your data?",
+  "strDoYouWantToContinue": "Do you want to continue?",
+  "strRestoreFailed": "Restore failed!\n{path}",
+  "strRestoredSuccessfully": "Restored successfully!\n{path}"
 }

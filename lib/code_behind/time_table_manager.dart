@@ -357,4 +357,11 @@ class TimetableManager {
       timetable: timetable,
     );
   }
+
+  void markAllDataToBeReloaded() {
+    _timetables = null;
+    _semesters = null;
+    _todoEvents = null;
+    _settings = null;
+  }
 }

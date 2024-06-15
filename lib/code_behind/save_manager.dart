@@ -25,6 +25,8 @@ class SaveManager {
   static const String mainDirName = "Schulapp";
   static const String settingsFileName = "settings.json";
   static const String timetableSaveDirName = "timetables";
+  //for backups
+  static const String tempDirName = "temp";
   static const String exportDirName = "exports";
   static const String importDirName = "imports";
   static const String semestersSaveDirName = "semesters";
@@ -84,7 +86,11 @@ class SaveManager {
 
     //load timetable
     final timetableFile = File(join(timetbaleDirPath, timetableFileName));
-    //TODO: test if it Exsits
+
+    if (!timetableFile.existsSync()) {
+      return null;
+    }
+
     // Read the contents of the file
     String jsonString = timetableFile.readAsStringSync();
 
@@ -205,14 +211,67 @@ class SaveManager {
     }
   }
 
+  void deleteTempDir() {
+    if (applicationDocumentsDirectory == null) {
+      loadApplicationDocumentsDirectory();
+      throw Exception("document dir not loaded");
+    }
+
+    final dir = Directory(
+      join(applicationDocumentsDirectory!.path, tempDirName),
+    );
+
+    if (dir.existsSync()) {
+      dir.deleteSync(recursive: true);
+    }
+  }
+
+  ///Creates a new temp Dir.
+  ///IMPORTANT: You need to call deleteTempDir after using it
+  Directory getTempDir() {
+    if (applicationDocumentsDirectory == null) {
+      loadApplicationDocumentsDirectory();
+      throw Exception("document dir not loaded");
+    }
+
+    final dir = Directory(
+      join(applicationDocumentsDirectory!.path, tempDirName),
+    );
+
+    if (dir.existsSync()) {
+      dir.deleteSync(recursive: true);
+    }
+
+    dir.createSync(recursive: true);
+
+    return dir;
+  }
+
+  ///WARNING: only call it if you know what your doing!!
+  void deleteMainSaveDir() {
+    if (applicationDocumentsDirectory == null) {
+      loadApplicationDocumentsDirectory();
+      throw Exception("document dir not loaded");
+    }
+
+    final dir = Directory(
+      join(applicationDocumentsDirectory!.path, mainDirName),
+    );
+
+    if (dir.existsSync()) {
+      dir.deleteSync(recursive: true);
+    }
+  }
+
   Directory getMainSaveDir() {
     if (applicationDocumentsDirectory == null) {
       loadApplicationDocumentsDirectory();
       throw Exception("document dir not loaded");
     }
 
-    final dir =
-        Directory(join(applicationDocumentsDirectory!.path, mainDirName));
+    final dir = Directory(
+      join(applicationDocumentsDirectory!.path, mainDirName),
+    );
 
     dir.createSync(recursive: true);
 
