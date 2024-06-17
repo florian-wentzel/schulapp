@@ -8,9 +8,16 @@ import 'package:schulapp/code_behind/time_table_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HolidaysManager {
-  static const String cacheKey = 'cached_holidays';
+  static const String cacheHolidaysKey = 'cached_holidays';
   static const String cacheStateKey = "cached_holiday_state";
   static const String cacheYearKey = "cached_holiday_year";
+
+  //Feiertage
+  static const String cacheForPublicHolidaysKey = 'cached_public_holidays';
+  static const String cacheStateForPublicHolidaysKey =
+      "cached_public_holiday_state";
+  static const String cacheYearForPublicHolidaysKey =
+      "cached_public_holiday_year";
 
   static const nameKey = "name";
   static const startKey = "start";
@@ -20,6 +27,10 @@ class HolidaysManager {
 
   //https://ferien-api.de/
   static const apiUrl = "https://ferien-api.de/api/v1/holidays/";
+  //Ferien
+  static const apiForPublicHolidaysUrl = "https://get.api-feiertage.de?";
+
+  static List<Holidays>? _loadedHolidays;
 
   HolidaysManager();
 
@@ -61,30 +72,39 @@ class HolidaysManager {
     bool withCustomHolidays = true,
     bool sorted = true,
   }) async {
+    if (_loadedHolidays != null) {
+      return _loadedHolidays!;
+    }
+
     final currYear = DateTime.now().year;
     final cachedYear = await _getCachedYear();
     final cachedStateCode = await _getCachedStateCode();
+
+    List<Holidays> allPublicHolidays =
+        await _getPublicHolidays(stateApiCode) ?? [];
 
     if (cachedYear != null &&
         currYear == cachedYear &&
         cachedStateCode != null &&
         stateApiCode == cachedStateCode &&
         stateApiCode.isNotEmpty) {
-      List<Holidays>? cachedHolidays = await _getCachedHolidayData();
-      if (cachedHolidays != null) {
+      _loadedHolidays = await _getCachedHolidayData(
+        cacheHolidaysKey,
+      );
+      if (_loadedHolidays != null) {
+        _loadedHolidays!.addAll(allPublicHolidays);
         if (withCustomHolidays) {
-          cachedHolidays.addAll(getCustomHolidays());
+          _loadedHolidays!.addAll(getCustomHolidays());
         }
         if (sorted) {
-          cachedHolidays.sort(
+          _loadedHolidays!.sort(
             (a, b) => a.start.compareTo(b.start),
           );
         }
-        return cachedHolidays;
+        return _loadedHolidays!;
       }
     }
 
-    List<Holidays> allHolidays = [];
     if (stateApiCode.isNotEmpty) {
       final url = Uri.parse("$apiUrl$stateApiCode/$currYear");
 
@@ -100,26 +120,32 @@ class HolidaysManager {
           List<Map<String, dynamic>> jsonList =
               (jsonDecode(responseBody) as List).cast();
 
-          allHolidays = _jsonToHolidaysList(jsonList);
+          _loadedHolidays == null
+              ? _loadedHolidays = _jsonToHolidaysList(jsonList)
+              : _loadedHolidays!.addAll(
+                  _jsonToHolidaysList(jsonList),
+                );
         } else {
-          debugPrint('Failed to load post: ${response.statusCode}');
+          debugPrint('Failed to load holidays: ${response.statusCode}');
           if (withCustomHolidays) {
-            allHolidays = getCustomHolidays();
+            _loadedHolidays = getCustomHolidays();
+            _loadedHolidays!.addAll(allPublicHolidays);
+
             if (sorted) {
-              allHolidays.sort(
+              _loadedHolidays!.sort(
                 (a, b) => a.start.compareTo(b.start),
               );
             }
-            return allHolidays;
+            return _loadedHolidays!;
           }
-          return [];
+          return allPublicHolidays;
         }
       } catch (e) {
         debugPrint('Error: $e');
-        return [];
+        return allPublicHolidays;
       }
 
-      if (allHolidays.isNotEmpty) {
+      if (_loadedHolidays!.isNotEmpty) {
         _cacheHolidayData(
           holidaysString: responseBody,
           stateCode: stateApiCode,
@@ -128,17 +154,21 @@ class HolidaysManager {
       }
     }
 
+    _loadedHolidays ??= [];
+
     if (withCustomHolidays) {
-      allHolidays.addAll(getCustomHolidays());
+      _loadedHolidays!.addAll(getCustomHolidays());
     }
 
+    _loadedHolidays!.addAll(allPublicHolidays);
+
     if (sorted) {
-      allHolidays.sort(
+      _loadedHolidays!.sort(
         (a, b) => a.start.compareTo(b.start),
       );
     }
 
-    return allHolidays;
+    return _loadedHolidays!;
   }
 
   static List<Holidays> getCustomHolidays() {
@@ -220,12 +250,23 @@ class HolidaysManager {
     required String stateCode,
   }) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString(cacheKey, holidaysString);
+    await prefs.setString(cacheHolidaysKey, holidaysString);
     await prefs.setString(cacheStateKey, stateCode);
     await prefs.setInt(cacheYearKey, year);
   }
 
-  static Future<List<Holidays>?> _getCachedHolidayData() async {
+  static Future<void> _cachePublicHolidayData({
+    required String holidaysString,
+    required int year,
+    required String stateCode,
+  }) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString(cacheForPublicHolidaysKey, holidaysString);
+    await prefs.setString(cacheStateForPublicHolidaysKey, stateCode);
+    await prefs.setInt(cacheYearForPublicHolidaysKey, year);
+  }
+
+  static Future<List<Holidays>?> _getCachedHolidayData(String cacheKey) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? encodedData = prefs.getString(cacheKey);
     if (encodedData != null) {
@@ -244,5 +285,110 @@ class HolidaysManager {
   static Future<String?> _getCachedStateCode() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getString(cacheStateKey);
+  }
+
+  static Future<int?> _getCachedYearForPublicHolidays() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getInt(cacheYearForPublicHolidaysKey);
+  }
+
+  static Future<String?> _getCachedStateCodeForPublicHolidays() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString(cacheStateForPublicHolidaysKey);
+  }
+
+  static Future<List<Holidays>?> _getPublicHolidays(String stateCode) async {
+    final currYear = DateTime.now().year;
+    final cachedYear = await _getCachedYearForPublicHolidays();
+    final cachedStateCode = await _getCachedStateCodeForPublicHolidays();
+
+    if (cachedYear != null &&
+        currYear == cachedYear &&
+        cachedStateCode != null &&
+        stateCode == cachedStateCode &&
+        stateCode.isNotEmpty) {
+      List<Holidays>? cachedHolidays = await _getCachedHolidayData(
+        cacheForPublicHolidaysKey,
+      );
+      if (cachedHolidays != null) {
+        return cachedHolidays;
+      }
+    }
+
+    List<Holidays> publicHolidays = [];
+    if (stateCode.isNotEmpty) {
+      final url = Uri.parse(
+          "${apiForPublicHolidaysUrl}years=$currYear&states=${stateCode.toLowerCase()}");
+
+      String responseBody = "";
+      try {
+        final httpClient = HttpClient();
+        final request = await httpClient.getUrl(url);
+        final response = await request.close();
+
+        if (response.statusCode == HttpStatus.ok) {
+          responseBody = await response.transform(utf8.decoder).join();
+
+          Map<String, dynamic> json = jsonDecode(responseBody);
+
+          final success = json["status"] == "success";
+
+          if (!success) {
+            return null;
+          }
+
+          publicHolidays = _jsonToPublicHolidaysList(
+            (json["feiertage"] as List).cast<Map<String, dynamic>>(),
+            stateCode,
+          );
+        } else {
+          debugPrint('Failed to load holidays: ${response.statusCode}');
+
+          return null;
+        }
+      } catch (e) {
+        debugPrint('Error: $e');
+        return null;
+      }
+
+      if (publicHolidays.isNotEmpty) {
+        _cachePublicHolidayData(
+          holidaysString: jsonEncode(
+            _holidaysListToJson(publicHolidays),
+          ),
+          stateCode: stateCode,
+          year: currYear,
+        );
+
+        return publicHolidays;
+      }
+    }
+
+    return null;
+  }
+
+  static List<Holidays> _jsonToPublicHolidaysList(
+      List<Map<String, dynamic>> jsonList, String stateCode) {
+    return List.generate(
+      jsonList.length,
+      (index) {
+        final json = jsonList[index];
+        final startAndEnd = DateTime.parse(json["date"]);
+        String name = json["fname"];
+        String slug = "";
+
+        return Holidays(
+          start: startAndEnd,
+          end: startAndEnd,
+          stateCode: stateCode,
+          name: name,
+          slug: slug,
+        );
+      },
+    );
+  }
+
+  static void removeLoadedHolidays() {
+    _loadedHolidays = null;
   }
 }

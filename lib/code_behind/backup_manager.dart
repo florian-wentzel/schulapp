@@ -9,7 +9,7 @@ import 'package:schulapp/code_behind/zip_manager.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 
 class BackupManager {
-  static const String backupExportExtension = ".zip"; //".schulbackup";
+  static const String backupExportExtension = ".schulbackup";
   static const String secureBackupFileName = "secure-backup.json";
   static const String countKey = "file-count";
   static const String versionKey = "version";

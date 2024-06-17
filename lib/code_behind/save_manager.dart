@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:path/path.dart';
-import 'package:document_file_save_plus/document_file_save_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:schulapp/code_behind/special_lesson.dart';
 import 'package:schulapp/code_behind/todo_event.dart';
@@ -36,7 +35,7 @@ class SaveManager {
   static const String timetableFileName = "timetable.json";
   static const String semesterFileName = "semester.json";
   static const String specialLessonsDirName = "special-lessons";
-  static const String timetableExportExtension = ".zip"; //".timetable";
+  static const String timetableExportExtension = ".timetable";
   static const String todosKey = "todos";
   static const String itemsKey = "items";
 
@@ -165,7 +164,7 @@ class SaveManager {
     return Timetable.fromJson(json);
   }
 
-  File exportTimetable(Timetable timetable) {
+  File exportTimetable(Timetable timetable, String path) {
     final now = DateTime.now();
     final exportName = " ${now.day}.${now.month}.${now.year}";
 
@@ -174,7 +173,7 @@ class SaveManager {
       timetable.name + exportName,
     );
     final zipExportPath = join(
-      getExportDir().path,
+      path,
       timetable.name + exportName + timetableExportExtension,
     );
 
@@ -190,13 +189,13 @@ class SaveManager {
 
     Directory(dirSavePath).deleteSync(recursive: true);
 
-    if (Platform.isAndroid || Platform.isIOS) {
-      DocumentFileSavePlus().saveFile(
-        File(zipExportPath).readAsBytesSync(),
-        basename(zipExportPath),
-        "application/zip",
-      );
-    }
+    // if (Platform.isAndroid || Platform.isIOS) {
+    //   DocumentFileSavePlus().saveFile(
+    //     File(zipExportPath).readAsBytesSync(),
+    //     basename(zipExportPath),
+    //     "application/zip",
+    //   );
+    // }
 
     return File(zipExportPath);
   }

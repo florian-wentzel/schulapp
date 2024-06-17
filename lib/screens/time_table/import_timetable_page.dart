@@ -31,7 +31,9 @@ class _ImportTimetablePageState extends State<ImportTimetablePage> {
         ElevatedButton(
           onPressed: _selectTimetable,
           child: Text(
-            AppLocalizationsManager.localizations.strSelectTimetableFile,
+            AppLocalizationsManager.localizations.strSelectTimetableFile(
+              SaveManager.timetableExportExtension,
+            ),
           ),
         ),
         const Spacer(),

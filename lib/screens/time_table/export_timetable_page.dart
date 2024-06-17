@@ -1,6 +1,6 @@
 import 'dart:io';
-import 'dart:math';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/multi_platform_manager.dart';
 import 'package:schulapp/code_behind/save_manager.dart';
@@ -120,15 +120,33 @@ class EexportTimetablePageState extends State<ExportTimetablePage> {
       );
     }
 
-    //damit es so rüberkommt als würde etwas geschehen
-    await Future.delayed(
-      Duration(milliseconds: (Random().nextDouble() * 990).toInt()),
-    );
+    String? selectedDirectory = await FilePicker.platform.getDirectoryPath();
+
+    if (selectedDirectory == null) {
+      if (mounted) {
+        Utils.showInfo(
+          context,
+          type: InfoType.warning,
+          msg: AppLocalizationsManager.localizations.strNoFileSelected,
+        );
+      }
+      return;
+    }
+    if (selectedDirectory == "/") {
+      if (mounted) {
+        Utils.showInfo(
+          context,
+          type: InfoType.error,
+          msg: AppLocalizationsManager.localizations.strThereWasAnError,
+        );
+      }
+      return;
+    }
 
     File? exportFile;
 
     try {
-      exportFile = SaveManager().exportTimetable(timetable);
+      exportFile = SaveManager().exportTimetable(timetable, selectedDirectory);
       if (mounted) {
         Utils.hideCurrInfo(context);
       }

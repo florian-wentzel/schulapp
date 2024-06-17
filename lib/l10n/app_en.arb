@@ -1,6 +1,8 @@
 {
   "@@locale": "en",
   "language_name": "Englisch",
+  "version_0_2_7": "Added public holidays",
+  "version_0_2_6": "New file-extensions (.timetable & .schulbackup)",
   "version_0_2_5": "Added backup and restore functionality",
   "version_0_2_4": "Added lesson cancellations and redesigned holiday UI",
   "version_0_2_3": "Holidays revised and other bug fixes",
@@ -80,7 +82,7 @@
   "strGrades": "Grades",
   "strEditSemester": "Edit Semester: {semesterName}",
   "strHolidaysInfoText": "All date information is provided without guarantee. I assume no responsibility for the accuracy of the data, nor do I accept liability for any economic damages that may arise from the use of this data.",
-  "strHolidaysThanksText": "Thank you to https://ferien-api.de/ for providing the holiday API free of charge.",
+  "strHolidaysThanksText": "Thank you to https://ferien-api.de/ for providing the holiday API free of charge.\nThank you to https://www.api-feiertage.de/ for providing the holiday API free of charge.",
   "strHolidaysWithStateName": "Holidays {federalStateName}",
   "strHolidays": "Holidays",
   "strSelectFederalState": "Select Federal State",
@@ -150,7 +152,7 @@
   "strExportTimetable": "Export Timetable",
   "strImport": "Import",
   "strExport": "Export",
-  "strSelectTimetableFile": "Select timetable file (.zip)",
+  "strSelectTimetableFile": "Select timetable file ({extension})",
   "strNoFileSelected": "No file Selected!",
   "strSelectedFileDoesNotExist": "Selected file does not exist!",
   "strImportingTimetable": "Importing timetable...",
@@ -222,5 +224,6 @@
   "strAreYouSureThatYouWantToRestoreYourData": "Are you sure that you want to restore your data?",
   "strDoYouWantToContinue": "Do you want to continue?",
   "strRestoreFailed": "Restore failed!\n{path}",
-  "strRestoredSuccessfully": "Restored successfully!\n{path}"
+  "strRestoredSuccessfully": "Restored successfully!\n{path}",
+  "strThereWasAnError": "There was an error! :("
 }

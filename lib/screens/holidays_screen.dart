@@ -83,6 +83,8 @@ class HolidaysScreen extends StatefulWidget {
             null,
           );
 
+      HolidaysManager.removeLoadedHolidays();
+
       setState?.call();
     }
 
@@ -92,6 +94,8 @@ class HolidaysScreen extends StatefulWidget {
           Settings.selectedFederalStateCodeKey,
           selectedFederalState?.apiCode,
         );
+
+    HolidaysManager.removeLoadedHolidays();
 
     fetchHolidays?.call();
     setState?.call();
@@ -346,7 +350,10 @@ class HolidaysListItemWidget extends StatelessWidget {
     }
 
     return Container(
-      margin: const EdgeInsets.all(8),
+      margin: const EdgeInsets.symmetric(
+        horizontal: 8,
+        vertical: 4,
+      ),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
@@ -397,6 +404,13 @@ class HolidaysListItemWidget extends StatelessWidget {
           Visibility(
             visible: showDateInfo && holidays.start != holidays.end,
             child: Text(
+              "-",
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
+          ),
+          Visibility(
+            visible: showDateInfo && holidays.start != holidays.end,
+            child: Text(
               Utils.dateToString(holidays.end),
               style: Theme.of(context).textTheme.bodyLarge,
             ),
@@ -413,6 +427,11 @@ class HolidaysListItemWidget extends StatelessWidget {
   }
 
   String _transformName(Holidays holidays) {
+    //ist ein Feiertag also nichts mit dem Namen machen
+    if (holidays.slug.isEmpty) {
+      return holidays.name;
+    }
+
     String name = holidays.name;
     if (holidays.slug == Holidays.custom ||
         holidays.stateCode == Holidays.custom) {

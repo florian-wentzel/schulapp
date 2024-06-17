@@ -17,7 +17,7 @@ import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/screens/grades_screen.dart';
 import 'package:schulapp/screens/hello_screen.dart';
 import 'package:schulapp/screens/holidays_screen.dart';
-import 'package:schulapp/screens/new_versions_screen.dart';
+import 'package:schulapp/screens/versions_screen.dart';
 import 'package:schulapp/screens/tasks_screen.dart';
 import 'package:schulapp/screens/time_table/create_timetable_screen.dart';
 import 'package:schulapp/screens/time_table/import_export_timetable_screen.dart';
@@ -583,7 +583,7 @@ class _TimetableScreenState extends State<TimetableScreen> {
 
             await Navigator.of(context).push(
               MaterialPageRoute(
-                builder: (context) => NewVersionsScreen(
+                builder: (context) => VersionsScreen(
                   lastUsedVersion: lastUsedVersion,
                 ),
               ),

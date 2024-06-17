@@ -9,7 +9,7 @@ import 'package:schulapp/code_behind/time_table_manager.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/code_behind/version_manager.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
-import 'package:schulapp/screens/new_versions_screen.dart';
+import 'package:schulapp/screens/versions_screen.dart';
 import 'package:schulapp/theme/theme_manager.dart';
 import 'package:schulapp/widgets/navigation_bar_drawer.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -257,6 +257,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 onPressed: _backupButtonPressed,
                 child: Text(
                   AppLocalizationsManager.localizations.strCreateBackup,
+                  textAlign: TextAlign.center,
                 ),
               ),
             ),
@@ -268,6 +269,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 onPressed: _restoreButtonPressed,
                 child: Text(
                   AppLocalizationsManager.localizations.strRestoreBackup,
+                  textAlign: TextAlign.center,
                 ),
               ),
             ),
@@ -282,7 +284,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       onTap: () {
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => NewVersionsScreen(
+            builder: (context) => VersionsScreen(
               lastUsedVersion: TimetableManager()
                       .settings
                       .getVar(Settings.lastUsedVersionKey) ??
@@ -323,7 +325,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }) {
     return Container(
       padding: const EdgeInsets.all(12),
-      margin: const EdgeInsets.all(8),
+      margin: const EdgeInsets.symmetric(
+        horizontal: 8,
+        vertical: 4,
+      ),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         color: Theme.of(context).cardColor,
@@ -430,7 +435,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
         allowMultiple: false,
         type: FileType.custom,
         allowedExtensions: [
-          "zip",
           BackupManager.backupExportExtension.replaceAll(".", "")
         ],
       );

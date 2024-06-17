@@ -56,7 +56,10 @@ class TodoEventListItemWidget extends StatelessWidget {
 
   Widget _body(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.all(8),
+      margin: const EdgeInsets.symmetric(
+        horizontal: 8,
+        vertical: 4,
+      ),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
         color: Theme.of(context).cardColor,
@@ -71,7 +74,7 @@ class TodoEventListItemWidget extends StatelessWidget {
         ),
         title: Text(
           event.linkedSubjectName,
-          overflow: TextOverflow.clip,
+          overflow: TextOverflow.ellipsis,
           style: TextStyle(
             decoration: event.finished ? TextDecoration.lineThrough : null,
             fontWeight: isSelected ? FontWeight.bold : null,
@@ -98,6 +101,7 @@ class TodoEventListItemWidget extends StatelessWidget {
                                 .bodyLarge
                                 ?.copyWith(color: Colors.red)
                             : Theme.of(context).textTheme.bodyLarge,
+                        textAlign: TextAlign.right,
                       );
                     },
                   )

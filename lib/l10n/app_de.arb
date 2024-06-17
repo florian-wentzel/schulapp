@@ -1,6 +1,8 @@
 {
   "@@locale": "de",
   "language_name": "Deutsch",
+  "version_0_2_7": "Feiertage hinzugefügt",
+  "version_0_2_6": "neue Dateiendungen (.timetable & .schulbackup)",
   "version_0_2_5": "Backup- und Wiederherstellungsfunktion hinzugefügt",
   "version_0_2_4": "Stundenausfälle hinzugefügt und Ferien UI überarbeitet",
   "version_0_2_3": "Ferien überarbeitet und andere Fehlerbehebungen",
@@ -72,7 +74,7 @@
   "strGrades": "Noten",
   "strEditSemester": "Semester bearbeiten: {semesterName}",
   "strHolidaysInfoText": "Alle Datumsangaben werden ohne Gewähr bereitgestellt. Ich übernehme keine Verantwortung für die Genauigkeit der Daten, noch akzeptiere ich Haftung für etwaige wirtschaftliche Schäden, die aus der Verwendung dieser Daten entstehen können.",
-  "strHolidaysThanksText": "Vielen Dank an https://ferien-api.de/ für die kostenlose Bereitstellung der Ferientermine-API.",
+  "strHolidaysThanksText": "Vielen Dank an https://ferien-api.de/ für die kostenlose Bereitstellung der Ferientermine-API.\nVielen Dank an https://www.api-feiertage.de/ für die kostenlose Bereitstellung der Feiertags-API.",
   "strHolidaysWithStateName": "Ferien {federalStateName}",
   "strHolidays": "Ferien",
   "strSelectFederalState": "Bundesland wählen",
@@ -142,7 +144,7 @@
   "strExportTimetable": "Stundenplan Exportieren",
   "strImport": "Importieren",
   "strExport": "Exportieren",
-  "strSelectTimetableFile": "Stundenplan-Datei auswählen (.zip)",
+  "strSelectTimetableFile": "Stundenplan-Datei auswählen ({extension})",
   "strNoFileSelected": "Keine Datei ausgewählt!",
   "strSelectedFileDoesNotExist": "Ausgewählte Datei existiert nicht!",
   "strImportingTimetable": "Stundenplan wird importiert...",
@@ -214,5 +216,6 @@
   "strAreYouSureThatYouWantToRestoreYourData": "Sind Sie sicher, dass Sie Ihre Daten wiederherstellen möchten?",
   "strDoYouWantToContinue": "Möchten Sie fortfahren?",
   "strRestoreFailed": "Wiederherstellung fehlgeschlagen!\n{path}",
-  "strRestoredSuccessfully": "Daten erfolgreich wiederhergestellt!\n{path}"
+  "strRestoredSuccessfully": "Daten erfolgreich wiederhergestellt!\n{path}",
+  "strThereWasAnError": "Es ist ein Fehler aufgetreten! :("
 }

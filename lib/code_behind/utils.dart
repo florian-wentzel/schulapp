@@ -525,12 +525,13 @@ class Utils {
     required BuildContext context,
     required Object heroObject,
     required Widget body,
+    int alpha = 220,
     Widget Function(BuildContext, Animation<double>, HeroFlightDirection,
             BuildContext, BuildContext)?
         flightShuttleBuilder,
     Color? color,
   }) async {
-    color ??= Theme.of(context).cardColor.withAlpha(220);
+    color ??= Theme.of(context).cardColor.withAlpha(alpha);
 
     return await Navigator.push<T>(
       context,

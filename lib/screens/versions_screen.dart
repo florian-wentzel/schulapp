@@ -3,19 +3,19 @@ import 'package:schulapp/code_behind/version_manager.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 
 // ignore: must_be_immutable
-class NewVersionsScreen extends StatefulWidget {
+class VersionsScreen extends StatefulWidget {
   String lastUsedVersion;
 
-  NewVersionsScreen({
+  VersionsScreen({
     super.key,
     required this.lastUsedVersion,
   });
 
   @override
-  State<NewVersionsScreen> createState() => _NewVersionsScreenState();
+  State<VersionsScreen> createState() => _VersionsScreenState();
 }
 
-class _NewVersionsScreenState extends State<NewVersionsScreen> {
+class _VersionsScreenState extends State<VersionsScreen> {
   List<(String, String)> versionsToShow = [];
 
   @override
@@ -41,10 +41,27 @@ class _NewVersionsScreenState extends State<NewVersionsScreen> {
             VersionManager.compareVersions(widget.lastUsedVersion, version) ==
                 -1;
 
-        return ListTile(
-          selected: selected,
-          title: Text(version),
-          subtitle: Text(description),
+        return Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 4,
+            vertical: 8,
+          ),
+          margin: const EdgeInsets.symmetric(
+            horizontal: 8,
+            vertical: 4,
+          ),
+          decoration: BoxDecoration(
+            color: Theme.of(context).cardColor,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: ListTile(
+            selected: selected,
+            titleTextStyle: Theme.of(context).textTheme.titleLarge,
+            title: Text(
+              version,
+            ),
+            subtitle: Text(description),
+          ),
         );
       },
     );

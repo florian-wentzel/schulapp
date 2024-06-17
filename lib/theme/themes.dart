@@ -7,7 +7,7 @@ final lightTheme = ThemeData.light().copyWith(
 );
 
 final darkTheme = ThemeData.dark().copyWith(
-  cardColor: const Color.fromARGB(225, 18, 17, 20),
+  cardColor: const Color.fromARGB(223, 12, 10, 12),
   textTheme: GoogleFonts.libreFranklinTextTheme(Typography.whiteCupertino),
   // textTheme: GoogleFonts.preahvihearTextTheme(Typography.whiteCupertino),
 );

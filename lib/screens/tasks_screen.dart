@@ -176,6 +176,7 @@ class _NotesScreenState extends State<NotesScreen> {
                     await Utils.showCustomPopUp(
                       context: context,
                       heroObject: event,
+                      alpha: 250,
                       body: TodoEventInfoPopUp(
                         event: event,
                         showEditTodoEventSheet: (event) async {
