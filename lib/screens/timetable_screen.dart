@@ -215,6 +215,26 @@ class _TimetableScreenState extends State<TimetableScreen> {
           height: height,
           child: Stack(
             children: [
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: FractionallySizedBox(
+                  heightFactor: 0.1,
+                  widthFactor: 1.0,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        stops: const [0, 1],
+                        colors: [
+                          Theme.of(context).scaffoldBackgroundColor,
+                          Theme.of(context).cardColor,
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
               SingleChildScrollView(
                 physics: const NeverScrollableScrollPhysics(),
                 scrollDirection: Axis.vertical,
@@ -527,8 +547,9 @@ class _TimetableScreenState extends State<TimetableScreen> {
         );
     stateApiCode ??= "";
 
-    currentOrNextHolidays = await HolidaysManager()
-        .getCurrOrNextHolidayForState(stateApiCode: stateApiCode);
+    currentOrNextHolidays = await HolidaysManager.getCurrOrNextHolidayForState(
+      stateApiCode: stateApiCode,
+    );
 
     setState(() {});
   }

@@ -1,6 +1,7 @@
 {
   "@@locale": "de",
   "language_name": "Deutsch",
+  "version_0_2_8": "Ferien und Feiertage werden nun im Stundenplan angezeigt",
   "version_0_2_7": "Feiertage hinzugefügt",
   "version_0_2_6": "neue Dateiendungen (.timetable & .schulbackup)",
   "version_0_2_5": "Backup- und Wiederherstellungsfunktion hinzugefügt",
@@ -82,7 +83,7 @@
   "strInformation": "Information",
   "strRemoveHolidays": "Ferien entfernen",
   "strHolidaysLengthXDays": "{days} Tag(e)",
-  "strEndsInXDays": "Endet in {days} Tage(n)",
+  "strEndsInXDays": "Endet in {days} Tagen",
   "strEndsToday": "Endet heute :(",
   "strSettings": "Einstellungen",
   "strTheme": "Anzeige",

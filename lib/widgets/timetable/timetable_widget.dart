@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:schulapp/code_behind/holidays_manager.dart';
 import 'package:schulapp/code_behind/save_manager.dart';
 import 'package:schulapp/code_behind/school_day.dart';
 import 'package:schulapp/code_behind/school_grade_subject.dart';
@@ -94,8 +95,18 @@ class _TimetableWidgetState extends State<TimetableWidget> {
 
     Timetable tt = widget.timetable;
 
-    DateTime currMonday = Utils.getWeekDay(DateTime.now(), DateTime.monday)
-        .add(Duration(days: 7 * currWeekIndex));
+    DateTime currMonday = Utils.getWeekDay(
+      DateTime.now().copyWith(
+        hour: 0,
+        minute: 0,
+        second: 0,
+        millisecond: 0,
+        microsecond: 0,
+      ),
+      DateTime.monday,
+    ).add(
+      Duration(days: 7 * currWeekIndex),
+    );
 
     this.currWeekIndex = Utils.getWeekIndex(currMonday);
     currYear = currMonday.year;
@@ -321,6 +332,20 @@ class _TimetableWidgetState extends State<TimetableWidget> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
+                        FutureBuilder(
+                          future: HolidaysManager.getRunningHolidays(
+                            currLessonDateTime,
+                          ),
+                          builder: (context, snapshot) {
+                            if (!snapshot.hasData) {
+                              return const SizedBox.shrink();
+                            }
+                            return Text(
+                              snapshot.data!.getFormattedName(),
+                              textAlign: TextAlign.center,
+                            );
+                          },
+                        ),
                         Text(
                           day.name,
                           style: Theme.of(context).textTheme.headlineSmall,

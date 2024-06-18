@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:schulapp/code_behind/holidays_manager.dart';
 import 'package:schulapp/code_behind/school_lesson.dart';
 import 'package:schulapp/code_behind/special_lesson.dart';
 import 'package:schulapp/code_behind/time_table.dart';
@@ -101,7 +102,13 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
           }
 
           DateTime currMonday = Utils.getWeekDay(
-            DateTime.now(),
+            DateTime.now().copyWith(
+              hour: 0,
+              minute: 0,
+              second: 0,
+              millisecond: 0,
+              microsecond: 0,
+            ),
             DateTime.monday,
           );
 
@@ -251,6 +258,20 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
                     fit: BoxFit.contain,
                     child: Column(
                       children: [
+                        FutureBuilder(
+                          future: HolidaysManager.getRunningHolidays(
+                            currLessonDateTime,
+                          ),
+                          builder: (context, snapshot) {
+                            if (!snapshot.hasData) {
+                              return const SizedBox.shrink();
+                            }
+                            return Text(
+                              snapshot.data!.getFormattedName(),
+                              textAlign: TextAlign.center,
+                            );
+                          },
+                        ),
                         Text(
                           day.name,
                           style: Theme.of(context).textTheme.headlineSmall,

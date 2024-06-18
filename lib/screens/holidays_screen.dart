@@ -124,7 +124,7 @@ class _HolidaysScreenState extends State<HolidaysScreen> {
 
     if (stateCode == null) return;
 
-    allHolidays = await HolidaysManager().getAllHolidaysForState(
+    allHolidays = await HolidaysManager.getAllHolidaysForState(
       stateApiCode: stateCode,
       withCustomHolidays: true,
     );
@@ -367,7 +367,7 @@ class HolidaysListItemWidget extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  _transformName(holidays),
+                  holidays.getFormattedName(),
                   style: textStyle,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -426,21 +426,6 @@ class HolidaysListItemWidget extends StatelessWidget {
     );
   }
 
-  String _transformName(Holidays holidays) {
-    //ist ein Feiertag also nichts mit dem Namen machen
-    if (holidays.slug.isEmpty) {
-      return holidays.name;
-    }
-
-    String name = holidays.name;
-    if (holidays.slug == Holidays.custom ||
-        holidays.stateCode == Holidays.custom) {
-      return name;
-    }
-    List<String> words = name.split(" ");
-    return _capitalizeWords(words.first);
-  }
-
   String _getDaysLeftString(Holidays holidays) {
     final now = DateTime.now().copyWith(
       microsecond: 0,
@@ -480,23 +465,5 @@ class HolidaysListItemWidget extends StatelessWidget {
     }
 
     return "";
-  }
-
-  String _capitalizeWords(String input) {
-    // Split the input string into words
-    List<String> words = input.split(' ');
-
-    // Capitalize the first letter of each word
-    List<String> capitalizedWords = words.map((word) {
-      if (word.isEmpty) {
-        return word; // If the word is empty, return it as is
-      } else {
-        // Capitalize the first letter of the word and concatenate with the rest
-        return word[0].toUpperCase() + word.substring(1);
-      }
-    }).toList();
-
-    // Join the capitalized words back into a single string
-    return capitalizedWords.join(' ');
   }
 }

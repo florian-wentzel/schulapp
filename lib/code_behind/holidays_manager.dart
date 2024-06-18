@@ -34,7 +34,7 @@ class HolidaysManager {
 
   HolidaysManager();
 
-  Future<Holidays?> getCurrOrNextHolidayForState({
+  static Future<Holidays?> getCurrOrNextHolidayForState({
     required String stateApiCode,
   }) async {
     final now = DateTime.now().copyWith(
@@ -67,7 +67,7 @@ class HolidaysManager {
     return allHolidays[latestHolidaysIndex];
   }
 
-  Future<List<Holidays>> getAllHolidaysForState({
+  static Future<List<Holidays>> getAllHolidaysForState({
     required String stateApiCode,
     bool withCustomHolidays = true,
     bool sorted = true,
@@ -171,6 +171,29 @@ class HolidaysManager {
     return _loadedHolidays!;
   }
 
+  static Future<Holidays?> getRunningHolidays(DateTime dateTime) async {
+    String? stateCode = TimetableManager().settings.getVar(
+          Settings.selectedFederalStateCodeKey,
+        );
+
+    if (stateCode == null) return null;
+
+    List<Holidays> allHolidays = await getAllHolidaysForState(
+      stateApiCode: stateCode,
+    );
+
+    for (final holidays in allHolidays) {
+      if (dateTime == holidays.start || dateTime == holidays.end) {
+        return holidays;
+      }
+      if (dateTime.isAfter(holidays.start) && dateTime.isBefore(holidays.end)) {
+        return holidays;
+      }
+    }
+
+    return null;
+  }
+
   static List<Holidays> getCustomHolidays() {
     try {
       String holidaysString = TimetableManager().settings.getVar<String>(
@@ -198,6 +221,8 @@ class HolidaysManager {
             Settings.customHolidaysKey,
             jsonString,
           );
+
+      removeLoadedHolidays();
     } catch (e) {
       debugPrint('Error: $e');
     }
