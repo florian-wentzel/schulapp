@@ -346,6 +346,12 @@ class _TimetableWidgetState extends State<TimetableWidget> {
                             );
                           },
                         ),
+                        customTask == null
+                            ? const SizedBox.shrink()
+                            : Text(
+                                customTask.linkedSubjectName,
+                                textAlign: TextAlign.center,
+                              ),
                         Text(
                           day.name,
                           style: Theme.of(context).textTheme.headlineSmall,

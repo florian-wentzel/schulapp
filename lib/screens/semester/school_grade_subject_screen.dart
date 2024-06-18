@@ -57,7 +57,6 @@ class _SchoolGradeSubjectScreenState extends State<SchoolGradeSubjectScreen> {
               return SchoolGradeSubjectWidget(
                 subject: widget.subject,
                 semester: widget.semester,
-                isFlightShuttleBuilder: true,
               );
             },
             child: Center(
@@ -72,16 +71,17 @@ class _SchoolGradeSubjectScreenState extends State<SchoolGradeSubjectScreen> {
             _gradeGroupBuilder,
           ),
           ...[_setGradeContainer()],
-          const SizedBox(
-            height: 4,
-          ),
           SizedBox(
             height: 300,
             child: Container(
-              padding: const EdgeInsets.all(16),
+              margin: const EdgeInsets.symmetric(
+                horizontal: 8,
+                vertical: 4,
+              ),
+              padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 color: Theme.of(context).cardColor,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(8),
               ),
               child: AspectRatio(
                 aspectRatio: 1.70,
@@ -316,13 +316,16 @@ class _SchoolGradeSubjectScreenState extends State<SchoolGradeSubjectScreen> {
     GradeGroup gg = widget.subject.gradeGroups[index];
     return Container(
       width: MediaQuery.of(context).size.width,
-      margin: const EdgeInsets.all(4),
+      margin: const EdgeInsets.symmetric(
+        horizontal: 8,
+        vertical: 4,
+      ),
       padding: const EdgeInsets.symmetric(
         horizontal: 16,
         vertical: 8,
       ),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(8),
         color: Theme.of(context).cardColor,
       ),
       child: Column(
@@ -950,13 +953,16 @@ class _SchoolGradeSubjectScreenState extends State<SchoolGradeSubjectScreen> {
       },
       child: Container(
         width: MediaQuery.of(context).size.width,
-        margin: const EdgeInsets.all(4),
+        margin: const EdgeInsets.symmetric(
+          horizontal: 8,
+          vertical: 4,
+        ),
         padding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 8,
         ),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(8),
           color: Theme.of(context).cardColor,
         ),
         child: Column(

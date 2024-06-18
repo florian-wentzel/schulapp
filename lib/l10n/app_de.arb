@@ -1,6 +1,7 @@
 {
   "@@locale": "de",
   "language_name": "Deutsch",
+  "version_0_3_0": "Benutzerdefinierte Aufgaben werden nun über dem Tagesnamen angezeigt & viele UI Verbesserungen",
   "version_0_2_8": "Ferien und Feiertage werden nun im Stundenplan angezeigt",
   "version_0_2_7": "Feiertage hinzugefügt",
   "version_0_2_6": "neue Dateiendungen (.timetable & .schulbackup)",
@@ -109,7 +110,7 @@
   "strDoYouWantToFinishXTasks": "Möchtest Du {count} Aufgaben als {finishString} markieren?",
   "strDoYouWantToDeleteXTasks": "Möchtest Du {count} Aufgaben löschen?",
   "strEdit": "Bearbeiten",
-  "strEditSchoolGradeSubjectX": "Bewertung bearbeiten: {subjectName}",
+  "strEditSchoolGradeSubject": "Bewertung bearbeiten",
   "strSchoolGradeSubjectX": "Schulfach: {subjectName}",
   "strSubjectName": "Name des Schulfachs",
   "strAddGradegroup": "Neue Bewertungsgruppe",

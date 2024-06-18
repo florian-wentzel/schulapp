@@ -86,12 +86,9 @@ class _AllTimetablesScreenState extends State<AllTimetablesScreen> {
         ),
       );
     }
-    return Padding(
-      padding: const EdgeInsets.all(8),
-      child: ListView.builder(
-        itemCount: TimetableManager().timetables.length,
-        itemBuilder: _itemBuilder,
-      ),
+    return ListView.builder(
+      itemCount: TimetableManager().timetables.length,
+      itemBuilder: _itemBuilder,
     );
   }
 
@@ -103,105 +100,116 @@ class _AllTimetablesScreenState extends State<AllTimetablesScreen> {
             ) ??
         "";
 
-    return ListTile(
-      onTap: () async {
-        await Navigator.of(context).push<bool>(
-          MaterialPageRoute(
-            builder: (context) => TimetableScreen(
-              timetable: tt,
-              title: AppLocalizationsManager.localizations.strTimetableWithName(
-                tt.name,
-              ),
-            ),
-          ),
-        );
-
-        setState(() {});
-      },
-      title: Text(tt.name),
-      // leading: Text(
-      //   (index + 1).toString(),
-      //   style: Theme.of(context).textTheme.bodyLarge,
-      // ),
-      trailing: Wrap(
-        spacing: 12, // space between two icons
-        crossAxisAlignment: WrapCrossAlignment.center,
-        children: <Widget>[
-          Checkbox.adaptive(
-            value: mainTimetableName == tt.name,
-            onChanged: (bool? value) {
-              assert(value != null);
-              if (value == null) return;
-              if (value) {
-                TimetableManager().settings.setVar(
-                      Settings.mainTimetableNameKey,
-                      tt.name,
-                    );
-              } else {
-                TimetableManager().settings.setVar(
-                      Settings.mainTimetableNameKey,
-                      null,
-                    );
-              }
-              setState(() {});
-            },
-          ),
-          IconButton(
-            onPressed: () async {
-              await Navigator.of(context).push<bool>(
-                MaterialPageRoute(
-                  builder: (context) => CreateTimeTableScreen(timetable: tt),
-                ),
-              );
-
-              setState(() {});
-            },
-            icon: const Icon(Icons.edit),
-          ),
-          IconButton(
-            onPressed: () async {
-              bool delete = await Utils.showBoolInputDialog(
-                context,
-                question:
-                    AppLocalizationsManager.localizations.strDoYouWantToDeleteX(
+    return Container(
+      margin: const EdgeInsets.symmetric(
+        horizontal: 8,
+        vertical: 4,
+      ),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+        color: Theme.of(context).cardColor,
+      ),
+      child: ListTile(
+        onTap: () async {
+          await Navigator.of(context).push<bool>(
+            MaterialPageRoute(
+              builder: (context) => TimetableScreen(
+                timetable: tt,
+                title:
+                    AppLocalizationsManager.localizations.strTimetableWithName(
                   tt.name,
                 ),
-              );
-
-              if (!delete) return;
-
-              bool removed = TimetableManager().removeTimetable(tt);
-
-              setState(() {});
-
-              if (!context.mounted) return;
-
-              if (removed) {
-                Utils.showInfo(
-                  context,
-                  type: InfoType.success,
-                  msg: AppLocalizationsManager.localizations
-                      .strSuccessfullyRemoved(
-                    tt.name,
-                  ),
-                );
-              } else {
-                Utils.showInfo(
-                  context,
-                  type: InfoType.error,
-                  msg: AppLocalizationsManager.localizations
-                      .strCouldNotBeRemoved(
-                    tt.name,
-                  ),
-                );
-              }
-            },
-            icon: const Icon(
-              Icons.delete,
-              color: Colors.red,
+              ),
             ),
-          )
-        ],
+          );
+
+          setState(() {});
+        },
+        title: Text(tt.name),
+        // leading: Text(
+        //   (index + 1).toString(),
+        //   style: Theme.of(context).textTheme.bodyLarge,
+        // ),
+        trailing: Wrap(
+          spacing: 12, // space between two icons
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: <Widget>[
+            Checkbox.adaptive(
+              value: mainTimetableName == tt.name,
+              onChanged: (bool? value) {
+                assert(value != null);
+                if (value == null) return;
+                if (value) {
+                  TimetableManager().settings.setVar(
+                        Settings.mainTimetableNameKey,
+                        tt.name,
+                      );
+                } else {
+                  TimetableManager().settings.setVar(
+                        Settings.mainTimetableNameKey,
+                        null,
+                      );
+                }
+                setState(() {});
+              },
+            ),
+            IconButton(
+              onPressed: () async {
+                await Navigator.of(context).push<bool>(
+                  MaterialPageRoute(
+                    builder: (context) => CreateTimeTableScreen(timetable: tt),
+                  ),
+                );
+
+                setState(() {});
+              },
+              icon: const Icon(Icons.edit),
+            ),
+            IconButton(
+              onPressed: () async {
+                bool delete = await Utils.showBoolInputDialog(
+                  context,
+                  question: AppLocalizationsManager.localizations
+                      .strDoYouWantToDeleteX(
+                    tt.name,
+                  ),
+                );
+
+                if (!delete) return;
+
+                bool removed = TimetableManager().removeTimetable(tt);
+
+                setState(() {});
+
+                if (!context.mounted) return;
+
+                if (removed) {
+                  Utils.showInfo(
+                    context,
+                    type: InfoType.success,
+                    msg: AppLocalizationsManager.localizations
+                        .strSuccessfullyRemoved(
+                      tt.name,
+                    ),
+                  );
+                } else {
+                  Utils.showInfo(
+                    context,
+                    type: InfoType.error,
+                    msg: AppLocalizationsManager.localizations
+                        .strCouldNotBeRemoved(
+                      tt.name,
+                    ),
+                  );
+                }
+              },
+              icon: const Icon(
+                Icons.delete,
+                color: Colors.red,
+              ),
+            )
+          ],
+        ),
       ),
     );
   }

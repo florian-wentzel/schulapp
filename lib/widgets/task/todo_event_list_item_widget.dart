@@ -61,7 +61,7 @@ class TodoEventListItemWidget extends StatelessWidget {
         vertical: 4,
       ),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(8),
         color: Theme.of(context).cardColor,
       ),
       child: ListTile(

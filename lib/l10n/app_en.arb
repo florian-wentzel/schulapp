@@ -1,6 +1,7 @@
 {
   "@@locale": "en",
   "language_name": "Englisch",
+  "version_0_3_0": "Custom tasks are now displayed above the day name & many UI improvements",
   "version_0_2_8": "Holidays are displayed on the timetable",
   "version_0_2_7": "Added public holidays",
   "version_0_2_6": "New file-extensions (.timetable & .schulbackup)",
@@ -117,7 +118,7 @@
   "strDoYouWantToFinishXTasks": "Do you want to {finishString} {count} tasks?",
   "strDoYouWantToDeleteXTasks": "Do you want to delete {count} tasks?",
   "strEdit": "Edit",
-  "strEditSchoolGradeSubjectX": "Edit: {subjectName}",
+  "strEditSchoolGradeSubject": "Edit Grading",
   "strSchoolGradeSubjectX": "Subject: {subjectName}",
   "strSubjectName": "Subject name",
   "strAddGradegroup": "Add Gradegroup",

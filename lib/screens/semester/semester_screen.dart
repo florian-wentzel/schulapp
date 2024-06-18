@@ -203,7 +203,6 @@ class _SemesterScreenState extends State<SemesterScreen> {
             return SchoolGradeSubjectWidget(
               subject: subject,
               semester: widget.semester,
-              isFlightShuttleBuilder: true,
             );
           },
           child: InkWell(

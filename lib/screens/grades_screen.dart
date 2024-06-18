@@ -92,12 +92,9 @@ class _GradesScreenState extends State<GradesScreen> {
       );
     }
 
-    return Padding(
-      padding: const EdgeInsets.all(8),
-      child: ListView.builder(
-        itemCount: TimetableManager().semesters.length,
-        itemBuilder: itemBuilder,
-      ),
+    return ListView.builder(
+      itemCount: TimetableManager().semesters.length,
+      itemBuilder: itemBuilder,
     );
   }
 
@@ -109,9 +106,17 @@ class _GradesScreenState extends State<GradesScreen> {
         "";
     final heroString = semester.name;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2.0),
+    return Container(
+      margin: const EdgeInsets.symmetric(
+        horizontal: 8,
+        vertical: 4,
+      ),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+        color: Theme.of(context).cardColor,
+      ),
       child: ListTile(
+        contentPadding: const EdgeInsets.all(8),
         onTap: () async {
           await Navigator.of(context).push(
             MaterialPageRoute(

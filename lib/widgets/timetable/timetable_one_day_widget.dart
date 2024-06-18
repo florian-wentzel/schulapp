@@ -272,6 +272,12 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
                             );
                           },
                         ),
+                        customTask == null
+                            ? const SizedBox.shrink()
+                            : Text(
+                                customTask.linkedSubjectName,
+                                textAlign: TextAlign.center,
+                              ),
                         Text(
                           day.name,
                           style: Theme.of(context).textTheme.headlineSmall,

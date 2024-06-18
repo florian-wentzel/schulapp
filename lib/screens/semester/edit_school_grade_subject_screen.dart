@@ -31,14 +31,8 @@ class _EditSchoolGradeSubjectScreenState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Row(
-          children: [
-            Text(
-              AppLocalizationsManager.localizations.strEditSchoolGradeSubjectX(
-                widget.subject.name,
-              ),
-            ),
-          ],
+        title: Text(
+          AppLocalizationsManager.localizations.strEditSchoolGradeSubject,
         ),
       ),
       body: _body(),
@@ -86,7 +80,6 @@ class _EditSchoolGradeSubjectScreenState
                   return SchoolGradeSubjectWidget(
                     semester: widget.semester,
                     subject: widget.subject,
-                    isFlightShuttleBuilder: true,
                   );
                 },
                 child: SchoolGradeSubjectWidget(
@@ -144,13 +137,16 @@ class _EditSchoolGradeSubjectScreenState
     GradeGroup gg = widget.subject.gradeGroups[index];
     return Container(
       width: MediaQuery.of(context).size.width,
-      margin: const EdgeInsets.all(4),
+      margin: const EdgeInsets.symmetric(
+        horizontal: 8,
+        vertical: 4,
+      ),
       padding: const EdgeInsets.symmetric(
         horizontal: 16,
         vertical: 8,
       ),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(8),
         color: Theme.of(context).cardColor,
       ),
       child: Column(

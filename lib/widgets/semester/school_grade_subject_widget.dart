@@ -8,14 +8,12 @@ import 'package:schulapp/code_behind/utils.dart';
 class SchoolGradeSubjectWidget extends StatelessWidget {
   SchoolGradeSubject subject;
   SchoolSemester semester;
-  bool isFlightShuttleBuilder;
   bool showName;
 
   SchoolGradeSubjectWidget({
     super.key,
     required this.subject,
     required this.semester,
-    this.isFlightShuttleBuilder = false,
     this.showName = true,
   });
 
@@ -27,8 +25,16 @@ class SchoolGradeSubjectWidget extends StatelessWidget {
 
     return Container(
       width: MediaQuery.of(context).size.width,
-      height: 60,
-      margin: const EdgeInsets.all(16),
+      height: 75,
+      margin: const EdgeInsets.symmetric(
+        horizontal: 8,
+        vertical: 4,
+      ),
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(8),
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -43,6 +49,7 @@ class SchoolGradeSubjectWidget extends StatelessWidget {
                     child: Text(
                       subject.name,
                       textAlign: TextAlign.left,
+                      overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.headlineMedium,
                     ),
                   ),
@@ -50,52 +57,50 @@ class SchoolGradeSubjectWidget extends StatelessWidget {
                 const SizedBox(
                   width: 8,
                 ),
-                if (isFlightShuttleBuilder)
-                  Container()
-                else
-                  Flexible(
-                    child: ListView.builder(
-                      shrinkWrap: true,
-                      scrollDirection: Axis.horizontal,
-                      itemCount: grades.length,
-                      itemBuilder: (context, index) {
-                        final grade = grades[index];
+                Flexible(
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    scrollDirection: Axis.horizontal,
+                    itemCount: grades.length,
+                    itemBuilder: (context, index) {
+                      final grade = grades[index];
 
-                        if (grade == null) {
-                          return const Center(child: Text("|  "));
-                        }
+                      if (grade == null) {
+                        return const Center(child: Text("|  "));
+                      }
 
-                        return Center(
-                          child: Text(
-                            "${grade.toString()}  ",
-                            style: TextStyle(
-                              color: Utils.getGradeColor(grade.grade),
-                            ),
+                      return Center(
+                        child: Text(
+                          "${grade.toString()}  ",
+                          style: TextStyle(
+                            color: Utils.getGradeColor(grade.grade),
                           ),
-                        );
-                      },
-                    ),
+                        ),
+                      );
+                    },
                   ),
+                ),
               ],
             ),
           ),
           Container(
-            width: isFlightShuttleBuilder ? 80 : null,
-            height: isFlightShuttleBuilder ? 80 : null,
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: Utils.getGradeColor(subject.getGradeAverage().toInt()),
             ),
             child: Center(
-              child: Text(
-                subject.getGradeAverageString(),
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      decoration: subject.endSetGrade != null
-                          ? TextDecoration.underline
-                          : null,
-                    ),
+              child: FittedBox(
+                fit: BoxFit.contain,
+                child: Text(
+                  subject.getGradeAverageString(),
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        decoration: subject.endSetGrade != null
+                            ? TextDecoration.underline
+                            : null,
+                      ),
+                ),
               ),
             ),
           ),
