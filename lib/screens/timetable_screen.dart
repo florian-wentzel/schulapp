@@ -1,11 +1,15 @@
+import 'dart:io';
+
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:go_router/go_router.dart';
 import 'package:schulapp/app.dart';
+import 'package:schulapp/code_behind/get_file_intent_manager.dart';
 import 'package:schulapp/code_behind/holidays.dart';
 import 'package:schulapp/code_behind/holidays_manager.dart';
+import 'package:schulapp/code_behind/save_manager.dart';
 import 'package:schulapp/code_behind/school_semester.dart';
 import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/time_table.dart';
@@ -14,6 +18,7 @@ import 'package:schulapp/code_behind/todo_event.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/code_behind/version_manager.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
+import 'package:schulapp/screens/all_timetables_screen.dart';
 import 'package:schulapp/screens/grades_screen.dart';
 import 'package:schulapp/screens/hello_screen.dart';
 import 'package:schulapp/screens/holidays_screen.dart';
@@ -47,7 +52,8 @@ class TimetableScreen extends StatefulWidget {
   State<TimetableScreen> createState() => _TimetableScreenState();
 }
 
-class _TimetableScreenState extends State<TimetableScreen> {
+class _TimetableScreenState extends State<TimetableScreen>
+    with WidgetsBindingObserver {
   final _verticalPageViewController = PageController();
 
   Holidays? currentOrNextHolidays;
@@ -56,11 +62,20 @@ class _TimetableScreenState extends State<TimetableScreen> {
 
   @override
   void initState() {
+    WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback(
       _postFrameCallback,
     );
     _fetchHolidays();
+
+    getOpenFileUrl();
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    WidgetsBinding.instance.removeObserver(this);
   }
 
   @override
@@ -80,6 +95,13 @@ class _TimetableScreenState extends State<TimetableScreen> {
       floatingActionButton: _floatingActionButton(context),
       body: _body(),
     );
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      getOpenFileUrl();
+    }
   }
 
   Widget? _floatingActionButton(BuildContext context) {
@@ -195,6 +217,73 @@ class _TimetableScreenState extends State<TimetableScreen> {
       width: width,
       height: height,
     );
+  }
+
+  Future getOpenFileUrl() async {
+    String? url = await GetFileIntentManager.getOpenFileUrl();
+
+    if (url == null) return;
+
+    final file = File(url);
+
+    if (!file.existsSync()) {
+      return;
+    }
+
+    if (mounted) {
+      Utils.showInfo(
+        context,
+        duration: const Duration(seconds: 1),
+        msg: AppLocalizationsManager.localizations.strImportingTimetable,
+      );
+    }
+    Timetable? timetable;
+    try {
+      timetable = SaveManager().importTimetable(file);
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+
+    await Future.delayed(
+      const Duration(seconds: 1),
+    );
+
+    if (mounted) {
+      if (timetable == null) {
+        Utils.showInfo(
+          context,
+          msg: AppLocalizationsManager.localizations.strImportingFailed,
+          type: InfoType.error,
+        );
+      } else {
+        Utils.showInfo(
+          context,
+          msg: AppLocalizationsManager.localizations.strImportSuccessful,
+          type: InfoType.success,
+        );
+      }
+    }
+    if (timetable == null) return;
+
+    await Future.delayed(
+      const Duration(milliseconds: 250),
+    );
+
+    if (!mounted) return;
+
+    bool? timetableSaved = await Navigator.of(context).push<bool?>(
+      MaterialPageRoute(
+        builder: (context) => CreateTimeTableScreen(timetable: timetable!),
+      ),
+    );
+
+    timetableSaved ??= false;
+
+    if (!timetableSaved) return;
+
+    if (mounted) {
+      context.go(AllTimetablesScreen.route);
+    }
   }
 
   Widget _timetableBuilder({

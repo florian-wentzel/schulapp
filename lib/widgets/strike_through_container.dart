@@ -22,11 +22,13 @@ class StrikeThroughContainerController {
 class StrikeThroughContainer extends StatefulWidget {
   StrikeThroughContainerController controller;
   Widget child;
+  Size? logicalSize;
 
   StrikeThroughContainer({
     super.key,
     required this.child,
     required this.controller,
+    this.logicalSize,
   });
 
   @override
@@ -69,8 +71,16 @@ class _StrikeThroughContainerState extends State<StrikeThroughContainer>
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-    final height = MediaQuery.of(context).size.height;
+    double width = -1;
+    double height = -1;
+
+    if (widget.logicalSize == null) {
+      width = MediaQuery.of(context).size.width;
+      height = MediaQuery.of(context).size.height;
+    } else {
+      width = widget.logicalSize!.width;
+      height = widget.logicalSize!.height;
+    }
     return Stack(
       children: [
         AnimatedBuilder(

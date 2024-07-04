@@ -1,5 +1,3 @@
-///Routes and Theme updates
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:schulapp/code_behind/settings.dart';
@@ -7,6 +5,7 @@ import 'package:schulapp/code_behind/time_table_manager.dart';
 import 'package:schulapp/code_behind/todo_event.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/code_behind/version_manager.dart';
+import 'package:schulapp/home_widget/home_widget_manager.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/screens/all_timetables_screen.dart';
 import 'package:schulapp/screens/grades_screen.dart';
@@ -19,6 +18,7 @@ import 'package:schulapp/theme/theme_manager.dart';
 import 'package:schulapp/theme/themes.dart';
 import 'package:schulapp/widgets/custom_bottom_navigation_bar.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:schulapp/widgets/timetable/timetable_one_day_widget.dart';
 
 final _router = GoRouter(
   routes: [
@@ -149,6 +149,8 @@ class _MainAppState extends State<MainApp> {
       );
     }
 
+    WidgetsBinding.instance.addPostFrameCallback(postFrameCallback);
+
     super.initState();
   }
 
@@ -169,6 +171,39 @@ class _MainAppState extends State<MainApp> {
       darkTheme: darkTheme,
       themeMode: ThemeManager().themeMode,
       routerConfig: _router,
+    );
+  }
+
+  Future<void> postFrameCallback(Duration timeStamp) async {
+    const double width = 200;
+    const double height = 350;
+
+    const logicalSize = Size(width, height);
+
+    await HomeWidgetManager.initialize();
+    final timetable = Utils.getHomescreenTimetable();
+
+    if (timetable == null) return;
+
+    Widget homeWidget = Material(
+      child: SizedBox(
+        width: width,
+        height: height,
+        child: Center(
+          child: TimetableOneDayWidget(
+            showTodoEvents: true,
+            timetable: timetable,
+            logicalSize: logicalSize,
+          ),
+        ),
+      ),
+    );
+
+    if (!mounted) return;
+    HomeWidgetManager.update(
+      context,
+      homeWidget,
+      logicalSize,
     );
   }
 }

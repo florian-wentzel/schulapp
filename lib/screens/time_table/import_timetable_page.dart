@@ -59,7 +59,6 @@ class _ImportTimetablePageState extends State<ImportTimetablePage> {
         allowMultiple: false,
         type: FileType.custom,
         allowedExtensions: [
-          "zip",
           SaveManager.timetableExportExtension.replaceAll(".", "")
         ],
       );

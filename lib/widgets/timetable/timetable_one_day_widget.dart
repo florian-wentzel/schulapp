@@ -18,11 +18,13 @@ import 'package:schulapp/code_behind/todo_event_util_functions.dart';
 class TimetableOneDayWidget extends StatefulWidget {
   Timetable timetable;
   bool showTodoEvents;
+  Size? logicalSize;
 
   TimetableOneDayWidget({
     super.key,
     required this.timetable,
     required this.showTodoEvents,
+    this.logicalSize,
   });
 
   @override
@@ -31,7 +33,7 @@ class TimetableOneDayWidget extends StatefulWidget {
 
 class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
   static const double minLessonWidth = 100;
-  static const double minLessonHeight = 50;
+  static const double minLessonHeight = 30;
   static const int pagesCount = 1000;
   //monday of curr week
   static const int initialMondayPageIndex = pagesCount ~/ 2;
@@ -63,14 +65,24 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
 
   @override
   Widget build(BuildContext context) {
-    lessonWidth = MediaQuery.of(context).size.width * 0.8 / 2;
+    double mediaQueryWidth = -1;
+    double mediaQueryHeight = -1;
+
+    if (widget.logicalSize == null) {
+      mediaQueryWidth = MediaQuery.of(context).size.width;
+      mediaQueryHeight = MediaQuery.of(context).size.height;
+    } else {
+      mediaQueryWidth = widget.logicalSize!.width;
+      mediaQueryHeight = widget.logicalSize!.height;
+    }
+
+    lessonWidth = mediaQueryWidth * 0.8 / 2;
     if (lessonWidth < minLessonWidth) {
       lessonWidth = minLessonWidth;
     }
 
-    lessonHeight = MediaQuery.of(context).size.height *
-        0.8 /
-        (widget.timetable.maxLessonCount + 1);
+    lessonHeight =
+        mediaQueryHeight * 0.8 / (widget.timetable.maxLessonCount + 1);
 
     if (lessonHeight < minLessonHeight) {
       lessonHeight = minLessonHeight;
@@ -79,6 +91,27 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
     selectedColor = Theme.of(context).colorScheme.secondary.withAlpha(30);
 
     unselectedColor = Colors.transparent;
+
+    if (widget.logicalSize != null) {
+      DateTime currMonday = Utils.getWeekDay(
+        DateTime.now().copyWith(
+          hour: 0,
+          minute: 0,
+          second: 0,
+          millisecond: 0,
+          microsecond: 0,
+        ),
+        DateTime.monday,
+      );
+
+      currWeekIndex = Utils.getWeekIndex(currMonday);
+      currYear = currMonday.year;
+
+      return _createDay(
+        currMonday: currMonday,
+        dayIndex: Utils.getCurrentWeekDayIndex(),
+      );
+    }
 
     return SizedBox(
       width: lessonWidth * 2,
@@ -447,6 +480,7 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
               child: StrikeThroughContainer(
                 key: UniqueKey(),
                 controller: containerController,
+                logicalSize: widget.logicalSize,
                 child: Container(
                   width: lessonWidth * 0.8,
                   height: lessonHeight * 0.8,
