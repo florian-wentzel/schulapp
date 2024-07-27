@@ -18,7 +18,6 @@ import 'package:schulapp/theme/theme_manager.dart';
 import 'package:schulapp/theme/themes.dart';
 import 'package:schulapp/widgets/custom_bottom_navigation_bar.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:schulapp/widgets/timetable/timetable_one_day_widget.dart';
 
 final _router = GoRouter(
   routes: [
@@ -175,35 +174,8 @@ class _MainAppState extends State<MainApp> {
   }
 
   Future<void> postFrameCallback(Duration timeStamp) async {
-    const double width = 200;
-    const double height = 350;
-
-    const logicalSize = Size(width, height);
-
     await HomeWidgetManager.initialize();
-    final timetable = Utils.getHomescreenTimetable();
-
-    if (timetable == null) return;
-
-    Widget homeWidget = Material(
-      child: SizedBox(
-        width: width,
-        height: height,
-        child: Center(
-          child: TimetableOneDayWidget(
-            showTodoEvents: true,
-            timetable: timetable,
-            logicalSize: logicalSize,
-          ),
-        ),
-      ),
-    );
-
     if (!mounted) return;
-    HomeWidgetManager.update(
-      context,
-      homeWidget,
-      logicalSize,
-    );
+    await HomeWidgetManager.updateWithDefaultTimetable(context: context);
   }
 }

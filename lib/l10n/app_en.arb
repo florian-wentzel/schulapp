@@ -1,6 +1,7 @@
 {
   "@@locale": "en",
   "language_name": "Englisch",
+  "version_0_4_0": "The timetable can now be added to the home screen, and \".timetable\" files can now be opened directly.",
   "version_0_3_0": "Custom tasks are now displayed above the day name & many UI improvements",
   "version_0_2_8": "Holidays are displayed on the timetable",
   "version_0_2_7": "Added public holidays",
@@ -227,5 +228,8 @@
   "strDoYouWantToContinue": "Do you want to continue?",
   "strRestoreFailed": "Restore failed!\n{path}",
   "strRestoredSuccessfully": "Restored successfully!\n{path}",
-  "strThereWasAnError": "There was an error! :("
+  "strThereWasAnError": "There was an error! :(",
+  "strWidgets": "Widgets",
+  "strPinToHomeScreen": "Add timetable to home screen",
+  "strYouDontHaveATimetableJet": "It looks like you don't have a timetable set up yet.\nPlease create one and try again."
 }

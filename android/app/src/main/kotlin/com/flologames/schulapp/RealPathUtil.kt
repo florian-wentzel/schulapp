@@ -1,4 +1,4 @@
-package com.example.schulapp
+package com.flologames.schulapp
 
 import android.annotation.SuppressLint
 import android.content.ContentUris

@@ -4,4 +4,7 @@
         <attr name="appWidgetInnerRadius" format="dimension" />
         <attr name="appWidgetRadius" format="dimension" />
     </declare-styleable>
+    <declare-styleable name="RoundCornerFrameLayout">
+        <attr name="corner_radius" format="dimension"/>
+    </declare-styleable>
 </resources>

@@ -8,6 +8,7 @@ import 'package:schulapp/code_behind/time_table.dart';
 import 'package:schulapp/code_behind/time_table_manager.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/code_behind/version_manager.dart';
+import 'package:schulapp/home_widget/home_widget_manager.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/screens/versions_screen.dart';
 import 'package:schulapp/theme/theme_manager.dart';
@@ -53,6 +54,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _themeSelector(),
         _selectLanguage(),
         _openMainSemesterAutomatically(),
+        _pinHomeWidget(),
         _createBackup(),
         _currentVersion(),
       ],
@@ -240,6 +242,32 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 );
             setState(() {});
           },
+        ),
+      ],
+    );
+  }
+
+  Widget _pinHomeWidget() {
+    return listItem(
+      title: AppLocalizationsManager.localizations.strWidgets,
+      body: [
+        ElevatedButton(
+          onPressed: () async {
+            Timetable? timetable = Utils.getHomescreenTimetable();
+
+            if (timetable == null) {
+              Utils.showInfo(
+                context,
+                msg: AppLocalizationsManager
+                    .localizations.strYouDontHaveATimetableJet,
+                type: InfoType.error,
+              );
+              return;
+            }
+
+            await HomeWidgetManager.requestToAddHomeWidget();
+          },
+          child: Text(AppLocalizationsManager.localizations.strPinToHomeScreen),
         ),
       ],
     );

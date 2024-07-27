@@ -59,7 +59,6 @@ class Settings {
   static const mainSemesterNameKey = "mainSemester";
   static const defaultGradeGroupsKey = "defaultGradeGroups";
   static const showLessonNumbersKey = "showLessonNumbers";
-  static const timetableLessonWidthKey = "timetableLessonWidth";
   static const openMainSemesterAutomaticallyKey =
       "openMainSemesterAutomatically";
   static const themeModeKey = "theme";
@@ -118,10 +117,6 @@ class Settings {
     SettingsVar<String?>(
       key: lastUsedVersionKey,
       defaultValue: () => null,
-    ),
-    SettingsVar<double>(
-      key: timetableLessonWidthKey,
-      defaultValue: () => 100,
     ),
     SettingsVar<bool>(
       key: showLessonNumbersKey,

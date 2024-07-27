@@ -1,13 +1,7 @@
-package com.example.schulapp
+package com.flologames.schulapp
 
-import android.content.Context
 import android.content.Intent
-import android.database.Cursor
-import android.net.Uri
 import android.os.Bundle
-import android.provider.MediaStore
-import androidx.annotation.NonNull
-import androidx.loader.content.CursorLoader
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -17,8 +11,8 @@ import io.flutter.plugins.GeneratedPluginRegistrant
 class MainActivity: FlutterActivity() {
     private val CHANNEL = "GET_FILE_INTENT_CHANNEL"
 
-    var openPath: String? = null
-    override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
+    private var openPath: String? = null
+    override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         GeneratedPluginRegistrant.registerWith(flutterEngine)
         val channel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL)
         channel.setMethodCallHandler { call, result ->

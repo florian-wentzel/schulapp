@@ -1,0 +1,9 @@
+How to Update:
+ - Change version in pubspec.yaml
+ - Add translation at the top of l10n/app_de.arb etc.
+ - Go to VersionManager.dart and add the translation to the _versions map
+
+
+How to change package name:
+ - run the following command in console (in project dir)
+   "dart run change_app_package_name:main com.new.package.name"

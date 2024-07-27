@@ -6,6 +6,7 @@ import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/time_table.dart';
 import 'package:schulapp/code_behind/time_table_manager.dart';
 import 'package:schulapp/code_behind/utils.dart';
+import 'package:schulapp/home_widget/home_widget_manager.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/widgets/timetable/timetable_drop_target_widget.dart';
 import 'package:schulapp/widgets/timetable/timetable_one_day_drop_target_widget.dart';
@@ -67,6 +68,7 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
 
         if (_canPop && context.mounted) {
           MainApp.changeNavBarVisibilitySecure(context, value: true);
+          HomeWidgetManager.updateWithDefaultTimetable(context: context);
           Navigator.of(context).pop();
         }
       },
@@ -154,6 +156,9 @@ class _CreateTimeTableScreenState extends State<CreateTimeTableScreen> {
 
                   if (!mounted) return;
 
+                  HomeWidgetManager.updateWithDefaultTimetable(
+                    context: context,
+                  );
                   //weil neuer timetable erstellt return true damit kann man später vielleicht was anfangen
                   Navigator.of(context).pop(true);
                 },

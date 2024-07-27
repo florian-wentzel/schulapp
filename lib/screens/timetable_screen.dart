@@ -68,7 +68,7 @@ class _TimetableScreenState extends State<TimetableScreen>
     );
     _fetchHolidays();
 
-    getOpenFileUrl();
+    _getOpenFileUrl();
     super.initState();
   }
 
@@ -100,7 +100,7 @@ class _TimetableScreenState extends State<TimetableScreen>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      getOpenFileUrl();
+      _getOpenFileUrl();
     }
   }
 
@@ -219,7 +219,9 @@ class _TimetableScreenState extends State<TimetableScreen>
     );
   }
 
-  Future getOpenFileUrl() async {
+  Future<void> _getOpenFileUrl() async {
+    if (kIsWeb) return;
+    if (!Platform.isAndroid) return;
     String? url = await GetFileIntentManager.getOpenFileUrl();
 
     if (url == null) return;

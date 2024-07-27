@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.flologames.schulapp">
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -13,8 +14,8 @@
         android:icon="@mipmap/icon"
         android:label="Schulapp">
         <receiver
-            android:name=".TimetableOneDay"
-            android:exported="false">
+            android:name="TimetableOneDay"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
@@ -23,6 +24,16 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/timetable_one_day_info" />
         </receiver>
+
+        <service
+            android:name="TimetableRemoteViewsService"
+            android:permission="android.permission.BIND_REMOTEVIEWS"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.widget.RemoteViewsService" />
+            </intent-filter>
+        </service>
+
         <receiver
             android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver"
             android:exported="false" />
@@ -38,7 +49,7 @@
         </receiver>
 
         <activity
-            android:name=".MainActivity"
+            android:name="MainActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:exported="true"
             android:hardwareAccelerated="true"
@@ -75,29 +86,6 @@
                 <data android:mimeType="*/*" />
                 <data android:pathPattern=".*\\.timetable" />
             </intent-filter>
-
-            <!--
-            <intent-filter android:icon="@mipmap/icon" android:label="Schulapp" android:priority="1">
-                <action android:name="android.intent.action.VIEW"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <category android:name="android.intent.category.BROWSABLE"/>
-                <data android:scheme="content" />
-                <data android:scheme="http" />
-                <data android:scheme="file" />
-                <data android:mimeType="*/*" />
-                <data android:pathPattern=".timetable" />
-            </intent-filter>
-            <intent-filter android:icon="@mipmap/icon" android:label="Schulapp" android:priority="1">
-                <action android:name="android.intent.action.VIEW"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <category android:name="android.intent.category.BROWSABLE"/>
-                <data android:scheme="content" />
-                <data android:scheme="http" />
-                <data android:scheme="file" />
-                <data android:mimeType="*/*" />
-                <data android:pathPattern=".schulbackup" />
-            </intent-filter>
-            -->
         </activity>
         <!--
  Don't delete the meta-data below.

@@ -5,6 +5,7 @@ import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/time_table.dart';
 import 'package:schulapp/code_behind/time_table_manager.dart';
 import 'package:schulapp/code_behind/utils.dart';
+import 'package:schulapp/home_widget/home_widget_manager.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/screens/time_table/create_timetable_screen.dart';
 import 'package:schulapp/screens/time_table/import_export_timetable_screen.dart';
@@ -150,6 +151,7 @@ class _AllTimetablesScreenState extends State<AllTimetablesScreen> {
                         null,
                       );
                 }
+                HomeWidgetManager.updateWithDefaultTimetable();
                 setState(() {});
               },
             ),
