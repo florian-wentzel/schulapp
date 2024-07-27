@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:fl_chart/fl_chart.dart';
@@ -5,8 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:go_router/go_router.dart';
+import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:schulapp/app.dart';
-import 'package:schulapp/code_behind/get_file_intent_manager.dart';
 import 'package:schulapp/code_behind/holidays.dart';
 import 'package:schulapp/code_behind/holidays_manager.dart';
 import 'package:schulapp/code_behind/save_manager.dart';
@@ -52,8 +53,9 @@ class TimetableScreen extends StatefulWidget {
   State<TimetableScreen> createState() => _TimetableScreenState();
 }
 
-class _TimetableScreenState extends State<TimetableScreen>
-    with WidgetsBindingObserver {
+class _TimetableScreenState extends State<TimetableScreen> {
+  StreamSubscription? _intentSubscription;
+
   final _verticalPageViewController = PageController();
 
   Holidays? currentOrNextHolidays;
@@ -62,20 +64,20 @@ class _TimetableScreenState extends State<TimetableScreen>
 
   @override
   void initState() {
-    WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback(
       _postFrameCallback,
     );
     _fetchHolidays();
 
-    _getOpenFileUrl();
+    _initReceiveSharingIntent();
+
     super.initState();
   }
 
   @override
   void dispose() {
+    _intentSubscription?.cancel();
     super.dispose();
-    WidgetsBinding.instance.removeObserver(this);
   }
 
   @override
@@ -95,13 +97,6 @@ class _TimetableScreenState extends State<TimetableScreen>
       floatingActionButton: _floatingActionButton(context),
       body: _body(),
     );
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      _getOpenFileUrl();
-    }
   }
 
   Widget? _floatingActionButton(BuildContext context) {
@@ -217,75 +212,6 @@ class _TimetableScreenState extends State<TimetableScreen>
       width: width,
       height: height,
     );
-  }
-
-  Future<void> _getOpenFileUrl() async {
-    if (kIsWeb) return;
-    if (!Platform.isAndroid) return;
-    String? url = await GetFileIntentManager.getOpenFileUrl();
-
-    if (url == null) return;
-
-    final file = File(url);
-
-    if (!file.existsSync()) {
-      return;
-    }
-
-    if (mounted) {
-      Utils.showInfo(
-        context,
-        duration: const Duration(seconds: 1),
-        msg: AppLocalizationsManager.localizations.strImportingTimetable,
-      );
-    }
-    Timetable? timetable;
-    try {
-      timetable = SaveManager().importTimetable(file);
-    } catch (e) {
-      debugPrint(e.toString());
-    }
-
-    await Future.delayed(
-      const Duration(seconds: 1),
-    );
-
-    if (mounted) {
-      if (timetable == null) {
-        Utils.showInfo(
-          context,
-          msg: AppLocalizationsManager.localizations.strImportingFailed,
-          type: InfoType.error,
-        );
-      } else {
-        Utils.showInfo(
-          context,
-          msg: AppLocalizationsManager.localizations.strImportSuccessful,
-          type: InfoType.success,
-        );
-      }
-    }
-    if (timetable == null) return;
-
-    await Future.delayed(
-      const Duration(milliseconds: 250),
-    );
-
-    if (!mounted) return;
-
-    bool? timetableSaved = await Navigator.of(context).push<bool?>(
-      MaterialPageRoute(
-        builder: (context) => CreateTimeTableScreen(timetable: timetable!),
-      ),
-    );
-
-    timetableSaved ??= false;
-
-    if (!timetableSaved) return;
-
-    if (mounted) {
-      context.go(AllTimetablesScreen.route);
-    }
   }
 
   Widget _timetableBuilder({
@@ -706,6 +632,96 @@ class _TimetableScreenState extends State<TimetableScreen>
         ),
       );
       VersionManager().updateLastUsedVersion();
+    }
+  }
+
+  void _initReceiveSharingIntent() async {
+    if (!Platform.isAndroid && !Platform.isIOS) {
+      return;
+    }
+
+    try {
+      ReceiveSharingIntent.instance.getInitialMedia().then(_handleFiles);
+      _intentSubscription = ReceiveSharingIntent.instance
+          .getMediaStream()
+          .listen(
+            _handleFiles,
+            onError: (error) => debugPrint("getIntentDataStream error: $error"),
+          );
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+  }
+
+  Future<void> _handleFiles(List<SharedMediaFile> files) async {
+    //only go to all timetablesscreen when user saves timetable
+    bool goToAllTimetables = false;
+
+    for (SharedMediaFile mediaFile in files) {
+      final file = File(mediaFile.path);
+
+      if (!file.existsSync()) {
+        continue;
+      }
+
+      if (mounted) {
+        Utils.showInfo(
+          context,
+          duration: const Duration(seconds: 1),
+          msg: AppLocalizationsManager.localizations.strImportingTimetable,
+        );
+      }
+
+      Timetable? timetable;
+
+      try {
+        timetable = SaveManager().importTimetable(file);
+      } catch (e) {
+        debugPrint(e.toString());
+      }
+
+      await Future.delayed(
+        const Duration(milliseconds: 500),
+      );
+
+      if (mounted) {
+        if (timetable == null) {
+          Utils.showInfo(
+            context,
+            msg: AppLocalizationsManager.localizations.strImportingFailed,
+            type: InfoType.error,
+          );
+        } else {
+          Utils.showInfo(
+            context,
+            msg: AppLocalizationsManager.localizations.strImportSuccessful,
+            type: InfoType.success,
+          );
+        }
+      }
+      if (timetable == null) continue;
+
+      await Future.delayed(
+        const Duration(milliseconds: 250),
+      );
+
+      if (!mounted) return;
+
+      bool timetableSaved = await Navigator.of(context).push<bool?>(
+            MaterialPageRoute(
+              builder: (context) =>
+                  CreateTimeTableScreen(timetable: timetable!),
+            ),
+          ) ??
+          false;
+
+      if (timetableSaved) goToAllTimetables = true;
+    }
+
+    if (!goToAllTimetables) return;
+
+    if (mounted) {
+      context.go(AllTimetablesScreen.route);
     }
   }
 }

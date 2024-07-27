@@ -265,6 +265,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               return;
             }
 
+            await HomeWidgetManager.updateWithDefaultTimetable();
             await HomeWidgetManager.requestToAddHomeWidget();
           },
           child: Text(AppLocalizationsManager.localizations.strPinToHomeScreen),

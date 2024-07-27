@@ -1,7 +1,8 @@
 {
   "@@locale": "de",
   "language_name": "Deutsch",
-  "version_0_4_0": "Stundenplan kann nun zum Startbildschirm hinzugefügt werden und \".timetable\"-Dateien können nun direkt geöffnet werden.",
+  "version_0_4_1": "Fehlerbehebung beim öffnen von \".timetable\"-Datein",
+  "version_0_4_0": "Stundenplan kann nun zum Startbildschirm hinzugefügt werden und \".timetable\"-Dateien können nun direkt geöffnet werden",
   "version_0_3_0": "Benutzerdefinierte Aufgaben werden nun über dem Tagesnamen angezeigt & viele UI Verbesserungen",
   "version_0_2_8": "Ferien und Feiertage werden nun im Stundenplan angezeigt",
   "version_0_2_7": "Feiertage hinzugefügt",
