@@ -1,6 +1,7 @@
 {
   "@@locale": "de",
   "language_name": "Deutsch",
+  "version_0_4_2": "Auf der Startseite können Aufgaben hinzugefügt werden",
   "version_0_4_1": "Fehlerbehebung beim öffnen von \".timetable\"-Datein",
   "version_0_4_0": "Stundenplan kann nun zum Startbildschirm hinzugefügt werden und \".timetable\"-Dateien können nun direkt geöffnet werden",
   "version_0_3_0": "Benutzerdefinierte Aufgaben werden nun über dem Tagesnamen angezeigt & viele UI Verbesserungen",
@@ -33,7 +34,7 @@
   "strFriday": "Freitag",
   "strSaturday": "Samstag",
   "strSunday": "Sonntag",
-  "strCreateTimetable": "Stundenplan Erstellen",
+  "strCreateTimetable": "Stundenplan erstellen",
   "strName": "Name",
   "strLessonCount": "Stundenanzahl",
   "strCreate": "Erstellen",

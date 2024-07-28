@@ -283,8 +283,9 @@ class _NotesScreenState extends State<NotesScreen> {
 
   Widget? _floatingActionButton() {
     if (isMultiselectionActive) return null;
+
     return FloatingActionButton(
-      child: const Icon(Icons.add),
+      child: const Icon(Icons.assignment_add),
       onPressed: () async {
         //selectedSubjectName, isCustomTask
         (String, bool)? selectedSubjectNameTuple =

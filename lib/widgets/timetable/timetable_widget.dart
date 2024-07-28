@@ -809,7 +809,7 @@ class _CustomPopUpShowLessonState extends State<CustomPopUpShowLesson> {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     child: const Icon(
-                      Icons.add_box,
+                      Icons.assignment_add,
                       size: 42,
                     ),
                   ),

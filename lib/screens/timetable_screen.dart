@@ -111,8 +111,44 @@ class _TimetableScreenState extends State<TimetableScreen> {
       animationCurve: Curves.elasticInOut,
       children: [
         SpeedDialChild(
-          child: const Icon(Icons.add),
+          child: const Icon(Icons.assignment_add),
           backgroundColor: Colors.indigo,
+          foregroundColor: Colors.white,
+          label: AppLocalizationsManager.localizations.strCreateATask,
+          onTap: () async {
+            //selectedSubjectName, isCustomTask
+            (String, bool)? selectedSubjectNameTuple =
+                await showSelectSubjectNameSheet(
+              context,
+              title: AppLocalizationsManager
+                  .localizations.strSelectSubjectToAddTaskTo,
+              allowCustomNames: true,
+            );
+
+            if (selectedSubjectNameTuple == null) return;
+            if (!context.mounted) return;
+
+            String selectedSubjectName = selectedSubjectNameTuple.$1;
+            bool isCustomTask = selectedSubjectNameTuple.$2;
+
+            TodoEvent? event = await createNewTodoEventSheet(
+              context,
+              linkedSubjectName: selectedSubjectName,
+              isCustomEvent: isCustomTask,
+            );
+
+            if (event == null) return;
+
+            TimetableManager().addOrChangeTodoEvent(event);
+
+            if (!mounted) return;
+
+            setState(() {});
+          },
+        ),
+        SpeedDialChild(
+          child: const Icon(Icons.add),
+          backgroundColor: Colors.blueAccent,
           foregroundColor: Colors.white,
           label: AppLocalizationsManager.localizations.strCreateTimetable,
           onTap: () async {
@@ -126,7 +162,7 @@ class _TimetableScreenState extends State<TimetableScreen> {
         SpeedDialChild(
           child: const Icon(Icons.edit),
           visible: widget.timetable != null,
-          backgroundColor: Colors.blueAccent,
+          backgroundColor: Colors.lightBlue,
           foregroundColor: Colors.white,
           label: AppLocalizationsManager.localizations.strEdit,
           onTap: () async {
@@ -154,7 +190,7 @@ class _TimetableScreenState extends State<TimetableScreen> {
         ),
         SpeedDialChild(
           child: const Icon(Icons.import_export),
-          backgroundColor: Colors.lightBlue,
+          backgroundColor: Colors.lightBlueAccent,
           foregroundColor: Colors.white,
           label: AppLocalizationsManager.localizations.strImportExport,
           onTap: () async {

@@ -1,6 +1,7 @@
 {
   "@@locale": "en",
   "language_name": "Englisch",
+  "version_0_4_2": "Tasks can be added on the homepage",
   "version_0_4_1": "Bug fix when opening \".timetable\" files",
   "version_0_4_0": "The timetable can now be added to the home screen, and \".timetable\" files can now be opened directly.",
   "version_0_3_0": "Custom tasks are now displayed above the day name & many UI improvements",
