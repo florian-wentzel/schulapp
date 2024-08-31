@@ -54,6 +54,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _themeSelector(),
         _selectLanguage(),
         _openMainSemesterAutomatically(),
+        _showTasksOnHomeScreen(),
         _pinHomeWidget(),
         _createBackup(),
         _currentVersion(),
@@ -238,6 +239,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
           onChanged: (value) {
             TimetableManager().settings.setVar(
                   Settings.openMainSemesterAutomaticallyKey,
+                  value,
+                );
+            setState(() {});
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _showTasksOnHomeScreen() {
+    return listItem(
+      title: AppLocalizationsManager.localizations.strShowTasksOnHomeScreen,
+      afterTitle: [
+        Switch.adaptive(
+          value: TimetableManager().settings.getVar(
+                Settings.showTasksOnHomeScreenKey,
+              ),
+          onChanged: (value) {
+            TimetableManager().settings.setVar(
+                  Settings.showTasksOnHomeScreenKey,
                   value,
                 );
             setState(() {});

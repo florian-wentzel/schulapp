@@ -1,6 +1,7 @@
 {
   "@@locale": "de",
   "language_name": "Deutsch",
+  "version_0_4_3": "Auf der Startseite können Aufgaben ein- oder ausgeblendet werden",
   "version_0_4_2": "Auf der Startseite können Aufgaben hinzugefügt werden",
   "version_0_4_1": "Fehlerbehebung beim öffnen von \".timetable\"-Datein",
   "version_0_4_0": "Stundenplan kann nun zum Startbildschirm hinzugefügt werden und \".timetable\"-Dateien können nun direkt geöffnet werden",
@@ -225,5 +226,6 @@
   "strThereWasAnError": "Es ist ein Fehler aufgetreten! :(",
   "strWidgets": "Widgets",
   "strPinToHomeScreen": "Stundenplan zum Startbildschirm hinzufügen",
-  "strYouDontHaveATimetableJet": "Es sieht so aus, als hätten Sie noch keinen Stundenplan eingerichtet.\nBitte erstellen Sie einen und versuchen Sie es erneut."
+  "strYouDontHaveATimetableJet": "Es sieht so aus, als hätten Sie noch keinen Stundenplan eingerichtet.\nBitte erstellen Sie einen und versuchen Sie es erneut.",
+  "strShowTasksOnHomeScreen": "Aufgaben auf der Startseite anzeigen"
 }

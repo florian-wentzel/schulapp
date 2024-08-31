@@ -61,6 +61,7 @@ class Settings {
   static const showLessonNumbersKey = "showLessonNumbers";
   static const openMainSemesterAutomaticallyKey =
       "openMainSemesterAutomatically";
+  static const showTasksOnHomeScreenKey = "showTasksOnHomeScreen";
   static const themeModeKey = "theme";
   static const languageCodeKey = "language";
   static const hiddenDebugModeKey = "hiddenDebugMode";
@@ -124,6 +125,10 @@ class Settings {
     ),
     SettingsVar<bool>(
       key: openMainSemesterAutomaticallyKey,
+      defaultValue: () => true,
+    ),
+    SettingsVar<bool>(
+      key: showTasksOnHomeScreenKey,
       defaultValue: () => true,
     ),
     SettingsVar<bool>(

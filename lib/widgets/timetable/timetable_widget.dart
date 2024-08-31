@@ -302,6 +302,10 @@ class _TimetableWidgetState extends State<TimetableWidget> {
       day: currLessonDateTime,
     );
 
+    final showTaskOnHomescreen = TimetableManager().settings.getVar(
+          Settings.showTasksOnHomeScreenKey,
+        );
+
     lessonWidgets.add(
       InkWell(
         onTap: notTappable
@@ -346,7 +350,7 @@ class _TimetableWidgetState extends State<TimetableWidget> {
                             );
                           },
                         ),
-                        customTask == null
+                        customTask == null || !showTaskOnHomescreen
                             ? const SizedBox.shrink()
                             : Text(
                                 customTask.linkedSubjectName,
@@ -368,7 +372,7 @@ class _TimetableWidgetState extends State<TimetableWidget> {
                     ),
                   ),
                   Visibility(
-                    visible: customTask != null,
+                    visible: customTask != null && showTaskOnHomescreen,
                     child: Align(
                       alignment: Alignment.bottomRight,
                       child: Text(
@@ -390,7 +394,7 @@ class _TimetableWidgetState extends State<TimetableWidget> {
                     ),
                   ),
                   Visibility(
-                    visible: customTask != null,
+                    visible: customTask != null && showTaskOnHomescreen,
                     child: Align(
                       alignment: Alignment.bottomRight,
                       child: Text(
@@ -559,7 +563,7 @@ class _TimetableWidgetState extends State<TimetableWidget> {
                         ),
                       ),
                       Visibility(
-                        visible: currEvent != null,
+                        visible: currEvent != null && showTaskOnHomescreen,
                         child: Align(
                           alignment: Alignment.bottomRight,
                           child: Text(
@@ -581,7 +585,7 @@ class _TimetableWidgetState extends State<TimetableWidget> {
                         ),
                       ),
                       Visibility(
-                        visible: currEvent != null,
+                        visible: currEvent != null && showTaskOnHomescreen,
                         child: Align(
                           alignment: Alignment.bottomRight,
                           child: Text(

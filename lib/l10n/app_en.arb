@@ -1,7 +1,8 @@
 {
   "@@locale": "en",
   "language_name": "Englisch",
-  "version_0_4_2": "Tasks can be added on the homepage",
+  "version_0_4_3": "Tasks can be shown or hidden on the homescreen",
+  "version_0_4_2": "Tasks can be created on the homescreen",
   "version_0_4_1": "Bug fix when opening \".timetable\" files",
   "version_0_4_0": "The timetable can now be added to the home screen, and \".timetable\" files can now be opened directly.",
   "version_0_3_0": "Custom tasks are now displayed above the day name & many UI improvements",
@@ -233,5 +234,6 @@
   "strThereWasAnError": "There was an error! :(",
   "strWidgets": "Widgets",
   "strPinToHomeScreen": "Add timetable to home screen",
-  "strYouDontHaveATimetableJet": "It looks like you don't have a timetable set up yet.\nPlease create one and try again."
+  "strYouDontHaveATimetableJet": "It looks like you don't have a timetable set up yet.\nPlease create one and try again.",
+  "strShowTasksOnHomeScreen": "Show tasks on homescreen"
 }

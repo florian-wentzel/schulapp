@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:schulapp/code_behind/holidays_manager.dart';
 import 'package:schulapp/code_behind/school_lesson.dart';
+import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/special_lesson.dart';
 import 'package:schulapp/code_behind/time_table.dart';
 import 'package:schulapp/code_behind/time_table_manager.dart';
@@ -258,6 +259,10 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
       day: currLessonDateTime,
     );
 
+    final showTaskOnHomescreen = TimetableManager().settings.getVar(
+          Settings.showTasksOnHomeScreenKey,
+        );
+
     lessonWidgets.add(
       InkWell(
         onTap: Utils.sameDay(currLessonDateTime, DateTime.now())
@@ -305,7 +310,7 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
                             );
                           },
                         ),
-                        customTask == null
+                        customTask == null || !showTaskOnHomescreen
                             ? const SizedBox.shrink()
                             : Text(
                                 customTask.linkedSubjectName,
@@ -327,7 +332,7 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
                     ),
                   ),
                   Visibility(
-                    visible: customTask != null,
+                    visible: customTask != null && showTaskOnHomescreen,
                     child: Align(
                       alignment: Alignment.bottomRight,
                       child: Text(
@@ -349,7 +354,7 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
                     ),
                   ),
                   Visibility(
-                    visible: customTask != null,
+                    visible: customTask != null && showTaskOnHomescreen,
                     child: Align(
                       alignment: Alignment.bottomRight,
                       child: Text(
@@ -519,7 +524,7 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
                         ),
                       ),
                       Visibility(
-                        visible: currEvent != null,
+                        visible: currEvent != null && showTaskOnHomescreen,
                         child: Align(
                           alignment: Alignment.bottomRight,
                           child: Text(
@@ -541,7 +546,7 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
                         ),
                       ),
                       Visibility(
-                        visible: currEvent != null,
+                        visible: currEvent != null && showTaskOnHomescreen,
                         child: Align(
                           alignment: Alignment.bottomRight,
                           child: Text(
