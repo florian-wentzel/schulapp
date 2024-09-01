@@ -30,7 +30,7 @@ class _GradesScreenState extends State<GradesScreen> {
       final mainSemester = Utils.getMainSemester();
 
       // Check if mainSemester is not null and not empty
-      if (mainSemester != null) {
+      if (mainSemester != null && mounted) {
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) => SemesterScreen(

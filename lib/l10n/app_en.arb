@@ -235,5 +235,11 @@
   "strWidgets": "Widgets",
   "strPinToHomeScreen": "Add timetable to home screen",
   "strYouDontHaveATimetableJet": "It looks like you don't have a timetable set up yet.\nPlease create one and try again.",
-  "strShowTasksOnHomeScreen": "Show tasks on homescreen"
+  "strShowTasksOnHomeScreen": "Show tasks on homescreen",
+  "strWeight": "Weight",
+  "strPinWeightedSubjectsAtTop": "Pin weighted subjects at the top",
+  "strSortSubjects": "Sort Subjects",
+  "strByName":"by name",
+  "strByGrade":"by grade",
+  "strManually": "manually"
 }

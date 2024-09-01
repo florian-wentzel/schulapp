@@ -4,6 +4,7 @@ import 'package:schulapp/code_behind/save_manager.dart';
 import 'package:schulapp/code_behind/school_grade_subject.dart';
 import 'package:schulapp/code_behind/school_semester.dart';
 import 'package:schulapp/code_behind/utils.dart';
+import 'package:schulapp/extensions.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/widgets/semester/school_grade_subject_widget.dart';
 
@@ -93,6 +94,7 @@ class _EditSchoolGradeSubjectScreenState
             widget.subject.gradeGroups.length,
             _gradeGroupBuilder,
           ),
+          _weightWidget(),
           const SizedBox(
             height: 8,
           ),
@@ -271,6 +273,75 @@ class _EditSchoolGradeSubjectScreenState
     );
   }
 
+  final List<double> _weightSnapPoints = [
+    0,
+    0.33,
+    0.5,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+  ];
+
+  Widget _weightWidget() {
+    return Container(
+      width: MediaQuery.of(context).size.width,
+      margin: const EdgeInsets.symmetric(
+        horizontal: 8,
+        vertical: 4,
+      ),
+      padding: const EdgeInsets.symmetric(
+        horizontal: 16,
+        vertical: 8,
+      ),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+        color: Theme.of(context).cardColor,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                AppLocalizationsManager.localizations.strWeight,
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              Text(
+                "${widget.subject.weight.roundIfInt()}x",
+                style: Theme.of(context).textTheme.labelMedium,
+              ),
+            ],
+          ),
+          SizedBox(
+            height: 50,
+            child: Row(
+              children: [
+                Expanded(
+                  child: Slider(
+                    value: widget.subject.weight,
+                    min: 0,
+                    max: 7,
+                    onChanged: (value) {
+                      final nearestSnapPointValue = _getNearestSnapPoint(value);
+                      widget.subject.weight = nearestSnapPointValue;
+
+                      setState(() {});
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<GradeGroup?> _showAddGradeGroupSheet(BuildContext context) async {
     const maxNameLength = GradeGroup.maxNameLength;
 
@@ -336,5 +407,20 @@ class _EditSchoolGradeSubjectScreenState
       percent: 50,
       grades: [],
     );
+  }
+
+  double _getNearestSnapPoint(double value) {
+    double nearestDist = double.infinity;
+    int nearestSnapPointIndex = 1; //weil 1 der normalwert ist
+
+    for (int i = 0; i < _weightSnapPoints.length; i++) {
+      final dist = (value - _weightSnapPoints[i]).abs();
+      if (dist < nearestDist) {
+        nearestDist = dist;
+        nearestSnapPointIndex = i;
+      }
+    }
+
+    return _weightSnapPoints[nearestSnapPointIndex];
   }
 }

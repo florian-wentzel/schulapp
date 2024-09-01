@@ -30,3 +30,15 @@ extension TimeOfDayExtension on TimeOfDay {
     return toMinutes() * 60;
   }
 }
+
+extension DoubleExtension on double {
+  String roundIfInt() {
+    if (this == toInt()) {
+      // If it is an integer, return it without the decimal part
+      return toInt().toString();
+    } else {
+      // If it's not an integer, return the original string
+      return toString();
+    }
+  }
+}

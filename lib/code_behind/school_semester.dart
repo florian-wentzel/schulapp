@@ -8,6 +8,10 @@ import 'grade_group.dart';
 import 'school_grade_subject.dart';
 
 class SchoolSemester {
+  static const sortByGradeValue = "sortByGrade";
+  static const sortByNameValue = "sortByName";
+  static const sortByCustomValue = "sortByCustom";
+
   static const nameKey = "name";
   static const subjectsKey = "subjects";
 
@@ -21,30 +25,57 @@ class SchoolSemester {
   }
 
   List<SchoolGradeSubject> get sortedSubjects {
+    final sortBy = TimetableManager().settings.getVar<String>(
+          Settings.sortSubjectsByKey,
+        );
+
+    final pinWeightedSubjectsAtTop = TimetableManager().settings.getVar<bool>(
+          Settings.pinWeightedSubjectsAtTopKey,
+        );
+
     //vielleicht sollte man eine kopie von der Liste machen und diese Kopieren, sortieren und zurückgeben
-    _subjects.sort(
-      (a, b) {
-        double averageA = double.parse(
-            a.getGradeAverage().toStringAsFixed(Settings.decimalPlaces));
-        double averageB = double.parse(
-            b.getGradeAverage().toStringAsFixed(Settings.decimalPlaces));
 
-        if (averageA == -1 && averageB == -1) {
+    if (sortBy == sortByGradeValue) {
+      _subjects.sort(
+        (a, b) {
+          double averageA = double.parse(
+              a.getGradeAverage().toStringAsFixed(Settings.decimalPlaces));
+          double averageB = double.parse(
+              b.getGradeAverage().toStringAsFixed(Settings.decimalPlaces));
+
+          if (!pinWeightedSubjectsAtTop || (a.weight != 1 && b.weight != 1)) {
+            return _compareGradeAverage(averageA, averageB, a.name, b.name);
+          }
+
+          if (a.weight != 1) {
+            return -1;
+          }
+          if (b.weight != 1) {
+            return 1;
+          }
+
+          return _compareGradeAverage(averageA, averageB, a.name, b.name);
+        },
+      );
+    } else if (sortBy == sortByNameValue) {
+      _subjects.sort(
+        (a, b) {
+          if (!pinWeightedSubjectsAtTop || (a.weight != 1 && b.weight != 1)) {
+            return a.name.compareTo(b.name);
+          }
+
+          if (a.weight != 1) {
+            return -1;
+          }
+          if (b.weight != 1) {
+            return 1;
+          }
+
           return a.name.compareTo(b.name);
-        }
+        },
+      );
+    } else if (sortBy == sortByCustomValue) {}
 
-        if (averageA == -1) {
-          return 1;
-        }
-
-        if (averageB == -1) {
-          return -1;
-        }
-        if (averageA == averageB) return a.name.compareTo(b.name);
-        if (averageA > averageB) return -1;
-        return 1;
-      },
-    );
     return _subjects;
   }
 
@@ -59,15 +90,15 @@ class SchoolSemester {
 
   double getGradeAverage() {
     double average = 0;
-    int count = 0;
+    double count = 0;
 
     for (var subject in _subjects) {
-      double subjectAverage = subject.getGradeAverage();
+      double subjectAverage = subject.getGradeAverage() * subject.weight;
 
       if (subjectAverage == -1) continue;
 
       average += subjectAverage;
-      count++;
+      count += subject.weight;
     }
 
     if (count == 0) return -1;
@@ -163,5 +194,27 @@ class SchoolSemester {
     }
 
     SaveManager().saveSemester(this);
+  }
+
+  int _compareGradeAverage(
+    double averageA,
+    double averageB,
+    String nameA,
+    String nameB,
+  ) {
+    if (averageA == -1 && averageB == -1) {
+      return nameA.compareTo(nameB);
+    }
+
+    if (averageA == -1) {
+      return 1;
+    }
+
+    if (averageB == -1) {
+      return -1;
+    }
+    if (averageA == averageB) return nameA.compareTo(nameB);
+    if (averageA > averageB) return -1;
+    return 1;
   }
 }

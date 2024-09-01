@@ -22,6 +22,48 @@ class SettingsScreen extends StatefulWidget {
 
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
+
+  static Widget listItem(
+    BuildContext context, {
+    required String title,
+    List<Widget>? body,
+    List<Widget>? afterTitle,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.symmetric(
+        horizontal: 8,
+        vertical: 4,
+      ),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        color: Theme.of(context).cardColor,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Flexible(
+                child: Text(
+                  title,
+                  style: Theme.of(context).textTheme.headlineMedium,
+                ),
+              ),
+              ...afterTitle ?? [Container()],
+            ],
+          ),
+          body != null
+              ? const SizedBox(
+                  height: 12,
+                )
+              : Container(),
+          ...body ?? [Container()],
+        ],
+      ),
+    );
+  }
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
@@ -63,7 +105,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _themeSelector() {
-    return listItem(
+    return SettingsScreen.listItem(
+      context,
       title: AppLocalizationsManager.localizations.strTheme,
       body: [
         SegmentedButton<ThemeMode>(
@@ -102,7 +145,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _selectLanguage() {
-    return listItem(
+    return SettingsScreen.listItem(
+      context,
       title: AppLocalizationsManager.localizations.strLanguage,
       body: [
         ElevatedButton(
@@ -228,7 +272,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _openMainSemesterAutomatically() {
-    return listItem(
+    return SettingsScreen.listItem(
+      context,
       title: AppLocalizationsManager
           .localizations.strOpenMainSemesterAutomatically,
       afterTitle: [
@@ -249,7 +294,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _showTasksOnHomeScreen() {
-    return listItem(
+    return SettingsScreen.listItem(
+      context,
       title: AppLocalizationsManager.localizations.strShowTasksOnHomeScreen,
       afterTitle: [
         Switch.adaptive(
@@ -269,7 +315,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _pinHomeWidget() {
-    return listItem(
+    return SettingsScreen.listItem(
+      context,
       title: AppLocalizationsManager.localizations.strWidgets,
       body: [
         ElevatedButton(
@@ -296,7 +343,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _createBackup() {
-    return listItem(
+    return SettingsScreen.listItem(
+      context,
       title: AppLocalizationsManager.localizations.strBackup,
       body: [
         Row(
@@ -343,7 +391,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
         );
       },
-      child: listItem(
+      child: SettingsScreen.listItem(
+        context,
         title: AppLocalizationsManager.localizations.strVersion,
         body: [
           FutureBuilder(
@@ -363,47 +412,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
               );
             },
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget listItem({
-    required String title,
-    List<Widget>? body,
-    List<Widget>? afterTitle,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      margin: const EdgeInsets.symmetric(
-        horizontal: 8,
-        vertical: 4,
-      ),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        color: Theme.of(context).cardColor,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Flexible(
-                child: Text(
-                  title,
-                  style: Theme.of(context).textTheme.headlineMedium,
-                ),
-              ),
-              ...afterTitle ?? [Container()],
-            ],
-          ),
-          body != null
-              ? const SizedBox(
-                  height: 12,
-                )
-              : Container(),
-          ...body ?? [Container()],
         ],
       ),
     );

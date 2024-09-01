@@ -13,6 +13,7 @@ import 'package:schulapp/code_behind/time_table_manager.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/screens/semester/school_grade_subject_screen.dart';
+import 'package:schulapp/screens/semester/semester_screen_settings_dialog.dart';
 import 'package:schulapp/widgets/semester/school_grade_subject_widget.dart';
 
 // ignore: must_be_immutable
@@ -45,6 +46,11 @@ class _SemesterScreenState extends State<SemesterScreen> {
             tooltip: AppLocalizationsManager.localizations.strShowGradesGraph,
             onPressed: _showGradesGraphPressed,
             icon: const Icon(Icons.info),
+          ),
+          IconButton(
+            tooltip: AppLocalizationsManager.localizations.strSettings,
+            onPressed: _showSettingsPressed,
+            icon: const Icon(Icons.settings),
           ),
         ],
       ),
@@ -340,6 +346,17 @@ class _SemesterScreenState extends State<SemesterScreen> {
     );
 
     return subjects;
+  }
+
+  Future<void> _showSettingsPressed() async {
+    await showDialog(
+      context: context,
+      builder: (context) => SemesterScreenSettingsDialog(
+        semester: widget.semester,
+      ),
+    );
+
+    setState(() {});
   }
 
   void _showGradesGraphPressed() {

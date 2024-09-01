@@ -3,6 +3,7 @@ import 'package:schulapp/code_behind/grade.dart';
 import 'package:schulapp/code_behind/school_grade_subject.dart';
 import 'package:schulapp/code_behind/school_semester.dart';
 import 'package:schulapp/code_behind/utils.dart';
+import 'package:schulapp/extensions.dart';
 
 // ignore: must_be_immutable
 class SchoolGradeSubjectWidget extends StatelessWidget {
@@ -51,6 +52,28 @@ class SchoolGradeSubjectWidget extends StatelessWidget {
                       textAlign: TextAlign.left,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.headlineMedium,
+                    ),
+                  ),
+                ),
+                const SizedBox(
+                  width: 4,
+                ),
+                Visibility(
+                  visible: showName && subject.weight != 1,
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        color: Theme.of(context).focusColor,
+                      ),
+                      child: Text(
+                        "${subject.weight.roundIfInt()}x",
+                        textAlign: TextAlign.left,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
                     ),
                   ),
                 ),

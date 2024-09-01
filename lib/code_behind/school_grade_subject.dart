@@ -6,7 +6,8 @@ import 'grade_group.dart';
 class SchoolGradeSubject {
   static const String nameKey = "name";
   static const String gradeGroupsKey = "gradeGroups";
-  static const endSetGradeKey = "endSetGrade";
+  static const String endSetGradeKey = "endSetGrade";
+  static const String weightKey = "weight";
 
   static const int maxNameLength = 15;
 
@@ -16,9 +17,12 @@ class SchoolGradeSubject {
 
   Grade? endSetGrade; //die note welche alle anderen überschreibt
 
+  double weight;
+
   SchoolGradeSubject({
     required this.name,
     required this.gradeGroups,
+    this.weight = 1,
     this.endSetGrade,
   });
 
@@ -59,6 +63,7 @@ class SchoolGradeSubject {
     return {
       nameKey: name,
       endSetGradeKey: endSetGrade?.toJson(),
+      weightKey: weight,
       gradeGroupsKey: List.generate(
         gradeGroups.length,
         (index) => gradeGroups[index].toJson(),
@@ -82,8 +87,11 @@ class SchoolGradeSubject {
       ),
     );
 
+    double weight = json[weightKey] ?? 1;
+
     return SchoolGradeSubject(
       name: name,
+      weight: weight,
       endSetGrade: endSetGrade,
       gradeGroups: gradeGroups,
     );

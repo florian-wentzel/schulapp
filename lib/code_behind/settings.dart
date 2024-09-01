@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/save_manager.dart';
+import 'package:schulapp/code_behind/school_semester.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 
 import 'grade_group.dart';
@@ -69,6 +70,8 @@ class Settings {
   static const selectedFederalStateCodeKey = "selectedFederalState";
   static const lastUsedVersionKey = "lastUsedVersion";
   static const customHolidaysKey = "customHolidays";
+  static const sortSubjectsByKey = "sortSubjectsBy";
+  static const pinWeightedSubjectsAtTopKey = "pinWeightedSubjectsAtTop";
 
   static int decimalPlaces = 1;
 
@@ -114,6 +117,14 @@ class Settings {
     SettingsVar<String?>(
       key: languageCodeKey,
       defaultValue: () => null,
+    ),
+    SettingsVar<String>(
+      key: sortSubjectsByKey,
+      defaultValue: () => SchoolSemester.sortByGradeValue,
+    ),
+    SettingsVar<bool>(
+      key: pinWeightedSubjectsAtTopKey,
+      defaultValue: () => false,
     ),
     SettingsVar<String?>(
       key: lastUsedVersionKey,

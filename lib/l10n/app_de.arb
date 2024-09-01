@@ -227,5 +227,11 @@
   "strWidgets": "Widgets",
   "strPinToHomeScreen": "Stundenplan zum Startbildschirm hinzufügen",
   "strYouDontHaveATimetableJet": "Es sieht so aus, als hätten Sie noch keinen Stundenplan eingerichtet.\nBitte erstellen Sie einen und versuchen Sie es erneut.",
-  "strShowTasksOnHomeScreen": "Aufgaben auf der Startseite anzeigen"
+  "strShowTasksOnHomeScreen": "Aufgaben auf der Startseite anzeigen",
+  "strWeight": "Gewichtung",
+  "strPinWeightedSubjectsAtTop": "Gewichtete Fächer oben fixieren",
+  "strSortSubjects":"Fächer Sortieren",
+  "strByName":"nach Namen",
+  "strByGrade":"nach Noten",
+  "strManually": "manuell"
 }
