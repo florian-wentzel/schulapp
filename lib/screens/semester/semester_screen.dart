@@ -357,6 +357,7 @@ class _SemesterScreenState extends State<SemesterScreen> {
     );
 
     setState(() {});
+    SaveManager().saveSemester(widget.semester);
   }
 
   void _showGradesGraphPressed() {

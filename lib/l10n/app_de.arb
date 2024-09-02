@@ -1,6 +1,8 @@
 {
   "@@locale": "de",
   "language_name": "Deutsch",
+  "version_0_4_5": "Fächer können in den Semestern verschieden angeordnet werden",
+  "version_0_4_4": "Fächer können nun in Semestern gewichtet werden",
   "version_0_4_3": "Auf der Startseite können Aufgaben ein- oder ausgeblendet werden",
   "version_0_4_2": "Auf der Startseite können Aufgaben hinzugefügt werden",
   "version_0_4_1": "Fehlerbehebung beim öffnen von \".timetable\"-Datein",
@@ -230,8 +232,9 @@
   "strShowTasksOnHomeScreen": "Aufgaben auf der Startseite anzeigen",
   "strWeight": "Gewichtung",
   "strPinWeightedSubjectsAtTop": "Gewichtete Fächer oben fixieren",
-  "strSortSubjects":"Fächer Sortieren",
-  "strByName":"nach Namen",
-  "strByGrade":"nach Noten",
-  "strManually": "manuell"
+  "strSortSubjects": "Fächer Sortieren",
+  "strByName": "nach Namen",
+  "strByGrade": "nach Noten",
+  "strManually": "manuell",
+  "strDragSubjectsIntoDesiredOrder": "Ziehen Sie die untenstehenden Fächer in die gewünschte Reihenfolge."
 }

@@ -45,18 +45,7 @@ class _SemesterScreenSettingsDialogState
                   SliverToBoxAdapter(child: _sortSubjectsBy()),
                   SliverToBoxAdapter(child: _sortSubjectsManuallyInfo()),
                   SliverToBoxAdapter(child: _pinWeightedSubjectsAtTop()),
-                  SliverReorderableList(
-                    itemBuilder: _itemBuilder,
-                    itemCount: widget.semester.subjects.length,
-                    onReorder: (oldIndex, newIndex) {
-                      if (newIndex > oldIndex) {
-                        newIndex -= 1;
-                      }
-                      final item = widget.semester.subjects.removeAt(oldIndex);
-                      widget.semester.subjects.insert(newIndex, item);
-                      setState(() {});
-                    },
-                  ),
+                  _reorderableListView(),
                 ],
               ),
             ),
@@ -123,7 +112,9 @@ class _SemesterScreenSettingsDialogState
       context,
       title: AppLocalizationsManager.localizations.strInformation,
       body: [
-        Text("Bka bkab ka"),
+        Text(
+          AppLocalizationsManager.localizations.strDragSubjectsIntoDesiredOrder,
+        ),
       ],
     );
   }
@@ -152,43 +143,48 @@ class _SemesterScreenSettingsDialogState
     );
   }
 
-  Widget _reordableListView() {
+  Widget _reorderableListView() {
     if (sortSubjectBySelection.first != SchoolSemester.sortByCustomValue) {
-      return const SizedBox.shrink();
+      return const SliverToBoxAdapter(
+        child: SizedBox.shrink(),
+      );
     }
-
-    // return ConstrainedBox(
-    //   constraints: BoxConstraints(
-    //     maxHeight: 400,
-    //   ),
-    //   child: ReorderableListView.builder(
-    //     itemBuilder: _itemBuilder,
-    //     itemCount: widget.semester.subjects.length,
-    //     onReorder: (oldIndex, newIndex) {},
-    //   ),
-    // );
-    return SettingsScreen.listItem(
-      context,
-      title: "List",
-      body: [],
+    return SliverReorderableList(
+      itemBuilder: _itemBuilder,
+      itemCount: widget.semester.subjects.length,
+      onReorder: (oldIndex, newIndex) {
+        if (newIndex > oldIndex) {
+          newIndex -= 1;
+        }
+        final item = widget.semester.subjects.removeAt(oldIndex);
+        widget.semester.subjects.insert(newIndex, item);
+        setState(() {});
+      },
     );
   }
 
   Widget _itemBuilder(BuildContext context, int index) {
-    // Container(
-    //   padding: const EdgeInsets.all(12),
-    //   margin: const EdgeInsets.symmetric(
-    //     horizontal: 8,
-    //     vertical: 4,
-    //   ),
-    //   decoration: BoxDecoration(
-    //     borderRadius: BorderRadius.circular(16),
-    //     color: Theme.of(context).cardColor,
-    //   ),
-    return ListTile(
+    return ReorderableDragStartListener(
       key: ValueKey(widget.semester.subjects[index]),
-      title: Text(widget.semester.subjects[index].name),
-      trailing: const Icon(Icons.drag_handle), // Handle for dragging
+      index: index,
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        margin: const EdgeInsets.symmetric(
+          horizontal: 8,
+          vertical: 4,
+        ),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          color: Theme.of(context).cardColor,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text("${index + 1}. ${widget.semester.subjects[index].name}"),
+            const Icon(Icons.drag_handle),
+          ],
+        ),
+      ),
     );
   }
 }
