@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/school_semester.dart';
 import 'package:schulapp/code_behind/settings.dart';
-import 'package:schulapp/code_behind/time_table_manager.dart';
+import 'package:schulapp/code_behind/timetable_manager.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/screens/semester/semester_screen.dart';

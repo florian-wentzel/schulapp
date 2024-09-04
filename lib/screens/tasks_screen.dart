@@ -2,7 +2,7 @@ import 'package:animated_list_plus/animated_list_plus.dart';
 import 'package:animated_list_plus/transitions.dart';
 import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/todo_event.dart';
-import 'package:schulapp/code_behind/time_table_manager.dart';
+import 'package:schulapp/code_behind/timetable_manager.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/widgets/navigation_bar_drawer.dart';

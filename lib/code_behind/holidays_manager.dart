@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/holidays.dart';
 import 'package:schulapp/code_behind/settings.dart';
-import 'package:schulapp/code_behind/time_table_manager.dart';
+import 'package:schulapp/code_behind/timetable_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HolidaysManager {

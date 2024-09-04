@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/save_manager.dart';
 import 'package:schulapp/code_behind/settings.dart';
-import 'package:schulapp/code_behind/time_table_manager.dart';
+import 'package:schulapp/code_behind/timetable_manager.dart';
 import 'package:schulapp/code_behind/utils.dart';
 
 import 'grade_group.dart';

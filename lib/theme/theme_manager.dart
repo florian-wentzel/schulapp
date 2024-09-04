@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/settings.dart';
-import 'package:schulapp/code_behind/time_table_manager.dart';
+import 'package:schulapp/code_behind/timetable_manager.dart';
 
 ///singelton damit es immer nur eine instanz gibt
 class ThemeManager with ChangeNotifier {
