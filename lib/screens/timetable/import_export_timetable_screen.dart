@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
-import 'package:schulapp/screens/time_table/export_timetable_page.dart';
-import 'package:schulapp/screens/time_table/import_timetable_page.dart';
+import 'package:schulapp/screens/timetable/export_timetable_page.dart';
+import 'package:schulapp/screens/timetable/import_timetable_page.dart';
 // import 'package:share_plus/share_plus.dart';
 
 class ImportExportTimetableScreen extends StatefulWidget {

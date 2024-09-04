@@ -6,7 +6,7 @@ import 'package:schulapp/code_behind/save_manager.dart';
 import 'package:schulapp/code_behind/timetable.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
-import 'package:schulapp/screens/time_table/create_timetable_screen.dart';
+import 'package:schulapp/screens/timetable/create_timetable_screen.dart';
 
 // ignore: must_be_immutable
 class ImportTimetablePage extends StatefulWidget {

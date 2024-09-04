@@ -4,7 +4,7 @@ import 'package:schulapp/code_behind/school_lesson_prefab.dart';
 import 'package:schulapp/code_behind/timetable.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
-import 'package:schulapp/screens/time_table/timetable_droptarget_helper.dart';
+import 'package:schulapp/screens/timetable/timetable_droptarget_helper.dart';
 
 class TimetableOneDayDropTargetWidget extends StatefulWidget {
   final Timetable timetable;
