@@ -1,6 +1,7 @@
 {
   "@@locale": "de",
   "language_name": "Deutsch",
+  "version_0_4_6": "Verbesserungen an der Benutzeroberfläche",
   "version_0_4_5": "Fächer können in den Semestern verschieden angeordnet werden",
   "version_0_4_4": "Fächer können nun in Semestern gewichtet werden",
   "version_0_4_3": "Auf der Startseite können Aufgaben ein- oder ausgeblendet werden",

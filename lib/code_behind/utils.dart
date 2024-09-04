@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:schulapp/code_behind/school_lesson.dart';
 import 'package:schulapp/code_behind/school_lesson_prefab.dart';
 import 'package:schulapp/code_behind/school_semester.dart';
@@ -316,16 +317,23 @@ class Utils {
     String? title,
     Color? pickerColor,
   }) {
-    return showDialog<Color>(
+    Color selectedColor = pickerColor ?? Colors.blue;
+
+    return showDialog<Color?>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: title == null ? null : Text(title),
-          content: Text(AppLocalizationsManager.localizations.strColorPicker),
+          content: ColorPicker(
+            pickerColor: selectedColor,
+            onColorChanged: (value) {
+              selectedColor = value;
+            },
+          ),
           actions: <Widget>[
             TextButton(
               onPressed: () {
-                Navigator.pop(context, Colors.red);
+                Navigator.pop(context, selectedColor);
               },
               child: Text(AppLocalizationsManager.localizations.strOK),
             ),

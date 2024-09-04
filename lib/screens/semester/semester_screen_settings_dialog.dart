@@ -34,8 +34,9 @@ class _SemesterScreenSettingsDialogState
       title: Text(
         AppLocalizationsManager.localizations.strSettings,
       ),
+      contentPadding: const EdgeInsets.all(0),
       content: SizedBox(
-        height: MediaQuery.of(context).size.height * 0.8,
+        height: MediaQuery.of(context).size.height,
         width: MediaQuery.of(context).size.width,
         child: Column(
           children: [
@@ -49,11 +50,14 @@ class _SemesterScreenSettingsDialogState
                 ],
               ),
             ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text(AppLocalizationsManager.localizations.strOK),
+            Container(
+              padding: const EdgeInsets.all(8),
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text(AppLocalizationsManager.localizations.strOK),
+              ),
             ),
           ],
         ),
@@ -72,18 +76,21 @@ class _SemesterScreenSettingsDialogState
               value: SchoolSemester.sortByNameValue,
               label: Text(
                 AppLocalizationsManager.localizations.strByName,
+                textAlign: TextAlign.center,
               ),
             ),
             ButtonSegment<String>(
               value: SchoolSemester.sortByGradeValue,
               label: Text(
                 AppLocalizationsManager.localizations.strByGrade,
+                textAlign: TextAlign.center,
               ),
             ),
             ButtonSegment<String>(
               value: SchoolSemester.sortByCustomValue,
               label: Text(
                 AppLocalizationsManager.localizations.strManually,
+                textAlign: TextAlign.center,
               ),
             ),
           ],

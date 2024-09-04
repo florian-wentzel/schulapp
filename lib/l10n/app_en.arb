@@ -1,6 +1,7 @@
 {
   "@@locale": "en",
   "language_name": "Englisch",
+  "version_0_4_6": "User Interface improvements",
   "version_0_4_5": "Subjects can now be arranged differently within the semesters",
   "version_0_4_4": "Weights have been added to subjects in the semesters",
   "version_0_4_3": "Tasks can be shown or hidden on the homescreen",

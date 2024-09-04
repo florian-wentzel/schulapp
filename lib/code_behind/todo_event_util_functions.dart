@@ -66,7 +66,8 @@ Future<TodoEvent?> createNewTodoEventSheet(
     endDateController.date = event.endTime;
   }
 
-  TodoType? type;
+  TodoType? type = event?.type;
+  bool okayPressed = false;
 
   await showModalBottomSheet(
     context: context,
@@ -235,6 +236,20 @@ Future<TodoEvent?> createNewTodoEventSheet(
                   ),
                 ],
               ),
+              type == null
+                  ? const SizedBox.shrink()
+                  : const SizedBox(
+                      height: 12,
+                    ),
+              type == null
+                  ? const SizedBox.shrink()
+                  : ElevatedButton(
+                      onPressed: () {
+                        okayPressed = true;
+                        Navigator.of(context).pop();
+                      },
+                      child: Text(AppLocalizationsManager.localizations.strOK),
+                    ),
               const SizedBox(
                 height: 12,
               ),
@@ -251,7 +266,7 @@ Future<TodoEvent?> createNewTodoEventSheet(
     },
   );
 
-  if (type == null) return null;
+  if (!okayPressed && type == null) return null;
 
   String name = nameController.text.trim();
   String desciption = descriptionController.text.trim();

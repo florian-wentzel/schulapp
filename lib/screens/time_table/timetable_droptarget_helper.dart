@@ -68,8 +68,8 @@ class _CustomPopUpCreateTimetableState
   String _teacher = "";
   Color _color = Colors.black;
 
-  TimeOfDay _start = const TimeOfDay(hour: 0, minute: 0);
-  TimeOfDay _end = const TimeOfDay(hour: 0, minute: 0);
+  // TimeOfDay _start = const TimeOfDay(hour: 0, minute: 0);
+  // TimeOfDay _end = const TimeOfDay(hour: 0, minute: 0);
 
   @override
   void initState() {
@@ -83,14 +83,14 @@ class _CustomPopUpCreateTimetableState
       widget.schoolLesson.color.blue,
     );
 
-    _start = TimeOfDay(
-      hour: widget.schoolTime.start.hour,
-      minute: widget.schoolTime.start.minute,
-    );
-    _end = TimeOfDay(
-      hour: widget.schoolTime.end.hour,
-      minute: widget.schoolTime.end.minute,
-    );
+    // _start = TimeOfDay(
+    //   hour: widget.schoolTime.start.hour,
+    //   minute: widget.schoolTime.start.minute,
+    // );
+    // _end = TimeOfDay(
+    //   hour: widget.schoolTime.end.hour,
+    //   minute: widget.schoolTime.end.minute,
+    // );
     super.initState();
   }
 
@@ -126,7 +126,7 @@ class _CustomPopUpCreateTimetableState
             ),
           ),
         ),
-        GestureDetector(
+        InkWell(
           onTap: () async {
             String? input = await Utils.showStringInputDialog(
               context,
@@ -168,10 +168,11 @@ class _CustomPopUpCreateTimetableState
         const SizedBox(
           height: 4,
         ),
-        GestureDetector(
+        InkWell(
           onTap: () async {
             Color? input = await Utils.showColorInputDialog(
               context,
+              pickerColor: _color,
             );
 
             if (input == null) return;
@@ -192,68 +193,68 @@ class _CustomPopUpCreateTimetableState
         //   height: 12,
         // ),
         const Spacer(),
-        FittedBox(
-          fit: BoxFit.fitWidth,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              GestureDetector(
-                onTap: () async {
-                  TimeOfDay? input = await showTimePicker(
-                      context: context, initialTime: widget.schoolTime.start);
+        // FittedBox(
+        //   fit: BoxFit.fitWidth,
+        //   child: Row(
+        //     mainAxisAlignment: MainAxisAlignment.center,
+        //     children: [
+        //       InkWell(
+        //         onTap: () async {
+        //           TimeOfDay? input = await showTimePicker(
+        //               context: context, initialTime: widget.schoolTime.start);
 
-                  if (input == null) return;
+        //           if (input == null) return;
 
-                  _start = input;
-                  setState(() {});
-                },
-                child: Text(
-                  _start.format(context),
-                  style: TextStyle(
-                    color: Theme.of(context).textTheme.bodyLarge?.color ??
-                        Colors.white,
-                    fontSize: 64.0,
-                    // decoration: TextDecoration.underline,
-                  ),
-                ),
-              ),
-              Text(
-                " - ",
-                style: TextStyle(
-                  color: Theme.of(context).textTheme.bodyLarge?.color ??
-                      Colors.white,
-                  fontSize: 64.0,
-                ),
-              ),
-              GestureDetector(
-                onTap: () async {
-                  TimeOfDay? input = await showTimePicker(
-                      context: context, initialTime: widget.schoolTime.end);
+        //           _start = input;
+        //           setState(() {});
+        //         },
+        //         child: Text(
+        //           _start.format(context),
+        //           style: TextStyle(
+        //             color: Theme.of(context).textTheme.bodyLarge?.color ??
+        //                 Colors.white,
+        //             fontSize: 64.0,
+        //             // decoration: TextDecoration.underline,
+        //           ),
+        //         ),
+        //       ),
+        //       Text(
+        //         " - ",
+        //         style: TextStyle(
+        //           color: Theme.of(context).textTheme.bodyLarge?.color ??
+        //               Colors.white,
+        //           fontSize: 64.0,
+        //         ),
+        //       ),
+        //       InkWell(
+        //         onTap: () async {
+        //           TimeOfDay? input = await showTimePicker(
+        //               context: context, initialTime: widget.schoolTime.end);
 
-                  if (input == null) return;
+        //           if (input == null) return;
 
-                  _end = input;
-                  setState(() {});
-                },
-                child: Text(
-                  _end.format(context),
-                  style: TextStyle(
-                    color: Theme.of(context).textTheme.bodyLarge?.color ??
-                        Colors.white,
-                    fontSize: 64.0,
-                    // decoration: TextDecoration.underline,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
+        //           _end = input;
+        //           setState(() {});
+        //         },
+        //         child: Text(
+        //           _end.format(context),
+        //           style: TextStyle(
+        //             color: Theme.of(context).textTheme.bodyLarge?.color ??
+        //                 Colors.white,
+        //             fontSize: 64.0,
+        //             // decoration: TextDecoration.underline,
+        //           ),
+        //         ),
+        //       ),
+        //     ],
+        //   ),
+        // ),
         const SizedBox(
           height: 12,
         ),
         FittedBox(
           fit: BoxFit.fitWidth,
-          child: GestureDetector(
+          child: InkWell(
             onTap: () async {
               String? input = await Utils.showStringInputDialog(
                 context,
@@ -293,7 +294,7 @@ class _CustomPopUpCreateTimetableState
             ),
           ),
         ),
-        GestureDetector(
+        InkWell(
           onTap: () async {
             String? input = await Utils.showStringInputDialog(
               context,
@@ -367,8 +368,8 @@ class _CustomPopUpCreateTimetableState
     widget.schoolLesson.room = _room;
     widget.schoolLesson.teacher = _teacher;
     widget.schoolLesson.color = _color;
-    widget.schoolTime.start = _start;
-    widget.schoolTime.end = _end;
+    // widget.schoolTime.start = _start;
+    // widget.schoolTime.end = _end;
   }
 }
 
