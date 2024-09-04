@@ -114,7 +114,7 @@ Future<bool?> createNewTimetable(BuildContext context) async {
 
   return Navigator.of(context).push<bool>(
     MaterialPageRoute(
-      builder: (context) => CreateTimeTableScreen(timetable: tt),
+      builder: (context) => CreateTimetableScreen(timetable: tt),
     ),
   );
 }

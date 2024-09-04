@@ -374,7 +374,7 @@ class Timetable {
 
       _schoolDays[i].name = defaultSchoolDays[i].name;
     }
-    SaveManager().saveTimeTable(this);
+    SaveManager().saveTimetable(this);
   }
 
   Timetable copy() {

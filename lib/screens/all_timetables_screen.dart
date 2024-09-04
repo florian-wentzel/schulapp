@@ -159,7 +159,7 @@ class _AllTimetablesScreenState extends State<AllTimetablesScreen> {
               onPressed: () async {
                 await Navigator.of(context).push<bool>(
                   MaterialPageRoute(
-                    builder: (context) => CreateTimeTableScreen(timetable: tt),
+                    builder: (context) => CreateTimetableScreen(timetable: tt),
                   ),
                 );
 

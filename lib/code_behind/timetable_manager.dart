@@ -115,7 +115,7 @@ class TimetableManager {
 
     _timetables!.add(timetable);
 
-    SaveManager().saveTimeTable(timetable);
+    SaveManager().saveTimetable(timetable);
   }
 
   bool removeTimetableAt(int index) {

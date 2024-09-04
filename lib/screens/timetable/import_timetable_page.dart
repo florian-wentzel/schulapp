@@ -131,7 +131,7 @@ class _ImportTimetablePageState extends State<ImportTimetablePage> {
 
     await Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => CreateTimeTableScreen(timetable: timetable!),
+        builder: (context) => CreateTimetableScreen(timetable: timetable!),
       ),
     );
 

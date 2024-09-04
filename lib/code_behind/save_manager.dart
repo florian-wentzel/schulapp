@@ -54,7 +54,7 @@ class SaveManager {
   }
 
   List<Timetable> loadTimetables(List<String> names) {
-    List<Timetable> timeTables = [];
+    List<Timetable> timetables = [];
     int errorCount = 0;
     for (var name in names) {
       try {
@@ -63,7 +63,7 @@ class SaveManager {
           errorCount++;
           continue;
         }
-        timeTables.add(tt);
+        timetables.add(tt);
       } catch (e) {
         debugPrint('Error reading or parsing the JSON file: $e');
       }
@@ -73,11 +73,11 @@ class SaveManager {
       debugPrint("Errorcount while loading: $errorCount");
     }
 
-    timeTables.sort(
+    timetables.sort(
       (a, b) => a.name.compareTo(b.name),
     );
 
-    return timeTables;
+    return timetables;
   }
 
   Timetable? loadTimetable(String name) {
@@ -109,11 +109,11 @@ class SaveManager {
 
   void saveTimetables(List<Timetable> timetables) {
     for (var timetable in timetables) {
-      saveTimeTable(timetable);
+      saveTimetable(timetable);
     }
   }
 
-  void saveTimeTable(
+  void saveTimetable(
     Timetable timetable, {
     String? timetableDirPath,
   }) {
@@ -177,7 +177,7 @@ class SaveManager {
       timetable.name + exportName + timetableExportExtension,
     );
 
-    saveTimeTable(
+    saveTimetable(
       timetable,
       timetableDirPath: dirSavePath,
     );

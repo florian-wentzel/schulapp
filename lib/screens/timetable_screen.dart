@@ -172,7 +172,7 @@ class _TimetableScreenState extends State<TimetableScreen> {
 
             bool? newTtCreated = await Navigator.of(context).push<bool>(
               MaterialPageRoute(
-                builder: (context) => CreateTimeTableScreen(
+                builder: (context) => CreateTimetableScreen(
                   timetable: widget.timetable!,
                 ),
               ),
@@ -746,7 +746,7 @@ class _TimetableScreenState extends State<TimetableScreen> {
       bool timetableSaved = await Navigator.of(context).push<bool?>(
             MaterialPageRoute(
               builder: (context) =>
-                  CreateTimeTableScreen(timetable: timetable!),
+                  CreateTimetableScreen(timetable: timetable!),
             ),
           ) ??
           false;
