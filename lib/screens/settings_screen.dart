@@ -2,6 +2,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:schulapp/app.dart';
 import 'package:schulapp/code_behind/backup_manager.dart';
+import 'package:schulapp/code_behind/grading_system_manager.dart';
 import 'package:schulapp/code_behind/school_semester.dart';
 import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/timetable.dart';
@@ -67,12 +68,16 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  Set<ThemeMode> selection = {};
+  Set<ThemeMode> themeSelection = {};
+  Set<GradingSystem> gradingSystemSelection = {};
 
   @override
   void initState() {
-    selection = {
+    themeSelection = {
       ThemeManager().themeMode,
+    };
+    gradingSystemSelection = {
+      TimetableManager().settings.getVar(Settings.selectedGradeSystemKey),
     };
     super.initState();
   }
@@ -94,11 +99,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return ListView(
       children: [
         _themeSelector(),
-        _selectLanguage(),
+        _gradeSystemSelector(),
         _openMainSemesterAutomatically(),
         _showTasksOnHomeScreen(),
         _pinHomeWidget(),
         _createBackup(),
+        _selectLanguage(),
         _currentVersion(),
       ],
     );
@@ -115,26 +121,82 @@ class _SettingsScreenState extends State<SettingsScreen> {
               value: ThemeMode.dark,
               label: Text(
                 AppLocalizationsManager.localizations.strDark,
+                textAlign: TextAlign.center,
               ),
             ),
             ButtonSegment<ThemeMode>(
               value: ThemeMode.system,
               label: Text(
                 AppLocalizationsManager.localizations.strSystem,
+                textAlign: TextAlign.center,
               ),
             ),
             ButtonSegment<ThemeMode>(
               value: ThemeMode.light,
               label: Text(
                 AppLocalizationsManager.localizations.strLight,
+                textAlign: TextAlign.center,
               ),
             ),
           ],
-          selected: selection,
+          selected: themeSelection,
           onSelectionChanged: (Set<ThemeMode> newSelection) {
-            selection = newSelection;
-            ThemeManager().themeMode = selection.first;
+            themeSelection = newSelection;
+            ThemeManager().themeMode = themeSelection.first;
             setState(() {});
+          },
+          showSelectedIcon: false,
+          multiSelectionEnabled: false,
+          emptySelectionAllowed: false,
+        ),
+      ],
+    );
+  }
+
+  Widget _gradeSystemSelector() {
+    return SettingsScreen.listItem(
+      context,
+      title: AppLocalizationsManager.localizations.strGradeSystem,
+      body: [
+        SegmentedButton<GradingSystem>(
+          segments: <ButtonSegment<GradingSystem>>[
+            ButtonSegment<GradingSystem>(
+              value: GradingSystem.grade_0_15,
+              label: Text(
+                AppLocalizationsManager.localizations.strPoints_0_15,
+                textAlign: TextAlign.center,
+              ),
+            ),
+            ButtonSegment<GradingSystem>(
+              value: GradingSystem.grade_1_6,
+              label: Text(
+                AppLocalizationsManager.localizations.strGrade_1_6,
+                textAlign: TextAlign.center,
+              ),
+            ),
+            ButtonSegment<GradingSystem>(
+              value: GradingSystem.grade_6_1,
+              label: Text(
+                AppLocalizationsManager.localizations.strGrade_6_1,
+                textAlign: TextAlign.center,
+              ),
+            ),
+            ButtonSegment<GradingSystem>(
+              value: GradingSystem.grade_A_F,
+              label: Text(
+                AppLocalizationsManager.localizations.strGrade_A_F,
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ],
+          selected: gradingSystemSelection,
+          onSelectionChanged: (Set<GradingSystem> newSelection) {
+            gradingSystemSelection = newSelection;
+            setState(() {});
+            TimetableManager().settings.setVar(
+                  Settings.selectedGradeSystemKey,
+                  gradingSystemSelection.first,
+                );
           },
           showSelectedIcon: false,
           multiSelectionEnabled: false,
@@ -554,7 +616,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         type: InfoType.success,
       );
 
-      selection = {
+      themeSelection = {
         ThemeManager().themeMode,
       };
       ThemeManager().themeMode = ThemeManager().themeMode;

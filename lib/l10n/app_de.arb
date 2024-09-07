@@ -237,5 +237,10 @@
   "strByName": "nach Namen",
   "strByGrade": "nach Noten",
   "strManually": "manuell",
-  "strDragSubjectsIntoDesiredOrder": "Ziehen Sie die untenstehenden Fächer in die gewünschte Reihenfolge."
+  "strDragSubjectsIntoDesiredOrder": "Ziehen Sie die untenstehenden Fächer in die gewünschte Reihenfolge.",
+  "strGradeSystem": "Bewertungssystem",
+  "strPoints_0_15": "Punkte 0 - 15",
+  "strGrade_1_6": "Noten 1 - 6",
+  "strGrade_6_1": "Noten 6 - 1",
+  "strGrade_A_F": "Noten A - F"
 }

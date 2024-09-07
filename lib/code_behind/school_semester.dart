@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:schulapp/code_behind/grading_system_manager.dart';
 import 'package:schulapp/code_behind/save_manager.dart';
 import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/timetable_manager.dart';
@@ -93,9 +94,11 @@ class SchoolSemester {
     double count = 0;
 
     for (var subject in _subjects) {
-      double subjectAverage = subject.getGradeAverage() * subject.weight;
+      double subjectAverage = subject.getGradeAverage();
 
       if (subjectAverage == -1) continue;
+
+      subjectAverage *= subject.weight;
 
       average += subjectAverage;
       count += subject.weight;
@@ -117,6 +120,11 @@ class SchoolSemester {
 
   String getGradePointsAverageString() {
     double gradeAverage = getGradeAverage();
+
+    return GradingSystemManager.convertGradeAverageToSelectedSystem(
+      gradeAverage,
+    );
+
     if (gradeAverage.isNaN || gradeAverage.isInfinite || gradeAverage == -1) {
       return "-";
     }
@@ -125,7 +133,11 @@ class SchoolSemester {
   }
 
   String getGradeAverageString() {
-    double gradeAverage = getGradeAverage();
+    final system = TimetableManager()
+        .settings
+        .getVar<GradingSystem>(Settings.selectedGradeSystemKey);
+    if (system == GradingSystem.grade_A_F || system == GradingSystem.grade_0_15)
+      double gradeAverage = getGradeAverage();
     if (gradeAverage.isNaN || gradeAverage.isInfinite || gradeAverage == -1) {
       return "-";
     }

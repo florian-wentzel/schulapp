@@ -1,3 +1,5 @@
+import 'package:schulapp/code_behind/grading_system_manager.dart';
+
 class Grade {
   static const gradeKey = "grade";
   static const dateKey = "date";
@@ -19,13 +21,7 @@ class Grade {
 
   @override
   String toString() {
-    if (grade.isNaN || grade.isInfinite) {
-      return "-";
-    }
-    if (grade < 10) {
-      return "0$grade";
-    }
-    return grade.toString();
+    return GradingSystemManager.convertGradeToSelectedSystem(grade);
   }
 
   Map<String, dynamic> toJson() {

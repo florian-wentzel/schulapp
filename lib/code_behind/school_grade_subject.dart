@@ -1,4 +1,4 @@
-import 'package:schulapp/code_behind/settings.dart';
+import 'package:schulapp/code_behind/grading_system_manager.dart';
 
 import 'grade.dart';
 import 'grade_group.dart';
@@ -148,13 +148,8 @@ class SchoolGradeSubject {
   String getGradeAverageString() {
     final gradeAverage = getGradeAverage();
 
-    return getGradeAverageStringStatic(gradeAverage);
-  }
-
-  static String getGradeAverageStringStatic(double grade) {
-    if (grade == -1) {
-      return "-";
-    }
-    return grade.toStringAsFixed(Settings.decimalPlaces);
+    return GradingSystemManager.convertGradeAverageToSelectedSystem(
+      gradeAverage,
+    );
   }
 }

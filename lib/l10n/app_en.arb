@@ -245,5 +245,10 @@
   "strByName": "by name",
   "strByGrade": "by grade",
   "strManually": "manually",
-  "strDragSubjectsIntoDesiredOrder": "Drag the subjects listed below into the desired order."
+  "strDragSubjectsIntoDesiredOrder": "Drag the subjects listed below into the desired order.",
+  "strGradeSystem": "Grading system",
+  "strPoints_0_15": "Points 0 - 15",
+  "strGrade_1_6": "Grades 1 - 6",
+  "strGrade_6_1": "Grades 6 - 1",
+  "strGrade_A_F": "Grades A - F"
 }

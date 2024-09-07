@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:schulapp/code_behind/grading_system_manager.dart';
 import 'package:schulapp/code_behind/save_manager.dart';
 import 'package:schulapp/code_behind/school_semester.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
@@ -72,6 +73,7 @@ class Settings {
   static const customHolidaysKey = "customHolidays";
   static const sortSubjectsByKey = "sortSubjectsBy";
   static const pinWeightedSubjectsAtTopKey = "pinWeightedSubjectsAtTop";
+  static const selectedGradeSystemKey = "selectedGradeSystem";
 
   static int decimalPlaces = 1;
 
@@ -92,6 +94,28 @@ class Settings {
     SettingsVar<String>(
       key: customHolidaysKey,
       defaultValue: () => "[]",
+    ),
+    SettingsVar<GradingSystem>(
+      key: selectedGradeSystemKey,
+      defaultValue: () => GradingSystem.grade_0_15,
+      saveCustomType: (type) {
+        return type.toString();
+      },
+      loadCustomType: (type) {
+        if (type == GradingSystem.grade_0_15.toString()) {
+          return GradingSystem.grade_0_15;
+        }
+        if (type == GradingSystem.grade_1_6.toString()) {
+          return GradingSystem.grade_1_6;
+        }
+        if (type == GradingSystem.grade_6_1.toString()) {
+          return GradingSystem.grade_6_1;
+        }
+        if (type == GradingSystem.grade_A_F.toString()) {
+          return GradingSystem.grade_A_F;
+        }
+        return null;
+      },
     ),
     SettingsVar<ThemeMode>(
       key: themeModeKey,
