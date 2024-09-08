@@ -78,7 +78,7 @@ class GradingSystemManager {
       return "1+";
     }
     if (grade == 14) {
-      return "1 ";
+      return "1";
     }
     if (grade == 13) {
       return "1-";
@@ -88,7 +88,7 @@ class GradingSystemManager {
       return "2+";
     }
     if (grade == 11) {
-      return "2 ";
+      return "2";
     }
     if (grade == 10) {
       return "2-";
@@ -98,7 +98,7 @@ class GradingSystemManager {
       return "3+";
     }
     if (grade == 8) {
-      return "3 ";
+      return "3";
     }
     if (grade == 7) {
       return "3-";
@@ -108,7 +108,7 @@ class GradingSystemManager {
       return "4+";
     }
     if (grade == 5) {
-      return "4 ";
+      return "4";
     }
     if (grade == 4) {
       return "4-";
@@ -118,14 +118,14 @@ class GradingSystemManager {
       return "5+";
     }
     if (grade == 2) {
-      return "5 ";
+      return "5";
     }
     if (grade == 1) {
       return "5-";
     }
 
     if (grade == 0) {
-      return "6 ";
+      return "6";
     }
 
     return "";
@@ -140,7 +140,7 @@ class GradingSystemManager {
       return "6+";
     }
     if (grade == 14) {
-      return "6 ";
+      return "6";
     }
     if (grade == 13) {
       return "6-";
@@ -150,7 +150,7 @@ class GradingSystemManager {
       return "5+";
     }
     if (grade == 11) {
-      return "5 ";
+      return "5";
     }
     if (grade == 10) {
       return "5-";
@@ -160,7 +160,7 @@ class GradingSystemManager {
       return "4+";
     }
     if (grade == 8) {
-      return "4 ";
+      return "4";
     }
     if (grade == 7) {
       return "4-";
@@ -170,7 +170,7 @@ class GradingSystemManager {
       return "3+";
     }
     if (grade == 5) {
-      return "3 ";
+      return "3";
     }
     if (grade == 4) {
       return "3-";
@@ -180,14 +180,14 @@ class GradingSystemManager {
       return "2+";
     }
     if (grade == 2) {
-      return "2 ";
+      return "2";
     }
     if (grade == 1) {
       return "2-";
     }
 
     if (grade == 0) {
-      return "1 ";
+      return "1";
     }
 
     return "";
@@ -206,7 +206,7 @@ class GradingSystemManager {
       return "A+";
     }
     if (grade == 14) {
-      return "A ";
+      return "A";
     }
     if (grade == 13) {
       return "A-";
@@ -216,7 +216,7 @@ class GradingSystemManager {
       return "B+";
     }
     if (grade == 11) {
-      return "B ";
+      return "B";
     }
     if (grade == 10) {
       return "B-";
@@ -226,7 +226,7 @@ class GradingSystemManager {
       return "C+";
     }
     if (grade == 8) {
-      return "C ";
+      return "C";
     }
     if (grade == 7) {
       return "C-";
@@ -236,7 +236,7 @@ class GradingSystemManager {
       return "D+";
     }
     if (grade == 5) {
-      return "D ";
+      return "D";
     }
     if (grade == 4) {
       return "D-";
@@ -246,14 +246,14 @@ class GradingSystemManager {
       return "E+";
     }
     if (grade == 2) {
-      return "E ";
+      return "E";
     }
     if (grade == 1) {
       return "E-";
     }
 
     if (grade == 0) {
-      return "F ";
+      return "F";
     }
 
     return "";

@@ -117,13 +117,20 @@ class _SemesterScreenState extends State<SemesterScreen> {
   Widget _body() {
     final semester = widget.semester;
 
+    final gradeSystem = TimetableManager().settings.getVa(
+          Settings.selectedGradeSystemKey,
+        );
+
+    bool showBottomText = true;
+
     return CustomScrollView(
       slivers: [
         SliverPersistentHeader(
           delegate: CircleHeaderDelegate(
             heroString: widget.heroString,
             text: widget.semester.getGradePointsAverageString(),
-            buttomText: widget.semester.getGradeAverageString(),
+            bottomText:
+                showBottomText ? widget.semester.getGradeAverageString() : null,
             color: widget.semester.getColor(),
           ),
           floating: false,
@@ -548,14 +555,14 @@ class _SemesterScreenState extends State<SemesterScreen> {
 class CircleHeaderDelegate extends SliverPersistentHeaderDelegate {
   String heroString;
   String text;
-  String buttomText;
+  String? bottomText;
   Color color;
 
   CircleHeaderDelegate({
     required this.heroString,
     required this.text,
-    required this.buttomText,
     required this.color,
+    this.bottomText,
   });
 
   @override
@@ -596,10 +603,12 @@ class CircleHeaderDelegate extends SliverPersistentHeaderDelegate {
                       text,
                       style: Theme.of(context).textTheme.displayMedium,
                     ),
-                    Text(
-                      buttomText,
-                      style: Theme.of(context).textTheme.headlineMedium,
-                    ),
+                    bottomText != null
+                        ? Text(
+                            bottomText!,
+                            style: Theme.of(context).textTheme.headlineMedium,
+                          )
+                        : const SizedBox.shrink(),
                   ],
                 ),
               ),
