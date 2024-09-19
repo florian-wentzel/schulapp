@@ -133,25 +133,21 @@ class SchoolSemester {
   }
 
   String getGradeAverageString() {
-    final system = TimetableManager()
-        .settings
-        .getVar<GradingSystem>(Settings.selectedGradeSystemKey);
-    if (system == GradingSystem.grade_A_F ||
-        system == GradingSystem.grade_0_15) {
-      // return "";
-    }
+    // final system = TimetableManager()
+    //     .settings
+    //     .getVar<GradingSystem>(Settings.selectedGradeSystemKey);
+
     double gradeAverage = getGradeAverage();
     if (gradeAverage.isNaN || gradeAverage.isInfinite || gradeAverage == -1) {
       return "-";
     }
 
-    return GradingSystemManager.convertGradeAverageToSelectedSystem(
+    //vielleicht muss man dass noch anpassen..
+
+    return GradingSystemManager.convertGradeAverageToSystem(
       gradeAverage,
+      GradingSystem.grade_1_6,
     );
-
-    // double newGradeAverage = (17 - gradeAverage) / 3;
-
-    // return newGradeAverage.toStringAsFixed(Settings.decimalPlaces);
   }
 
   Map<String, dynamic> toJson() {

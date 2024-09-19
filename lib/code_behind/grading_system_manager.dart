@@ -132,7 +132,7 @@ class GradingSystemManager {
   }
 
   static String _convertGradeAverage_6_1(double grade) {
-    return gradeAverageTo_1_6_average(grade);
+    return gradeAverageTo_6_1_average(grade);
   }
 
   static String _convertGrade_6_1(int grade) {
@@ -262,6 +262,12 @@ class GradingSystemManager {
   // ignore: non_constant_identifier_names
   static String gradeAverageTo_1_6_average(double grade) {
     final newGradeAverage = (17 - grade) / 3;
+    return newGradeAverage.toStringAsFixed(Settings.decimalPlaces);
+  }
+
+  // ignore: non_constant_identifier_names
+  static String gradeAverageTo_6_1_average(double grade) {
+    final newGradeAverage = 7 - (17 - grade) / 3;
     return newGradeAverage.toStringAsFixed(Settings.decimalPlaces);
   }
 }

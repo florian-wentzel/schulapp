@@ -1,6 +1,7 @@
 {
   "@@locale": "en",
   "language_name": "Englisch",
+  "version_0_4_7": "Selectable grading systems added",
   "version_0_4_6": "User Interface improvements",
   "version_0_4_5": "Subjects can now be arranged differently within the semesters",
   "version_0_4_4": "Weights have been added to subjects in the semesters",
@@ -132,6 +133,7 @@
   "strEditSubject": "Edit Subject",
   "strDeleteSubject": "Delete Subject",
   "strEditGrade": "Edit Grade",
+  "strAddGrade": "Add Grade",
   "strExtraInfo": "Extra info",
   "strDate": "Date",
   "strSetEndGrade": "Set end Grade",

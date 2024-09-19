@@ -8,6 +8,7 @@ import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:go_router/go_router.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:schulapp/app.dart';
+import 'package:schulapp/code_behind/grading_system_manager.dart';
 import 'package:schulapp/code_behind/holidays.dart';
 import 'package:schulapp/code_behind/holidays_manager.dart';
 import 'package:schulapp/code_behind/save_manager.dart';
@@ -480,7 +481,7 @@ class _TimetableScreenState extends State<TimetableScreen> {
 
     int index = 0;
     for (int key in grades.keys) {
-      String title = key.toString();
+      String title = GradingSystemManager.convertGradeToSelectedSystem(key);
       bool selected = index == _pieChartTouchedIndex;
 
       if (selected && grades[key] != null) {

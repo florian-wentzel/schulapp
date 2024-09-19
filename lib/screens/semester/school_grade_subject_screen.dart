@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/grade.dart';
 import 'package:schulapp/code_behind/grade_group.dart';
+import 'package:schulapp/code_behind/grading_system_manager.dart';
 import 'package:schulapp/code_behind/save_manager.dart';
 import 'package:schulapp/code_behind/school_grade_subject.dart';
 import 'package:schulapp/code_behind/school_semester.dart';
@@ -510,7 +511,9 @@ class _SchoolGradeSubjectScreenState extends State<SchoolGradeSubjectScreen> {
                         ),
                         child: Center(
                           child: Text(
-                            "$grade",
+                            GradingSystemManager.convertGradeToSelectedSystem(
+                              grade,
+                            ),
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 24,
@@ -596,7 +599,7 @@ class _SchoolGradeSubjectScreenState extends State<SchoolGradeSubjectScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  AppLocalizationsManager.localizations.strEditGrade,
+                  AppLocalizationsManager.localizations.strAddGrade,
                   style: Theme.of(context).textTheme.headlineMedium,
                   textAlign: TextAlign.center,
                 ),
@@ -658,7 +661,9 @@ class _SchoolGradeSubjectScreenState extends State<SchoolGradeSubjectScreen> {
                         ),
                         child: Center(
                           child: Text(
-                            '$grade',
+                            GradingSystemManager.convertGradeToSelectedSystem(
+                              grade,
+                            ),
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 24,
@@ -940,7 +945,9 @@ class _SchoolGradeSubjectScreenState extends State<SchoolGradeSubjectScreen> {
     String endSetGradeString = " – ";
     final endSetGrade = widget.subject.endSetGrade;
     if (endSetGrade != null) {
-      endSetGradeString = endSetGrade.grade.toString();
+      endSetGradeString = GradingSystemManager.convertGradeToSelectedSystem(
+        endSetGrade.grade,
+      );
     }
     return InkWell(
       onTap: () async {

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:schulapp/code_behind/grade.dart';
 import 'package:schulapp/code_behind/grade_group.dart';
+import 'package:schulapp/code_behind/grading_system_manager.dart';
 import 'package:schulapp/code_behind/save_manager.dart';
 import 'package:schulapp/code_behind/school_grade_subject.dart';
 import 'package:schulapp/code_behind/school_lesson_prefab.dart';
@@ -117,11 +118,11 @@ class _SemesterScreenState extends State<SemesterScreen> {
   Widget _body() {
     final semester = widget.semester;
 
-    final gradeSystem = TimetableManager().settings.getVa(
+    final gradeSystem = TimetableManager().settings.getVar<GradingSystem>(
           Settings.selectedGradeSystemKey,
         );
 
-    bool showBottomText = true;
+    bool showBottomText = gradeSystem == GradingSystem.grade_0_15;
 
     return CustomScrollView(
       slivers: [

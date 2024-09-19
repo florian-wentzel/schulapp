@@ -1,6 +1,7 @@
 {
   "@@locale": "de",
   "language_name": "Deutsch",
+  "version_0_4_7": "Auswählbare Notensysteme hinzugefügt",
   "version_0_4_6": "Verbesserungen an der Benutzeroberfläche",
   "version_0_4_5": "Fächer können in den Semestern verschieden angeordnet werden",
   "version_0_4_4": "Fächer können nun in Semestern gewichtet werden",
@@ -124,6 +125,7 @@
   "strEditSubject": "Schulfach bearbeiten",
   "strDeleteSubject": "Schulfach löschen",
   "strEditGrade": "Note bearbeiten",
+  "strAddGrade": "Note hinzufügen",
   "strExtraInfo": "Extra Informationen",
   "strDate": "Datum",
   "strSetEndGrade": "Zeugnisnote setzen",
