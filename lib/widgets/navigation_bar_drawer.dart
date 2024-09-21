@@ -172,12 +172,14 @@ class _NavigationBarDrawerState extends State<NavigationBarDrawer> {
     );
   }
 
-  void _loggedInTextPressed() {
+  Future<void> _loggedInTextPressed() async {
     // Navigator.of(context).pop();
-    Navigator.of(context).push(
+    await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => const VertretungsplanPaulDessauScreen(),
       ),
     );
+
+    setState(() {});
   }
 }

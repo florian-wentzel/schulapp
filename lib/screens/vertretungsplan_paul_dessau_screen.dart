@@ -44,52 +44,66 @@ class _VertretungsplanPaulDessauScreenState
       appBar: AppBar(
         title: const Text("Vertretungsplan"),
       ),
-      body: _body(),
+      body: AnimatedSwitcher(
+        duration: const Duration(
+          seconds: 1,
+        ),
+        child: _body(),
+      ),
+      bottomNavigationBar: Container(
+        margin: const EdgeInsets.all(12),
+        height: kBottomNavigationBarHeight,
+        width: MediaQuery.of(context).size.width,
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: AnimatedSwitcher(
+          duration: const Duration(
+            seconds: 1,
+          ),
+          child: _logInOutButton(),
+        ),
+      ),
     );
   }
 
   Widget _body() {
+    if (_loadedPDFbytes != null) {
+      return _pdfViewer();
+    }
+
     return Column(
+      key: const ValueKey("login"),
       children: [
         Expanded(
           child: SingleChildScrollView(
             child: Column(
               children: [
                 Column(
-                  // mainAxisAlignment: MainAxisAlignment.,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    AnimatedSwitcher(
-                      duration: const Duration(
-                        seconds: 1,
+                    const Padding(
+                      padding: EdgeInsets.symmetric(
+                        vertical: 84.0,
+                        horizontal: 8,
                       ),
-                      child: Padding(
-                        key: const ValueKey("text"),
-                        padding: EdgeInsets.symmetric(
-                          vertical: _loadedPDF == null ? 84.0 : 8,
-                          horizontal: 8,
-                        ),
-                        child: _loadedPDF != null
-                            ? const SizedBox.shrink(
-                                key: ValueKey(""),
-                              )
-                            : const Column(
-                                children: [
-                                  Text(
-                                    "Vertretungsplan",
-                                    textAlign: TextAlign.center,
-                                    overflow: TextOverflow.fade,
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 32.0,
-                                    ),
-                                  ),
-                                  Text(
-                                    "von Gesamtschule Paul Dessau\n(beta)",
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ],
-                              ),
+                      child: Column(
+                        children: [
+                          Text(
+                            "Vertretungsplan",
+                            textAlign: TextAlign.center,
+                            overflow: TextOverflow.fade,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 32.0,
+                            ),
+                          ),
+                          Text(
+                            "von Gesamtschule Paul Dessau\n(beta)",
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
                       ),
                     ),
                     AnimatedSwitcher(
@@ -107,25 +121,6 @@ class _VertretungsplanPaulDessauScreenState
                 ),
               ],
             ),
-          ),
-        ),
-        Container(
-          padding: const EdgeInsets.all(12),
-          margin: const EdgeInsets.all(12),
-          width: MediaQuery.of(context).size.width,
-          decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Column(
-            children: [
-              AnimatedSwitcher(
-                duration: const Duration(
-                  seconds: 1,
-                ),
-                child: _logInOutButton(),
-              ),
-            ],
           ),
         ),
       ],
@@ -164,7 +159,7 @@ class _VertretungsplanPaulDessauScreenState
                 labelText: 'Passwort',
               ),
               onSubmitted: (value) {
-                loginButtonPressed();
+                _loginButtonPressed();
               },
             ),
           ),
@@ -180,7 +175,7 @@ class _VertretungsplanPaulDessauScreenState
     if (username != null) {
       return TextButton(
         key: const ValueKey("logout"),
-        onPressed: () {},
+        onPressed: _logoutButtonPressed,
         child: Text(
           "Abmelden",
           style: TextStyle(
@@ -192,14 +187,35 @@ class _VertretungsplanPaulDessauScreenState
     }
     return ElevatedButton(
       key: const ValueKey("login"),
-      onPressed: _loading ? null : loginButtonPressed,
+      onPressed: _loading ? null : _loginButtonPressed,
       child: const Text(
         "Anmelden",
       ),
     );
   }
 
-  void loginButtonPressed() async {
+  void _logoutButtonPressed() {
+    _loadedPDFbytes = null;
+
+    _usernameController.text = TimetableManager().settings.getVar(
+          Settings.username,
+        );
+    _passwordController.text = "";
+
+    TimetableManager().settings.setVar(
+          Settings.username,
+          null,
+        );
+
+    TimetableManager().settings.setVar(
+          Settings.securePassword,
+          null,
+        );
+
+    setState(() {});
+  }
+
+  Future<void> _loginButtonPressed() async {
     if (_loading) return;
 
     final username = _usernameController.text.trim();
@@ -254,7 +270,7 @@ class _VertretungsplanPaulDessauScreenState
 
     Utils.showInfo(
       context,
-      msg: AppLocalizationsManager.localizations.strLoginSuccessful,
+      msg: AppLocalizationsManager.localizations.strLogindataSuccessfullySaved,
       type: InfoType.success,
     );
 
@@ -263,7 +279,7 @@ class _VertretungsplanPaulDessauScreenState
     setState(() {});
   }
 
-  Uint8List? _loadedPDF;
+  Uint8List? _loadedPDFbytes;
 
   void getPDFBytes() async {
     if (_loading) return;
@@ -288,7 +304,7 @@ class _VertretungsplanPaulDessauScreenState
         password: password,
       );
 
-      _loadedPDF = pdfBytes;
+      _loadedPDFbytes = pdfBytes;
     } catch (e) {
       if (mounted) {
         Utils.showInfo(
@@ -309,7 +325,7 @@ class _VertretungsplanPaulDessauScreenState
         child: CircularProgressIndicator(),
       );
     }
-    if (_loadedPDF == null) {
+    if (_loadedPDFbytes == null) {
       return Center(
         key: const ValueKey("button"),
         child: ElevatedButton(
@@ -319,14 +335,10 @@ class _VertretungsplanPaulDessauScreenState
       );
     }
 
-    return SizedBox(
-      width: MediaQuery.of(context).size.width,
-      height: MediaQuery.of(context).size.height * 0.9,
-      child: PdfViewer.data(
-        _loadedPDF!,
-        key: const ValueKey("pdfViewer"),
-        sourceName: "Vertretungsplan",
-      ),
+    return PdfViewer.data(
+      _loadedPDFbytes!,
+      key: const ValueKey("pdfViewer"),
+      sourceName: "Vertretungsplan",
     );
   }
 }

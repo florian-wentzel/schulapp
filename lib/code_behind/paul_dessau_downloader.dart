@@ -17,10 +17,9 @@ class PaulDessauDownloader {
       "username": username,
       "password": password,
     };
-    final response = await http.get(
-      Uri.parse(
-          "https://ontheline.trincoll.edu/images/bookdown/sample-local-pdf.pdf"),
-      // body: body,
+    final response = await http.post(
+      Uri.parse(proxyUrl),
+      body: body,
     );
     if (response.headers["content-type"] != "application/pdf") {
       var body = jsonDecode(response.body);
