@@ -257,5 +257,6 @@
   "strGrade_6_1": "Grades 6 - 1",
   "strGrade_A_F": "Grades A - F",
   "strNotLoggedIn": "not logged in",
-  "strLogindataSuccessfullySaved": "Login data successfully saved"
+  "strLogindataSuccessfullySaved": "Login data successfully saved",
+  "strSubstitutionPlan": "Open substitution plan"
 }

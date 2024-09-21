@@ -28,6 +28,7 @@ import 'package:schulapp/screens/versions_screen.dart';
 import 'package:schulapp/screens/tasks_screen.dart';
 import 'package:schulapp/screens/timetable/create_timetable_screen.dart';
 import 'package:schulapp/screens/timetable/import_export_timetable_screen.dart';
+import 'package:schulapp/screens/vertretungsplan_paul_dessau_screen.dart';
 import 'package:schulapp/widgets/timetable/timetable_widget.dart';
 import 'package:schulapp/code_behind/timetable_util_functions.dart';
 import 'package:schulapp/widgets/navigation_bar_drawer.dart';
@@ -88,9 +89,32 @@ class _TimetableScreenState extends State<TimetableScreen> {
       value: true,
     );
 
+    bool showSubstitutionplanAction =
+        TimetableManager().settings.getVar(Settings.username) != null;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
+        actions: [
+          Visibility(
+            visible: showSubstitutionplanAction,
+            child: IconButton(
+              tooltip:
+                  AppLocalizationsManager.localizations.strSubstitutionPlan,
+              onPressed: () async {
+                await Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        const VertretungsplanPaulDessauScreen(),
+                  ),
+                );
+
+                setState(() {});
+              },
+              icon: const Icon(Icons.cloud_download),
+            ),
+          ),
+        ],
       ),
       drawer: widget.isHomeScreen
           ? NavigationBarDrawer(selectedRoute: TimetableScreen.route)

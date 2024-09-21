@@ -249,5 +249,6 @@
   "strGrade_6_1": "Noten 6 - 1",
   "strGrade_A_F": "Noten A - F",
   "strNotLoggedIn": "nicht angemeldet",
-  "strLogindataSuccessfullySaved": "Anmeldedaten erfolgreich gespeichert"
+  "strLogindataSuccessfullySaved": "Anmeldedaten erfolgreich gespeichert",
+  "strSubstitutionPlan": "Vertretungsplan Öffnen"
 }
