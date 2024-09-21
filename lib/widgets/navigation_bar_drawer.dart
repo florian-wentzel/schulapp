@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:schulapp/code_behind/settings.dart';
+import 'package:schulapp/code_behind/timetable_manager.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/screens/all_timetables_screen.dart';
 import 'package:schulapp/screens/grades_screen.dart';
 import 'package:schulapp/screens/holidays_screen.dart';
+import 'package:schulapp/screens/vertretungsplan_paul_dessau_screen.dart';
 import 'package:schulapp/screens/tasks_screen.dart';
 import 'package:schulapp/screens/settings_screen.dart';
 import 'package:schulapp/screens/timetable_screen.dart';
@@ -114,9 +117,15 @@ class _NavigationBarDrawerState extends State<NavigationBarDrawer> {
               const SizedBox(
                 height: 4,
               ),
-              Text(
-                'nicht angemeldet',
-                style: Theme.of(context).textTheme.bodySmall,
+              InkWell(
+                onTap: _loggedInTextPressed,
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  child: Text(
+                    _getLogInText(),
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ),
               ),
             ],
           ),
@@ -137,6 +146,16 @@ class _NavigationBarDrawerState extends State<NavigationBarDrawer> {
     );
   }
 
+  String _getLogInText() {
+    final username = TimetableManager().settings.getVar(Settings.username);
+
+    if (username != null) {
+      return username;
+    }
+
+    return AppLocalizationsManager.localizations.strNotLoggedIn;
+  }
+
   void _onDestinationSelected(int index) {
     int correctedIndex = index;
     for (int i = 0; i <= index; i++) {
@@ -150,6 +169,15 @@ class _NavigationBarDrawerState extends State<NavigationBarDrawer> {
     return const Padding(
       padding: EdgeInsets.fromLTRB(28, 10, 28, 10),
       child: Divider(),
+    );
+  }
+
+  void _loggedInTextPressed() {
+    // Navigator.of(context).pop();
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const VertretungsplanPaulDessauScreen(),
+      ),
     );
   }
 }

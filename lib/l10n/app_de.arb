@@ -105,6 +105,7 @@
   "strChangeLanguage": "Sprache ändern",
   "strVersion": "Version",
   "strNameCanNotBeEmpty": "Name darf nicht leer sein!",
+  "strPasswordCanNotBeEmpty": "Passwort darf nicht leer sein!",
   "strNameIsToLong": "Name ist zu lang!",
   "strSelectedDirDoesNotExist": "Ausgewählter Ordner existiert nicht!",
   "strTasks": "Aufgaben",
@@ -229,6 +230,7 @@
   "strRestoreFailed": "Wiederherstellung fehlgeschlagen!\n{path}",
   "strRestoredSuccessfully": "Daten erfolgreich wiederhergestellt!\n{path}",
   "strThereWasAnError": "Es ist ein Fehler aufgetreten! :(",
+  "strThereWasAnErrorWhileSaving": "Es ist ein Fehler beim Speichern aufgetreten! :(",
   "strWidgets": "Widgets",
   "strPinToHomeScreen": "Stundenplan zum Startbildschirm hinzufügen",
   "strYouDontHaveATimetableJet": "Es sieht so aus, als hätten Sie noch keinen Stundenplan eingerichtet.\nBitte erstellen Sie einen und versuchen Sie es erneut.",
@@ -244,5 +246,7 @@
   "strPoints_0_15": "Punkte 0 - 15",
   "strGrade_1_6": "Noten 1 - 6",
   "strGrade_6_1": "Noten 6 - 1",
-  "strGrade_A_F": "Noten A - F"
+  "strGrade_A_F": "Noten A - F",
+  "strNotLoggedIn": "nicht angemeldet",
+  "strLoginSuccessful": "Anmeldung erfolgreich"
 }

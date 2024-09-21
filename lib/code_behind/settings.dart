@@ -1,3 +1,4 @@
+import 'package:encrypt/encrypt.dart' as encrypt;
 import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/grading_system_manager.dart';
 import 'package:schulapp/code_behind/save_manager.dart';
@@ -13,7 +14,7 @@ class SettingsVar<T> {
   T Function() defaultValue;
 
   T? Function(dynamic value)? loadCustomType;
-  String Function(T type)? saveCustomType;
+  String? Function(T type)? saveCustomType;
 
   //für settings die noch nicht gespeichert werden aber übersetzt werden müssen
   final bool _alwaysReturnDefaultValue;
@@ -74,6 +75,14 @@ class Settings {
   static const sortSubjectsByKey = "sortSubjectsBy";
   static const pinWeightedSubjectsAtTopKey = "pinWeightedSubjectsAtTop";
   static const selectedGradeSystemKey = "selectedGradeSystem";
+  static const username = "username";
+  static const securePassword = "password";
+
+  static final key = encrypt.Key.fromUtf8("a/wdkaw1ln=921jt48wadan249Bamd=#");
+  static final _iv = encrypt.IV.fromUtf8("a2lA.8_n&dXa0?.e");
+
+  static encrypt.Encrypter get _encrypter =>
+      encrypt.Encrypter(encrypt.AES(key));
 
   static int decimalPlaces = 1;
 
@@ -174,6 +183,35 @@ class Settings {
       key: defaultGradeGroupsKey,
       defaultValue: () => _defaultGradeGroups,
       alwaysReturnDefaultValue: true,
+    ),
+    SettingsVar<String?>(
+      key: username,
+      defaultValue: () => null,
+    ),
+    SettingsVar<String?>(
+      key: securePassword,
+      defaultValue: () => null,
+      loadCustomType: (value) {
+        if (value == null) {
+          return null;
+        }
+
+        final decrypted = _encrypter.decrypt(
+          encrypt.Encrypted.fromBase64(
+            value,
+          ),
+          iv: _iv,
+        );
+
+        return decrypted;
+      },
+      saveCustomType: (value) {
+        if (value == null) {
+          return null;
+        }
+        final encrypted = _encrypter.encrypt(value, iv: _iv);
+        return encrypted.base64;
+      },
     ),
   ];
 

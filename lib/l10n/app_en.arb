@@ -113,6 +113,7 @@
   "strChangeLanguage": "Change Language",
   "strVersion": "Version",
   "strNameCanNotBeEmpty": "Name can not be empty!",
+  "strPasswordCanNotBeEmpty": "Password can not be empty!",
   "strNameIsToLong": "Name is to long!",
   "strSelectedDirDoesNotExist": "Selected dir does not Exist!",
   "strTasks": "Tasks",
@@ -237,6 +238,7 @@
   "strRestoreFailed": "Restore failed!\n{path}",
   "strRestoredSuccessfully": "Restored successfully!\n{path}",
   "strThereWasAnError": "There was an error! :(",
+  "strThereWasAnErrorWhileSaving": "An error occurred while saving! :(",
   "strWidgets": "Widgets",
   "strPinToHomeScreen": "Add timetable to home screen",
   "strYouDontHaveATimetableJet": "It looks like you don't have a timetable set up yet.\nPlease create one and try again.",
@@ -252,5 +254,7 @@
   "strPoints_0_15": "Points 0 - 15",
   "strGrade_1_6": "Grades 1 - 6",
   "strGrade_6_1": "Grades 6 - 1",
-  "strGrade_A_F": "Grades A - F"
+  "strGrade_A_F": "Grades A - F",
+  "strNotLoggedIn": "not logged in",
+  "strLoginSuccessful": "Login Successful"
 }
