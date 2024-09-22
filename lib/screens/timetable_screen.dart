@@ -104,8 +104,9 @@ class _TimetableScreenState extends State<TimetableScreen> {
               onPressed: () async {
                 await Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (context) =>
-                        const VertretungsplanPaulDessauScreen(),
+                    builder: (context) => VertretungsplanPaulDessauScreen(
+                      loadPDFDirectly: true,
+                    ),
                   ),
                 );
 

@@ -8,8 +8,14 @@ import 'package:schulapp/code_behind/timetable_manager.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 
+// ignore: must_be_immutable
 class VertretungsplanPaulDessauScreen extends StatefulWidget {
-  const VertretungsplanPaulDessauScreen({super.key});
+  bool loadPDFDirectly;
+
+  VertretungsplanPaulDessauScreen({
+    super.key,
+    this.loadPDFDirectly = false,
+  });
 
   @override
   State<VertretungsplanPaulDessauScreen> createState() =>
@@ -29,6 +35,14 @@ class _VertretungsplanPaulDessauScreenState
     super.initState();
 
     _passwordFocusNode = FocusNode();
+    if (widget.loadPDFDirectly) {
+      Future.delayed(
+        Duration.zero,
+        () {
+          _getPDFBytes();
+        },
+      );
+    }
   }
 
   @override
@@ -43,6 +57,16 @@ class _VertretungsplanPaulDessauScreenState
     return Scaffold(
       appBar: AppBar(
         title: const Text("Vertretungsplan"),
+        actions: [
+          Visibility(
+            visible:
+                TimetableManager().settings.getVar(Settings.username) != null,
+            child: IconButton(
+              icon: const Icon(Icons.logout),
+              onPressed: _logoutButtonPressed,
+            ),
+          ),
+        ],
       ),
       body: AnimatedSwitcher(
         duration: const Duration(
@@ -50,20 +74,31 @@ class _VertretungsplanPaulDessauScreenState
         ),
         child: _body(),
       ),
-      bottomNavigationBar: Container(
-        margin: const EdgeInsets.all(12),
-        height: kBottomNavigationBarHeight,
-        width: MediaQuery.of(context).size.width,
-        decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(12),
+      bottomNavigationBar: AnimatedSwitcher(
+        duration: const Duration(
+          seconds: 1,
         ),
-        child: AnimatedSwitcher(
-          duration: const Duration(
-            seconds: 1,
-          ),
-          child: _logInOutButton(),
-        ),
+        child: TimetableManager().settings.getVar(Settings.username) != null
+            ? const SizedBox.shrink(
+                key: ValueKey("nothing"),
+              )
+            : Container(
+                margin: const EdgeInsets.all(12),
+                height: kBottomNavigationBarHeight,
+                width: MediaQuery.of(context).size.width,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).cardColor,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Center(
+                  child: ElevatedButton(
+                    onPressed: _loading ? null : _loginButtonPressed,
+                    child: const Text(
+                      "Anmelden",
+                    ),
+                  ),
+                ),
+              ),
       ),
     );
   }
@@ -168,32 +203,6 @@ class _VertretungsplanPaulDessauScreenState
     );
   }
 
-  Widget _logInOutButton() {
-    final username =
-        TimetableManager().settings.getVar<String?>(Settings.username);
-
-    if (username != null) {
-      return TextButton(
-        key: const ValueKey("logout"),
-        onPressed: _logoutButtonPressed,
-        child: Text(
-          "Abmelden",
-          style: TextStyle(
-            color: Colors.grey[600],
-            fontSize: 16,
-          ),
-        ),
-      );
-    }
-    return ElevatedButton(
-      key: const ValueKey("login"),
-      onPressed: _loading ? null : _loginButtonPressed,
-      child: const Text(
-        "Anmelden",
-      ),
-    );
-  }
-
   void _logoutButtonPressed() {
     _loadedPDFbytes = null;
 
@@ -281,7 +290,7 @@ class _VertretungsplanPaulDessauScreenState
 
   Uint8List? _loadedPDFbytes;
 
-  void getPDFBytes() async {
+  void _getPDFBytes() async {
     if (_loading) return;
     _loading = true;
 
@@ -329,7 +338,7 @@ class _VertretungsplanPaulDessauScreenState
       return Center(
         key: const ValueKey("button"),
         child: ElevatedButton(
-          onPressed: getPDFBytes,
+          onPressed: _getPDFBytes,
           child: const Text("Vertretungsplan Herunterladen"),
         ),
       );

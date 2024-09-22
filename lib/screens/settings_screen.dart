@@ -29,40 +29,60 @@ class SettingsScreen extends StatefulWidget {
     required String title,
     List<Widget>? body,
     List<Widget>? afterTitle,
+    bool hide = false,
   }) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      margin: const EdgeInsets.symmetric(
-        horizontal: 8,
-        vertical: 4,
-      ),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        color: Theme.of(context).cardColor,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Flexible(
-                child: Text(
-                  title,
-                  style: Theme.of(context).textTheme.headlineMedium,
-                ),
-              ),
-              ...afterTitle ?? [Container()],
-            ],
+    return AnimatedSwitcher(
+      transitionBuilder: (Widget child, Animation<double> animation) {
+        return FadeTransition(
+          opacity: animation,
+          child: SizeTransition(
+            sizeFactor: animation,
+            child: child,
           ),
-          body != null
-              ? const SizedBox(
-                  height: 12,
-                )
-              : Container(),
-          ...body ?? [Container()],
-        ],
+        );
+      },
+      duration: const Duration(
+        milliseconds: 400,
       ),
+      child: hide
+          ? const SizedBox.shrink(
+              key: ValueKey("nothing"),
+            )
+          : Container(
+              key: const ValueKey("item"),
+              padding: const EdgeInsets.all(12),
+              margin: const EdgeInsets.symmetric(
+                horizontal: 8,
+                vertical: 4,
+              ),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                color: Theme.of(context).cardColor,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          title,
+                          style: Theme.of(context).textTheme.headlineMedium,
+                        ),
+                      ),
+                      ...afterTitle ?? [Container()],
+                    ],
+                  ),
+                  body != null
+                      ? const SizedBox(
+                          height: 12,
+                        )
+                      : Container(),
+                  ...body ?? [Container()],
+                ],
+              ),
+            ),
     );
   }
 }
@@ -105,6 +125,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _pinHomeWidget(),
         _createBackup(),
         _selectLanguage(),
+        _paulDessauLogout(),
         _currentVersion(),
       ],
     );
@@ -434,6 +455,41 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
           ],
+        ),
+      ],
+    );
+  }
+
+  Widget _paulDessauLogout() {
+    final username =
+        TimetableManager().settings.getVar<String?>(Settings.username);
+
+    return SettingsScreen.listItem(
+      context,
+      title: "Paul-Dessau",
+      hide: username == null,
+      body: [
+        ElevatedButton(
+          onPressed: () {
+            TimetableManager().settings.setVar(
+                  Settings.username,
+                  null,
+                );
+
+            TimetableManager().settings.setVar(
+                  Settings.securePassword,
+                  null,
+                );
+
+            setState(() {});
+
+            Utils.showInfo(
+              context,
+              msg: "Erfolgreich abgemeldet",
+              type: InfoType.success,
+            );
+          },
+          child: const Text("Abmelden"),
         ),
       ],
     );
