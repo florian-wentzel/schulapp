@@ -147,7 +147,7 @@ class _NavigationBarDrawerState extends State<NavigationBarDrawer> {
   }
 
   String _getLogInText() {
-    final username = TimetableManager().settings.getVar(Settings.username);
+    final username = TimetableManager().settings.getVar(Settings.usernameKey);
 
     if (username != null) {
       return username;

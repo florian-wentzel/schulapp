@@ -75,8 +75,9 @@ class Settings {
   static const sortSubjectsByKey = "sortSubjectsBy";
   static const pinWeightedSubjectsAtTopKey = "pinWeightedSubjectsAtTop";
   static const selectedGradeSystemKey = "selectedGradeSystem";
-  static const username = "username";
-  static const securePassword = "password";
+  static const usernameKey = "username";
+  static const securePasswordKey = "password";
+  static const highContrastTextOnHomescreenKey = "highContrastTextOnHomescreen";
 
   static final key = encrypt.Key.fromUtf8("a/wdkaw1ln=921jt48wadan249Bamd=#");
   static final _iv = encrypt.IV.fromUtf8("a2lA.8_n&dXa0?.e");
@@ -176,6 +177,10 @@ class Settings {
       defaultValue: () => true,
     ),
     SettingsVar<bool>(
+      key: highContrastTextOnHomescreenKey,
+      defaultValue: () => false,
+    ),
+    SettingsVar<bool>(
       key: hiddenDebugModeKey,
       defaultValue: () => false,
     ),
@@ -185,11 +190,11 @@ class Settings {
       alwaysReturnDefaultValue: true,
     ),
     SettingsVar<String?>(
-      key: username,
+      key: usernameKey,
       defaultValue: () => null,
     ),
     SettingsVar<String?>(
-      key: securePassword,
+      key: securePasswordKey,
       defaultValue: () => null,
       loadCustomType: (value) {
         if (value == null) {

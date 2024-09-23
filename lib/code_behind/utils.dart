@@ -310,7 +310,6 @@ class Utils {
     );
   }
 
-  //TODO
   static Future<Color?> showColorInputDialog(
     BuildContext context, {
     String? hintText,

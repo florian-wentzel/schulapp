@@ -59,15 +59,13 @@ class CancelledSpecialLesson extends SpecialLesson {
   static const type = "Cancelled";
 
   CancelledSpecialLesson({
-    required int dayIndex,
-    required int timeIndex,
+    required super.dayIndex,
+    required super.timeIndex,
   }) : super(
           name: "",
           room: "",
           teacher: "",
           color: Colors.black,
-          dayIndex: dayIndex,
-          timeIndex: timeIndex,
         );
 
   @override

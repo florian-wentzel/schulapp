@@ -90,7 +90,7 @@ class _TimetableScreenState extends State<TimetableScreen> {
     );
 
     bool showSubstitutionplanAction =
-        TimetableManager().settings.getVar(Settings.username) != null;
+        TimetableManager().settings.getVar(Settings.usernameKey) != null;
 
     return Scaffold(
       appBar: AppBar(

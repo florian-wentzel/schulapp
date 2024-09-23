@@ -1,6 +1,7 @@
 {
   "@@locale": "de",
   "language_name": "Deutsch",
+  "version_0_4_9": "Textkontrast auf der Startseite einstellbar",
   "version_0_4_8": "Vertretungsplan der Gesamtschule Paul Dessau jetzt verfügbar (beta)",
   "version_0_4_7": "Auswählbare Notensysteme hinzugefügt",
   "version_0_4_6": "Verbesserungen an der Benutzeroberfläche",
@@ -250,5 +251,6 @@
   "strGrade_A_F": "Noten A - F",
   "strNotLoggedIn": "nicht angemeldet",
   "strLogindataSuccessfullySaved": "Anmeldedaten erfolgreich gespeichert",
-  "strSubstitutionPlan": "Vertretungsplan Öffnen"
+  "strSubstitutionPlan": "Vertretungsplan Öffnen",
+  "strHighContrastOnHomeScreen": "Textkontrast auf der Startseite erhöhen"
 }

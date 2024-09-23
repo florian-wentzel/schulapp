@@ -59,8 +59,8 @@ class _VertretungsplanPaulDessauScreenState
         title: const Text("Vertretungsplan"),
         actions: [
           Visibility(
-            visible:
-                TimetableManager().settings.getVar(Settings.username) != null,
+            visible: TimetableManager().settings.getVar(Settings.usernameKey) !=
+                null,
             child: IconButton(
               icon: const Icon(Icons.logout),
               onPressed: _logoutButtonPressed,
@@ -78,7 +78,7 @@ class _VertretungsplanPaulDessauScreenState
         duration: const Duration(
           seconds: 1,
         ),
-        child: TimetableManager().settings.getVar(Settings.username) != null
+        child: TimetableManager().settings.getVar(Settings.usernameKey) != null
             ? const SizedBox.shrink(
                 key: ValueKey("nothing"),
               )
@@ -147,7 +147,7 @@ class _VertretungsplanPaulDessauScreenState
                       ),
                       child: TimetableManager()
                                   .settings
-                                  .getVar(Settings.username) ==
+                                  .getVar(Settings.usernameKey) ==
                               null
                           ? _textFields()
                           : _pdfViewer(),
@@ -207,17 +207,17 @@ class _VertretungsplanPaulDessauScreenState
     _loadedPDFbytes = null;
 
     _usernameController.text = TimetableManager().settings.getVar(
-          Settings.username,
+          Settings.usernameKey,
         );
     _passwordController.text = "";
 
     TimetableManager().settings.setVar(
-          Settings.username,
+          Settings.usernameKey,
           null,
         );
 
     TimetableManager().settings.setVar(
-          Settings.securePassword,
+          Settings.securePasswordKey,
           null,
         );
 
@@ -254,12 +254,12 @@ class _VertretungsplanPaulDessauScreenState
     bool b = true;
 
     a = TimetableManager().settings.setVar(
-          Settings.username,
+          Settings.usernameKey,
           username,
         );
 
     b = TimetableManager().settings.setVar(
-          Settings.securePassword,
+          Settings.securePasswordKey,
           password,
         );
 
@@ -297,10 +297,10 @@ class _VertretungsplanPaulDessauScreenState
     setState(() {});
 
     final username = TimetableManager().settings.getVar<String?>(
-          Settings.username,
+          Settings.usernameKey,
         );
     final password = TimetableManager().settings.getVar<String?>(
-          Settings.securePassword,
+          Settings.securePasswordKey,
         );
 
     if (username == null || password == null) {

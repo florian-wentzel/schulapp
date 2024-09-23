@@ -1,6 +1,7 @@
 {
   "@@locale": "en",
   "language_name": "Englisch",
+  "version_0_4_9": "Text contrast on homescreen adjustable",
   "version_0_4_8": "Substitution plan of Paul Dessau Comprehensive School now available (beta)",
   "version_0_4_7": "Selectable grading systems added",
   "version_0_4_6": "User Interface improvements",
@@ -258,5 +259,6 @@
   "strGrade_A_F": "Grades A - F",
   "strNotLoggedIn": "not logged in",
   "strLogindataSuccessfullySaved": "Login data successfully saved",
-  "strSubstitutionPlan": "Open substitution plan"
+  "strSubstitutionPlan": "Open substitution plan",
+  "strHighContrastOnHomeScreen": "Increase text contrast on homescreen"
 }

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:schulapp/app.dart';
@@ -122,6 +124,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _gradeSystemSelector(),
         _openMainSemesterAutomatically(),
         _showTasksOnHomeScreen(),
+        _highContrastOnHomeScreen(),
         _pinHomeWidget(),
         _createBackup(),
         _selectLanguage(),
@@ -397,9 +400,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  Widget _highContrastOnHomeScreen() {
+    return SettingsScreen.listItem(
+      context,
+      title: AppLocalizationsManager.localizations.strHighContrastOnHomeScreen,
+      afterTitle: [
+        Switch.adaptive(
+          value: TimetableManager().settings.getVar(
+                Settings.highContrastTextOnHomescreenKey,
+              ),
+          onChanged: (value) {
+            TimetableManager().settings.setVar(
+                  Settings.highContrastTextOnHomescreenKey,
+                  value,
+                );
+            setState(() {});
+          },
+        ),
+      ],
+    );
+  }
+
   Widget _pinHomeWidget() {
     return SettingsScreen.listItem(
       context,
+      hide: !Platform.isAndroid,
       title: AppLocalizationsManager.localizations.strWidgets,
       body: [
         ElevatedButton(
@@ -462,7 +487,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Widget _paulDessauLogout() {
     final username =
-        TimetableManager().settings.getVar<String?>(Settings.username);
+        TimetableManager().settings.getVar<String?>(Settings.usernameKey);
 
     return SettingsScreen.listItem(
       context,
@@ -472,12 +497,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ElevatedButton(
           onPressed: () {
             TimetableManager().settings.setVar(
-                  Settings.username,
+                  Settings.usernameKey,
                   null,
                 );
 
             TimetableManager().settings.setVar(
-                  Settings.securePassword,
+                  Settings.securePasswordKey,
                   null,
                 );
 
