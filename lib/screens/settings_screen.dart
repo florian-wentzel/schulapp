@@ -6,11 +6,14 @@ import 'package:schulapp/app.dart';
 import 'package:schulapp/code_behind/backup_manager.dart';
 import 'package:schulapp/code_behind/grading_system_manager.dart';
 import 'package:schulapp/code_behind/school_semester.dart';
+import 'package:schulapp/code_behind/school_time.dart';
 import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/timetable.dart';
 import 'package:schulapp/code_behind/timetable_manager.dart';
+import 'package:schulapp/code_behind/timetable_util_functions.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/code_behind/version_manager.dart';
+import 'package:schulapp/extensions.dart';
 import 'package:schulapp/home_widget/home_widget_manager.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/screens/versions_screen.dart';
@@ -28,7 +31,7 @@ class SettingsScreen extends StatefulWidget {
 
   static Widget listItem(
     BuildContext context, {
-    required String title,
+    required String? title,
     List<Widget>? body,
     List<Widget>? afterTitle,
     bool hide = false,
@@ -64,19 +67,21 @@ class SettingsScreen extends StatefulWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Flexible(
-                        child: Text(
-                          title,
-                          style: Theme.of(context).textTheme.headlineMedium,
-                        ),
-                      ),
-                      ...afterTitle ?? [Container()],
-                    ],
-                  ),
-                  body != null
+                  if (title != null || afterTitle != null)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        if (title != null)
+                          Flexible(
+                            child: Text(
+                              title,
+                              style: Theme.of(context).textTheme.headlineMedium,
+                            ),
+                          ),
+                        ...afterTitle ?? [Container()],
+                      ],
+                    ),
+                  body != null && (title != null || afterTitle != null)
                       ? const SizedBox(
                           height: 12,
                         )
@@ -125,6 +130,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _openMainSemesterAutomatically(),
         _showTasksOnHomeScreen(),
         _highContrastOnHomeScreen(),
+        _reducedClassHoursEnabled(),
+        _reducedClassHours(),
         _pinHomeWidget(),
         _createBackup(),
         _selectLanguage(),
@@ -421,6 +428,185 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  Widget _reducedClassHoursEnabled() {
+    return SettingsScreen.listItem(
+      context,
+      title: AppLocalizationsManager.localizations.strReducedClassHours,
+      afterTitle: [
+        Switch.adaptive(
+          value: TimetableManager().settings.getVar(
+                Settings.reducedClassHoursEnabledKey,
+              ),
+          onChanged: (value) {
+            TimetableManager().settings.setVar(
+                  Settings.reducedClassHoursEnabledKey,
+                  value,
+                );
+
+            final reducedClassHours = TimetableManager().settings.getVar(
+                  Settings.reducedClassHoursKey,
+                );
+
+            if (value && reducedClassHours == null) {
+              Utils.showInfo(
+                context,
+                msg: AppLocalizationsManager
+                    .localizations.strYouDontHaveAnyReducedTimesSetUpYet,
+                type: InfoType.warning,
+              );
+            }
+            setState(() {});
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _reducedClassHours() {
+    final times = TimetableManager().settings.getVar<List<SchoolTime>?>(
+              Settings.reducedClassHoursKey,
+            ) ??
+        [];
+    return SettingsScreen.listItem(
+      context,
+      title: null,
+      hide: !TimetableManager().settings.getVar(
+            Settings.reducedClassHoursEnabledKey,
+          ),
+      body: [
+        if (times.isNotEmpty)
+          ConstrainedBox(
+            constraints: const BoxConstraints(
+              maxHeight: 300,
+            ),
+            child: ListView.builder(
+              itemCount: times.length,
+              itemBuilder: (context, index) {
+                return Container(
+                  padding: const EdgeInsets.all(2),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      InkWell(
+                        onTap: () async {
+                          TimeOfDay? time = await showTimePicker(
+                            context: context,
+                            initialTime: times[index].start,
+                          );
+
+                          if (time == null) return;
+
+                          if (!time.isBefore(times[index].end)) {
+                            if (context.mounted) {
+                              Utils.showInfo(
+                                context,
+                                msg: AppLocalizationsManager
+                                    .localizations.strTimeNotValid,
+                                type: InfoType.error,
+                              );
+                            }
+                            return;
+                          }
+
+                          if (index - 1 >= 0 &&
+                              time.isBefore(times[index - 1].end)) {
+                            if (context.mounted) {
+                              Utils.showInfo(
+                                context,
+                                msg: AppLocalizationsManager
+                                    .localizations.strTimeNotValid,
+                                type: InfoType.error,
+                              );
+                            }
+                            return;
+                          }
+
+                          times[index].start = time;
+
+                          TimetableManager().settings.setVar<List<SchoolTime>?>(
+                                Settings.reducedClassHoursKey,
+                                times,
+                              );
+
+                          setState(() {});
+                        },
+                        child: Text(
+                          times[index].getStartString(),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      const Text(
+                        "-",
+                      ),
+                      InkWell(
+                        onTap: () async {
+                          TimeOfDay? time = await showTimePicker(
+                            context: context,
+                            initialTime: times[index].end,
+                          );
+
+                          if (time == null) return;
+
+                          if (time.isBefore(times[index].start)) {
+                            if (context.mounted) {
+                              Utils.showInfo(
+                                context,
+                                msg: AppLocalizationsManager
+                                    .localizations.strTimeNotValid,
+                                type: InfoType.error,
+                              );
+                            }
+                            return;
+                          }
+
+                          if (index + 1 < times.length &&
+                              !time.isBefore(times[index + 1].start)) {
+                            if (context.mounted) {
+                              Utils.showInfo(
+                                context,
+                                msg: AppLocalizationsManager
+                                    .localizations.strTimeNotValid,
+                                type: InfoType.error,
+                              );
+                            }
+                            return;
+                          }
+
+                          times[index].end = time;
+
+                          TimetableManager().settings.setVar<List<SchoolTime>?>(
+                                Settings.reducedClassHoursKey,
+                                times,
+                              );
+
+                          setState(() {});
+                        },
+                        child: Container(
+                          margin: const EdgeInsets.all(8.0),
+                          child: Text(
+                            times[index].getEndString(),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        if (times.isNotEmpty)
+          const SizedBox(
+            height: 8,
+          ),
+        ElevatedButton(
+          onPressed: _setTimesPressed,
+          child: Text(AppLocalizationsManager.localizations.strSetTimes),
+        ),
+      ],
+    );
+  }
+
   Widget _pinHomeWidget() {
     return SettingsScreen.listItem(
       context,
@@ -703,6 +889,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ThemeManager().themeMode = ThemeManager().themeMode;
       setState(() {});
     }
+  }
+
+  Future<void> _setTimesPressed() async {
+    final times = (await showCreateTimetableSheet(
+      context,
+      onlySchoolTimes: true,
+    ))
+        ?.schoolTimes;
+
+    if (times == null) return;
+
+    final b = TimetableManager().settings.setVar<List<SchoolTime>>(
+          Settings.reducedClassHoursKey,
+          times,
+        );
+
+    if (b && mounted) {
+      Utils.showInfo(
+        context,
+        msg: AppLocalizationsManager.localizations.strSuccessfullySaved,
+        type: InfoType.success,
+      );
+    }
+
+    setState(() {});
   }
 }
 

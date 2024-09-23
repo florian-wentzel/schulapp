@@ -47,6 +47,8 @@ class _TimetableWidgetState extends State<TimetableWidget> {
     initialPage: initialPageIndex,
   );
 
+  late List<SchoolTime> ttSchoolTimes;
+
   double lessonHeight = minLessonHeight;
   double lessonWidth = minLessonWidth;
 
@@ -55,6 +57,70 @@ class _TimetableWidgetState extends State<TimetableWidget> {
 
   late int currWeekIndex;
   late int currYear;
+
+  @override
+  void initState() {
+    super.initState();
+
+    ttSchoolTimes = widget.timetable.schoolTimes;
+
+    final reducedClassHoursEnabled = TimetableManager().settings.getVar<bool>(
+          Settings.reducedClassHoursEnabledKey,
+        );
+
+    if (!reducedClassHoursEnabled) {
+      return;
+    }
+
+    final reducedClassHours =
+        TimetableManager().settings.getVar<List<SchoolTime>?>(
+              Settings.reducedClassHoursKey,
+            );
+
+    if (reducedClassHours == null) {
+      Future.delayed(
+        Duration.zero,
+        () {
+          if (!mounted) return;
+
+          Utils.showInfo(
+            context,
+            msg: AppLocalizationsManager
+                .localizations.strYouDontHaveAnyReducedTimesSetUpYet,
+            type: InfoType.error,
+          );
+        },
+      );
+
+      return;
+    }
+
+    if (reducedClassHours.length < widget.timetable.schoolTimes.length) {
+      Future.delayed(
+        Duration.zero,
+        () {
+          if (!mounted) return;
+
+          Utils.showInfo(
+            context,
+            msg: AppLocalizationsManager
+                .localizations.strReducedTimesCannotBeUsed,
+            type: InfoType.error,
+          );
+        },
+      );
+
+      return;
+    }
+
+    while (reducedClassHours.length > widget.timetable.schoolTimes.length) {
+      reducedClassHours.removeLast();
+    }
+
+    ttSchoolTimes = reducedClassHours;
+
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -133,8 +199,6 @@ class _TimetableWidgetState extends State<TimetableWidget> {
   }
 
   Widget _createTimes() {
-    final tt = widget.timetable;
-
     List<Widget> timeWidgets = [];
 
     timeWidgets.add(
@@ -143,7 +207,7 @@ class _TimetableWidgetState extends State<TimetableWidget> {
         height: lessonHeight,
         child: Center(
           child: TimeToNextLessonWidget(
-            timetable: tt,
+            ttSchoolTimes: ttSchoolTimes,
             onNewLessonCB: () {
               if (mounted) {
                 setState(() {});
@@ -155,9 +219,9 @@ class _TimetableWidgetState extends State<TimetableWidget> {
     );
 
     for (int lessonIndex = 0;
-        lessonIndex < tt.schoolTimes.length;
+        lessonIndex < ttSchoolTimes.length;
         lessonIndex++) {
-      final schoolTime = tt.schoolTimes[lessonIndex];
+      final schoolTime = ttSchoolTimes[lessonIndex];
       String startString = schoolTime.getStartString();
       String endString = schoolTime.getEndString();
 
@@ -168,8 +232,8 @@ class _TimetableWidgetState extends State<TimetableWidget> {
       if (schoolTime.isCurrentlyRunning()) {
         containerColor = selectedColor;
       } else {
-        if (lessonIndex + 1 < tt.schoolTimes.length) {
-          final nextSchoolTime = tt.schoolTimes[lessonIndex + 1];
+        if (lessonIndex + 1 < ttSchoolTimes.length) {
+          final nextSchoolTime = ttSchoolTimes[lessonIndex + 1];
           int currTimeInSec = Utils.nowInSeconds();
           int currSchoolTimeEndInSec = schoolTime.end.toSeconds();
           int nextSchoolTimeStartInSec = nextSchoolTime.start.toSeconds();
@@ -358,7 +422,7 @@ class _TimetableWidgetState extends State<TimetableWidget> {
     );
 
     for (int lessonIndex = 0; lessonIndex < day.lessons.length; lessonIndex++) {
-      final currSchoolTime = tt.schoolTimes[lessonIndex];
+      final currSchoolTime = ttSchoolTimes[lessonIndex];
       final lesson = day.lessons[lessonIndex];
       final heroString = "$lessonIndex:$dayIndex";
 
@@ -380,8 +444,8 @@ class _TimetableWidgetState extends State<TimetableWidget> {
         containerColor = selectedColor;
       }
 
-      if (lessonIndex + 1 < tt.schoolTimes.length) {
-        final nextSchoolTime = tt.schoolTimes[lessonIndex + 1];
+      if (lessonIndex + 1 < ttSchoolTimes.length) {
+        final nextSchoolTime = ttSchoolTimes[lessonIndex + 1];
         int currTimeInSec = Utils.nowInSeconds();
         int currSchoolTimeEndInSec = currSchoolTime.end.toSeconds();
         int nextSchoolTimeStartInSec = nextSchoolTime.start.toSeconds();

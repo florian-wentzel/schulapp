@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:schulapp/code_behind/holidays_manager.dart';
+import 'package:schulapp/code_behind/school_time.dart';
 import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/timetable.dart';
 import 'package:schulapp/code_behind/timetable_manager.dart';
 import 'package:schulapp/code_behind/todo_event.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/extensions.dart';
+import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/widgets/strike_through_container.dart';
 import 'package:schulapp/widgets/timetable/time_to_next_lesson_widget.dart';
 import 'package:schulapp/widgets/timetable/timetable_lesson_widget.dart';
@@ -36,6 +38,7 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
   static const int initialMondayPageIndex = pagesCount ~/ 2;
 
   late final PageController _pageController;
+  late List<SchoolTime> ttSchoolTimes;
 
   double lessonHeight = minLessonHeight;
   double lessonWidth = minLessonWidth;
@@ -48,6 +51,8 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
 
   @override
   void initState() {
+    super.initState();
+
     int showNextWeek = 0;
     if (DateTime.now().weekday == DateTime.sunday) {
       showNextWeek = widget.timetable.schoolDays.length;
@@ -57,7 +62,65 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
           Utils.getCurrentWeekDayIndex() +
           showNextWeek,
     );
-    super.initState();
+
+    ttSchoolTimes = widget.timetable.schoolTimes;
+
+    final reducedClassHoursEnabled = TimetableManager().settings.getVar<bool>(
+          Settings.reducedClassHoursEnabledKey,
+        );
+
+    if (!reducedClassHoursEnabled) {
+      return;
+    }
+
+    final reducedClassHours =
+        TimetableManager().settings.getVar<List<SchoolTime>?>(
+              Settings.reducedClassHoursKey,
+            );
+
+    if (reducedClassHours == null) {
+      Future.delayed(
+        Duration.zero,
+        () {
+          if (!mounted) return;
+
+          Utils.showInfo(
+            context,
+            msg: AppLocalizationsManager
+                .localizations.strYouDontHaveAnyReducedTimesSetUpYet,
+            type: InfoType.error,
+          );
+        },
+      );
+
+      return;
+    }
+
+    if (reducedClassHours.length < widget.timetable.schoolTimes.length) {
+      Future.delayed(
+        Duration.zero,
+        () {
+          if (!mounted) return;
+
+          Utils.showInfo(
+            context,
+            msg: AppLocalizationsManager
+                .localizations.strReducedTimesCannotBeUsed,
+            type: InfoType.error,
+          );
+        },
+      );
+
+      return;
+    }
+
+    while (reducedClassHours.length > widget.timetable.schoolTimes.length) {
+      reducedClassHours.removeLast();
+    }
+
+    ttSchoolTimes = reducedClassHours;
+
+    setState(() {});
   }
 
   @override
@@ -112,7 +175,7 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
 
     return SizedBox(
       width: lessonWidth * 2,
-      height: lessonHeight * (widget.timetable.schoolTimes.length + 1) +
+      height: lessonHeight * (widget.timetable.maxLessonCount + 1) +
           lessonHeight / 4, //_createBreakHighlight
       child: PageView.builder(
         controller: _pageController,
@@ -159,8 +222,6 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
   }
 
   Widget _createTimes() {
-    final tt = widget.timetable;
-
     List<Widget> timeWidgets = [];
 
     timeWidgets.add(
@@ -169,7 +230,7 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
         height: lessonHeight,
         child: Center(
           child: TimeToNextLessonWidget(
-            timetable: tt,
+            ttSchoolTimes: ttSchoolTimes,
             onNewLessonCB: () {
               if (mounted) {
                 setState(() {});
@@ -181,9 +242,9 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
     );
 
     for (int lessonIndex = 0;
-        lessonIndex < tt.schoolTimes.length;
+        lessonIndex < ttSchoolTimes.length;
         lessonIndex++) {
-      final schoolTime = tt.schoolTimes[lessonIndex];
+      final schoolTime = ttSchoolTimes[lessonIndex];
       String startString = schoolTime.getStartString();
       String endString = schoolTime.getEndString();
 
@@ -194,8 +255,8 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
       if (schoolTime.isCurrentlyRunning()) {
         containerColor = selectedColor;
       } else {
-        if (lessonIndex + 1 < tt.schoolTimes.length) {
-          final nextSchoolTime = tt.schoolTimes[lessonIndex + 1];
+        if (lessonIndex + 1 < ttSchoolTimes.length) {
+          final nextSchoolTime = ttSchoolTimes[lessonIndex + 1];
           int currTimeInSec = Utils.nowInSeconds();
           int currSchoolTimeEndInSec = schoolTime.end.toSeconds();
           int nextSchoolTimeStartInSec = nextSchoolTime.start.toSeconds();
@@ -377,7 +438,7 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
     );
 
     for (int lessonIndex = 0; lessonIndex < day.lessons.length; lessonIndex++) {
-      final currSchoolTime = tt.schoolTimes[lessonIndex];
+      final currSchoolTime = ttSchoolTimes[lessonIndex];
       final lesson = day.lessons[lessonIndex];
       final heroString = "$lessonIndex:$dayIndex";
 
@@ -388,8 +449,8 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
       if (currSchoolTime.isCurrentlyRunning()) {
         containerColor = selectedColor;
       } else {
-        if (lessonIndex + 1 < tt.schoolTimes.length) {
-          final nextSchoolTime = tt.schoolTimes[lessonIndex + 1];
+        if (lessonIndex + 1 < ttSchoolTimes.length) {
+          final nextSchoolTime = ttSchoolTimes[lessonIndex + 1];
           int currTimeInSec = Utils.nowInSeconds();
           int currSchoolTimeEndInSec = currSchoolTime.end.toSeconds();
           int nextSchoolTimeStartInSec = nextSchoolTime.start.toSeconds();

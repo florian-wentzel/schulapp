@@ -1,8 +1,12 @@
+import 'dart:convert';
+
 import 'package:encrypt/encrypt.dart' as encrypt;
 import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/grading_system_manager.dart';
 import 'package:schulapp/code_behind/save_manager.dart';
 import 'package:schulapp/code_behind/school_semester.dart';
+import 'package:schulapp/code_behind/school_time.dart';
+import 'package:schulapp/code_behind/timetable.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 
 import 'grade_group.dart';
@@ -13,11 +17,12 @@ class SettingsVar<T> {
   T? _value;
   T Function() defaultValue;
 
-  T? Function(dynamic value)? loadCustomType;
+  T? Function(String? value)? loadCustomType;
   String? Function(T type)? saveCustomType;
 
   //für settings die noch nicht gespeichert werden aber übersetzt werden müssen
   final bool _alwaysReturnDefaultValue;
+  final T Function(T? value)? _onlyReturnCopy;
 
   SettingsVar({
     required this.key,
@@ -25,14 +30,20 @@ class SettingsVar<T> {
     this.loadCustomType,
     this.saveCustomType,
     T? value,
+    T Function(T? value)? onlyReturnCopy,
     bool alwaysReturnDefaultValue = false,
   })  : _value = value,
-        _alwaysReturnDefaultValue = alwaysReturnDefaultValue;
+        _alwaysReturnDefaultValue = alwaysReturnDefaultValue,
+        _onlyReturnCopy = onlyReturnCopy;
 
   T get value {
     if (_alwaysReturnDefaultValue) {
       return defaultValue.call();
     }
+    if (_onlyReturnCopy != null) {
+      return _onlyReturnCopy.call(_value);
+    }
+
     return _value ?? defaultValue.call();
   }
 
@@ -78,6 +89,8 @@ class Settings {
   static const usernameKey = "username";
   static const securePasswordKey = "password";
   static const highContrastTextOnHomescreenKey = "highContrastTextOnHomescreen";
+  static const reducedClassHoursEnabledKey = "reducedClassHoursEnabled";
+  static const reducedClassHoursKey = "reducedClassHours";
 
   static final key = encrypt.Key.fromUtf8("a/wdkaw1ln=921jt48wadan249Bamd=#");
   static final _iv = encrypt.IV.fromUtf8("a2lA.8_n&dXa0?.e");
@@ -159,6 +172,49 @@ class Settings {
     SettingsVar<bool>(
       key: pinWeightedSubjectsAtTopKey,
       defaultValue: () => false,
+    ),
+    SettingsVar<bool>(
+      key: reducedClassHoursEnabledKey,
+      defaultValue: () => false,
+    ),
+    SettingsVar<List<SchoolTime>?>(
+      key: reducedClassHoursKey,
+      defaultValue: () => null,
+      onlyReturnCopy: (value) {
+        if (value == null) {
+          return null;
+        }
+
+        return value.map((item) => item.clone()).toList();
+      },
+      loadCustomType: (string) {
+        if (string == null) {
+          return null;
+        }
+        final Map<String, dynamic> json = jsonDecode(string);
+
+        List<Map<String, dynamic>> ts =
+            (json[Timetable.schoolTimesKey] as List).cast();
+
+        return List.generate(
+          ts.length,
+          (index) => SchoolTime.fromJson(ts[index]),
+        );
+      },
+      saveCustomType: (times) {
+        if (times == null) {
+          return null;
+        }
+
+        final map = {
+          Timetable.schoolTimesKey: List<Map<String, dynamic>>.generate(
+            times.length,
+            (index) => times[index].toJson(),
+          ),
+        };
+
+        return jsonEncode(map);
+      },
     ),
     SettingsVar<String?>(
       key: lastUsedVersionKey,

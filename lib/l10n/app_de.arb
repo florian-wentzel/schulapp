@@ -1,6 +1,7 @@
 {
   "@@locale": "de",
   "language_name": "Deutsch",
+  "version_0_5_0": "Verkürzte Zeiten hinzugefügt",
   "version_0_4_9": "Textkontrast auf der Startseite einstellbar",
   "version_0_4_8": "Vertretungsplan der Gesamtschule Paul Dessau jetzt verfügbar (beta)",
   "version_0_4_7": "Auswählbare Notensysteme hinzugefügt",
@@ -251,6 +252,10 @@
   "strGrade_A_F": "Noten A - F",
   "strNotLoggedIn": "nicht angemeldet",
   "strLogindataSuccessfullySaved": "Anmeldedaten erfolgreich gespeichert",
+  "strSuccessfullySaved": "Erfolgreich gespeichert",
   "strSubstitutionPlan": "Vertretungsplan Öffnen",
-  "strHighContrastOnHomeScreen": "Textkontrast auf der Startseite erhöhen"
+  "strHighContrastOnHomeScreen": "Textkontrast auf der Startseite erhöhen",
+  "strReducedClassHours": "Verkürzter Unterricht",
+  "strYouDontHaveAnyReducedTimesSetUpYet": "Du hast noch keine verkürzten Zeiten eingerichtet.",
+  "strReducedTimesCannotBeUsed": "Verkürzte Zeiten können nicht verwendet werden, da der Stundenplan zu viele Unterrichtsstunden hat."
 }

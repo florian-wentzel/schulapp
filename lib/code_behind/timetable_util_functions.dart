@@ -119,11 +119,16 @@ Future<bool?> createNewTimetable(BuildContext context) async {
   );
 }
 
-Future<Timetable?> showCreateTimetableSheet(BuildContext context) async {
+Future<Timetable?> showCreateTimetableSheet(
+  BuildContext context, {
+  bool onlySchoolTimes = false,
+}) async {
   Timetable? timetable = await showModalBottomSheet<Timetable>(
     context: context,
     scrollControlDisabledMaxHeightRatio: 11.0 / 16.0,
-    builder: (context) => const CreateTimetableBottomSheet(),
+    builder: (context) => CreateTimetableBottomSheet(
+      onlySchoolTimes: onlySchoolTimes,
+    ),
   );
 
   return timetable;
@@ -298,8 +303,14 @@ Future<Timetable?> showSelectTimetableSheet(
   return selectedTimetable;
 }
 
+// ignore: must_be_immutable
 class CreateTimetableBottomSheet extends StatefulWidget {
-  const CreateTimetableBottomSheet({super.key});
+  bool onlySchoolTimes;
+
+  CreateTimetableBottomSheet({
+    super.key,
+    this.onlySchoolTimes = false,
+  });
 
   @override
   State<CreateTimetableBottomSheet> createState() =>
@@ -358,9 +369,10 @@ class _CreateTimetableBottomSheetState
   @override
   void initState() {
     _pages = [
-      _CreateTimetableBottomSheetPage(
-        builder: _page1,
-      ),
+      if (!widget.onlySchoolTimes)
+        _CreateTimetableBottomSheetPage(
+          builder: _page1,
+        ),
       _CreateTimetableBottomSheetPage(
         builder: _page2,
       ),
@@ -714,7 +726,7 @@ class _CreateTimetableBottomSheetState
                 Slider.adaptive(
                   value: _timeBetweenLessons.toDouble(),
                   min: 0,
-                  max: 40,
+                  max: 45,
                   onChanged: (value) {
                     _timeBetweenLessons = value.toInt();
                     const snapPoint = 10;
@@ -734,22 +746,23 @@ class _CreateTimetableBottomSheetState
             ),
           ],
         ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(AppLocalizationsManager.localizations.strSaturdayLessons),
-            const SizedBox(
-              width: 4,
-            ),
-            Switch.adaptive(
-              value: _addSaturday,
-              onChanged: (value) {
-                _addSaturday = value;
-                setState(() {});
-              },
-            ),
-          ],
-        ),
+        if (!widget.onlySchoolTimes)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(AppLocalizationsManager.localizations.strSaturdayLessons),
+              const SizedBox(
+                width: 4,
+              ),
+              Switch.adaptive(
+                value: _addSaturday,
+                onChanged: (value) {
+                  _addSaturday = value;
+                  setState(() {});
+                },
+              ),
+            ],
+          ),
       ],
     );
   }

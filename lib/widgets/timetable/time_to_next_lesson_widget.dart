@@ -2,19 +2,18 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/school_time.dart';
-import 'package:schulapp/code_behind/timetable.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/extensions.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 
 // ignore: must_be_immutable
 class TimeToNextLessonWidget extends StatefulWidget {
-  Timetable timetable;
+  List<SchoolTime> ttSchoolTimes;
   void Function() onNewLessonCB;
 
   TimeToNextLessonWidget({
     super.key,
-    required this.timetable,
+    required this.ttSchoolTimes,
     required this.onNewLessonCB,
   });
 
@@ -29,7 +28,7 @@ class _TimeToNextLessonWidgetState extends State<TimeToNextLessonWidget> {
 
   @override
   void initState() {
-    _currTime = widget.timetable.getCurrentLessonOrBreakTime();
+    _currTime = _getCurrentLessonOrBreakTime();
     _currTimeString = _getCurrTimeString();
     _timer ??= Timer.periodic(
       const Duration(seconds: 1),
@@ -47,7 +46,7 @@ class _TimeToNextLessonWidgetState extends State<TimeToNextLessonWidget> {
 
   void onTimer(Timer timer) {
     if (_currTime == null) {
-      _currTime = widget.timetable.getCurrentLessonOrBreakTime();
+      _currTime = _getCurrentLessonOrBreakTime();
       if (_currTime != null) {
         _onNewLesson();
       }
@@ -112,5 +111,40 @@ class _TimeToNextLessonWidgetState extends State<TimeToNextLessonWidget> {
 
   void _onNewLesson() {
     widget.onNewLessonCB.call();
+  }
+
+  SchoolTime? _getCurrentLessonOrBreakTime() {
+    final timeBeforeFirstLessonStartInt =
+        const TimeOfDay(hour: 0, minute: 10).toSeconds();
+
+    final int nowInt = Utils.nowInSeconds();
+    final int firstInt = widget.ttSchoolTimes.first.start.toSeconds();
+    final int lastInt = widget.ttSchoolTimes.last.end.toSeconds();
+
+    //TODO: wenn firstDouble = 0 dann kommt bestimm nur trash bei raus
+    if (nowInt < firstInt - timeBeforeFirstLessonStartInt || nowInt > lastInt) {
+      return null;
+    }
+
+    SchoolTime? currTime;
+
+    for (int i = widget.ttSchoolTimes.length - 1; i >= 0; i--) {
+      SchoolTime time = widget.ttSchoolTimes[i];
+      if (nowInt > time.end.toSeconds()) {
+        continue;
+      }
+      currTime = time;
+      if (nowInt > time.start.toSeconds()) {
+        continue;
+      }
+      if (i - 1 < 0) continue;
+
+      currTime = SchoolTime(
+        start: widget.ttSchoolTimes[i - 1].end,
+        end: time.start,
+      );
+    }
+
+    return currTime;
   }
 }
