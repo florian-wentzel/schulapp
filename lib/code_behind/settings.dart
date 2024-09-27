@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:encrypt/encrypt.dart' as encrypt;
 import 'package:flutter/material.dart';
@@ -24,6 +25,8 @@ class SettingsVar<T> {
   final bool _alwaysReturnDefaultValue;
   final T Function(T? value)? _onlyReturnCopy;
 
+  final void Function(T value)? _onSetterCalled;
+
   SettingsVar({
     required this.key,
     required this.defaultValue,
@@ -31,9 +34,11 @@ class SettingsVar<T> {
     this.saveCustomType,
     T? value,
     T Function(T? value)? onlyReturnCopy,
+    void Function(T value)? onSetterCalled,
     bool alwaysReturnDefaultValue = false,
   })  : _value = value,
         _alwaysReturnDefaultValue = alwaysReturnDefaultValue,
+        _onSetterCalled = onSetterCalled,
         _onlyReturnCopy = onlyReturnCopy;
 
   T get value {
@@ -48,6 +53,8 @@ class SettingsVar<T> {
   }
 
   set value(T value) {
+    _onSetterCalled?.call(value);
+
     _value = value ?? defaultValue.call();
   }
 
@@ -91,6 +98,8 @@ class Settings {
   static const highContrastTextOnHomescreenKey = "highContrastTextOnHomescreen";
   static const reducedClassHoursEnabledKey = "reducedClassHoursEnabled";
   static const reducedClassHoursKey = "reducedClassHours";
+  static const paulDessauPdfBytesKey = "paulDessauPdfBytes";
+  static const paulDessauPdfBytesSavedDateKey = "paulDessauPdfBytesSavedDate";
 
   static final key = encrypt.Key.fromUtf8("a/wdkaw1ln=921jt48wadan249Bamd=#");
   static final _iv = encrypt.IV.fromUtf8("a2lA.8_n&dXa0?.e");
@@ -272,6 +281,37 @@ class Settings {
         }
         final encrypted = _encrypter.encrypt(value, iv: _iv);
         return encrypted.base64;
+      },
+    ),
+    SettingsVar<Uint8List?>(
+      key: paulDessauPdfBytesKey,
+      defaultValue: () => null,
+      saveCustomType: (type) {
+        if (type == null) return null;
+
+        return base64Encode(type);
+      },
+      loadCustomType: (value) {
+        if (value == null) return null;
+
+        return base64Decode(value);
+      },
+    ),
+    SettingsVar<DateTime?>(
+      key: paulDessauPdfBytesSavedDateKey,
+      defaultValue: () => null,
+      loadCustomType: (value) {
+        if (value == null) return null;
+        int? millieseconds = int.tryParse(value);
+
+        if (millieseconds == null) return null;
+
+        return DateTime.fromMillisecondsSinceEpoch(millieseconds);
+      },
+      saveCustomType: (type) {
+        if (type == null) return null;
+
+        return type.millisecondsSinceEpoch.toString();
       },
     ),
   ];

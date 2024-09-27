@@ -35,10 +35,33 @@ class _VertretungsplanPaulDessauScreenState
     super.initState();
 
     _passwordFocusNode = FocusNode();
+
+    final lastDownload = TimetableManager().settings.getVar<DateTime?>(
+          Settings.paulDessauPdfBytesSavedDateKey,
+        );
+
+    if (lastDownload != null) {
+      int lastDownloadWeekIndex = Utils.getWeekIndex(lastDownload);
+      int currWeekIndex = Utils.getWeekIndex(DateTime.now());
+
+      if (lastDownload.year != DateTime.now().year ||
+          lastDownloadWeekIndex != currWeekIndex ||
+          lastDownload.weekday != DateTime.now().weekday) {
+        _setPaulDessauPdfBytes(null);
+      }
+    }
+
     if (widget.loadPDFDirectly) {
       Future.delayed(
         Duration.zero,
         () {
+          final alreadyLoaded = TimetableManager().settings.getVar<Uint8List?>(
+                    Settings.paulDessauPdfBytesKey,
+                  ) !=
+              null;
+
+          if (alreadyLoaded) return;
+
           _getPDFBytes();
         },
       );
@@ -54,13 +77,39 @@ class _VertretungsplanPaulDessauScreenState
 
   @override
   Widget build(BuildContext context) {
+    final userLoggedIn = TimetableManager().settings.getVar(
+              Settings.usernameKey,
+            ) !=
+        null;
+
+    final pdfLoaded = TimetableManager().settings.getVar(
+              Settings.paulDessauPdfBytesKey,
+            ) !=
+        null;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Vertretungsplan"),
         actions: [
           Visibility(
-            visible: TimetableManager().settings.getVar(Settings.usernameKey) !=
-                null,
+            visible: userLoggedIn && pdfLoaded,
+            child: IconButton(
+              icon: const Icon(Icons.replay_outlined),
+              onPressed: _loading
+                  ? null
+                  : () {
+                      if (_loading) return;
+
+                      Utils.showInfo(
+                        context,
+                        msg: "Lädt..",
+                      );
+                      _getPDFBytes();
+                    },
+            ),
+          ),
+          Visibility(
+            visible: userLoggedIn,
             child: IconButton(
               icon: const Icon(Icons.logout),
               onPressed: _logoutButtonPressed,
@@ -104,7 +153,11 @@ class _VertretungsplanPaulDessauScreenState
   }
 
   Widget _body() {
-    if (_loadedPDFbytes != null) {
+    final loadedPDFbytes = TimetableManager().settings.getVar<Uint8List?>(
+          Settings.paulDessauPdfBytesKey,
+        );
+
+    if (loadedPDFbytes != null) {
       return _pdfViewer();
     }
 
@@ -204,7 +257,7 @@ class _VertretungsplanPaulDessauScreenState
   }
 
   void _logoutButtonPressed() {
-    _loadedPDFbytes = null;
+    _setPaulDessauPdfBytes(null);
 
     _usernameController.text = TimetableManager().settings.getVar(
           Settings.usernameKey,
@@ -288,8 +341,6 @@ class _VertretungsplanPaulDessauScreenState
     setState(() {});
   }
 
-  Uint8List? _loadedPDFbytes;
-
   void _getPDFBytes() async {
     if (_loading) return;
     _loading = true;
@@ -313,7 +364,20 @@ class _VertretungsplanPaulDessauScreenState
         password: password,
       );
 
-      _loadedPDFbytes = pdfBytes;
+      final pdfAlreadyLoaded = TimetableManager().settings.getVar<Uint8List?>(
+                Settings.paulDessauPdfBytesKey,
+              ) !=
+          null;
+
+      _setPaulDessauPdfBytes(pdfBytes);
+
+      if (pdfAlreadyLoaded && mounted) {
+        Utils.showInfo(
+          context,
+          msg: "Vertretungsplan erfolgreich heruntergeladen!",
+          type: InfoType.success,
+        );
+      }
     } catch (e) {
       if (mounted) {
         Utils.showInfo(
@@ -328,13 +392,17 @@ class _VertretungsplanPaulDessauScreenState
   }
 
   Widget _pdfViewer() {
-    if (_loading) {
+    final loadedPDFbytes = TimetableManager().settings.getVar<Uint8List?>(
+          Settings.paulDessauPdfBytesKey,
+        );
+
+    if (_loading && loadedPDFbytes == null) {
       return const Center(
         key: ValueKey("loading"),
         child: CircularProgressIndicator(),
       );
     }
-    if (_loadedPDFbytes == null) {
+    if (loadedPDFbytes == null) {
       return Center(
         key: const ValueKey("button"),
         child: ElevatedButton(
@@ -345,9 +413,21 @@ class _VertretungsplanPaulDessauScreenState
     }
 
     return PdfViewer.data(
-      _loadedPDFbytes!,
+      loadedPDFbytes,
       key: const ValueKey("pdfViewer"),
       sourceName: "Vertretungsplan",
     );
+  }
+
+  void _setPaulDessauPdfBytes(Uint8List? pdfBytes) {
+    TimetableManager().settings.setVar<Uint8List?>(
+          Settings.paulDessauPdfBytesKey,
+          pdfBytes,
+        );
+
+    TimetableManager().settings.setVar<DateTime>(
+          Settings.paulDessauPdfBytesSavedDateKey,
+          DateTime.now(),
+        );
   }
 }

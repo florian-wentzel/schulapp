@@ -578,9 +578,9 @@ class Utils {
       diff += 7;
     }
 
-    DateTime mondayOfCurrentWeek = dateTime.subtract(Duration(days: diff));
+    DateTime dayOfCurrentWeek = dateTime.subtract(Duration(days: diff));
 
-    return mondayOfCurrentWeek;
+    return dayOfCurrentWeek;
   }
 
   static bool isMobileRatio(BuildContext context) {

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -689,6 +690,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
             TimetableManager().settings.setVar(
                   Settings.securePasswordKey,
+                  null,
+                );
+
+            TimetableManager().settings.setVar<Uint8List?>(
+                  Settings.paulDessauPdfBytesKey,
+                  null,
+                );
+
+            TimetableManager().settings.setVar<DateTime?>(
+                  Settings.paulDessauPdfBytesSavedDateKey,
                   null,
                 );
 
