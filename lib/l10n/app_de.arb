@@ -1,6 +1,7 @@
 {
   "@@locale": "de",
   "language_name": "Deutsch",
+  "version_0_5_1": "Langes Drücken auf den Tagesnamen  hinzugefügt, um alle Stunden des Tages als ausgefallen zu markieren.",
   "version_0_5_0": "Verkürzte Zeiten hinzugefügt",
   "version_0_4_9": "Textkontrast auf der Startseite einstellbar",
   "version_0_4_8": "Vertretungsplan der Gesamtschule Paul Dessau jetzt verfügbar (beta)",

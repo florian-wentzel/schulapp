@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:schulapp/code_behind/holidays_manager.dart';
+import 'package:schulapp/code_behind/school_lesson.dart';
 import 'package:schulapp/code_behind/school_time.dart';
 import 'package:schulapp/code_behind/settings.dart';
+import 'package:schulapp/code_behind/special_lesson.dart';
 import 'package:schulapp/code_behind/timetable.dart';
 import 'package:schulapp/code_behind/timetable_manager.dart';
 import 'package:schulapp/code_behind/todo_event.dart';
@@ -320,6 +322,8 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
           Settings.showTasksOnHomeScreenKey,
         );
 
+    final List<StrikeThroughContainerController> dayContainerControllers = [];
+
     lessonWidgets.add(
       InkWell(
         onTap: Utils.sameDay(currLessonDateTime, DateTime.now())
@@ -336,6 +340,46 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
                   curve: Curves.easeInOutCirc,
                 );
               },
+        onLongPress: () async {
+          final value = !tt.isSpecialLesson(
+            year: currYear,
+            weekIndex: currWeekIndex,
+            schoolDayIndex: dayIndex,
+            schoolTimeIndex: 0,
+          );
+          for (int timeIndex = 0;
+              timeIndex < dayContainerControllers.length;
+              timeIndex++) {
+            final containerController = dayContainerControllers[timeIndex];
+            if (SchoolLesson.isEmptyLessonName(day.lessons[timeIndex].name)) {
+              continue;
+            }
+            containerController.strikeThrough = value;
+
+            if (value) {
+              tt.setSpecialLesson(
+                weekIndex: currWeekIndex,
+                year: currYear,
+                specialLesson: CancelledSpecialLesson(
+                  dayIndex: dayIndex,
+                  timeIndex: timeIndex,
+                ),
+              );
+            } else {
+              tt.removeSpecialLesson(
+                year: currYear,
+                weekIndex: currWeekIndex,
+                dayIndex: dayIndex,
+                timeIndex: timeIndex,
+              );
+            }
+            await Future.delayed(
+              const Duration(
+                milliseconds: 100,
+              ),
+            );
+          }
+        },
         child: Container(
           color: Utils.sameDay(currLessonDateTime, DateTime.now())
               ? selectedColor
@@ -477,6 +521,8 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
         weekIndex: currWeekIndex,
         year: currYear,
       );
+
+      dayContainerControllers.add(containerController);
 
       Widget lessonWidget = TimetableLessonWidget(
         containerController: containerController,

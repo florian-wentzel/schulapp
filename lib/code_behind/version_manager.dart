@@ -98,6 +98,7 @@ class VersionHolder {
   }
 
   static final Map<String, String> _versions = {
+    "0.5.1": AppLocalizationsManager.localizations.version_0_5_1,
     "0.5.0": AppLocalizationsManager.localizations.version_0_5_0,
     "0.4.9": AppLocalizationsManager.localizations.version_0_4_9,
     "0.4.8": AppLocalizationsManager.localizations.version_0_4_8,

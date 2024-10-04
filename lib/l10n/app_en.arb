@@ -1,6 +1,7 @@
 {
   "@@locale": "en",
   "language_name": "Englisch",
+  "version_0_5_1": "Added long press on the day name to mark all hours of the day as canceled.",
   "version_0_5_0": "Reduced times added",
   "version_0_4_9": "Text contrast on homescreen adjustable",
   "version_0_4_8": "Substitution plan of Paul Dessau Comprehensive School now available (beta)",
