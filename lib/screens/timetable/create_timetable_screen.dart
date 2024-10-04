@@ -12,12 +12,11 @@ import 'package:schulapp/widgets/timetable/timetable_drop_target_widget.dart';
 import 'package:schulapp/widgets/timetable/timetable_one_day_drop_target_widget.dart';
 import 'package:schulapp/code_behind/timetable_util_functions.dart';
 
-// ignore: must_be_immutable
 class CreateTimetableScreen extends StatefulWidget {
   static const String route = "/createTimetable";
-  Timetable timetable;
+  final Timetable timetable;
 
-  CreateTimetableScreen({
+  const CreateTimetableScreen({
     super.key,
     required this.timetable,
   });

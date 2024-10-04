@@ -12,12 +12,11 @@ import 'package:schulapp/widgets/date_selection_button.dart';
 import 'package:schulapp/widgets/semester/school_grade_subject_widget.dart';
 import 'package:fl_chart/fl_chart.dart';
 
-// ignore: must_be_immutable
 class SchoolGradeSubjectScreen extends StatefulWidget {
-  SchoolGradeSubject subject;
-  SchoolSemester semester;
+  final SchoolGradeSubject subject;
+  final SchoolSemester semester;
 
-  SchoolGradeSubjectScreen({
+  const SchoolGradeSubjectScreen({
     super.key,
     required this.subject,
     required this.semester,

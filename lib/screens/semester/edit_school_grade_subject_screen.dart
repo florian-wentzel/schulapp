@@ -8,12 +8,11 @@ import 'package:schulapp/extensions.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/widgets/semester/school_grade_subject_widget.dart';
 
-// ignore: must_be_immutable
 class EditSchoolGradeSubjectScreen extends StatefulWidget {
-  SchoolGradeSubject subject;
-  SchoolSemester semester;
+  final SchoolGradeSubject subject;
+  final SchoolSemester semester;
 
-  EditSchoolGradeSubjectScreen({
+  const EditSchoolGradeSubjectScreen({
     super.key,
     required this.subject,
     required this.semester,

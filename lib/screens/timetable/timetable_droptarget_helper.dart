@@ -41,14 +41,13 @@ void onLessonWidgetTap(
   setState.call();
 }
 
-// ignore: must_be_immutable
 class CustomPopUpCreateTimetable extends StatefulWidget {
-  SchoolTime schoolTime;
-  SchoolLesson schoolLesson;
-  SchoolDay schoolDay;
-  String heroString;
+  final SchoolTime schoolTime;
+  final SchoolLesson schoolLesson;
+  final SchoolDay schoolDay;
+  final String heroString;
 
-  CustomPopUpCreateTimetable({
+  const CustomPopUpCreateTimetable({
     super.key,
     required this.heroString,
     required this.schoolDay,
@@ -374,11 +373,10 @@ class _CustomPopUpCreateTimetableState
 }
 
 // just for the time
-// ignore: must_be_immutable
 class CustomPopUpChangeSubjectTime extends StatefulWidget {
-  SchoolTime schoolTime;
+  final SchoolTime schoolTime;
 
-  CustomPopUpChangeSubjectTime({super.key, required this.schoolTime});
+  const CustomPopUpChangeSubjectTime({super.key, required this.schoolTime});
 
   @override
   State<CustomPopUpChangeSubjectTime> createState() =>

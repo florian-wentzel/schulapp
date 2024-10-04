@@ -303,11 +303,10 @@ Future<Timetable?> showSelectTimetableSheet(
   return selectedTimetable;
 }
 
-// ignore: must_be_immutable
 class CreateTimetableBottomSheet extends StatefulWidget {
-  bool onlySchoolTimes;
+  final bool onlySchoolTimes;
 
-  CreateTimetableBottomSheet({
+  const CreateTimetableBottomSheet({
     super.key,
     this.onlySchoolTimes = false,
   });
@@ -774,11 +773,10 @@ class _CreateTimetableBottomSheetState
   }
 }
 
-// ignore: must_be_immutable
 class SetTimetableBreaksWidget extends StatefulWidget {
-  List<int> lessons;
+  final List<int> lessons;
 
-  SetTimetableBreaksWidget({
+  const SetTimetableBreaksWidget({
     super.key,
     required this.lessons,
   });

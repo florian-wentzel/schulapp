@@ -25,12 +25,11 @@ import 'package:schulapp/widgets/custom_pop_up.dart';
 import 'package:schulapp/widgets/task/todo_event_list_item_widget.dart';
 import 'package:schulapp/widgets/timetable/timetable_lesson_widget.dart';
 
-// ignore: must_be_immutable
 class TimetableWidget extends StatefulWidget {
-  Timetable timetable;
-  bool showTodoEvents;
+  final Timetable timetable;
+  final bool showTodoEvents;
 
-  TimetableWidget(
+  const TimetableWidget(
       {super.key, required this.timetable, required this.showTodoEvents});
 
   @override
@@ -492,15 +491,14 @@ class _TimetableWidgetState extends State<TimetableWidget> {
   }
 }
 
-// ignore: must_be_immutable
 class CustomPopUpShowLesson extends StatefulWidget {
-  SchoolLesson lesson;
-  SchoolDay day;
-  SchoolTime schoolTime;
-  String heroString;
-  TodoEvent? event;
+  final SchoolLesson lesson;
+  final SchoolDay day;
+  final SchoolTime schoolTime;
+  final String heroString;
+  final TodoEvent? event;
 
-  CustomPopUpShowLesson({
+  const CustomPopUpShowLesson({
     super.key,
     required this.heroString,
     required this.day,

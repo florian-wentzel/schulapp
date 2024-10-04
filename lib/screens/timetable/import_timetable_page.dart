@@ -8,11 +8,10 @@ import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/screens/timetable/create_timetable_screen.dart';
 
-// ignore: must_be_immutable
 class ImportTimetablePage extends StatefulWidget {
-  void Function() goToHomePage;
+  final void Function() goToHomePage;
 
-  ImportTimetablePage({
+  const ImportTimetablePage({
     super.key,
     required this.goToHomePage,
   });

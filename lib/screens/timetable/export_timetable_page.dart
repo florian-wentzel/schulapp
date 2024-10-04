@@ -10,11 +10,10 @@ import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/screens/timetable_screen.dart';
 
-// ignore: must_be_immutable
 class ExportTimetablePage extends StatefulWidget {
-  void Function() goToHomePage;
+  final void Function() goToHomePage;
 
-  ExportTimetablePage({
+  const ExportTimetablePage({
     super.key,
     required this.goToHomePage,
   });

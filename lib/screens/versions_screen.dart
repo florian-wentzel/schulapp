@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/version_manager.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 
-// ignore: must_be_immutable
 class VersionsScreen extends StatefulWidget {
-  String lastUsedVersion;
+  final String lastUsedVersion;
 
-  VersionsScreen({
+  const VersionsScreen({
     super.key,
     required this.lastUsedVersion,
   });

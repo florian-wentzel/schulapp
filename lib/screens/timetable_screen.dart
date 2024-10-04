@@ -29,6 +29,7 @@ import 'package:schulapp/screens/tasks_screen.dart';
 import 'package:schulapp/screens/timetable/create_timetable_screen.dart';
 import 'package:schulapp/screens/timetable/import_export_timetable_screen.dart';
 import 'package:schulapp/screens/vertretungsplan_paul_dessau_screen.dart';
+import 'package:schulapp/widgets/page_view_scrollable_child.dart';
 import 'package:schulapp/widgets/timetable/timetable_widget.dart';
 import 'package:schulapp/code_behind/timetable_util_functions.dart';
 import 'package:schulapp/widgets/navigation_bar_drawer.dart';
@@ -36,15 +37,14 @@ import 'package:schulapp/widgets/timetable/timetable_one_day_widget.dart';
 import 'package:schulapp/widgets/task/todo_event_list_item_widget.dart';
 import 'package:schulapp/code_behind/todo_event_util_functions.dart';
 
-// ignore: must_be_immutable
 class TimetableScreen extends StatefulWidget {
   static const String route = "/";
 
-  String title;
-  Timetable? timetable;
-  bool isHomeScreen;
+  final String title;
+  final Timetable? timetable;
+  final bool isHomeScreen;
 
-  TimetableScreen({
+  const TimetableScreen({
     super.key,
     required this.title,
     required this.timetable,
@@ -59,6 +59,8 @@ class _TimetableScreenState extends State<TimetableScreen> {
   StreamSubscription? _intentSubscription;
 
   final _verticalPageViewController = PageController();
+  final _verticalScrollController = ScrollController();
+  final _statsScrollController = ScrollController();
 
   Holidays? currentOrNextHolidays;
 
@@ -79,6 +81,9 @@ class _TimetableScreenState extends State<TimetableScreen> {
   @override
   void dispose() {
     _intentSubscription?.cancel();
+    _verticalPageViewController.dispose();
+    _verticalScrollController.dispose();
+    _statsScrollController.dispose();
     super.dispose();
   }
 
@@ -104,7 +109,7 @@ class _TimetableScreenState extends State<TimetableScreen> {
               onPressed: () async {
                 await Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (context) => VertretungsplanPaulDessauScreen(
+                    builder: (context) => const VertretungsplanPaulDessauScreen(
                       loadPDFDirectly: true,
                     ),
                   ),
@@ -118,7 +123,9 @@ class _TimetableScreenState extends State<TimetableScreen> {
         ],
       ),
       drawer: widget.isHomeScreen
-          ? NavigationBarDrawer(selectedRoute: TimetableScreen.route)
+          ? const NavigationBarDrawer(
+              selectedRoute: TimetableScreen.route,
+            )
           : null,
       floatingActionButton: _floatingActionButton(context),
       body: _body(),
@@ -284,6 +291,9 @@ class _TimetableScreenState extends State<TimetableScreen> {
     return PageView(
       scrollDirection: Axis.vertical,
       controller: _verticalPageViewController,
+      physics: const NeverScrollableScrollPhysics(
+        parent: ClampingScrollPhysics(),
+      ),
       onPageChanged: (value) {
         _currPageIndex = value;
         setState(() {});
@@ -314,12 +324,19 @@ class _TimetableScreenState extends State<TimetableScreen> {
                   ),
                 ),
               ),
-              SingleChildScrollView(
-                physics: const NeverScrollableScrollPhysics(),
+              PageViewScrollableChild(
+                pageController: _verticalPageViewController,
+                scrollController: _verticalScrollController,
                 scrollDirection: Axis.vertical,
-                primary: false,
-                child: Center(
-                  child: child,
+                child: SingleChildScrollView(
+                  controller: _verticalScrollController,
+                  physics: const NeverScrollableScrollPhysics(
+                    parent: ClampingScrollPhysics(),
+                  ),
+                  scrollDirection: Axis.vertical,
+                  child: Center(
+                    child: child,
+                  ),
                 ),
               ),
               // Align(
@@ -358,9 +375,14 @@ class _TimetableScreenState extends State<TimetableScreen> {
             ],
           ),
         ),
-        _statsPage(
-          width: width,
-          height: height,
+        PageViewScrollableChild(
+          pageController: _verticalPageViewController,
+          scrollController: _statsScrollController,
+          scrollDirection: Axis.vertical,
+          child: _statsPage(
+            width: width,
+            height: height,
+          ),
         ),
       ],
     );
@@ -378,9 +400,11 @@ class _TimetableScreenState extends State<TimetableScreen> {
       child: Stack(
         children: [
           SingleChildScrollView(
+            controller: _statsScrollController,
             scrollDirection: Axis.vertical,
-            physics: const NeverScrollableScrollPhysics(),
-            primary: false,
+            physics: const NeverScrollableScrollPhysics(
+              parent: ClampingScrollPhysics(),
+            ),
             child: Column(
               children: [
                 Text(

@@ -17,12 +17,11 @@ import 'package:schulapp/screens/semester/school_grade_subject_screen.dart';
 import 'package:schulapp/screens/semester/semester_screen_settings_dialog.dart';
 import 'package:schulapp/widgets/semester/school_grade_subject_widget.dart';
 
-// ignore: must_be_immutable
 class SemesterScreen extends StatefulWidget {
-  SchoolSemester semester;
-  String heroString;
+  final SchoolSemester semester;
+  final String heroString;
 
-  SemesterScreen({
+  const SemesterScreen({
     super.key,
     required this.semester,
     required this.heroString,

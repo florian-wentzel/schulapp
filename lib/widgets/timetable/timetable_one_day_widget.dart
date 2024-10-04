@@ -13,13 +13,12 @@ import 'package:schulapp/widgets/strike_through_container.dart';
 import 'package:schulapp/widgets/timetable/time_to_next_lesson_widget.dart';
 import 'package:schulapp/widgets/timetable/timetable_lesson_widget.dart';
 
-// ignore: must_be_immutable
 class TimetableOneDayWidget extends StatefulWidget {
-  Timetable timetable;
-  bool showTodoEvents;
-  Size? logicalSize;
+  final Timetable timetable;
+  final bool showTodoEvents;
+  final Size? logicalSize;
 
-  TimetableOneDayWidget({
+  const TimetableOneDayWidget({
     super.key,
     required this.timetable,
     required this.showTodoEvents,

@@ -5,11 +5,11 @@ import 'package:schulapp/code_behind/school_semester.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/extensions.dart';
 
-// ignore: must_be_immutable
 class SchoolGradeSubjectWidget extends StatelessWidget {
-  SchoolGradeSubject subject;
-  SchoolSemester semester;
-  bool showName;
+  final SchoolGradeSubject subject;
+  final SchoolSemester semester;
+  final bool showName;
+  final List<Grade?> grades = [];
 
   SchoolGradeSubjectWidget({
     super.key,
@@ -18,11 +18,10 @@ class SchoolGradeSubjectWidget extends StatelessWidget {
     this.showName = true,
   });
 
-  List<Grade?> grades = [];
-
   @override
   Widget build(BuildContext context) {
-    grades = _generateGrades();
+    grades.clear();
+    grades.addAll(_generateGrades());
 
     return Container(
       width: MediaQuery.of(context).size.width,

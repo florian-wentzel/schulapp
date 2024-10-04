@@ -347,7 +347,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
         final timetable = list[index];
         return ListTileWithCheckBox(
           title: getName(timetable),
-          value: selectedCheckbox[index],
+          controller: ListTileWithCheckBoxController(
+            value: selectedCheckbox[index],
+          ),
           onValueChanged: (value) {
             selectedCheckbox[index] = value;
           },
@@ -928,17 +930,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 }
 
-// ignore: must_be_immutable
-class ListTileWithCheckBox extends StatefulWidget {
-  String title;
+class ListTileWithCheckBoxController {
   bool value;
+  ListTileWithCheckBoxController({this.value = false});
+}
 
-  void Function(bool value) onValueChanged;
+class ListTileWithCheckBox extends StatefulWidget {
+  final String title;
+  final ListTileWithCheckBoxController controller;
 
-  ListTileWithCheckBox({
+  final void Function(bool value) onValueChanged;
+
+  const ListTileWithCheckBox({
     super.key,
     required this.title,
-    required this.value,
+    required this.controller,
     required this.onValueChanged,
   });
 
@@ -951,16 +957,16 @@ class _ListTileWithCheckBoxState extends State<ListTileWithCheckBox> {
   Widget build(BuildContext context) {
     return ListTile(
       onTap: () {
-        widget.value = !widget.value;
-        widget.onValueChanged.call(widget.value);
+        widget.controller.value = !widget.controller.value;
+        widget.onValueChanged.call(widget.controller.value);
         setState(() {});
       },
       title: Text(widget.title),
       trailing: Checkbox(
-        value: widget.value,
+        value: widget.controller.value,
         onChanged: (value) {
-          widget.value = value ?? false;
-          widget.onValueChanged.call(widget.value);
+          widget.controller.value = value ?? false;
+          widget.onValueChanged.call(widget.controller.value);
           setState(() {});
         },
       ),

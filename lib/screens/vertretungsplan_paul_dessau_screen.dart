@@ -8,11 +8,10 @@ import 'package:schulapp/code_behind/timetable_manager.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 
-// ignore: must_be_immutable
 class VertretungsplanPaulDessauScreen extends StatefulWidget {
-  bool loadPDFDirectly;
+  final bool loadPDFDirectly;
 
-  VertretungsplanPaulDessauScreen({
+  const VertretungsplanPaulDessauScreen({
     super.key,
     this.loadPDFDirectly = false,
   });

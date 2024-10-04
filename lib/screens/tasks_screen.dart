@@ -11,13 +11,12 @@ import 'package:schulapp/widgets/task/todo_event_list_item_widget.dart';
 import 'package:schulapp/code_behind/todo_event_util_functions.dart';
 import 'package:tuple/tuple.dart';
 
-// ignore: must_be_immutable
 class NotesScreen extends StatefulWidget {
   static const route = "/notes";
 
-  TodoEvent? todoEvent;
+  final TodoEvent? todoEvent;
 
-  NotesScreen({super.key, this.todoEvent});
+  const NotesScreen({super.key, this.todoEvent});
 
   @override
   State<NotesScreen> createState() => _NotesScreenState();
@@ -443,12 +442,11 @@ class _NotesScreenState extends State<NotesScreen> {
   }
 }
 
-// ignore: must_be_immutable
 class TodoEventInfoPopUp extends StatelessWidget {
-  Future<TodoEvent?> Function(TodoEvent event) showEditTodoEventSheet;
-  TodoEvent event;
+  final Future<TodoEvent?> Function(TodoEvent event) showEditTodoEventSheet;
+  final TodoEvent event;
 
-  TodoEventInfoPopUp({
+  const TodoEventInfoPopUp({
     super.key,
     required this.event,
     required this.showEditTodoEventSheet,

@@ -321,15 +321,14 @@ class _HolidaysScreenState extends State<HolidaysScreen> {
   }
 }
 
-// ignore: must_be_immutable
 class HolidaysListItemWidget extends StatelessWidget {
-  Holidays holidays;
-  bool showBackground;
-  bool showDateInfo;
-  bool textLineThrough;
-  void Function(Holidays holidays)? onDeletePressed;
+  final Holidays holidays;
+  final bool showBackground;
+  final bool showDateInfo;
+  final bool textLineThrough;
+  final void Function(Holidays holidays)? onDeletePressed;
 
-  HolidaysListItemWidget({
+  const HolidaysListItemWidget({
     super.key,
     required this.holidays,
     this.showBackground = true,

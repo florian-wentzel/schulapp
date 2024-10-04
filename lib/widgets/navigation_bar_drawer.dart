@@ -25,11 +25,10 @@ class CustomDestination {
   });
 }
 
-// ignore: must_be_immutable
 class NavigationBarDrawer extends StatefulWidget {
-  String selectedRoute;
+  final String selectedRoute;
 
-  NavigationBarDrawer({super.key, required this.selectedRoute});
+  const NavigationBarDrawer({super.key, required this.selectedRoute});
 
   @override
   State<NavigationBarDrawer> createState() => _NavigationBarDrawerState();

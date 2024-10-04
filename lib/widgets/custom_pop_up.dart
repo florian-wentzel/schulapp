@@ -3,17 +3,16 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/utils.dart';
 
-// ignore: must_be_immutable
 class CustomPopUp extends StatefulWidget {
-  Object heroObject;
-  Widget body;
-  Color color;
-  Widget Function(BuildContext, Animation<double>, HeroFlightDirection,
+  final Object heroObject;
+  final Widget body;
+  final Color color;
+  final Widget Function(BuildContext, Animation<double>, HeroFlightDirection,
       BuildContext, BuildContext)? flightShuttleBuilder;
 
-  EdgeInsets padding;
+  final EdgeInsets padding;
 
-  CustomPopUp({
+  const CustomPopUp({
     super.key,
     required this.heroObject,
     required this.color,

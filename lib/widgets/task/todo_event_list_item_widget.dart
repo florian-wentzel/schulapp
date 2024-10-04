@@ -2,20 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/todo_event.dart';
 import 'package:schulapp/widgets/periodic_updating_widget.dart';
 
-// ignore: must_be_immutable
 class TodoEventListItemWidget extends StatelessWidget {
   // Animation<double> animation;
-  void Function() onPressed;
-  void Function() onLongPressed;
-  void Function() onInfoPressed;
-  void Function() onDeleteSwipe;
+  final void Function() onPressed;
+  final void Function() onLongPressed;
+  final void Function() onInfoPressed;
+  final void Function() onDeleteSwipe;
 
-  TodoEvent event;
-  bool removeHero;
-  bool showTimeLeft;
-  bool isSelected;
+  final TodoEvent event;
+  final bool removeHero;
+  final bool showTimeLeft;
+  final bool isSelected;
 
-  TodoEventListItemWidget({
+  const TodoEventListItemWidget({
     super.key,
     this.removeHero = false,
     this.showTimeLeft = true,

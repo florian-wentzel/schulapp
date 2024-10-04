@@ -12,29 +12,28 @@ import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/widgets/strike_through_container.dart';
 
-// ignore: must_be_immutable
 class TimetableLessonWidget extends StatefulWidget {
-  StrikeThroughContainerController containerController;
-  Timetable tt;
-  DateTime currLessonDateTime;
-  SchoolLesson lesson;
-  TodoEvent? currEvent;
+  final StrikeThroughContainerController containerController;
+  final Timetable tt;
+  final DateTime currLessonDateTime;
+  final SchoolLesson lesson;
+  final TodoEvent? currEvent;
 
-  String heroString;
+  final String heroString;
 
-  double lessonWidth;
-  double lessonHeight;
+  final double lessonWidth;
+  final double lessonHeight;
 
-  Color containerColor;
+  final Color containerColor;
 
-  bool showTaskOnHomescreen;
+  final bool showTaskOnHomescreen;
 
-  int currYear;
-  int currWeekIndex;
-  int dayIndex;
-  int lessonIndex;
+  final int currYear;
+  final int currWeekIndex;
+  final int dayIndex;
+  final int lessonIndex;
 
-  TimetableLessonWidget({
+  const TimetableLessonWidget({
     super.key,
     required this.tt,
     required this.lesson,

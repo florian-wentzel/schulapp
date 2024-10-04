@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/widgets/date_selection_button.dart';
 
-// ignore: must_be_immutable
 class TimeSelectionButton extends StatefulWidget {
-  DateSelectionButtonController controller;
+  final DateSelectionButtonController controller;
 
-  TimeSelectionButton({super.key, required this.controller});
+  const TimeSelectionButton({super.key, required this.controller});
 
   @override
   State<TimeSelectionButton> createState() => _TimeSelectionButtonState();

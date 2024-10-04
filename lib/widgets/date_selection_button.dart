@@ -19,11 +19,10 @@ class DateSelectionButtonController {
   List<Function(DateTime)> onDateChangedCBs = [];
 }
 
-// ignore: must_be_immutable
 class DateSelectionButton extends StatefulWidget {
-  DateSelectionButtonController controller;
+  final DateSelectionButtonController controller;
 
-  DateSelectionButton({super.key, required this.controller});
+  const DateSelectionButton({super.key, required this.controller});
 
   @override
   State<DateSelectionButton> createState() => _DateSelectionButtonState();
