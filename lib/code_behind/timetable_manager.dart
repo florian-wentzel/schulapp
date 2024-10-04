@@ -303,7 +303,7 @@ class TimetableManager {
     required Timetable timetable,
     required int year,
     required int weekIndex,
-    required CancelledSpecialLesson specialLesson,
+    required SpecialLesson specialLesson,
   }) {
     final currSpecialLessonsKey =
         SaveManager().getSpecialLessonsFileName(year, weekIndex);
@@ -315,6 +315,17 @@ class TimetableManager {
         weekIndex: weekIndex,
       );
       timetable.currSpecialLessonsWeekKey = currSpecialLessonsKey;
+    }
+
+    final alreadyInList = timetable.currSpecialLessonsWeek?.any(
+          (element) =>
+              element.dayIndex == specialLesson.dayIndex &&
+              element.timeIndex == specialLesson.timeIndex,
+        ) ??
+        false;
+
+    if (alreadyInList) {
+      return;
     }
 
     timetable.currSpecialLessonsWeek?.add(specialLesson);
