@@ -694,8 +694,10 @@ class _CustomPopUpShowLessonState extends State<CustomPopUpShowLesson> {
                                 .strDoYouWantToDeleteTaskX(
                               widget.event!.linkedSubjectName,
                             ),
-                            description:
-                                "(${Utils.dateToString(widget.event!.endTime)})",
+                            description: widget.event!.endTime == null
+                                ? AppLocalizationsManager.localizations
+                                    .strNoEndDate //kann nicht eintreten eigentlich
+                                : "(${Utils.dateToString(widget.event!.endTime!)})",
                             showYesAndNoInsteadOfOK: true,
                           );
                           if (!removeTodoEvent) return;

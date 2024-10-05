@@ -25,25 +25,27 @@ class _TimeSelectionButtonState extends State<TimeSelectionButton> {
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
-      onPressed: () async {
-        TimeOfDay? selectedTime = await showTimePicker(
-          context: context,
-          initialTime: TimeOfDay.now(),
-        );
+      onPressed: widget.controller.noDate
+          ? null
+          : () async {
+              TimeOfDay? selectedTime = await showTimePicker(
+                context: context,
+                initialTime: TimeOfDay.now(),
+              );
 
-        if (selectedTime == null) return;
+              if (selectedTime == null) return;
 
-        final date = widget.controller.date;
-        widget.controller.date = DateTime(
-          date.year,
-          date.month,
-          date.day,
-          selectedTime.hour,
-          selectedTime.minute,
-        );
+              final date = widget.controller.date;
+              widget.controller.date = DateTime(
+                date.year,
+                date.month,
+                date.day,
+                selectedTime.hour,
+                selectedTime.minute,
+              );
 
-        setState(() {});
-      },
+              setState(() {});
+            },
       child: Text(Utils.timeToString(widget.controller.date)),
     );
   }

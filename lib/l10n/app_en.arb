@@ -1,6 +1,7 @@
 {
   "@@locale": "en",
   "language_name": "Englisch",
+  "version_0_5_2": "Tasks without End Date added",
   "version_0_5_1": "Added long press on the day name to mark all hours of the day as canceled.",
   "version_0_5_0": "Reduced times added",
   "version_0_4_9": "Text contrast on homescreen adjustable",
@@ -184,7 +185,8 @@
   "strYouDidNotSelectASemesterToShowOnHomescreen": "You did not select a Semester\n to show on homescreen.\nGo to the Grades page\nand select a Semester:)",
   "strGoToGradesScreen": "Go to Grades screen",
   "strTopic": "Topic",
-  "strEndDate": "End date:",
+  "strEndDate": "End Date:",
+  "strNoEndDate": "No End Date",
   "strHello": "Hello!",
   "strYouUpdatedYourAppWantToSeeNewFeatures": "Ohh you updated your app! Do you want to see the new features?",
   "strShowNewFeatures": "Show new Features",

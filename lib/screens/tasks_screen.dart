@@ -541,11 +541,17 @@ class TodoEventInfoPopUp extends StatelessWidget {
             color: Theme.of(context).canvasColor,
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Text(
-            "${Utils.dateToString(event.endTime)} | ${event.endTime.hour} : ${event.endTime.minute}",
-            style: Theme.of(context).textTheme.bodyLarge,
-            textAlign: TextAlign.center,
-          ),
+          child: event.endTime == null
+              ? Text(
+                  AppLocalizationsManager.localizations.strNoEndDate,
+                  style: Theme.of(context).textTheme.bodyLarge,
+                  textAlign: TextAlign.center,
+                )
+              : Text(
+                  "${Utils.dateToString(event.endTime!)} | ${event.endTime!.hour} : ${event.endTime!.minute}",
+                  style: Theme.of(context).textTheme.bodyLarge,
+                  textAlign: TextAlign.center,
+                ),
         ),
         const SizedBox(
           height: 12,

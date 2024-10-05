@@ -5,6 +5,7 @@ import 'package:schulapp/code_behind/school_semester.dart';
 import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/timetable.dart';
 import 'package:schulapp/code_behind/save_manager.dart';
+import 'package:schulapp/code_behind/utils.dart';
 
 ///singelton damit es immer nur eine instanz gibt
 class TimetableManager {
@@ -40,7 +41,18 @@ class TimetableManager {
     todoEvents.sort(
       (a, b) {
         if (a.finished && b.finished) {
-          return a.endTime.compareTo(b.endTime);
+          if (a.endTime == null && b.endTime == null) {
+            return Utils.todoTypeToInt(b.type)
+                .compareTo(Utils.todoTypeToInt(a.type));
+          }
+          if (a.endTime == null) {
+            return -1;
+          }
+          if (b.endTime == null) {
+            return 1;
+          }
+
+          return a.endTime!.compareTo(b.endTime!);
           //TodoEvent.compareType(a.type, b.type);
         }
         if (a.finished) {
@@ -49,7 +61,18 @@ class TimetableManager {
         if (b.finished) {
           return -1;
         }
-        return a.endTime.compareTo(b.endTime);
+        if (a.endTime == null && b.endTime == null) {
+          return Utils.todoTypeToInt(b.type).compareTo(
+            Utils.todoTypeToInt(a.type),
+          );
+        }
+        if (a.endTime == null) {
+          return -1;
+        }
+        if (b.endTime == null) {
+          return 1;
+        }
+        return a.endTime!.compareTo(b.endTime!);
       },
     );
 
@@ -239,10 +262,11 @@ class TimetableManager {
       TodoEvent event = todoEvents[i];
       // if (event.finished) continue;
       // if (event.customEvent) continue;
+      if (event.endTime == null) continue;
       if (event.linkedSubjectName != linkedSubjectName) continue;
-      if (event.endTime.year != lessonDayTime.year ||
-          event.endTime.month != lessonDayTime.month ||
-          event.endTime.day != lessonDayTime.day) {
+      if (event.endTime!.year != lessonDayTime.year ||
+          event.endTime!.month != lessonDayTime.month ||
+          event.endTime!.day != lessonDayTime.day) {
         continue;
       }
 
@@ -259,10 +283,11 @@ class TimetableManager {
 
       // if (event.finished) continue;
       if (!event.isCustomEvent) continue;
+      if (event.endTime == null) continue;
 
-      if (event.endTime.year != day.year ||
-          event.endTime.month != day.month ||
-          event.endTime.day != day.day) {
+      if (event.endTime!.year != day.year ||
+          event.endTime!.month != day.month ||
+          event.endTime!.day != day.day) {
         continue;
       }
 

@@ -24,7 +24,7 @@ class TodoEvent {
   final String linkedSubjectName;
   final bool isCustomEvent;
 
-  DateTime endTime;
+  DateTime? endTime;
   TodoType type;
 
   String desciption;
@@ -46,15 +46,20 @@ class TodoEvent {
   bool isExpired() {
     if (finished) return false;
 
-    return endTime.isBefore(DateTime.now());
+    return endTime?.isBefore(DateTime.now()) ?? false;
   }
 
   String getEndTimeString() {
     if (finished) {
       return AppLocalizationsManager.localizations.strFinished;
     }
+    DateTime? endDateTime = endTime;
 
-    Duration timeLeft = endTime.difference(DateTime.now());
+    if (endDateTime == null) {
+      return AppLocalizationsManager.localizations.strNoEndDate;
+    }
+
+    Duration timeLeft = endDateTime.difference(DateTime.now());
 
     if (timeLeft.inDays > 0) {
       return AppLocalizationsManager.localizations.strInXDays(timeLeft.inDays);
@@ -104,7 +109,7 @@ class TodoEvent {
     return {
       _nameKey: name,
       _linkedSubjectNameKey: linkedSubjectName,
-      _endTimeKey: endTime.millisecondsSinceEpoch,
+      _endTimeKey: endTime?.millisecondsSinceEpoch,
       _typeKey: type.toString(),
       _desciptionKey: desciption,
       _finishedKey: finished,
@@ -115,7 +120,13 @@ class TodoEvent {
   static TodoEvent fromJson(Map<String, dynamic> json, int key) {
     String name = json[_nameKey];
     String linkedSubjectName = json[_linkedSubjectNameKey];
-    DateTime endTime = DateTime.fromMillisecondsSinceEpoch(json[_endTimeKey]);
+    int? milliSec = json[_endTimeKey];
+    DateTime? endTime;
+
+    if (milliSec != null) {
+      endTime = DateTime.fromMillisecondsSinceEpoch(milliSec);
+    }
+
     TodoType type = todoTypeFromString(json[_typeKey]);
     String desciption = json[_desciptionKey];
     bool finished = json[_finishedKey];
@@ -207,15 +218,18 @@ class TodoEvent {
 
   Future<void> addNotification() async {
     if (finished) return;
+    DateTime? endDateTime = endTime;
+    if (endDateTime == null) return;
+
     await NotificationManager().scheduleNotification(
       id: key * notificationMultiplier,
-      scheduledDateTime: endTime.subtract(const Duration(days: 1)),
+      scheduledDateTime: endDateTime.subtract(const Duration(days: 1)),
       title: "$linkedSubjectName : ${TodoEvent.typeToString(type)}",
       body: AppLocalizationsManager.localizations.strTomorrow,
     );
     return NotificationManager().scheduleNotification(
       id: key * notificationMultiplier + 1,
-      scheduledDateTime: endTime,
+      scheduledDateTime: endDateTime,
       title: "$linkedSubjectName : ${TodoEvent.typeToString(type)}",
       body: AppLocalizationsManager.localizations.strNow,
     );

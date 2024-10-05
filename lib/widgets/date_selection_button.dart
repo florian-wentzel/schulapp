@@ -5,18 +5,37 @@ class DateSelectionButtonController {
   DateTime? firstDate, lastDate;
 
   DateTime _date;
+  bool _noDate;
+
   DateTime get date => _date;
-  set date(DateTime dateTime) {
-    _date = dateTime;
+  set date(DateTime? dateTime) {
+    if (dateTime == null) {
+      _noDate = true;
+    } else {
+      _date = dateTime;
+    }
 
     for (var element in onDateChangedCBs) {
-      element.call(dateTime);
+      element.call(_noDate ? null : dateTime);
     }
   }
 
-  DateSelectionButtonController({required DateTime date}) : _date = date;
+  bool get noDate => _noDate;
+  set noDate(bool noDate) {
+    _noDate = noDate;
 
-  List<Function(DateTime)> onDateChangedCBs = [];
+    for (var element in onDateChangedCBs) {
+      element.call(_noDate ? null : _date);
+    }
+  }
+
+  DateSelectionButtonController({
+    required DateTime date,
+    bool noDate = false,
+  })  : _date = date,
+        _noDate = noDate;
+
+  List<void Function(DateTime?)> onDateChangedCBs = [];
 }
 
 // ignore: must_be_immutable
@@ -33,28 +52,30 @@ class _DateSelectionButtonState extends State<DateSelectionButton> {
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
-      onPressed: () async {
-        DateTime? dateTime = await showDatePicker(
-          context: context,
-          //min
-          firstDate: widget.controller.firstDate ??
-              DateTime.fromMillisecondsSinceEpoch(0),
-          //This number is the max
-          lastDate: widget.controller.lastDate ??
-              DateTime.fromMillisecondsSinceEpoch(8640000000000000),
-        );
+      onPressed: widget.controller.noDate
+          ? null
+          : () async {
+              DateTime? dateTime = await showDatePicker(
+                context: context,
+                //min
+                firstDate: widget.controller.firstDate ??
+                    DateTime.fromMillisecondsSinceEpoch(0),
+                //This number is the max
+                lastDate: widget.controller.lastDate ??
+                    DateTime.fromMillisecondsSinceEpoch(8640000000000000),
+              );
 
-        if (dateTime == null) return;
+              if (dateTime == null) return;
 
-        widget.controller.date = dateTime.copyWith(
-          hour: widget.controller.date.hour,
-          minute: widget.controller.date.minute,
-          second: widget.controller.date.second,
-          millisecond: widget.controller.date.millisecond,
-          microsecond: widget.controller.date.microsecond,
-        );
-        setState(() {});
-      },
+              widget.controller.date = dateTime.copyWith(
+                hour: widget.controller.date.hour,
+                minute: widget.controller.date.minute,
+                second: widget.controller.date.second,
+                millisecond: widget.controller.date.millisecond,
+                microsecond: widget.controller.date.microsecond,
+              );
+              setState(() {});
+            },
       child: Text(Utils.dateToString(widget.controller.date)),
     );
   }
