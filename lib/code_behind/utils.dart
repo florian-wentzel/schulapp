@@ -323,7 +323,7 @@ class Utils {
       builder: (BuildContext context) {
         return AlertDialog(
           title: title == null ? null : Text(title),
-          content: ColorPicker(
+          content: MaterialPicker(
             pickerColor: selectedColor,
             onColorChanged: (value) {
               selectedColor = value;
