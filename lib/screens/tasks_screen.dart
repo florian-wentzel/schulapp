@@ -339,7 +339,7 @@ class _NotesScreenState extends State<NotesScreen> {
       Tuple2<String, List<TodoEvent> Function(List<TodoEvent>)>(
         AppLocalizationsManager.localizations.strSelectAllTasks,
         (todoEvents) {
-          return todoEvents;
+          return todoEvents.where((element) => true).toList();
         },
       ),
     ];

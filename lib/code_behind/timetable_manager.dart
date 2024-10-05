@@ -5,7 +5,6 @@ import 'package:schulapp/code_behind/school_semester.dart';
 import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/timetable.dart';
 import 'package:schulapp/code_behind/save_manager.dart';
-import 'package:schulapp/code_behind/utils.dart';
 
 ///singelton damit es immer nur eine instanz gibt
 class TimetableManager {
@@ -42,8 +41,8 @@ class TimetableManager {
       (a, b) {
         if (a.finished && b.finished) {
           if (a.endTime == null && b.endTime == null) {
-            return Utils.todoTypeToInt(b.type)
-                .compareTo(Utils.todoTypeToInt(a.type));
+            return TodoEvent.typeToInt(b.type)
+                .compareTo(TodoEvent.typeToInt(a.type));
           }
           if (a.endTime == null) {
             return -1;
@@ -62,15 +61,14 @@ class TimetableManager {
           return -1;
         }
         if (a.endTime == null && b.endTime == null) {
-          return Utils.todoTypeToInt(b.type).compareTo(
-            Utils.todoTypeToInt(a.type),
-          );
+          return TodoEvent.typeToInt(b.type)
+              .compareTo(TodoEvent.typeToInt(a.type));
         }
         if (a.endTime == null) {
-          return -1;
+          return 1;
         }
         if (b.endTime == null) {
-          return 1;
+          return -1;
         }
         return a.endTime!.compareTo(b.endTime!);
       },

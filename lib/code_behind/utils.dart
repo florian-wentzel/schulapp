@@ -8,7 +8,6 @@ import 'package:schulapp/code_behind/school_semester.dart';
 import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/timetable.dart';
 import 'package:schulapp/code_behind/timetable_manager.dart';
-import 'package:schulapp/code_behind/todo_event.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/widgets/custom_pop_up.dart';
 
@@ -679,21 +678,6 @@ class Utils {
     int weekIndex = daysDifference ~/ 7 + 1;
 
     return weekIndex;
-  }
-
-  static int todoTypeToInt(TodoType type) {
-    switch (type) {
-      case TodoType.homework:
-        return 1;
-      case TodoType.test:
-        return 2;
-      case TodoType.presentation:
-        return 3;
-      case TodoType.exam:
-        return 4;
-      default:
-    }
-    return 0;
   }
 }
 
