@@ -480,11 +480,14 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
                 const SizedBox(
                   height: 12,
                 ),
-                MaterialPicker(
-                  pickerColor: color,
-                  onColorChanged: (value) {
-                    color = value;
-                  },
+                SizedBox(
+                  height: 200,
+                  child: MaterialPicker(
+                    pickerColor: color,
+                    onColorChanged: (value) {
+                      color = value;
+                    },
+                  ),
                 ),
                 const SizedBox(
                   height: 16,
