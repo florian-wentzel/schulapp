@@ -37,6 +37,8 @@ class _NewTodoEventWidgetState extends State<NewTodoEventWidget> {
     descriptionController.text = widget.event?.desciption ?? "";
     if (widget.isCustomEvent == null) {
       isCustomEvent = widget.event?.isCustomEvent ?? false;
+    } else {
+      isCustomEvent = widget.isCustomEvent!;
     }
 
     endDateController = DateSelectionButtonController(

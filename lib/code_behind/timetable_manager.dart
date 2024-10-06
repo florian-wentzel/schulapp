@@ -51,7 +51,7 @@ class TimetableManager {
             return 1;
           }
 
-          return a.endTime!.compareTo(b.endTime!);
+          return b.endTime!.compareTo(a.endTime!);
           //TodoEvent.compareType(a.type, b.type);
         }
         if (a.finished) {
@@ -65,10 +65,10 @@ class TimetableManager {
               .compareTo(TodoEvent.typeToInt(a.type));
         }
         if (a.endTime == null) {
-          return 1;
+          return -1;
         }
         if (b.endTime == null) {
-          return -1;
+          return 1;
         }
         return a.endTime!.compareTo(b.endTime!);
       },
