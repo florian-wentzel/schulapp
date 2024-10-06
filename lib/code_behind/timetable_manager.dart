@@ -36,6 +36,14 @@ class TimetableManager {
     return _todoEvents!;
   }
 
+  List<TodoEvent> get sortedUnfinishedTodoEvents {
+    return sortedTodoEvents.where((element) => !element.finished).toList();
+  }
+
+  List<TodoEvent> get sortedFinishedTodoEvents {
+    return sortedTodoEvents.where((element) => element.finished).toList();
+  }
+
   List<TodoEvent> get sortedTodoEvents {
     todoEvents.sort(
       (a, b) {

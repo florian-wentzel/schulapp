@@ -1,6 +1,7 @@
 {
   "@@locale": "en",
   "language_name": "Englisch",
+  "version_0_6_0": "Completed tasks are displayed separately",
   "version_0_5_2": "Tasks without End Date added",
   "version_0_5_1": "Added long press on the day name to mark all hours of the day as canceled.",
   "version_0_5_0": "Reduced times added",
@@ -268,5 +269,8 @@
   "strHighContrastOnHomeScreen": "Increase text contrast on homescreen",
   "strReducedClassHours": "Reduced class hours",
   "strYouDontHaveAnyReducedTimesSetUpYet": "You don't have any reduced times set up yet.",
-  "strReducedTimesCannotBeUsed": "Reduced times cannot be used because the timetable has too many lessons."
+  "strReducedTimesCannotBeUsed": "Reduced times cannot be used because the timetable has too many lessons.",
+  "strFinishedTasks": "Completed Tasks",
+  "strShowFinishedTasks": "show Completed Tasks",
+  "strNoTasksFinishedYet": "No tasks completed yet. Keep going!"
 }

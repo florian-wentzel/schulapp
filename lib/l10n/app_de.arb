@@ -1,6 +1,7 @@
 {
   "@@locale": "de",
   "language_name": "Deutsch",
+  "version_0_6_0": "Erledigte Aufgaben werden separat angezeigt",
   "version_0_5_2": "Aufgaben ohne Abgabedatum hinzugefügt",
   "version_0_5_1": "Langes Drücken auf den Tagesnamen  hinzugefügt, um alle Stunden des Tages als ausgefallen zu markieren",
   "version_0_5_0": "Verkürzte Zeiten hinzugefügt",
@@ -260,5 +261,8 @@
   "strHighContrastOnHomeScreen": "Textkontrast auf der Startseite erhöhen",
   "strReducedClassHours": "Verkürzter Unterricht",
   "strYouDontHaveAnyReducedTimesSetUpYet": "Du hast noch keine verkürzten Zeiten eingerichtet.",
-  "strReducedTimesCannotBeUsed": "Verkürzte Zeiten können nicht verwendet werden, da der Stundenplan zu viele Unterrichtsstunden hat."
+  "strReducedTimesCannotBeUsed": "Verkürzte Zeiten können nicht verwendet werden, da der Stundenplan zu viele Unterrichtsstunden hat.",
+  "strFinishedTasks": "Erledigte Aufgaben",
+  "strShowFinishedTasks": "Erledigte Aufgaben anzeigen",
+  "strNoTasksFinishedYet": "Keine Aufgaben bisher abgeschlossen. Bleib dran!"
 }

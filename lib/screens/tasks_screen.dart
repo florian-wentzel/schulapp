@@ -9,6 +9,7 @@ import 'package:schulapp/widgets/navigation_bar_drawer.dart';
 import 'package:schulapp/code_behind/timetable_util_functions.dart';
 import 'package:schulapp/widgets/task/todo_event_list_item_widget.dart';
 import 'package:schulapp/code_behind/todo_event_util_functions.dart';
+import 'package:schulapp/widgets/task/todo_event_to_finished_task_overlay.dart';
 import 'package:tuple/tuple.dart';
 
 // ignore: must_be_immutable
@@ -16,14 +17,22 @@ class NotesScreen extends StatefulWidget {
   static const route = "/notes";
 
   TodoEvent? todoEvent;
+  final bool showFinishedTasks;
 
-  NotesScreen({super.key, this.todoEvent});
+  NotesScreen({
+    super.key,
+    this.todoEvent,
+    this.showFinishedTasks = false,
+  });
 
   @override
   State<NotesScreen> createState() => _NotesScreenState();
 }
 
 class _NotesScreenState extends State<NotesScreen> {
+  final GlobalKey _showFinishedTasksActionKey = GlobalKey();
+  final GlobalKey _backButtonKey = GlobalKey();
+
   List<TodoEvent> selectedTodoEvents = [];
   bool isMultiselectionActive = false;
 
@@ -34,7 +43,7 @@ class _NotesScreenState extends State<NotesScreen> {
     Future.delayed(
       Duration.zero,
       () async {
-        if (widget.todoEvent != null) {
+        if (widget.todoEvent != null && mounted) {
           await Utils.showCustomPopUp(
             context: context,
             heroObject: widget.todoEvent!,
@@ -71,13 +80,48 @@ class _NotesScreenState extends State<NotesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: NavigationBarDrawer(selectedRoute: NotesScreen.route),
+      drawer: widget.showFinishedTasks
+          ? null
+          : NavigationBarDrawer(selectedRoute: NotesScreen.route),
       appBar: AppBar(
-        title: Text(
-          AppLocalizationsManager.localizations.strTasks,
-        ),
+        title: widget.showFinishedTasks
+            ? Text(
+                AppLocalizationsManager.localizations.strFinishedTasks,
+              )
+            : Text(
+                AppLocalizationsManager.localizations.strTasks,
+              ),
+        leading: widget.showFinishedTasks
+            ? IconButton(
+                key: _backButtonKey,
+                onPressed: () => Navigator.of(context).pop(),
+                icon: const Icon(Icons.arrow_back),
+              )
+            : null,
         actions: !isMultiselectionActive
-            ? null
+            ? [
+                Visibility(
+                  visible: !widget.showFinishedTasks,
+                  child: IconButton(
+                    key: _showFinishedTasksActionKey,
+                    onPressed: () async {
+                      await Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => NotesScreen(
+                            showFinishedTasks: true,
+                          ),
+                        ),
+                      );
+                      setState(() {});
+                    },
+                    tooltip: AppLocalizationsManager
+                        .localizations.strShowFinishedTasks,
+                    icon: const Icon(
+                      Icons.done_all,
+                    ),
+                  ),
+                ),
+              ]
             : [
                 IconButton(
                   onPressed: _unselectAllItems,
@@ -106,14 +150,29 @@ class _NotesScreenState extends State<NotesScreen> {
                 ),
               ],
       ),
-      floatingActionButton: _floatingActionButton(),
+      floatingActionButton:
+          widget.showFinishedTasks ? null : _floatingActionButton(),
       body: _body(),
     );
   }
 
   Widget _body() {
-    final events = TimetableManager().sortedTodoEvents;
+    final List<TodoEvent> events;
+
+    if (widget.showFinishedTasks) {
+      events = TimetableManager().sortedFinishedTodoEvents;
+    } else {
+      events = TimetableManager().sortedUnfinishedTodoEvents;
+    }
+
     if (events.isEmpty) {
+      if (widget.showFinishedTasks) {
+        return Center(
+          child: Text(
+            AppLocalizationsManager.localizations.strNoTasksFinishedYet,
+          ),
+        );
+      }
       return Center(
         child: ElevatedButton(
           onPressed: () async {
@@ -162,63 +221,75 @@ class _NotesScreenState extends State<NotesScreen> {
               final bool isSelected = isMultiselectionActive
                   ? _selectedTodoEventsContains(event)
                   : false;
-              return SizeFadeTransition(
-                sizeFraction: 0.7,
-                animation: animation,
-                key: Key(event.key.toString()),
-                child: TodoEventListItemWidget(
-                  event: event,
-                  isSelected: isSelected,
-                  onLongPressed: () {
-                    addOrActivateMultiselection(event);
-                  },
-                  onInfoPressed: () async {
-                    await Utils.showCustomPopUp(
-                      context: context,
-                      heroObject: event,
-                      alpha: 250,
-                      body: TodoEventInfoPopUp(
-                        event: event,
-                        showEditTodoEventSheet: (event) async {
-                          TodoEvent? newEvent = await createNewTodoEventSheet(
-                            context,
-                            linkedSubjectName: event.linkedSubjectName,
-                            event: event,
-                          );
-
-                          return newEvent;
-                        },
-                      ),
-                      flightShuttleBuilder: (p0, p1, p2, p3, p4) {
-                        return Container(
-                          color: Theme.of(context).cardColor,
-                        );
+              return Builder(
+                builder: (itemContext) {
+                  return SizeFadeTransition(
+                    sizeFraction: 0.7,
+                    animation: animation,
+                    key: Key(event.key.toString()),
+                    child: TodoEventListItemWidget(
+                      event: event,
+                      isSelected: isSelected,
+                      onLongPressed: () {
+                        addOrActivateMultiselection(event);
                       },
-                    );
+                      onInfoPressed: () async {
+                        await Utils.showCustomPopUp(
+                          context: context,
+                          heroObject: event,
+                          alpha: 250,
+                          body: TodoEventInfoPopUp(
+                            event: event,
+                            showEditTodoEventSheet: (event) async {
+                              TodoEvent? newEvent =
+                                  await createNewTodoEventSheet(
+                                context,
+                                linkedSubjectName: event.linkedSubjectName,
+                                event: event,
+                              );
 
-                    //warten damit animation funktioniert
-                    await Future.delayed(
-                      const Duration(milliseconds: 500),
-                    );
+                              return newEvent;
+                            },
+                          ),
+                          flightShuttleBuilder: (p0, p1, p2, p3, p4) {
+                            return Container(
+                              color: Theme.of(context).cardColor,
+                            );
+                          },
+                        );
 
-                    setState(() {});
-                  },
-                  onPressed: () {
-                    if (isMultiselectionActive) {
-                      addOrActivateMultiselection(event);
-                      return;
-                    }
-                    event.finished = !event.finished;
-                    //damit es gespeichert wird
-                    TimetableManager().addOrChangeTodoEvent(event);
-                    setState(() {});
-                  },
-                  onDeleteSwipe: () {
-                    setState(() {
-                      TimetableManager().removeTodoEvent(event);
-                    });
-                  },
-                ),
+                        //warten damit animation funktioniert
+                        await Future.delayed(
+                          const Duration(milliseconds: 500),
+                        );
+
+                        setState(() {});
+                      },
+                      onPressed: () {
+                        if (isMultiselectionActive) {
+                          addOrActivateMultiselection(event);
+                          return;
+                        }
+                        event.finished = !event.finished;
+                        //damit es gespeichert wird
+                        TimetableManager().addOrChangeTodoEvent(event);
+
+                        setState(() {});
+
+                        if (!widget.showFinishedTasks) {
+                          _createAnimationToFinishedTasks(event, itemContext);
+                        } else {
+                          _createAnimationToUnfinishedTasks(event, itemContext);
+                        }
+                      },
+                      onDeleteSwipe: () {
+                        setState(() {
+                          TimetableManager().removeTodoEvent(event);
+                        });
+                      },
+                    ),
+                  );
+                },
               );
             },
             areItemsTheSame: (a, b) =>
@@ -323,13 +394,7 @@ class _NotesScreenState extends State<NotesScreen> {
   Widget multiSelectionButton() {
     if (!isMultiselectionActive) return Container();
 
-    final buttons = [
-      Tuple2<String, List<TodoEvent> Function(List<TodoEvent>)>(
-        AppLocalizationsManager.localizations.strSelectAllFinishedTasks,
-        (todoEvents) {
-          return todoEvents.where((element) => element.finished).toList();
-        },
-      ),
+    var buttons = [
       Tuple2<String, List<TodoEvent> Function(List<TodoEvent>)>(
         AppLocalizationsManager.localizations.strSelectAllExpiredTasks,
         (todoEvents) {
@@ -343,6 +408,16 @@ class _NotesScreenState extends State<NotesScreen> {
         },
       ),
     ];
+    if (widget.showFinishedTasks) {
+      buttons = [
+        Tuple2<String, List<TodoEvent> Function(List<TodoEvent>)>(
+          AppLocalizationsManager.localizations.strSelectAllFinishedTasks,
+          (todoEvents) {
+            return todoEvents.where((element) => element.finished).toList();
+          },
+        ),
+      ];
+    }
 
     return Container(
       padding: const EdgeInsets.all(8),
@@ -440,6 +515,66 @@ class _NotesScreenState extends State<NotesScreen> {
       setState(() {});
     }
     selectedTodoEvents.clear();
+  }
+
+  void _createAnimationToFinishedTasks(
+      TodoEvent event, BuildContext itemContext) {
+    _animateTodoEvent(
+      todoEvent: event,
+      itemContext: itemContext,
+      targetKey: _showFinishedTasksActionKey,
+    );
+  }
+
+  void _createAnimationToUnfinishedTasks(
+      TodoEvent event, BuildContext itemContext) {
+    _animateTodoEvent(
+      todoEvent: event,
+      itemContext: itemContext,
+      targetKey: _backButtonKey,
+    );
+  }
+
+  void _animateTodoEvent({
+    required TodoEvent todoEvent,
+    required BuildContext itemContext,
+    required GlobalKey targetKey,
+  }) {
+    final backButtonBox =
+        targetKey.currentContext!.findRenderObject() as RenderBox;
+    final itemEndTopLeft = backButtonBox.localToGlobal(Offset.zero);
+
+    final itemEndCenter = Offset(
+      itemEndTopLeft.dx + backButtonBox.size.width / 2,
+      itemEndTopLeft.dy + backButtonBox.size.height / 2,
+    );
+
+    // Get the position of ListTile
+    RenderBox listItemBox = itemContext.findRenderObject() as RenderBox;
+    Offset itemStartTopLeft = listItemBox.localToGlobal(Offset.zero);
+
+    final itemStartCenter = Offset(
+      itemStartTopLeft.dx + listItemBox.size.width / 2,
+      itemStartTopLeft.dy + listItemBox.size.height / 2,
+    );
+
+    OverlayState overlayState = Overlay.of(context);
+
+    OverlayEntry? overlayEntry;
+
+    overlayEntry = OverlayEntry(
+      builder: (context) => TodoEventToFinishedTaskOverlay(
+        todoEvent: todoEvent,
+        itemStartCenter: itemStartCenter,
+        itemEndCenter: itemEndCenter,
+        itemSize: listItemBox.size,
+        onComplete: () {
+          overlayEntry?.remove();
+        },
+      ),
+    );
+
+    overlayState.insert(overlayEntry);
   }
 }
 
