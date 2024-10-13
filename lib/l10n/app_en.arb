@@ -272,5 +272,6 @@
   "strReducedTimesCannotBeUsed": "Reduced times cannot be used because the timetable has too many lessons.",
   "strFinishedTasks": "Completed Tasks",
   "strShowFinishedTasks": "show Completed Tasks",
-  "strNoTasksFinishedYet": "No tasks completed yet. Keep going!"
+  "strNoTasksFinishedYet": "No tasks completed yet. Keep going!",
+  "strNotes": "Notes"
 }

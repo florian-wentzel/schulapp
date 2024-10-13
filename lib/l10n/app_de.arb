@@ -264,5 +264,6 @@
   "strReducedTimesCannotBeUsed": "Verkürzte Zeiten können nicht verwendet werden, da der Stundenplan zu viele Unterrichtsstunden hat.",
   "strFinishedTasks": "Erledigte Aufgaben",
   "strShowFinishedTasks": "Erledigte Aufgaben anzeigen",
-  "strNoTasksFinishedYet": "Keine Aufgaben bisher abgeschlossen. Bleib dran!"
+  "strNoTasksFinishedYet": "Keine Aufgaben bisher abgeschlossen. Bleib dran!",
+  "strNotes": "Notizen"
 }

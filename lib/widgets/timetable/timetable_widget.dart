@@ -763,10 +763,10 @@ class _CustomPopUpShowLessonState extends State<CustomPopUpShowLesson> {
             setState(() {});
           },
           onInfoPressed: () async {
-            context.go(NotesScreen.route, extra: todoEvent);
+            context.go(TasksScreen.route, extra: todoEvent);
           },
           onLongPressed: () {
-            context.go(NotesScreen.route, extra: todoEvent);
+            context.go(TasksScreen.route, extra: todoEvent);
           },
         ),
       );

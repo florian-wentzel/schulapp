@@ -13,23 +13,23 @@ import 'package:schulapp/widgets/task/todo_event_to_finished_task_overlay.dart';
 import 'package:tuple/tuple.dart';
 
 // ignore: must_be_immutable
-class NotesScreen extends StatefulWidget {
-  static const route = "/notes";
+class TasksScreen extends StatefulWidget {
+  static const route = "/tasks";
 
   TodoEvent? todoEvent;
   final bool showFinishedTasks;
 
-  NotesScreen({
+  TasksScreen({
     super.key,
     this.todoEvent,
     this.showFinishedTasks = false,
   });
 
   @override
-  State<NotesScreen> createState() => _NotesScreenState();
+  State<TasksScreen> createState() => _TasksScreenState();
 }
 
-class _NotesScreenState extends State<NotesScreen> {
+class _TasksScreenState extends State<TasksScreen> {
   final GlobalKey _showFinishedTasksActionKey = GlobalKey();
   final GlobalKey _backButtonKey = GlobalKey();
 
@@ -82,7 +82,7 @@ class _NotesScreenState extends State<NotesScreen> {
     return Scaffold(
       drawer: widget.showFinishedTasks
           ? null
-          : NavigationBarDrawer(selectedRoute: NotesScreen.route),
+          : NavigationBarDrawer(selectedRoute: TasksScreen.route),
       appBar: AppBar(
         title: widget.showFinishedTasks
             ? Text(
@@ -107,7 +107,7 @@ class _NotesScreenState extends State<NotesScreen> {
                     onPressed: () async {
                       await Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder: (context) => NotesScreen(
+                          builder: (context) => TasksScreen(
                             showFinishedTasks: true,
                           ),
                         ),

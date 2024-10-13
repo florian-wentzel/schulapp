@@ -34,6 +34,7 @@ dependencies:
   encrypt: ^5.0.3
   http: ^1.2.2
   pdfrx: ^1.0.84
+  image_picker: ^1.1.2
 
   # fluent_ui: ^4.8.1
   # flutter_acrylic: ^1.1.3 #Window acrylic, mica & transparency effects for Flutter on Windows, macOS & Linux

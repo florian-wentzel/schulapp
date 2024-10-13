@@ -11,6 +11,7 @@ import 'package:schulapp/screens/all_timetables_screen.dart';
 import 'package:schulapp/screens/grades_screen.dart';
 import 'package:schulapp/screens/hello_screen.dart';
 import 'package:schulapp/screens/holidays_screen.dart';
+import 'package:schulapp/screens/notes_screen.dart';
 import 'package:schulapp/screens/tasks_screen.dart';
 import 'package:schulapp/screens/settings_screen.dart';
 import 'package:schulapp/screens/timetable_screen.dart';
@@ -68,8 +69,8 @@ final _router = GoRouter(
           builder: (context, state) => const GradesScreen(),
         ),
         GoRoute(
-          path: NotesScreen.route,
-          builder: (context, state) => NotesScreen(
+          path: TasksScreen.route,
+          builder: (context, state) => TasksScreen(
             todoEvent: state.extra as TodoEvent?,
           ),
         ),
@@ -84,6 +85,10 @@ final _router = GoRouter(
         GoRoute(
           path: HelloScreen.route,
           builder: (context, state) => const HelloScreen(),
+        ),
+        GoRoute(
+          path: NotesScreen.route,
+          builder: (context, state) => const NotesScreen(),
         ),
       ],
     ),

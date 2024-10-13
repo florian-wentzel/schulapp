@@ -6,6 +6,7 @@ import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/screens/all_timetables_screen.dart';
 import 'package:schulapp/screens/grades_screen.dart';
 import 'package:schulapp/screens/holidays_screen.dart';
+import 'package:schulapp/screens/notes_screen.dart';
 import 'package:schulapp/screens/vertretungsplan_paul_dessau_screen.dart';
 import 'package:schulapp/screens/tasks_screen.dart';
 import 'package:schulapp/screens/settings_screen.dart';
@@ -57,9 +58,15 @@ class _NavigationBarDrawerState extends State<NavigationBarDrawer> {
     ),
     CustomDestination(
       label: AppLocalizationsManager.localizations.strTasks,
-      route: NotesScreen.route,
+      route: TasksScreen.route,
       icon: const Icon(Icons.assignment_outlined),
       selectedIcon: const Icon(Icons.assignment),
+    ),
+    CustomDestination(
+      label: AppLocalizationsManager.localizations.strNotes,
+      route: NotesScreen.route,
+      icon: const Icon(Icons.book_outlined),
+      selectedIcon: const Icon(Icons.book),
     ),
     CustomDestination(
       label: AppLocalizationsManager.localizations.strHolidays,

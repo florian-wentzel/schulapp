@@ -18,7 +18,7 @@ class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
   final List<String> pageRoutes = [
     GradesScreen.route,
     TimetableScreen.route,
-    NotesScreen.route,
+    TasksScreen.route,
   ];
 
   int _getCurrentIndex() {
