@@ -18,6 +18,19 @@ class EditNoteScreen extends StatefulWidget {
 
 class _EditNoteScreenState extends State<EditNoteScreen> {
   final TextEditingController _headingTextController = TextEditingController();
+
+  @override
+  void initState() {
+    widget.schoolNote.addListener(onSchoolNoteChange);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    widget.schoolNote.removeListener(onSchoolNoteChange);
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -66,7 +79,9 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
                       color: Theme.of(context).cardColor,
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: item.render(),
+                    child: item.render(
+                      widget.schoolNote,
+                    ),
                   ),
                 ),
               );
@@ -117,18 +132,21 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
     //     .readAsBytes()
     //     .then((value) => ByteData.sublistView(value));
 
-    widget.schoolNote.parts.add(
+    widget.schoolNote.addPart(
       SchoolNotePartImage(
         value: imageFile.path,
       ),
     );
-    setState(() {});
   }
 
   void _onAddTextPressed() {
-    widget.schoolNote.parts.add(
+    widget.schoolNote.addPart(
       SchoolNotePartText(),
     );
+  }
+
+  void onSchoolNoteChange() {
+    if (!mounted) return;
     setState(() {});
   }
 }
