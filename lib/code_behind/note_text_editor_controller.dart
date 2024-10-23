@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+//https://medium.com/techskool/create-a-markdown-textformfield-in-flutter-929209ae2c02
 class NoteTextEditorController extends TextEditingController {
   static const Map<String, TextStyle> defaultMap = {
     r"@.\w+": TextStyle(

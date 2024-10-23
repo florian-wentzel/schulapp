@@ -1,66 +1,74 @@
-import 'dart:collection';
-
 import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/note_text_editor_controller.dart';
 import 'package:schulapp/screens/notes/interactive_image_note_widget.dart';
 
-//TODO create SchoolNoteUI class wich holds SchoolNote as memberVar
-//EditNoteScreen converts List<SchoolNote> to List<SchoolNoteUI> so we have ChangeNotifier
-class SchoolNote with ChangeNotifier {
-  static get defaultParts => <SchoolNotePart>[
-        SchoolNotePartText(value: ""),
-      ];
+class SchoolNoteUI extends SchoolNote with ChangeNotifier {
+  //only modify via SchoolNoteUI methods
+  final SchoolNote schoolNote;
 
-  List<SchoolNotePart> get parts => UnmodifiableListView(_parts);
-  final List<SchoolNotePart> _parts;
-
-  SchoolNote({
-    List<SchoolNotePart>? parts,
-  }) : _parts = parts ?? defaultParts;
+  SchoolNoteUI({required this.schoolNote});
 
   void moveNotePartUp(SchoolNotePart part) {
-    int index = _parts.indexOf(part);
+    int index = schoolNote.parts.indexOf(part);
 
     if (index <= 0) return;
-    if (index >= _parts.length) return;
+    if (index >= schoolNote.parts.length) return;
 
-    SchoolNotePart partHolder = _parts[index];
-    _parts[index] = _parts[index - 1];
-    _parts[index - 1] = partHolder;
+    SchoolNotePart partHolder = schoolNote.parts[index];
+    schoolNote.parts[index] = schoolNote.parts[index - 1];
+    schoolNote.parts[index - 1] = partHolder;
     notifyListeners();
   }
 
   void moveNotePartDown(SchoolNotePart part) {
-    int index = _parts.indexOf(part);
+    int index = schoolNote.parts.indexOf(part);
 
     if (index < 0) return;
-    if (index > _parts.length) return;
+    if (index >= schoolNote.parts.length - 1) return;
 
-    SchoolNotePart partHolder = _parts[index];
-    _parts[index] = _parts[index + 1];
-    _parts[index + 1] = partHolder;
+    SchoolNotePart partHolder = schoolNote.parts[index];
+    schoolNote.parts[index] = schoolNote.parts[index + 1];
+    schoolNote.parts[index + 1] = partHolder;
     notifyListeners();
   }
 
   void addPart(SchoolNotePart schoolNotePart) {
-    _parts.add(schoolNotePart);
+    schoolNote.parts.add(schoolNotePart);
+    notifyListeners();
+  }
+
+  void removeNotePart(SchoolNotePartImage partImage) {
+    schoolNote.parts.remove(partImage);
     notifyListeners();
   }
 }
 
+class SchoolNote {
+  static get defaultParts => <SchoolNotePart>[
+        SchoolNotePartText(value: ""),
+      ];
+
+  final List<SchoolNotePart> parts;
+
+  SchoolNote({
+    List<SchoolNotePart>? parts,
+  }) : parts = parts ?? defaultParts;
+}
+
 abstract class SchoolNotePart {
   final String value;
+  bool inEditMode = false;
 
   SchoolNotePart({required this.value});
 
-  Widget render(SchoolNote schoolNote);
+  Widget render(SchoolNoteUI schoolNote);
 }
 
 class SchoolNotePartImage extends SchoolNotePart {
   SchoolNotePartImage({required super.value});
 
   @override
-  Widget render(SchoolNote schoolNote) {
+  Widget render(SchoolNoteUI schoolNote) {
     return InteractiveImageNoteWidget(
       note: schoolNote,
       partImage: this,
@@ -74,11 +82,12 @@ class SchoolNotePartText extends SchoolNotePart {
   SchoolNotePartText({super.value = ""});
 
   @override
-  Widget render(SchoolNote schoolNote) {
+  Widget render(SchoolNoteUI schoolNote) {
     return TextFormField(
       onChanged: (value) {
         print(value);
       },
+      autofocus: true,
       decoration: const InputDecoration(
         border: InputBorder.none,
       ),

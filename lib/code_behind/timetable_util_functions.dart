@@ -357,7 +357,7 @@ class _CreateTimetableBottomSheetState
   late final List<_CreateTimetableBottomSheetPage> _pages;
 
   //stunden wenn Wert = -1
-  //pause = Wert der Pause
+  //pause = länge der Pause
   final List<int> _lessons = [];
 
   bool _addSaturday = false;

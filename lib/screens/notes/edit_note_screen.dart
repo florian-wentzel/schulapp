@@ -19,15 +19,21 @@ class EditNoteScreen extends StatefulWidget {
 class _EditNoteScreenState extends State<EditNoteScreen> {
   final TextEditingController _headingTextController = TextEditingController();
 
+  late final SchoolNoteUI _schoolNote;
+
   @override
   void initState() {
-    widget.schoolNote.addListener(onSchoolNoteChange);
+    _schoolNote = SchoolNoteUI(
+      schoolNote: widget.schoolNote,
+    );
+    _schoolNote.addListener(onSchoolNoteChange);
+
     super.initState();
   }
 
   @override
   void dispose() {
-    widget.schoolNote.removeListener(onSchoolNoteChange);
+    _schoolNote.removeListener(onSchoolNoteChange);
     super.dispose();
   }
 
@@ -73,14 +79,17 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
                     duration: const Duration(
                       seconds: 1,
                     ),
-                    margin: const EdgeInsets.all(8),
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
                       color: Theme.of(context).cardColor,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: item.render(
-                      widget.schoolNote,
+                      _schoolNote,
                     ),
                   ),
                 ),
@@ -132,7 +141,7 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
     //     .readAsBytes()
     //     .then((value) => ByteData.sublistView(value));
 
-    widget.schoolNote.addPart(
+    _schoolNote.addPart(
       SchoolNotePartImage(
         value: imageFile.path,
       ),
@@ -140,7 +149,7 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
   }
 
   void _onAddTextPressed() {
-    widget.schoolNote.addPart(
+    _schoolNote.addPart(
       SchoolNotePartText(),
     );
   }
