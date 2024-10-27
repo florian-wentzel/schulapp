@@ -1,12 +1,18 @@
-import 'package:flutter/material.dart';
-import 'package:schulapp/code_behind/note_text_editor_controller.dart';
-import 'package:schulapp/screens/notes/interactive_image_note_widget.dart';
+import 'dart:io';
 
-class SchoolNoteUI extends SchoolNote with ChangeNotifier {
-  //only modify via SchoolNoteUI methods
+import 'package:flutter/material.dart';
+import 'package:schulapp/code_behind/save_manager.dart';
+import 'package:schulapp/code_behind/school_note_part.dart';
+
+class SchoolNoteUI with ChangeNotifier {
+  ///only modify via SchoolNoteUI methods
   final SchoolNote schoolNote;
 
   SchoolNoteUI({required this.schoolNote});
+
+  String? addFile(File file) {
+    return schoolNote.addFile(file);
+  }
 
   void moveNotePartUp(SchoolNotePart part) {
     int index = schoolNote.parts.indexOf(part);
@@ -17,6 +23,7 @@ class SchoolNoteUI extends SchoolNote with ChangeNotifier {
     SchoolNotePart partHolder = schoolNote.parts[index];
     schoolNote.parts[index] = schoolNote.parts[index - 1];
     schoolNote.parts[index - 1] = partHolder;
+    schoolNote.setLastModifiedDate();
     notifyListeners();
   }
 
@@ -29,16 +36,24 @@ class SchoolNoteUI extends SchoolNote with ChangeNotifier {
     SchoolNotePart partHolder = schoolNote.parts[index];
     schoolNote.parts[index] = schoolNote.parts[index + 1];
     schoolNote.parts[index + 1] = partHolder;
+    schoolNote.setLastModifiedDate();
     notifyListeners();
   }
 
   void addPart(SchoolNotePart schoolNotePart) {
     schoolNote.parts.add(schoolNotePart);
+    schoolNote.setLastModifiedDate();
     notifyListeners();
   }
 
-  void removeNotePart(SchoolNotePartImage partImage) {
+  void removeNotePart(SchoolNotePart partImage) {
     schoolNote.parts.remove(partImage);
+    schoolNote.setLastModifiedDate();
+    notifyListeners();
+  }
+
+  void callOnChange() {
+    schoolNote.setLastModifiedDate();
     notifyListeners();
   }
 }
@@ -50,52 +65,87 @@ class SchoolNote {
 
   final List<SchoolNotePart> parts;
 
+  final DateTime _creationDate;
+  DateTime _lastModifiedDate;
+
+  DateTime get creationDate => _creationDate;
+  DateTime get lastModifiedDate => _lastModifiedDate;
+
+  String title;
+
   SchoolNote({
     List<SchoolNotePart>? parts,
-  }) : parts = parts ?? defaultParts;
-}
+    this.title = "",
+    DateTime? creationDate,
+    DateTime? lastModifiedDate,
+  })  : parts = parts ?? defaultParts,
+        _creationDate = creationDate ?? DateTime.now(),
+        _lastModifiedDate =
+            lastModifiedDate ?? creationDate?.copyWith() ?? DateTime.now();
 
-abstract class SchoolNotePart {
-  final String value;
-  bool inEditMode = false;
+  static const String titleKey = "title";
+  static const String creationDateKey = "creationDate";
+  static const String lastModifiedDateKey = "lastModifiedDate";
+  static const String partsKey = "parts";
 
-  SchoolNotePart({required this.value});
+  String get saveFileName => creationDate.millisecondsSinceEpoch.toString();
 
-  Widget render(SchoolNoteUI schoolNote);
-}
+  static SchoolNote? fromJson(Map<String, dynamic> json) {
+    String title = json[titleKey];
+    DateTime creationDate =
+        DateTime.fromMillisecondsSinceEpoch(json[creationDateKey]);
+    DateTime lastModifiedDate =
+        DateTime.fromMillisecondsSinceEpoch(json[lastModifiedDateKey]);
+    List<Map<String, dynamic>> partsJson = (json[partsKey] as List).cast();
 
-class SchoolNotePartImage extends SchoolNotePart {
-  SchoolNotePartImage({required super.value});
+    List<SchoolNotePart> schoolNoteParts = [];
 
-  @override
-  Widget render(SchoolNoteUI schoolNote) {
-    return InteractiveImageNoteWidget(
-      note: schoolNote,
-      partImage: this,
+    for (int i = 0; i < partsJson.length; i++) {
+      final schoolnotePart = SchoolNotePart.fromJson(partsJson[i]);
+
+      if (schoolnotePart == null) {
+        debugPrint(
+            "There was an error while loading SchoolNotePart: ${partsJson[i][SchoolNotePart.typeKey]}");
+        continue;
+      }
+
+      schoolNoteParts.add(schoolnotePart);
+    }
+
+    return SchoolNote(
+      title: title,
+      creationDate: creationDate,
+      lastModifiedDate: lastModifiedDate,
+      parts: schoolNoteParts,
     );
   }
-}
 
-class SchoolNotePartText extends SchoolNotePart {
-  final _textEditController = NoteTextEditorController();
-
-  SchoolNotePartText({super.value = ""});
-
-  @override
-  Widget render(SchoolNoteUI schoolNote) {
-    return TextFormField(
-      onChanged: (value) {
-        print(value);
-      },
-      autofocus: true,
-      decoration: const InputDecoration(
-        border: InputBorder.none,
+  Map<String, dynamic> toJson() {
+    return {
+      titleKey: title,
+      creationDateKey: creationDate.millisecondsSinceEpoch,
+      lastModifiedDateKey: lastModifiedDate.millisecondsSinceEpoch,
+      partsKey: List.generate(
+        parts.length,
+        (index) => parts[index].toJson(),
       ),
-      controller: _textEditController,
-      keyboardType: TextInputType.multiline,
-      expands: false,
-      minLines: 1,
-      maxLines: 999,
-    );
+    };
+  }
+
+  void setLastModifiedDate() {
+    _lastModifiedDate = DateTime.now();
+  }
+
+  String? addFile(File file) {
+    return SaveManager().addFileToSchoolNote(this, file);
+  }
+
+  bool removeFile(String fileName) {
+    return SaveManager().removeFileToSchoolNote(this, fileName);
+  }
+
+  ///returns null if the file does not exist
+  String? getFilePath(String fileName) {
+    return SaveManager().getFilePathFromSchoolNoteFile(this, fileName);
   }
 }

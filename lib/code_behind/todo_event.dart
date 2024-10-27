@@ -5,6 +5,7 @@ import 'package:schulapp/l10n/app_localizations_manager.dart';
 class TodoEvent {
   static const String _nameKey = "name";
   static const String _linkedSubjectNameKey = "linkedSubjectName";
+  static const String _linkedSchoolNoteKey = "linkedNote";
   static const String _endTimeKey = "endTime";
   static const String _typeKey = "type";
   static const String _desciptionKey = "desciption";
@@ -22,6 +23,9 @@ class TodoEvent {
   int key;
   final String name;
   final String linkedSubjectName;
+
+  ///SchoolNote.saveFileName
+  final String? linkedSchoolNote;
   final bool isCustomEvent;
 
   DateTime? endTime;
@@ -36,6 +40,7 @@ class TodoEvent {
     required this.key,
     required this.name,
     required this.linkedSubjectName,
+    required this.linkedSchoolNote,
     required this.endTime,
     required this.type,
     required this.desciption,
@@ -108,6 +113,7 @@ class TodoEvent {
   Map<String, dynamic> toJson() {
     return {
       _nameKey: name,
+      _linkedSchoolNoteKey: linkedSchoolNote,
       _linkedSubjectNameKey: linkedSubjectName,
       _endTimeKey: endTime?.millisecondsSinceEpoch,
       _typeKey: type.toString(),
@@ -120,6 +126,7 @@ class TodoEvent {
   static TodoEvent fromJson(Map<String, dynamic> json, int key) {
     String name = json[_nameKey];
     String linkedSubjectName = json[_linkedSubjectNameKey];
+    String? linkedSchoolNote = json[_linkedSchoolNoteKey];
     int? milliSec = json[_endTimeKey];
     DateTime? endTime;
 
@@ -135,6 +142,7 @@ class TodoEvent {
     return TodoEvent(
       key: key,
       name: name,
+      linkedSchoolNote: linkedSchoolNote,
       linkedSubjectName: linkedSubjectName,
       endTime: endTime,
       type: type,
@@ -197,6 +205,7 @@ class TodoEvent {
     return TodoEvent(
       key: key,
       name: name,
+      linkedSchoolNote: linkedSchoolNote,
       linkedSubjectName: linkedSubjectName,
       endTime: endTime,
       type: type,

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/school_note.dart';
+import 'package:schulapp/code_behind/school_note_part.dart';
 import 'package:schulapp/screens/notes/image_preview_screen.dart';
 import 'package:schulapp/widgets/notes/resizeble_widget.dart';
 
@@ -23,6 +24,26 @@ class InteractiveImageNoteWidget extends StatefulWidget {
 class _InteractiveImageNoteWidgetState
     extends State<InteractiveImageNoteWidget> {
   final resizebleController = ResizebleWidgetController();
+
+  late String pathToImg;
+
+  @override
+  void initState() {
+    final path = widget.note.schoolNote.getFilePath(widget.partImage.value);
+    if (path != null) {
+      pathToImg = path;
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback(
+      (timeStamp) {
+        if (path == null) {
+          widget.note.removeNotePart(widget.partImage);
+        }
+      },
+    );
+
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +67,7 @@ class _InteractiveImageNoteWidgetState
         await Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) => ImagePreviewScreen(
-              pathToImg: widget.partImage.value,
+              pathToImg: pathToImg,
               heroObj: widget.partImage,
             ),
           ),
@@ -59,7 +80,7 @@ class _InteractiveImageNoteWidgetState
       child: Hero(
         tag: widget.partImage,
         child: Image.file(
-          File(widget.partImage.value),
+          File(pathToImg),
           fit: BoxFit.contain,
         ),
       ),
@@ -69,19 +90,13 @@ class _InteractiveImageNoteWidgetState
   Widget _editModeWidget() {
     return Column(
       children: [
-        // ResizebleWidget(
-        // controller: resizebleController,
-        // child:
-        InteractiveViewer(
-          panEnabled: true,
-          minScale: 0.5,
-          maxScale: 4.0,
+        Hero(
+          tag: widget.partImage,
           child: Image.file(
-            File(widget.partImage.value),
+            File(pathToImg),
             fit: BoxFit.contain,
           ),
         ),
-        // ),
         _editBar(),
       ],
     );
@@ -121,8 +136,9 @@ class _InteractiveImageNoteWidgetState
               await Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (context) => ImagePreviewScreen(
-                    pathToImg: widget.partImage.value,
+                    pathToImg: pathToImg,
                     heroObj: widget.partImage,
+                    editMode: true,
                   ),
                 ),
               );
@@ -131,6 +147,7 @@ class _InteractiveImageNoteWidgetState
           ),
           IconButton(
             onPressed: () {
+              widget.note.schoolNote.removeFile(widget.partImage.value);
               widget.note.removeNotePart(widget.partImage);
             },
             icon: const Icon(

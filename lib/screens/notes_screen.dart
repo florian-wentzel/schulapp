@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/school_note.dart';
+import 'package:schulapp/code_behind/school_notes_manager.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
-import 'package:schulapp/screens/notes/edit_note_screen.dart';
 import 'package:schulapp/widgets/navigation_bar_drawer.dart';
+import 'package:schulapp/widgets/notes/school_note_list_item.dart';
 
 class NotesScreen extends StatefulWidget {
   static const String route = "/notes";
@@ -23,24 +24,49 @@ class _NotesScreenState extends State<NotesScreen> {
           AppLocalizationsManager.localizations.strNotes,
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _addNewNote,
+        child: const Icon(Icons.add),
+      ),
       body: _body(),
     );
   }
 
   Widget _body() {
-    SchoolNote note = SchoolNote();
+    if (SchoolNotesManager().schoolNotes.isEmpty) {
+      return Center(
+        child: ElevatedButton(
+          onPressed: _addNewNote,
+          child: Text(
+            AppLocalizationsManager.localizations.strCreateANote,
+          ),
+        ),
+      );
+    }
     return ListView.builder(
-      itemCount: 10,
-      itemBuilder: (context, index) => ListTile(
-        title: Text("$index"),
-        onTap: () {
-          Navigator.of(context).push(MaterialPageRoute(
-            builder: (context) => EditNoteScreen(
-              schoolNote: note,
-            ),
-          ));
-        },
-      ),
+      itemCount: SchoolNotesManager().schoolNotes.length,
+      itemBuilder: (context, index) => _itemBuilder(index),
     );
+  }
+
+  Widget _itemBuilder(int index) {
+    final schoolNote = SchoolNotesManager().schoolNotes[index];
+
+    return SchoolNoteListItem(
+      schoolNote: schoolNote,
+      onDelete: () {
+        setState(() {});
+      },
+    );
+  }
+
+  Future<void> _addNewNote() async {
+    SchoolNote note = SchoolNote();
+
+    SchoolNotesManager().addSchoolNote(note);
+
+    await SchoolNoteListItem.openNote(context, note);
+
+    setState(() {});
   }
 }

@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:schulapp/code_behind/school_note.dart';
+import 'package:schulapp/code_behind/school_note_part.dart';
+import 'package:schulapp/code_behind/school_notes_manager.dart';
 import 'package:schulapp/code_behind/timetable.dart';
 import 'package:schulapp/code_behind/timetable_manager.dart';
 import 'package:schulapp/code_behind/todo_event.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/widgets/date_selection_button.dart';
+import 'package:schulapp/widgets/notes/school_note_list_item.dart';
 import 'package:schulapp/widgets/time_selection_button.dart';
 
 class NewTodoEventWidget extends StatefulWidget {
@@ -29,6 +33,7 @@ class _NewTodoEventWidgetState extends State<NewTodoEventWidget> {
   TextEditingController nameController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
   late DateSelectionButtonController endDateController;
+  SchoolNote? linkedSchoolNote;
   bool isCustomEvent = false;
 
   @override
@@ -46,6 +51,13 @@ class _NewTodoEventWidgetState extends State<NewTodoEventWidget> {
               ?.getNextLessonDate(widget.linkedSubjectName) ??
           DateTime.now(),
     );
+
+    final linkedNote = widget.event?.linkedSchoolNote;
+    if (linkedNote != null) {
+      linkedSchoolNote = SchoolNotesManager().getSchoolNoteBySaveName(
+        linkedNote,
+      );
+    }
 
     bool onDateChangedCBsAlreadyCalled = false;
 
@@ -112,16 +124,7 @@ class _NewTodoEventWidgetState extends State<NewTodoEventWidget> {
             const SizedBox(
               height: 12,
             ),
-            TextField(
-              decoration: InputDecoration(
-                hintText: AppLocalizationsManager.localizations.strExtraInfo,
-              ),
-              maxLength: maxDescriptionLength,
-              maxLines: 5,
-              minLines: 1,
-              textAlign: TextAlign.center,
-              controller: descriptionController,
-            ),
+            _getExtraInfoOrSchoolNoteWidget(),
             const SizedBox(
               height: 12,
             ),
@@ -316,6 +319,84 @@ class _NewTodoEventWidgetState extends State<NewTodoEventWidget> {
     );
   }
 
+  Widget _getExtraInfoOrSchoolNoteWidget() {
+    Widget child;
+    if (linkedSchoolNote == null) {
+      child = Column(
+        key: const ValueKey("extraInfo"),
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          TextField(
+            decoration: InputDecoration(
+              hintText: AppLocalizationsManager.localizations.strExtraInfo,
+            ),
+            maxLength: maxDescriptionLength,
+            maxLines: 5,
+            minLines: 1,
+            textAlign: TextAlign.center,
+            controller: descriptionController,
+          ),
+          const SizedBox(
+            height: 12,
+          ),
+          ElevatedButton(
+            onPressed: _addSchoolNote,
+            child: Text(AppLocalizationsManager.localizations.strAddNote),
+          ),
+        ],
+      );
+    } else {
+      child = SchoolNoteListItem(
+        key: const ValueKey("extraInfo"),
+        onDelete: () {
+          linkedSchoolNote = null;
+          setState(() {});
+        },
+        schoolNote: linkedSchoolNote!,
+      );
+    }
+
+    return AnimatedSwitcher(
+      duration: const Duration(
+        milliseconds: 300,
+      ),
+      transitionBuilder: (child, animation) {
+        return SizeTransition(
+          sizeFactor: animation,
+          child: child,
+        );
+        // return FadeTransition(
+        //   opacity: animation,
+        //   child: SizeTransition(
+        //     sizeFactor: animation,
+        //     child: child,
+        //   ),
+        // );
+      },
+      child: child,
+    );
+  }
+
+  Future<void> _addSchoolNote() async {
+    SchoolNote note = SchoolNote(
+        title: AppLocalizationsManager.localizations.strTaskNote(
+          widget.linkedSubjectName,
+        ),
+        parts: [
+          SchoolNotePartText(
+            value: descriptionController.text.trim(),
+          ),
+        ]);
+
+    SchoolNotesManager().addSchoolNote(note);
+
+    await SchoolNoteListItem.openNote(context, note);
+
+    linkedSchoolNote = note;
+
+    setState(() {});
+  }
+
   Widget customButton(
     BuildContext context, {
     required String text,
@@ -387,6 +468,7 @@ class _NewTodoEventWidgetState extends State<NewTodoEventWidget> {
         key: widget.event?.key ?? TimetableManager().getNextSchoolEventKey(),
         name: name,
         desciption: desciption,
+        linkedSchoolNote: linkedSchoolNote?.saveFileName,
         linkedSubjectName: widget.linkedSubjectName,
         endTime: endDateController.noDate ? null : endDateController.date,
         type: type!,

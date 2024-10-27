@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:schulapp/code_behind/school_note.dart';
 import 'package:schulapp/code_behind/special_lesson.dart';
 import 'package:schulapp/code_behind/todo_event.dart';
 import 'package:schulapp/code_behind/school_semester.dart';
@@ -24,6 +25,8 @@ class SaveManager {
   static const String mainDirName = "Schulapp";
   static const String settingsFileName = "settings.json";
   static const String timetableSaveDirName = "timetables";
+  static const String schoolNotesSaveDirName = "notes";
+  static const String schoolNoteAddedFilesSaveDirName = "files";
   //for backups
   static const String tempDirName = "temp";
   static const String exportDirName = "exports";
@@ -33,6 +36,7 @@ class SaveManager {
   static const String finishedEventSaveName = "finsihedTodos.json";
   static const String todoEventSaveName = "todos.json";
   static const String timetableFileName = "timetable.json";
+  static const String schoolNoteFileName = "note.json";
   static const String semesterFileName = "semester.json";
   static const String specialLessonsDirName = "special-lessons";
   static const String timetableExportExtension = ".timetable";
@@ -40,6 +44,166 @@ class SaveManager {
   static const String itemsKey = "items";
 
   Directory? applicationDocumentsDirectory;
+
+  Directory getFileDirectoryFromSchoolNote(SchoolNote schoolNote) {
+    String schoolNoteDirPath =
+        join(getSchoolNotesDir().path, schoolNote.saveFileName);
+
+    String schoolNoteAddedFilesDirPath =
+        join(schoolNoteDirPath, schoolNoteAddedFilesSaveDirName);
+
+    Directory dir = Directory(schoolNoteAddedFilesDirPath);
+    dir.createSync();
+
+    return dir;
+  }
+
+  ///returns null if the file does not exist
+  String? getFilePathFromSchoolNoteFile(
+      SchoolNote schoolNote, String fileName) {
+    final dir = getFileDirectoryFromSchoolNote(schoolNote);
+    final path = join(dir.path, fileName);
+    if (!File(path).existsSync()) {
+      return null;
+    }
+    return path;
+  }
+
+  bool removeFileToSchoolNote(SchoolNote schoolNote, String fileName) {
+    try {
+      Directory dir = getFileDirectoryFromSchoolNote(schoolNote);
+
+      String pathToAppDataFile = join(dir.path, fileName);
+
+      File(pathToAppDataFile).deleteSync();
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  String? addFileToSchoolNote(SchoolNote schoolNote, File file) {
+    try {
+      Directory dir = getFileDirectoryFromSchoolNote(schoolNote);
+
+      final fileName =
+          "${DateTime.now().millisecondsSinceEpoch}${extension(file.path)}";
+
+      String pathToAppDataFile = join(dir.path, fileName);
+
+      file.copySync(pathToAppDataFile);
+
+      return fileName;
+    } on Exception catch (_) {
+      return null;
+    }
+  }
+
+  bool deleteSchoolNote(SchoolNote schoolNote) {
+    try {
+      String schoolNoteDirPath =
+          join(getSchoolNotesDir().path, schoolNote.saveFileName);
+
+      Directory schoolNoteDir = Directory(schoolNoteDirPath);
+
+      if (schoolNoteDir.existsSync()) {
+        schoolNoteDir.deleteSync(recursive: true);
+      }
+
+      return true;
+    } on Exception catch (_) {
+      return false;
+    }
+  }
+
+  void saveSchoolNote(
+    SchoolNote schoolNote, {
+    String? schoolNoteDirPath,
+  }) {
+    try {
+      schoolNote.title = schoolNote.title.trim();
+
+      schoolNoteDirPath ??= join(
+        getSchoolNotesDir().path,
+        schoolNote.saveFileName,
+      );
+
+      Directory schoolNoteDir = Directory(schoolNoteDirPath);
+      schoolNoteDir.createSync();
+
+      File schoolNoteFile = File(join(schoolNoteDirPath, schoolNoteFileName));
+
+      if (!schoolNoteDir.existsSync()) {
+        throw Exception(
+          "school note dir could not be created: ${schoolNoteDir.path}",
+        );
+      }
+
+      String jsonString = json.encode(schoolNote.toJson());
+
+      schoolNoteFile.writeAsStringSync(jsonString);
+    } catch (_) {}
+  }
+
+  List<SchoolNote> loadAllSchoolNotes() {
+    final schoolNotesDir = getSchoolNotesDir();
+    final files = schoolNotesDir.listSync();
+
+    List<String> names = List.generate(
+      files.length,
+      (index) => basename(files[index].path),
+    );
+
+    return loadSchoolNotes(names);
+  }
+
+  List<SchoolNote> loadSchoolNotes(List<String> names) {
+    List<SchoolNote> schoolNotes = [];
+    int errorCount = 0;
+
+    for (var name in names) {
+      try {
+        SchoolNote? note = loadSchoolNote(name);
+        if (note == null) {
+          errorCount++;
+          continue;
+        }
+        schoolNotes.add(note);
+      } catch (e) {
+        debugPrint('Error reading or parsing the JSON file: $e');
+      }
+    }
+
+    if (errorCount != 0) {
+      debugPrint("Errorcount while loading: $errorCount");
+    }
+
+    schoolNotes.sort(
+      (a, b) => a.title.compareTo(b.title),
+    );
+
+    return schoolNotes;
+  }
+
+  SchoolNote? loadSchoolNote(String name) {
+    try {
+      String schoolNotesDirPath = join(getSchoolNotesDir().path, name);
+
+      final schoolNoteFile = File(join(schoolNotesDirPath, schoolNoteFileName));
+
+      if (!schoolNoteFile.existsSync()) {
+        return null;
+      }
+
+      String jsonString = schoolNoteFile.readAsStringSync();
+
+      Map<String, dynamic> jsonData = json.decode(jsonString);
+
+      return SchoolNote.fromJson(jsonData);
+    } catch (e) {
+      return null;
+    }
+  }
 
   List<Timetable> loadAllTimetables() {
     final timetablesDir = getTimetablesDir();
@@ -318,6 +482,18 @@ class SaveManager {
 
     final dir = Directory(
       join(mainDirPath, timetableSaveDirName),
+    );
+
+    dir.createSync();
+
+    return dir;
+  }
+
+  Directory getSchoolNotesDir() {
+    String mainDirPath = getMainSaveDir().path;
+
+    final dir = Directory(
+      join(mainDirPath, schoolNotesSaveDirName),
     );
 
     dir.createSync();

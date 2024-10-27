@@ -273,5 +273,12 @@
   "strFinishedTasks": "Completed Tasks",
   "strShowFinishedTasks": "show Completed Tasks",
   "strNoTasksFinishedYet": "No tasks completed yet. Keep going!",
-  "strNotes": "Notes"
+  "strNotes": "Notes",
+  "strAddNote": "Add Note",
+  "strTaskNote": "Task Note: {linkedSubjectName}",
+  "strTitle": "Title",
+  "strEditNote": "Edit note",
+  "strCreateANote": "Create a note",
+  "strDoYouWantToDeleteLinkedNote": "Do you want to delete the linked note?",
+  "strImagePreviewTitle": "Image"
 }

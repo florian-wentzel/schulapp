@@ -29,7 +29,7 @@ class PaulDessauDownloader {
       if (body["msg"] == "Unauthorized") {
         throw "Benutzername oder Passwort falsch:(";
       }
-      throw "Misst da ist was unerwartetes schiefgelaufen:(\n${body["msg"]}";
+      throw "Misst, da ist was Unerwartetes schiefgelaufen:(\n${body["msg"]}";
     }
     return response.bodyBytes;
   }

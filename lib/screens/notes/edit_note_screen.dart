@@ -1,8 +1,16 @@
+import 'dart:io';
+
 import 'package:animated_list_plus/animated_list_plus.dart';
 import 'package:animated_list_plus/transitions.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:schulapp/app.dart';
+import 'package:schulapp/code_behind/save_manager.dart';
 import 'package:schulapp/code_behind/school_note.dart';
+import 'package:schulapp/code_behind/school_note_part.dart';
+import 'package:schulapp/code_behind/utils.dart';
+import 'package:schulapp/l10n/app_localizations_manager.dart';
 
 class EditNoteScreen extends StatefulWidget {
   final SchoolNote schoolNote;
@@ -23,17 +31,21 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
 
   @override
   void initState() {
+    MainApp.changeNavBarVisibility(false);
     _schoolNote = SchoolNoteUI(
       schoolNote: widget.schoolNote,
     );
     _schoolNote.addListener(onSchoolNoteChange);
+    _headingTextController.text = _schoolNote.schoolNote.title;
 
     super.initState();
   }
 
   @override
   void dispose() {
+    MainApp.changeNavBarVisibility(true);
     _schoolNote.removeListener(onSchoolNoteChange);
+    _saveNote();
     super.dispose();
   }
 
@@ -41,7 +53,7 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Edit Note"),
+        title: Text(AppLocalizationsManager.localizations.strEditNote),
       ),
       body: _body(context),
     );
@@ -59,9 +71,21 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
           ),
           child: TextField(
             controller: _headingTextController,
-            decoration: const InputDecoration(
+            // onChanged: (value) {
+            //   widget.schoolNote.title = value;
+            // },
+            onEditingComplete: () {
+              _saveNote();
+            },
+            onSubmitted: (value) {
+              _saveNote();
+            },
+            onTapOutside: (event) {
+              _saveNote();
+            },
+            decoration: InputDecoration(
               border: InputBorder.none,
-              hintText: "Titel",
+              hintText: AppLocalizationsManager.localizations.strTitle,
             ),
             style: Theme.of(context).textTheme.headlineLarge,
           ),
@@ -73,7 +97,7 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
               return SizeFadeTransition(
                 sizeFraction: 0.7,
                 animation: animation,
-                key: Key(item.toString()),
+                key: ValueKey(item.value),
                 child: Center(
                   child: AnimatedContainer(
                     duration: const Duration(
@@ -116,6 +140,10 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
                 ),
               ),
               IconButton(
+                onPressed: _onAddFilePressed,
+                icon: const Icon(Icons.note_add),
+              ),
+              IconButton(
                 onPressed: _onAddTextPressed,
                 icon: const Icon(
                   Icons.add_box_outlined,
@@ -137,25 +165,96 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
 
     if (imageFile == null) return;
 
-    // final ByteData data = await imageFile
-    //     .readAsBytes()
-    //     .then((value) => ByteData.sublistView(value));
+    if (!File(imageFile.path).existsSync()) {
+      if (mounted) {
+        Utils.showInfo(
+          context,
+          msg:
+              AppLocalizationsManager.localizations.strSelectedFileDoesNotExist,
+          type: InfoType.error,
+        );
+      }
+      return;
+    }
+
+    final filename = _schoolNote.addFile(
+      File(imageFile.path),
+    );
+
+    if (filename == null) {
+      if (mounted) {
+        Utils.showInfo(
+          context,
+          msg: AppLocalizationsManager.localizations.strThereWasAnError,
+          type: InfoType.error,
+        );
+      }
+      return;
+    }
 
     _schoolNote.addPart(
       SchoolNotePartImage(
-        value: imageFile.path,
+        value: filename,
       ),
     );
+
+    _saveNote();
+  }
+
+  Future<void> _onAddFilePressed() async {
+    FilePickerResult? result;
+    try {
+      result = await FilePicker.platform.pickFiles(
+        allowMultiple: false,
+        type: FileType.any,
+      );
+    } on Exception {
+      if (mounted) {
+        Utils.showInfo(
+          context,
+          msg: AppLocalizationsManager.localizations.strThereWasAnError,
+          type: InfoType.error,
+        );
+      }
+      return;
+    }
+
+    final path = result?.files.single.path;
+    if (path == null) {
+      if (mounted) {
+        Utils.showInfo(
+          context,
+          msg: AppLocalizationsManager.localizations.strNoFileSelected,
+          type: InfoType.error,
+        );
+      }
+      return;
+    }
+
+    _schoolNote.addPart(
+      SchoolNotePartFile(value: path),
+    );
+
+    _saveNote();
   }
 
   void _onAddTextPressed() {
     _schoolNote.addPart(
       SchoolNotePartText(),
     );
+
+    _saveNote();
   }
 
   void onSchoolNoteChange() {
     if (!mounted) return;
     setState(() {});
+    _saveNote();
+  }
+
+  void _saveNote() {
+    widget.schoolNote.title = _headingTextController.text.trim();
+
+    SaveManager().saveSchoolNote(widget.schoolNote);
   }
 }

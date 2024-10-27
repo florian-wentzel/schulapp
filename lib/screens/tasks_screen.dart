@@ -1,12 +1,14 @@
 import 'package:animated_list_plus/animated_list_plus.dart';
 import 'package:animated_list_plus/transitions.dart';
 import 'package:flutter/material.dart';
+import 'package:schulapp/code_behind/school_notes_manager.dart';
 import 'package:schulapp/code_behind/todo_event.dart';
 import 'package:schulapp/code_behind/timetable_manager.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/widgets/navigation_bar_drawer.dart';
 import 'package:schulapp/code_behind/timetable_util_functions.dart';
+import 'package:schulapp/widgets/notes/school_note_list_item.dart';
 import 'package:schulapp/widgets/task/todo_event_list_item_widget.dart';
 import 'package:schulapp/code_behind/todo_event_util_functions.dart';
 import 'package:schulapp/widgets/task/todo_event_to_finished_task_overlay.dart';
@@ -598,8 +600,23 @@ class TodoEventInfoPopUp extends StatelessWidget {
           children: [
             IconButton(
               onPressed: () async {
-                TimetableManager().removeTodoEvent(event);
-                Navigator.pop(context);
+                bool deleteNote = false;
+
+                if (event.linkedSchoolNote != null) {
+                  final delete = await Utils.showBoolInputDialog(
+                    context,
+                    question: AppLocalizationsManager
+                        .localizations.strDoYouWantToDeleteLinkedNote,
+                  );
+                  deleteNote = delete;
+                }
+                TimetableManager().removeTodoEvent(
+                  event,
+                  deleteLinkedSchoolNote: deleteNote,
+                );
+                if (context.mounted) {
+                  Navigator.pop(context);
+                }
               },
               icon: const Icon(
                 Icons.delete,
@@ -646,29 +663,7 @@ class TodoEventInfoPopUp extends StatelessWidget {
         const SizedBox(
           height: 24,
         ),
-        Visibility(
-          visible: event.desciption.isNotEmpty,
-          replacement: const Spacer(),
-          child: Flexible(
-            fit: FlexFit.tight,
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              margin: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Theme.of(context).canvasColor,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: SingleChildScrollView(
-                scrollDirection: Axis.vertical,
-                child: Text(
-                  event.desciption,
-                  style: Theme.of(context).textTheme.bodyLarge,
-                  textAlign: TextAlign.left,
-                ),
-              ),
-            ),
-          ),
-        ),
+        _getDescriptionOrSchoolNoteWidget(context),
         Container(
           padding: const EdgeInsets.all(8),
           margin: const EdgeInsets.all(8),
@@ -701,6 +696,63 @@ class TodoEventInfoPopUp extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _getDescriptionOrSchoolNoteWidget(BuildContext context) {
+    final linkedNote = event.linkedSchoolNote;
+    if (linkedNote != null) {
+      final schoolNote = SchoolNotesManager().getSchoolNoteBySaveName(
+        linkedNote,
+      );
+
+      if (schoolNote != null) {
+        return Flexible(
+          fit: FlexFit.tight,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).canvasColor,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 8,
+                  horizontal: 4,
+                ),
+                child: SchoolNoteListItem(
+                  schoolNote: schoolNote,
+                  showDeleteBtn: false,
+                ),
+              ),
+            ],
+          ),
+        );
+      }
+    }
+    return Visibility(
+      visible: event.desciption.isNotEmpty,
+      replacement: const Spacer(),
+      child: Flexible(
+        fit: FlexFit.tight,
+        child: Container(
+          padding: const EdgeInsets.all(8),
+          margin: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Theme.of(context).canvasColor,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.vertical,
+            child: Text(
+              event.desciption,
+              style: Theme.of(context).textTheme.bodyLarge,
+              textAlign: TextAlign.left,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

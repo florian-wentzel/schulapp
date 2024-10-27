@@ -293,6 +293,7 @@ class _TimetableLessonWidgetState extends State<TimetableLessonWidget> {
     TodoEvent? event = TodoEvent(
       key: TimetableManager().getNextSchoolEventKey(),
       name: "",
+      linkedSchoolNote: null,
       linkedSubjectName: lesson.name,
       endTime: eventEndTime,
       type: TodoType.test,

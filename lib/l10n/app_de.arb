@@ -265,5 +265,12 @@
   "strFinishedTasks": "Erledigte Aufgaben",
   "strShowFinishedTasks": "Erledigte Aufgaben anzeigen",
   "strNoTasksFinishedYet": "Keine Aufgaben bisher abgeschlossen. Bleib dran!",
-  "strNotes": "Notizen"
+  "strNotes": "Notizen",
+  "strAddNote": "Notiz hinzufügen",
+  "strTaskNote": "Aufgabennotiz: {linkedSubjectName}",
+  "strTitle": "Titel",
+  "strEditNote": "Notiz bearbeiten",
+  "strCreateANote": "Notiz erstellen",
+  "strDoYouWantToDeleteLinkedNote": "Möchtest du die verknüpfte Notiz löschen?",
+  "strImagePreviewTitle": "Bild"
 }

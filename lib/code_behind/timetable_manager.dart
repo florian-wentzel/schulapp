@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:schulapp/code_behind/school_notes_manager.dart';
 import 'package:schulapp/code_behind/special_lesson.dart';
 import 'package:schulapp/code_behind/todo_event.dart';
 import 'package:schulapp/code_behind/school_semester.dart';
@@ -6,7 +7,7 @@ import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/timetable.dart';
 import 'package:schulapp/code_behind/save_manager.dart';
 
-///singelton damit es immer nur eine instanz gibt
+///Contains, timetables, semesters, todoEvents and settings
 class TimetableManager {
   static final TimetableManager _instance =
       TimetableManager._privateConstructor();
@@ -16,6 +17,7 @@ class TimetableManager {
     return _instance;
   }
 
+  //TODO: Semesters, todoEvents and Settings eigenes singelton geben
   List<Timetable>? _timetables;
   List<SchoolSemester>? _semesters;
   List<TodoEvent>? _todoEvents;
@@ -223,9 +225,18 @@ class TimetableManager {
     SaveManager().saveTodoEvents(todoEvents);
   }
 
-  bool removeTodoEvent(TodoEvent event) {
+  bool removeTodoEvent(TodoEvent event, {bool deleteLinkedSchoolNote = false}) {
     if (event.key < 0 || event.key >= todoEvents.length) return false;
     event.cancleNotification();
+
+    if (deleteLinkedSchoolNote && event.linkedSchoolNote != null) {
+      final note =
+          SchoolNotesManager().getSchoolNoteBySaveName(event.linkedSchoolNote!);
+
+      if (note != null) {
+        SchoolNotesManager().removeSchoolNote(note);
+      }
+    }
 
     todoEvents.remove(event);
 
