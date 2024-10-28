@@ -10,8 +10,14 @@ class SchoolNoteUI with ChangeNotifier {
 
   SchoolNoteUI({required this.schoolNote});
 
-  String? addFile(File file) {
-    return schoolNote.addFile(file);
+  String? addFile(
+    File file, {
+    bool keepFileName = false,
+  }) {
+    return schoolNote.addFile(
+      file,
+      keepFileName: keepFileName,
+    );
   }
 
   void moveNotePartUp(SchoolNotePart part) {
@@ -136,8 +142,15 @@ class SchoolNote {
     _lastModifiedDate = DateTime.now();
   }
 
-  String? addFile(File file) {
-    return SaveManager().addFileToSchoolNote(this, file);
+  String? addFile(
+    File file, {
+    bool keepFileName = false,
+  }) {
+    return SaveManager().addFileToSchoolNote(
+      this,
+      file,
+      keepFileName: keepFileName,
+    );
   }
 
   bool removeFile(String fileName) {

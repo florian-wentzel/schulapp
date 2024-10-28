@@ -82,14 +82,23 @@ class SaveManager {
     }
   }
 
-  String? addFileToSchoolNote(SchoolNote schoolNote, File file) {
+  String? addFileToSchoolNote(
+    SchoolNote schoolNote,
+    File file, {
+    bool keepFileName = false,
+  }) {
     try {
       Directory dir = getFileDirectoryFromSchoolNote(schoolNote);
 
-      final fileName =
-          "${DateTime.now().millisecondsSinceEpoch}${extension(file.path)}";
+      final fileName = keepFileName
+          ? basename(file.path)
+          : "${DateTime.now().millisecondsSinceEpoch}${extension(file.path)}";
 
       String pathToAppDataFile = join(dir.path, fileName);
+
+      if (File(pathToAppDataFile).existsSync()) {
+        return null;
+      }
 
       file.copySync(pathToAppDataFile);
 

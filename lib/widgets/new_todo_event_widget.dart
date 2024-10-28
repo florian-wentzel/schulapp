@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:schulapp/app.dart';
 import 'package:schulapp/code_behind/school_note.dart';
 import 'package:schulapp/code_behind/school_note_part.dart';
 import 'package:schulapp/code_behind/school_notes_manager.dart';
@@ -391,6 +392,8 @@ class _NewTodoEventWidgetState extends State<NewTodoEventWidget> {
     SchoolNotesManager().addSchoolNote(note);
 
     await SchoolNoteListItem.openNote(context, note);
+
+    MainApp.changeNavBarVisibility(true);
 
     linkedSchoolNote = note;
 

@@ -66,8 +66,14 @@ class SchoolNotePartImage extends SchoolNotePart {
 
 class SchoolNotePartFile extends SchoolNotePart {
   static const String type = "SchoolNotePartFile";
+  static const String isLinkKey = "isLink";
 
-  SchoolNotePartFile({required super.value});
+  final bool isLink;
+
+  SchoolNotePartFile({
+    required super.value,
+    required this.isLink,
+  });
 
   @override
   Widget render(SchoolNoteUI schoolNote) {
@@ -82,15 +88,20 @@ class SchoolNotePartFile extends SchoolNotePart {
     return {
       SchoolNotePart.typeKey: type,
       SchoolNotePart.valueKey: value,
+      isLinkKey: isLink,
     };
   }
 
   static SchoolNotePart? fromJson(Map<String, dynamic> json) {
     String? value = json[SchoolNotePart.valueKey];
+    bool isLink = json[isLinkKey] ?? false;
 
     if (value == null) return null;
 
-    return SchoolNotePartFile(value: value);
+    return SchoolNotePartFile(
+      value: value,
+      isLink: isLink,
+    );
   }
 }
 

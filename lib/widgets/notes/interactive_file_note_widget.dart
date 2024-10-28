@@ -3,6 +3,7 @@ import 'package:open_file/open_file.dart';
 import 'package:path/path.dart';
 import 'package:schulapp/code_behind/school_note.dart';
 import 'package:schulapp/code_behind/school_note_part.dart';
+import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/widgets/notes/resizeble_widget.dart';
 
 class InteractiveFileNoteWidget extends StatefulWidget {
@@ -23,13 +24,49 @@ class InteractiveFileNoteWidget extends StatefulWidget {
 class _InteractiveFileNoteWidgetState extends State<InteractiveFileNoteWidget> {
   final resizebleController = ResizebleWidgetController();
 
+  String? pathToFile;
+
+  @override
+  void initState() {
+    if (widget.partFile.isLink) {
+      pathToFile = widget.partFile.value;
+    } else {
+      pathToFile = widget.note.schoolNote.getFilePath(widget.partFile.value);
+    }
+
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     Widget child;
-    if (widget.partFile.inEditMode) {
-      child = _editModeWidget(context);
+    if (pathToFile == null) {
+      child = Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            AppLocalizationsManager.localizations.strSelectedFileDoesNotExist,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          IconButton(
+            onPressed: () {
+              widget.note.removeNotePart(widget.partFile);
+            },
+            icon: const Icon(
+              Icons.delete,
+              color: Colors.red,
+            ),
+          ),
+        ],
+      );
     } else {
-      child = _normalWidget();
+      if (widget.partFile.inEditMode) {
+        child = _editModeWidget(context);
+      } else {
+        child = _normalWidget();
+      }
     }
 
     return AnimatedSize(
@@ -50,7 +87,7 @@ class _InteractiveFileNoteWidgetState extends State<InteractiveFileNoteWidget> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            basename(widget.partFile.value),
+            basename(pathToFile!),
             style: const TextStyle(
               fontWeight: FontWeight.bold,
             ),
@@ -71,7 +108,7 @@ class _InteractiveFileNoteWidgetState extends State<InteractiveFileNoteWidget> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              basename(widget.partFile.value),
+              basename(pathToFile!),
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
               ),
@@ -118,6 +155,9 @@ class _InteractiveFileNoteWidgetState extends State<InteractiveFileNoteWidget> {
           ),
           IconButton(
             onPressed: () {
+              if (!widget.partFile.isLink) {
+                widget.note.schoolNote.removeFile(widget.partFile.value);
+              }
               widget.note.removeNotePart(widget.partFile);
             },
             icon: const Icon(
@@ -131,6 +171,6 @@ class _InteractiveFileNoteWidgetState extends State<InteractiveFileNoteWidget> {
   }
 
   Future<void> _openFile() async {
-    await OpenFile.open(widget.partFile.value);
+    await OpenFile.open(pathToFile);
   }
 }

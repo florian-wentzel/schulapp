@@ -272,5 +272,6 @@
   "strEditNote": "Notiz bearbeiten",
   "strCreateANote": "Notiz erstellen",
   "strDoYouWantToDeleteLinkedNote": "Möchtest du die verknüpfte Notiz löschen?",
-  "strImagePreviewTitle": "Bild"
+  "strImagePreviewTitle": "Bild",
+  "strDoYouWantToCreateACopyOfTheFile": "Möchten Sie eine Kopie von der Datei anlegen?"
 }

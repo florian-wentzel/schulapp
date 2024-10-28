@@ -768,19 +768,30 @@ class _CreateTimetableBottomSheetState
   }
 
   Widget _page3() {
+    TimeOfDay currTime =
+        TimeOfDay.fromDateTime(_dateSelectionButtonController.date);
+
     return SetTimetableBreaksWidget(
       lessons: _lessons,
+      lessonLength: _lessonLength,
+      timeBetweenLessons: _timeBetweenLessons,
+      startTime: currTime,
     );
   }
 }
 
-// ignore: must_be_immutable
 class SetTimetableBreaksWidget extends StatefulWidget {
-  List<int> lessons;
+  final List<int> lessons;
+  final TimeOfDay startTime;
+  final int timeBetweenLessons;
+  final int lessonLength;
 
-  SetTimetableBreaksWidget({
+  const SetTimetableBreaksWidget({
     super.key,
     required this.lessons,
+    required this.startTime,
+    required this.timeBetweenLessons,
+    required this.lessonLength,
   });
 
   @override
@@ -789,9 +800,19 @@ class SetTimetableBreaksWidget extends StatefulWidget {
 }
 
 class _SetTimetableBreaksWidgetState extends State<SetTimetableBreaksWidget> {
+  final _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     int correctedIndex = 0;
+
+    TimeOfDay currTime = widget.startTime.add();
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
@@ -805,23 +826,56 @@ class _SetTimetableBreaksWidgetState extends State<SetTimetableBreaksWidget> {
         ),
         Expanded(
           child: ReorderableListView(
+            scrollController: _scrollController,
             children: List.generate(
               widget.lessons.length,
               (index) {
                 //-1 == Stunde
                 if (widget.lessons[index] == -1) {
+                  TimeOfDay endTime =
+                      currTime.add(minutes: widget.lessonLength);
+
+                  final str =
+                      "${AppLocalizationsManager.localizations.strXLesson(index + 1 - correctedIndex)}   (${currTime.format(context)} - ${endTime.format(context)})";
+
+                  currTime = endTime.add(minutes: widget.timeBetweenLessons);
+
                   return ListTile(
                     key: ValueKey(index),
                     title: Text(
-                      AppLocalizationsManager.localizations
-                          .strXLesson(index + 1 - correctedIndex),
+                      str,
                     ),
                   );
                 }
                 correctedIndex++;
-                //every thing else is a break with value = minutes
+
+                currTime = currTime.add(
+                  //weli wir nach einer stunde immer widget.timeBetweenLessons addieren
+                  minutes: widget.lessons[index] - widget.timeBetweenLessons,
+                );
+
+                //everything else is a break with value = minutes
                 return ListTile(
                   key: ValueKey(index),
+                  onTap: () async {
+                    double? value = await Utils.showRangeInputDialog(
+                      context,
+                      title: AppLocalizationsManager
+                          .localizations.strSelectBreakLength,
+                      textAfterValue:
+                          AppLocalizationsManager.localizations.strMinutes,
+                      minValue: 1,
+                      maxValue: 90,
+                      startValue: 20,
+                      onlyIntegers: true,
+                      snapPoints: [5, 10, 15, 20, 30, 45, 90],
+                    );
+
+                    if (value == null) return;
+                    int intValue = value.toInt();
+                    widget.lessons[index] = intValue;
+                    setState(() {});
+                  },
                   title: Text(
                     AppLocalizationsManager.localizations
                         .strBreakXMin(widget.lessons[index]),
@@ -862,7 +916,7 @@ class _SetTimetableBreaksWidgetState extends State<SetTimetableBreaksWidget> {
               maxValue: 90,
               startValue: 20,
               onlyIntegers: true,
-              snapPoints: [5, 10, 20, 30, 45, 90],
+              snapPoints: [5, 10, 15, 20, 30, 45, 90],
             );
 
             if (value == null) return;
@@ -870,11 +924,15 @@ class _SetTimetableBreaksWidgetState extends State<SetTimetableBreaksWidget> {
             widget.lessons.add(intValue);
             setState(() {});
             if (context.mounted) {
-              Utils.showInfo(
-                context,
-                msg: AppLocalizationsManager
-                    .localizations.strSuccessfullyAddedBreak,
-                type: InfoType.success,
+              //scroll to end
+              WidgetsBinding.instance.addPostFrameCallback(
+                (timeStamp) {
+                  _scrollController.animateTo(
+                    _scrollController.position.maxScrollExtent,
+                    duration: const Duration(milliseconds: 500),
+                    curve: Curves.easeOut,
+                  );
+                },
               );
             }
           },

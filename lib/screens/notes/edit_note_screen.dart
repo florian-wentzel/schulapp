@@ -219,7 +219,7 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
       return;
     }
 
-    final path = result?.files.single.path;
+    String? path = result?.files.single.path;
     if (path == null) {
       if (mounted) {
         Utils.showInfo(
@@ -231,8 +231,51 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
       return;
     }
 
+    if (!File(path).existsSync()) {
+      if (mounted) {
+        Utils.showInfo(
+          context,
+          msg:
+              AppLocalizationsManager.localizations.strSelectedFileDoesNotExist,
+          type: InfoType.error,
+        );
+      }
+      return;
+    }
+
+    if (!mounted) return;
+
+    final copyFile = await Utils.showBoolInputDialog(
+      context,
+      question: AppLocalizationsManager
+          .localizations.strDoYouWantToCreateACopyOfTheFile,
+      showYesAndNoInsteadOfOK: true,
+    );
+
+    if (copyFile) {
+      final filename = _schoolNote.addFile(
+        File(path),
+        keepFileName: true,
+      );
+      if (filename == null) {
+        if (mounted) {
+          Utils.showInfo(
+            context,
+            msg: AppLocalizationsManager.localizations.strThereWasAnError,
+            type: InfoType.error,
+          );
+        }
+        return;
+      }
+
+      path = filename;
+    }
+
     _schoolNote.addPart(
-      SchoolNotePartFile(value: path),
+      SchoolNotePartFile(
+        value: path,
+        isLink: !copyFile,
+      ),
     );
 
     _saveNote();
