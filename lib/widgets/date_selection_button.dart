@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/utils.dart';
 
-class DateSelectionButtonController {
+class DateSelectionButtonController with ChangeNotifier {
   DateTime? firstDate, lastDate;
 
   DateTime _date;
@@ -15,40 +15,52 @@ class DateSelectionButtonController {
       _date = dateTime;
     }
 
-    for (var element in onDateChangedCBs) {
-      element.call(_noDate ? null : dateTime);
-    }
+    notifyListeners();
   }
 
   bool get noDate => _noDate;
   set noDate(bool noDate) {
     _noDate = noDate;
 
-    for (var element in onDateChangedCBs) {
-      element.call(_noDate ? null : _date);
-    }
+    notifyListeners();
   }
 
   DateSelectionButtonController({
     required DateTime date,
+    this.firstDate,
+    this.lastDate,
     bool noDate = false,
   })  : _date = date,
         _noDate = noDate;
-
-  List<void Function(DateTime?)> onDateChangedCBs = [];
 }
 
-// ignore: must_be_immutable
 class DateSelectionButton extends StatefulWidget {
-  DateSelectionButtonController controller;
+  final DateSelectionButtonController controller;
+  final void Function(DateTime date)? onDateSelected;
 
-  DateSelectionButton({super.key, required this.controller});
+  const DateSelectionButton({
+    super.key,
+    required this.controller,
+    this.onDateSelected,
+  });
 
   @override
   State<DateSelectionButton> createState() => _DateSelectionButtonState();
 }
 
 class _DateSelectionButtonState extends State<DateSelectionButton> {
+  @override
+  void initState() {
+    widget.controller.addListener(_onValueChanged);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    widget.controller.removeListener(_onValueChanged);
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
@@ -74,9 +86,16 @@ class _DateSelectionButtonState extends State<DateSelectionButton> {
                 millisecond: widget.controller.date.millisecond,
                 microsecond: widget.controller.date.microsecond,
               );
+
+              widget.onDateSelected?.call(dateTime);
+
               setState(() {});
             },
       child: Text(Utils.dateToString(widget.controller.date)),
     );
+  }
+
+  void _onValueChanged() {
+    setState(() {});
   }
 }

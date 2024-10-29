@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/screens/grades_screen.dart';
+import 'package:schulapp/screens/notes_screen.dart';
 import 'package:schulapp/screens/tasks_screen.dart';
 import 'package:schulapp/screens/timetable_screen.dart';
 
@@ -35,29 +36,34 @@ class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
 
   @override
   Widget build(BuildContext context) {
-    return BottomNavigationBar(
-      currentIndex: _getCurrentIndex(),
-      onTap: (value) {
-        context.go(pageRoutes[value]);
-        setState(() {});
+    return GestureDetector(
+      onLongPress: () {
+        context.go(NotesScreen.route);
       },
-      items: [
-        BottomNavigationBarItem(
-          icon: const Icon(Icons.school_outlined),
-          activeIcon: const Icon(Icons.school),
-          label: AppLocalizationsManager.localizations.strGrades,
-        ),
-        BottomNavigationBarItem(
-          icon: const Icon(Icons.home_outlined),
-          activeIcon: const Icon(Icons.home),
-          label: AppLocalizationsManager.localizations.strStartScreen,
-        ),
-        BottomNavigationBarItem(
-          icon: const Icon(Icons.assignment_outlined),
-          activeIcon: const Icon(Icons.assignment),
-          label: AppLocalizationsManager.localizations.strTasks,
-        ),
-      ],
+      child: BottomNavigationBar(
+        currentIndex: _getCurrentIndex(),
+        onTap: (value) {
+          context.go(pageRoutes[value]);
+          setState(() {});
+        },
+        items: [
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.school_outlined),
+            activeIcon: const Icon(Icons.school),
+            label: AppLocalizationsManager.localizations.strGrades,
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.home_outlined),
+            activeIcon: const Icon(Icons.home),
+            label: AppLocalizationsManager.localizations.strStartScreen,
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.assignment_outlined),
+            activeIcon: const Icon(Icons.assignment),
+            label: AppLocalizationsManager.localizations.strTasks,
+          ),
+        ],
+      ),
     );
   }
 }

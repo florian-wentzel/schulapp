@@ -109,27 +109,31 @@ class _EditCustomHolidaysScreenState extends State<EditCustomHolidaysScreen> {
       microsecond: 0,
     );
 
+    final initEndDate = initDate.add(
+      const Duration(days: 1),
+    );
+
     DateSelectionButtonController startDateController =
         DateSelectionButtonController(
       date: initDate,
+      lastDate: initEndDate,
     );
 
     DateSelectionButtonController endDateController =
         DateSelectionButtonController(
-      date: initDate.add(
-        const Duration(days: 1),
-      ),
+      date: initEndDate,
+      firstDate: initEndDate,
     );
 
-    startDateController.onDateChangedCBs.add(
-      (dateTime) {
-        endDateController.firstDate = dateTime;
+    startDateController.addListener(
+      () {
+        endDateController.firstDate = startDateController.date;
       },
     );
 
-    endDateController.onDateChangedCBs.add(
-      (dateTime) {
-        startDateController.lastDate = dateTime;
+    endDateController.addListener(
+      () {
+        startDateController.lastDate = endDateController.date;
       },
     );
 

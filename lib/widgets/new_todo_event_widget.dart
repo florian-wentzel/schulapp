@@ -60,41 +60,8 @@ class _NewTodoEventWidgetState extends State<NewTodoEventWidget> {
       );
     }
 
-    bool onDateChangedCBsAlreadyCalled = false;
-
-    endDateController.onDateChangedCBs.add((newDate) {
-      if (newDate == null) return;
-      if (onDateChangedCBsAlreadyCalled) {
-        return; //so there is not infinity loop / Stackoverflow
-      }
-
-      final Timetable? homescreenTT = Utils.getHomescreenTimetable();
-      if (homescreenTT == null) return;
-
-      //because monday = 1 | we need to subtract 1
-      final dayIndex = newDate.weekday - 1;
-      if (dayIndex < 0 || dayIndex >= homescreenTT.schoolDays.length) {
-        return;
-      }
-
-      final day = homescreenTT.schoolDays[dayIndex];
-      for (int i = 0; i < day.lessons.length; i++) {
-        var lesson = day.lessons[i];
-        if (lesson.name == widget.linkedSubjectName) {
-          onDateChangedCBsAlreadyCalled = true;
-          var time = homescreenTT.schoolTimes[i];
-          endDateController.date = newDate.copyWith(
-            hour: time.start.hour,
-            minute: time.start.minute,
-          );
-          onDateChangedCBsAlreadyCalled = false;
-          break;
-        }
-      }
-    });
-
     if (widget.event != null) {
-      endDateController.date = widget.event!.endTime;
+      endDateController.date = widget.event!.endTime?.copyWith();
     }
 
     super.initState();
@@ -209,6 +176,31 @@ class _NewTodoEventWidgetState extends State<NewTodoEventWidget> {
                       Expanded(
                         child: DateSelectionButton(
                           controller: endDateController,
+                          onDateSelected: (DateTime newDate) {
+                            final Timetable? homescreenTT =
+                                Utils.getHomescreenTimetable();
+                            if (homescreenTT == null) return;
+
+                            //because monday = 1 | we need to subtract 1
+                            final dayIndex = newDate.weekday - 1;
+                            if (dayIndex < 0 ||
+                                dayIndex >= homescreenTT.schoolDays.length) {
+                              return;
+                            }
+
+                            final day = homescreenTT.schoolDays[dayIndex];
+                            for (int i = 0; i < day.lessons.length; i++) {
+                              var lesson = day.lessons[i];
+                              if (lesson.name == widget.linkedSubjectName) {
+                                var time = homescreenTT.schoolTimes[i];
+                                endDateController.date = newDate.copyWith(
+                                  hour: time.start.hour,
+                                  minute: time.start.minute,
+                                );
+                                break;
+                              }
+                            }
+                          },
                         ),
                       ),
                       const SizedBox(

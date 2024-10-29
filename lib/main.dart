@@ -7,16 +7,15 @@ import 'package:timezone/data/latest.dart' as tz;
 void main() async {
   //sichergehen dass alle plugins initialisiert wurden
   WidgetsFlutterBinding.ensureInitialized();
-  Future<void> initNotificationsFuture =
-      NotificationManager().initNotifications();
-  Future<void> loadApplicationDocumentsDirectoryFuture =
-      SaveManager().loadApplicationDocumentsDirectory();
+
+  final futures = [
+    NotificationManager().initNotifications(),
+    SaveManager().loadApplicationDocumentsDirectory(),
+  ];
 
   tz.initializeTimeZones();
 
-  //erstmal beide gleichzeitig laden lassen und dann warten
-  await initNotificationsFuture;
-  await loadApplicationDocumentsDirectoryFuture;
+  await Future.wait(futures);
 
   runApp(const MainApp());
 }

@@ -15,11 +15,14 @@ class TimeSelectionButton extends StatefulWidget {
 class _TimeSelectionButtonState extends State<TimeSelectionButton> {
   @override
   void initState() {
-    widget.controller.onDateChangedCBs.add((p0) {
-      if (!mounted) return;
-      setState(() {});
-    });
+    widget.controller.addListener(_onValueChanged);
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    widget.controller.removeListener(_onValueChanged);
+    super.dispose();
   }
 
   @override
@@ -48,5 +51,9 @@ class _TimeSelectionButtonState extends State<TimeSelectionButton> {
             },
       child: Text(Utils.timeToString(widget.controller.date)),
     );
+  }
+
+  void _onValueChanged() {
+    setState(() {});
   }
 }
