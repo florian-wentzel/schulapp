@@ -509,8 +509,29 @@ class _TasksScreenState extends State<TasksScreen> {
       growable: false,
     );
 
+    bool deleteNote = false;
+    bool showDeleteNote = false;
+
+    for (var event in copySelectedTodoEvents) {
+      if (event.linkedSchoolNote != null) {
+        showDeleteNote = true;
+      }
+    }
+
+    if (showDeleteNote && mounted) {
+      final delete = await Utils.showBoolInputDialog(
+        context,
+        question: AppLocalizationsManager
+            .localizations.strDoYouWantToDeleteAllLinkedNote,
+      );
+      deleteNote = delete;
+    }
+
     for (TodoEvent event in copySelectedTodoEvents) {
-      TimetableManager().removeTodoEvent(event);
+      TimetableManager().removeTodoEvent(
+        event,
+        deleteLinkedSchoolNote: deleteNote,
+      );
       await Future.delayed(
         const Duration(milliseconds: 150),
       );

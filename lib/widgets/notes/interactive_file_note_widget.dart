@@ -86,10 +86,12 @@ class _InteractiveFileNoteWidgetState extends State<InteractiveFileNoteWidget> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            basename(pathToFile!),
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
+          Flexible(
+            child: Text(
+              basename(pathToFile!),
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
           IconButton(
@@ -107,10 +109,12 @@ class _InteractiveFileNoteWidgetState extends State<InteractiveFileNoteWidget> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              basename(pathToFile!),
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
+            Flexible(
+              child: Text(
+                basename(pathToFile!),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
             IconButton(

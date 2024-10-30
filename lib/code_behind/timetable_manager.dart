@@ -229,9 +229,9 @@ class TimetableManager {
     if (event.key < 0 || event.key >= todoEvents.length) return false;
     event.cancleNotification();
 
-    if (deleteLinkedSchoolNote && event.linkedSchoolNote != null) {
+    if (deleteLinkedSchoolNote) {
       final note =
-          SchoolNotesManager().getSchoolNoteBySaveName(event.linkedSchoolNote!);
+          SchoolNotesManager().getSchoolNoteBySaveName(event.linkedSchoolNote);
 
       if (note != null) {
         SchoolNotesManager().removeSchoolNote(note);

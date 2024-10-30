@@ -54,6 +54,12 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(AppLocalizationsManager.localizations.strEditNote),
+        actions: [
+          IconButton(
+            onPressed: _onInfoPressed,
+            icon: const Icon(Icons.info),
+          ),
+        ],
       ),
       body: _body(context),
     );
@@ -300,4 +306,113 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
 
     SaveManager().saveSchoolNote(widget.schoolNote);
   }
+
+  void _onInfoPressed() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
+          ),
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          title: Text(
+            AppLocalizationsManager.localizations.strInformation,
+          ),
+          content: Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          AppLocalizationsManager.localizations.strCreatedOn,
+                          style: TextStyle(
+                            color:
+                                Theme.of(context).textTheme.bodyMedium!.color,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(
+                        width: 8,
+                      ),
+                      Expanded(
+                        child: Text(
+                          _getCreatedDateString(),
+                          style: TextStyle(
+                            color:
+                                Theme.of(context).textTheme.bodyMedium!.color,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Divider(
+                    color: Theme.of(context).dividerColor,
+                    thickness: 1,
+                    height: 20,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          AppLocalizationsManager
+                              .localizations.strLastModifiedOn,
+                          style: TextStyle(
+                            color:
+                                Theme.of(context).textTheme.bodyMedium!.color,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(
+                        width: 8,
+                      ),
+                      Expanded(
+                        child: Text(
+                          _getLastModifiedString(),
+                          style: TextStyle(
+                            color:
+                                Theme.of(context).textTheme.bodyMedium!.color,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text(
+                AppLocalizationsManager.localizations.strOK,
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  String _getCreatedDateString() => "${Utils.dateToString(
+        widget.schoolNote.creationDate,
+      )}, ${TimeOfDay.fromDateTime(widget.schoolNote.creationDate).format(context)}";
+
+  String _getLastModifiedString() => "${Utils.dateToString(
+        widget.schoolNote.lastModifiedDate,
+      )}, ${TimeOfDay.fromDateTime(widget.schoolNote.lastModifiedDate).format(context)}";
 }

@@ -53,12 +53,9 @@ class _NewTodoEventWidgetState extends State<NewTodoEventWidget> {
           DateTime.now(),
     );
 
-    final linkedNote = widget.event?.linkedSchoolNote;
-    if (linkedNote != null) {
-      linkedSchoolNote = SchoolNotesManager().getSchoolNoteBySaveName(
-        linkedNote,
-      );
-    }
+    linkedSchoolNote = SchoolNotesManager().getSchoolNoteBySaveName(
+      widget.event?.linkedSchoolNote,
+    );
 
     if (widget.event != null) {
       endDateController.date = widget.event!.endTime?.copyWith();

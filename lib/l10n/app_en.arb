@@ -280,6 +280,9 @@
   "strEditNote": "Edit note",
   "strCreateANote": "Create a note",
   "strDoYouWantToDeleteLinkedNote": "Do you want to delete the linked note?",
+  "strDoYouWantToDeleteAllLinkedNote": "Do you want to delete the linked notes?",
   "strImagePreviewTitle": "Image",
-  "strDoYouWantToCreateACopyOfTheFile": "Would you like to create a copy of the file?"
+  "strDoYouWantToCreateACopyOfTheFile": "Would you like to create a copy of the file?",
+  "strLastModifiedOn": "Last modified on",
+  "strCreatedOn": "Created on"
 }

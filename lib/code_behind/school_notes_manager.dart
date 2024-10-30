@@ -28,7 +28,9 @@ class SchoolNotesManager {
     return SaveManager().deleteSchoolNote(schoolNote);
   }
 
-  SchoolNote? getSchoolNoteBySaveName(String saveFileName) {
+  SchoolNote? getSchoolNoteBySaveName(String? saveFileName) {
+    if (saveFileName == null) return null;
+
     return schoolNotes.cast<SchoolNote?>().firstWhere(
           (element) => element?.saveFileName == saveFileName,
           orElse: () => null,

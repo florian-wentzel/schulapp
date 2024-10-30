@@ -272,6 +272,9 @@
   "strEditNote": "Notiz bearbeiten",
   "strCreateANote": "Notiz erstellen",
   "strDoYouWantToDeleteLinkedNote": "Möchtest du die verknüpfte Notiz löschen?",
+  "strDoYouWantToDeleteAllLinkedNote": "Möchtest du die verknüpften Notizen löschen?",
   "strImagePreviewTitle": "Bild",
-  "strDoYouWantToCreateACopyOfTheFile": "Möchten Sie eine Kopie von der Datei anlegen?"
+  "strDoYouWantToCreateACopyOfTheFile": "Möchten Sie eine Kopie von der Datei anlegen?",
+  "strLastModifiedOn": "Zuletzt bearbeitet am",
+  "strCreatedOn": "Erstellt am"
 }

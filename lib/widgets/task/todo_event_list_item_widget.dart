@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:schulapp/code_behind/school_note.dart';
+import 'package:schulapp/code_behind/school_notes_manager.dart';
 import 'package:schulapp/code_behind/todo_event.dart';
+import 'package:schulapp/widgets/notes/school_note_list_item.dart';
 import 'package:schulapp/widgets/periodic_updating_widget.dart';
 
 // ignore: must_be_immutable
@@ -55,6 +58,10 @@ class TodoEventListItemWidget extends StatelessWidget {
   }
 
   Widget _body(BuildContext context) {
+    final linkedSchoolNote = SchoolNotesManager().getSchoolNoteBySaveName(
+      event.linkedSchoolNote,
+    );
+
     return Container(
       margin: const EdgeInsets.symmetric(
         horizontal: 8,
@@ -89,6 +96,13 @@ class TodoEventListItemWidget extends StatelessWidget {
           spacing: 12,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
+            linkedSchoolNote != null
+                ? IconButton(
+                    onPressed: () =>
+                        _onLinkedSchoolNotePressed(context, linkedSchoolNote),
+                    icon: const Icon(Icons.description),
+                  )
+                : const SizedBox.shrink(),
             showTimeLeft
                 ? PeriodicUpdatingWidget(
                     timerDuration: const Duration(seconds: 1),
@@ -105,7 +119,7 @@ class TodoEventListItemWidget extends StatelessWidget {
                       );
                     },
                   )
-                : const SizedBox(),
+                : const SizedBox.shrink(),
             IconButton(
               onPressed: onInfoPressed,
               icon: const Icon(Icons.info),
@@ -113,6 +127,16 @@ class TodoEventListItemWidget extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  void _onLinkedSchoolNotePressed(
+    BuildContext context,
+    SchoolNote linkedSchoolNote,
+  ) async {
+    await SchoolNoteListItem.openNote(
+      context,
+      linkedSchoolNote,
     );
   }
 }
