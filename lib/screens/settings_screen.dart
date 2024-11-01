@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:schulapp/app.dart';
 import 'package:schulapp/code_behind/backup_manager.dart';
 import 'package:schulapp/code_behind/grading_system_manager.dart';
-import 'package:schulapp/code_behind/notification_schedule.dart';
+import 'package:schulapp/code_behind/notification_manager.dart';
 import 'package:schulapp/code_behind/school_semester.dart';
 import 'package:schulapp/code_behind/school_time.dart';
 import 'package:schulapp/code_behind/settings.dart';
@@ -615,19 +615,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget _todoEventNotificationScheduleEnabled() {
     return SettingsScreen.listItem(
       context,
-      title: "Aufgaben benachrichtungen",
+      title: AppLocalizationsManager.localizations.strTaskNotification,
       afterTitle: [
         Switch.adaptive(
           value: TimetableManager().settings.getVar(
                 Settings.notificationScheduleEnabledKey,
               ),
-          onChanged: (value) {
+          onChanged: (value) async {
+            if (value) {
+              await NotificationManager().askForPermission();
+            }
+
             TimetableManager().settings.setVar(
                   Settings.notificationScheduleEnabledKey,
                   value,
                 );
 
             setState(() {});
+
+            TimetableManager().sortedTodoEvents;
           },
         ),
       ],
@@ -643,11 +649,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
       body: [
         ElevatedButton(
-          onPressed: () async {
-            await setNotificationScheduleList(context);
-            setState(() {});
-          },
-          child: const Text("Erinnerung Einstellen"),
+          onPressed: _onSetNotificationSchedulePressed,
+          child: Text(
+            AppLocalizationsManager.localizations.strSetTaskNotification,
+          ),
         ),
       ],
     );
@@ -968,6 +973,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
         type: InfoType.success,
       );
     }
+
+    setState(() {});
+  }
+
+  Future<void> _onSetNotificationSchedulePressed() async {
+    final newList = await setNotificationScheduleList(context);
+
+    if (newList == null) return;
+
+    TimetableManager().settings.setVar(
+          Settings.notificationScheduleListKey,
+          newList,
+        );
+
+    //reset notification
+    TimetableManager().sortedTodoEvents;
 
     setState(() {});
   }

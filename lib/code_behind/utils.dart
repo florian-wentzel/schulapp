@@ -525,7 +525,17 @@ class Utils {
   }
 
   static String timeToString(DateTime date) {
-    return "${date.hour} : ${date.minute}";
+    // return TimeOfDay.fromDateTime(date).format(context);
+    String hour = date.hour.toString();
+    if (date.hour < 10) {
+      hour = "0${date.hour}";
+    }
+    String minute = date.minute.toString();
+    if (date.minute < 10) {
+      minute = "0${date.minute}";
+    }
+
+    return "$hour : $minute";
   }
 
   static Future<T?> showCustomPopUp<T>({

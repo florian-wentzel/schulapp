@@ -201,6 +201,12 @@ class TodoEvent {
     DateTime? endDateTime = endTime;
     if (endDateTime == null) return;
 
+    final scheduleNotification = TimetableManager().settings.getVar<bool>(
+          Settings.notificationScheduleEnabledKey,
+        );
+
+    if (!scheduleNotification) return;
+
     final List<NotificationSchedule> notificationScheduleList =
         TimetableManager().settings.getVar(
               Settings.notificationScheduleListKey,

@@ -460,8 +460,8 @@ class _TasksScreenState extends State<TasksScreen> {
       context,
       question:
           AppLocalizationsManager.localizations.strDoYouWantToFinishXTasks(
-        selectedTodoEvents.length,
         finishString,
+        selectedTodoEvents.length,
       ),
     );
     if (!finishOrUnfinish) return;

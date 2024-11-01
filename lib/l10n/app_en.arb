@@ -1,288 +1,807 @@
 {
   "@@locale": "en",
   "language_name": "Englisch",
+  "@language_name": {},
   "version_0_6_0": "Completed tasks are displayed separately",
+  "@version_0_6_0": {},
   "version_0_5_2": "Tasks without End Date added",
+  "@version_0_5_2": {},
   "version_0_5_1": "Added long press on the day name to mark all hours of the day as canceled.",
+  "@version_0_5_1": {},
   "version_0_5_0": "Reduced times added",
+  "@version_0_5_0": {},
   "version_0_4_9": "Text contrast on homescreen adjustable",
+  "@version_0_4_9": {},
   "version_0_4_8": "Substitution plan of Paul Dessau Comprehensive School now available (beta)",
+  "@version_0_4_8": {},
   "version_0_4_7": "Selectable grading systems added",
+  "@version_0_4_7": {},
   "version_0_4_6": "User Interface improvements",
+  "@version_0_4_6": {},
   "version_0_4_5": "Subjects can now be arranged differently within the semesters",
+  "@version_0_4_5": {},
   "version_0_4_4": "Weights have been added to subjects in the semesters",
+  "@version_0_4_4": {},
   "version_0_4_3": "Tasks can be shown or hidden on the homescreen",
+  "@version_0_4_3": {},
   "version_0_4_2": "Tasks can be created on the homescreen",
+  "@version_0_4_2": {},
   "version_0_4_1": "Bug fix when opening \".timetable\" files",
+  "@version_0_4_1": {},
   "version_0_4_0": "The timetable can now be added to the home screen, and \".timetable\" files can now be opened directly.",
+  "@version_0_4_0": {},
   "version_0_3_0": "Custom tasks are now displayed above the day name & many UI improvements",
+  "@version_0_3_0": {},
   "version_0_2_8": "Holidays are displayed on the timetable",
+  "@version_0_2_8": {},
   "version_0_2_7": "Added public holidays",
+  "@version_0_2_7": {},
   "version_0_2_6": "New file-extensions (.timetable & .schulbackup)",
+  "@version_0_2_6": {},
   "version_0_2_5": "Added backup and restore functionality",
+  "@version_0_2_5": {},
   "version_0_2_4": "Added lesson cancellations and redesigned holiday UI",
+  "@version_0_2_4": {},
   "version_0_2_3": "Holidays revised and other bug fixes",
+  "@version_0_2_3": {},
   "version_0_2_2": "Updated grades average",
+  "@version_0_2_2": {},
   "version_0_2_1": "Remade create new timetable functionality",
+  "@version_0_2_1": {},
   "version_0_2_0": "Remade Edit-timetable-screen",
+  "@version_0_2_0": {},
   "version_0_1_8": "Added custom subject task visuals",
+  "@version_0_1_8": {},
   "version_0_1_7": "Translate semester grade groups and timetable names",
+  "@version_0_1_7": {},
   "version_0_1_6": "Added custom holidays",
+  "@version_0_1_6": {},
   "version_0_1_5": "Added custom subject names to Tasks-screen",
+  "@version_0_1_5": {},
   "version_0_1_4": "Added statistics page to Home-screen",
+  "@version_0_1_4": {},
   "version_0_1_3": "Remade Settings-Manager",
+  "@version_0_1_3": {},
   "version_0_1_2": "Added intro slider",
+  "@version_0_1_2": {},
   "version_0_1_1": "Added update informaion",
+  "@version_0_1_1": {},
   "version_0_1_0": "Added multiple Languages",
+  "@version_0_1_0": {},
   "strStartScreen": "Home",
+  "@strStartScreen": {},
   "strTimetableDirNotCreated": "timetable dir could not be created: {timetablePath}",
   "@strTimetableDirNotCreated": {
     "placeholders": {
       "timetablePath": {
-        "type": "String",
-        "example": "Bob"
+        "type": "String"
       }
     }
   },
   "strWrittenAndVerbalGrades": "Written & Verbal grades",
+  "@strWrittenAndVerbalGrades": {},
   "strExamGrades": "Exam grades",
+  "@strExamGrades": {},
   "strMonday": "Monday",
+  "@strMonday": {},
   "strTuesday": "Tuesday",
+  "@strTuesday": {},
   "strWednesday": "Wednesday",
+  "@strWednesday": {},
   "strThursday": "Thursday",
+  "@strThursday": {},
   "strFriday": "Friday",
+  "@strFriday": {},
   "strSaturday": "Saturday",
+  "@strSaturday": {},
   "strSunday": "Sunday",
+  "@strSunday": {},
   "strCreateTimetable": "Create Timetable",
+  "@strCreateTimetable": {},
   "strName": "Name",
+  "@strName": {},
   "strLessonCount": "Lesson Count",
+  "@strLessonCount": {},
   "strCreate": "Create",
+  "@strCreate": {},
   "strFinished": "Finished",
+  "@strFinished": {},
   "strFinish": "finish",
+  "@strFinish": {},
   "strUnfinish": "unfinish",
+  "@strUnfinish": {},
   "strNow": "now",
+  "@strNow": {},
   "strOK": "OK",
+  "@strOK": {},
   "strCancel": "Cancel",
+  "@strCancel": {},
   "strCreateSemester": "Create Semester",
+  "@strCreateSemester": {},
   "strSemesterX": "Semester: {name}",
+  "@strSemesterX": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "strSemesterNameCanNotBeEmpty": "Semester name can not be empty!",
+  "@strSemesterNameCanNotBeEmpty": {},
   "strTimetableNameCanNotBeEmpty": "Timetable name can not be empty!",
+  "@strTimetableNameCanNotBeEmpty": {},
   "strLessonCountMustBeInRange": "Lesson count must be greater than: {minLessonCount} and less than: {maxLessonCount}!",
+  "@strLessonCountMustBeInRange": {
+    "placeholders": {
+      "minLessonCount": {
+        "type": "int"
+      },
+      "maxLessonCount": {
+        "type": "int"
+      }
+    }
+  },
   "strTimetableWithName": "Timetable Info: {timetableName}",
-  "strInXDays": "In {daysLeft} days",
+  "@strTimetableWithName": {
+    "placeholders": {
+      "timetableName": {
+        "type": "String"
+      }
+    }
+  },
+  "strInXDays": "In {daysLeft, plural, =0 {zero days} =1 {one day} other {{daysLeft} days}}",
+  "@strInXDays": {
+    "placeholders": {
+      "daysLeft": {
+        "type": "int"
+      }
+    }
+  },
   "strStartsTomorrow": "Starts Tomorrow :)",
+  "@strStartsTomorrow": {},
   "strAlreadyOver": "Already Over :(",
+  "@strAlreadyOver": {},
   "strToday": "Today :)",
+  "@strToday": {},
   "strStartsToday": "Starts Today :)",
+  "@strStartsToday": {},
   "strEndsTomorrow": "Ends Tomorrow :(",
-  "strExpiredXDaysAgo": "Expired {daysLeft} days ago",
-  "strInXHours": "In {hoursLeft} hours",
-  "strExpiredXHoursAgo": "Expired {hoursLeft} hours ago",
-  "strInXMinutes": "In {minutesLeft} minutes",
-  "strXMinutes": "{minutesLeft} minutes",
-  "strExpiredXMinutesAgo": "Expired {minutesLeft} minutes ago",
-  "strInXSeconds": "In {secondsLeft} seconds",
-  "strExpiredXSecondsAgo": "Expired {secondsLeft} seconds ago",
+  "@strEndsTomorrow": {},
+  "strExpiredXDaysAgo": "Expired {daysLeft, plural, =0 {zero days} =1 {one day} other {{daysLeft} days}} ago",
+  "@strExpiredXDaysAgo": {
+    "placeholders": {
+      "daysLeft": {
+        "type": "int"
+      }
+    }
+  },
+  "strInXHours": "In {hoursLeft, plural, =0 {zero hours} =1 {one hour} other {{hoursLeft} hours}}",
+  "@strInXHours": {
+    "placeholders": {
+      "hoursLeft": {
+        "type": "int"
+      }
+    }
+  },
+  "strExpiredXHoursAgo": "Expired {hoursLeft, plural, =0 {zero hours} =1 {one hour} other {{hoursLeft} hours}} ago",
+  "@strExpiredXHoursAgo": {
+    "placeholders": {
+      "hoursLeft": {
+        "type": "int"
+      }
+    }
+  },
+  "strInXMinutes": "In {minutesLeft, plural, =0 {zero minutes} =1 {one minute} other {{minutesLeft} minutes}}",
+  "@strInXMinutes": {
+    "placeholders": {
+      "minutesLeft": {
+        "type": "int"
+      }
+    }
+  },
+  "strXMinutes": "{minutesLeft, plural, =0 {Zero minutes} =1 {One minute} other {{minutesLeft} minutes}}",
+  "@strXMinutes": {
+    "placeholders": {
+      "minutesLeft": {
+        "type": "int"
+      }
+    }
+  },
+  "strExpiredXMinutesAgo": "Expired {minutesLeft, plural, =0 {zero minutes} =1 {one minute} other {{minutesLeft} minutes}} ago",
+  "@strExpiredXMinutesAgo": {
+    "placeholders": {
+      "minutesLeft": {
+        "type": "int"
+      }
+    }
+  },
+  "strInXSeconds": "In {secondsLeft, plural, =0 {zero seconds} =1 {one second} other {{secondsLeft} seconds}}",
+  "@strInXSeconds": {
+    "placeholders": {
+      "secondsLeft": {
+        "type": "int"
+      }
+    }
+  },
+  "strExpiredXSecondsAgo": "Expired {secondsLeft, plural, =0 {zero seconds} =1 {one second} other {{secondsLeft} seconds}} ago",
+  "@strExpiredXSecondsAgo": {
+    "placeholders": {
+      "secondsLeft": {
+        "type": "int"
+      }
+    }
+  },
   "strExam": "Exam",
+  "@strExam": {},
   "strTest": "Test",
+  "@strTest": {},
   "strPresentation": "Presentation",
+  "@strPresentation": {},
   "strHomework": "Homework",
+  "@strHomework": {},
   "strTomorrow": "Tomorrow",
+  "@strTomorrow": {},
   "strColorPicker": "Color Picker",
+  "@strColorPicker": {},
   "strTimetables": "Timetables",
+  "@strTimetables": {},
   "strImportExport": "Import / Export",
+  "@strImportExport": {},
   "strDoYouWantToDeleteX": "Do you want to delete {name}?",
+  "@strDoYouWantToDeleteX": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "strDoYouWantToDeleteTaskX": "Do you want to delete the Task: {x}?",
+  "@strDoYouWantToDeleteTaskX": {
+    "placeholders": {
+      "x": {
+        "type": "String"
+      }
+    }
+  },
   "strSuccessfullyRemoved": "{name} successfully removed!",
+  "@strSuccessfullyRemoved": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "strCouldNotBeRemoved": "{name} could not be removed!",
+  "@strCouldNotBeRemoved": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "strGrades": "Grades",
+  "@strGrades": {},
   "strEditSemester": "Edit Semester: {semesterName}",
+  "@strEditSemester": {
+    "placeholders": {
+      "semesterName": {
+        "type": "String"
+      }
+    }
+  },
   "strHolidaysInfoText": "All date information is provided without guarantee. I assume no responsibility for the accuracy of the data, nor do I accept liability for any economic damages that may arise from the use of this data.",
+  "@strHolidaysInfoText": {},
   "strHolidaysThanksText": "Thank you to https://ferien-api.de/ for providing the holiday API free of charge.\nThank you to https://www.api-feiertage.de/ for providing the holiday API free of charge.",
+  "@strHolidaysThanksText": {},
   "strHolidaysWithStateName": "Holidays {federalStateName}",
+  "@strHolidaysWithStateName": {
+    "placeholders": {
+      "federalStateName": {
+        "type": "String"
+      }
+    }
+  },
   "strHolidays": "Holidays",
+  "@strHolidays": {},
   "strSelectFederalState": "Select Federal State",
+  "@strSelectFederalState": {},
   "strTryAgain": "Try again",
+  "@strTryAgain": {},
   "strInformation": "Information",
+  "@strInformation": {},
   "strRemoveHolidays": "Remove Holidays",
-  "strHolidaysLengthXDays": "{days} day(s)",
-  "strEndsInXDays": "Ends in {days} days",
+  "@strRemoveHolidays": {},
+  "strHolidaysLengthXDays": "{days, plural, =1 {One day} other {{days} days}}",
+  "@strHolidaysLengthXDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "strEndsInXDays": "Ends in {days, plural, =0 {Zero days} =1{One day} other {{days} days}}",
+  "@strEndsInXDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "strEndsToday": "Ends today :(",
+  "@strEndsToday": {},
   "strSettings": "Settings",
+  "@strSettings": {},
   "strTheme": "Theme",
+  "@strTheme": {},
   "strDark": "dark",
+  "@strDark": {},
   "strLight": "light",
+  "@strLight": {},
   "strSystem": "system",
+  "@strSystem": {},
   "strOpenMainSemesterAutomatically": "Open main semester automatically",
+  "@strOpenMainSemesterAutomatically": {},
   "strLanguage": "Language",
+  "@strLanguage": {},
   "strSelectLanguage": "Select Language",
+  "@strSelectLanguage": {},
   "strChangeLanguage": "Change Language",
+  "@strChangeLanguage": {},
   "strVersion": "Version",
+  "@strVersion": {},
   "strNameCanNotBeEmpty": "Name can not be empty!",
+  "@strNameCanNotBeEmpty": {},
   "strPasswordCanNotBeEmpty": "Password can not be empty!",
+  "@strPasswordCanNotBeEmpty": {},
   "strNameIsToLong": "Name is to long!",
+  "@strNameIsToLong": {},
   "strSelectedDirDoesNotExist": "Selected dir does not Exist!",
+  "@strSelectedDirDoesNotExist": {},
   "strTasks": "Tasks",
+  "@strTasks": {},
   "strMarkAsUNfinished": "mark as (un)finished",
+  "@strMarkAsUNfinished": {},
   "strDeleteSelectedItems": "delete selected items",
+  "@strDeleteSelectedItems": {},
   "strSelectSubjectToAddTaskTo": "Select Subject to add to Task:",
+  "@strSelectSubjectToAddTaskTo": {},
   "strCreateATask": "Create a Task",
+  "@strCreateATask": {},
   "strSelectAllFinishedTasks": "Select all finished Tasks",
+  "@strSelectAllFinishedTasks": {},
   "strSelectAllExpiredTasks": "Select all expired Tasks",
+  "@strSelectAllExpiredTasks": {},
   "strSelectAllTasks": "Select all Tasks",
-  "strDoYouWantToFinishXTasks": "Do you want to {finishString} {count} tasks?",
+  "@strSelectAllTasks": {},
+  "strDoYouWantToFinishXTasks": "Do you want to {finishString} {count, plural, =1 {one Task} other {{count} Tasks}}?",
+  "@strDoYouWantToFinishXTasks": {
+    "placeholders": {
+      "finishString": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "strDoYouWantToDeleteXTasks": "Do you want to delete {count} tasks?",
+  "@strDoYouWantToDeleteXTasks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "strEdit": "Edit",
+  "@strEdit": {},
   "strEditSchoolGradeSubject": "Edit Grading",
+  "@strEditSchoolGradeSubject": {},
   "strSchoolGradeSubjectX": "Subject: {subjectName}",
+  "@strSchoolGradeSubjectX": {
+    "placeholders": {
+      "subjectName": {
+        "type": "String"
+      }
+    }
+  },
   "strSubjectName": "Subject name",
+  "@strSubjectName": {},
   "strAddGradegroup": "Add Gradegroup",
+  "@strAddGradegroup": {},
   "strEditSubject": "Edit Subject",
+  "@strEditSubject": {},
   "strDeleteSubject": "Delete Subject",
+  "@strDeleteSubject": {},
   "strEditGrade": "Edit Grade",
+  "@strEditGrade": {},
   "strAddGrade": "Add Grade",
+  "@strAddGrade": {},
   "strExtraInfo": "Extra info",
+  "@strExtraInfo": {},
   "strDate": "Date",
+  "@strDate": {},
   "strSetEndGrade": "Set end Grade",
+  "@strSetEndGrade": {},
   "strShowGradesGraph": "Show Grades Graph",
+  "@strShowGradesGraph": {},
   "strCreateNewSubject": "Create new Subject",
+  "@strCreateNewSubject": {},
   "strImportSubjectsFromTimetable": "Import Subjects from Timetable",
+  "@strImportSubjectsFromTimetable": {},
   "strDoYouWantToExitWithoutSaving": "Do you want to exit without saving?",
+  "@strDoYouWantToExitWithoutSaving": {},
   "strYes": "Yes",
+  "@strYes": {},
   "strNo": "No",
+  "@strNo": {},
   "strEnterTimetableName": "Enter Timetable name",
+  "@strEnterTimetableName": {},
   "strSave": "Save",
+  "@strSave": {},
   "strSelectTimetableToImportSubjectsFrom": "Select Timetable to import Subjects from:",
+  "@strSelectTimetableToImportSubjectsFrom": {},
   "strChangeSchoolLesson": "Change School lesson",
+  "@strChangeSchoolLesson": {},
   "strDoYouWantToUpdateAllLessons": "Do you want to update all Lessons?",
+  "@strDoYouWantToUpdateAllLessons": {},
   "strRoomsWontChange": "(rooms wont change)",
+  "@strRoomsWontChange": {},
   "strCreateSchoolLesson": "Create School Lesson",
+  "@strCreateSchoolLesson": {},
   "strTeacher": "Teacher",
+  "@strTeacher": {},
   "strRoom": "Room",
+  "@strRoom": {},
   "strSelectTimetableToExport": "Select timetable to export: ",
+  "@strSelectTimetableToExport": {},
   "strBack": "Back",
+  "@strBack": {},
   "strTimetableX": "Timetable: {name}",
+  "@strTimetableX": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "strExporting": "Exporting..",
+  "@strExporting": {},
   "strFileSavedInDownloadsDirectory": "File saved in Downloads Directory.",
+  "@strFileSavedInDownloadsDirectory": {},
   "strExportingSuccessful": "Exporting Successful!",
+  "@strExportingSuccessful": {},
   "strImportExportTimetable": "Import / Export Timetable",
+  "@strImportExportTimetable": {},
   "strImportTimetable": "Import Timetable",
+  "@strImportTimetable": {},
   "strExportTimetable": "Export Timetable",
+  "@strExportTimetable": {},
   "strImport": "Import",
+  "@strImport": {},
   "strExport": "Export",
+  "@strExport": {},
   "strSelectTimetableFile": "Select timetable file ({extension})",
+  "@strSelectTimetableFile": {
+    "placeholders": {
+      "extension": {
+        "type": "String"
+      }
+    }
+  },
   "strNoFileSelected": "No file Selected!",
+  "@strNoFileSelected": {},
   "strSelectedFileDoesNotExist": "Selected file does not exist!",
+  "@strSelectedFileDoesNotExist": {},
   "strImportingTimetable": "Importing timetable...",
+  "@strImportingTimetable": {},
   "strImportingFailed": "Importing failed!",
+  "@strImportingFailed": {},
   "strImportSuccessful": "Import successful!",
+  "@strImportSuccessful": {},
   "strTimes": "Times",
+  "@strTimes": {},
   "strWarningXIsEmptyContinue": "Warning: {x} is empty do you want to continue?",
+  "@strWarningXIsEmptyContinue": {
+    "placeholders": {
+      "x": {
+        "type": "String"
+      }
+    }
+  },
   "strRoomX": "Room: {room}",
+  "@strRoomX": {
+    "placeholders": {
+      "room": {
+        "type": "String"
+      }
+    }
+  },
   "strTimeNotValid": "Time is not valid.",
+  "@strTimeNotValid": {},
   "strTaskSuccessfullyCreated": "Task successfully created",
+  "@strTaskSuccessfullyCreated": {},
   "strYourSelectedSemesterDoesNotContainSubjectNamedX": "Your Selected Semester does not\n contain a Subject named: {name}",
+  "@strYourSelectedSemesterDoesNotContainSubjectNamedX": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "strCreateSubjectNamedX": "Create a Subject named: {name}",
+  "@strCreateSubjectNamedX": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "strYouDidNotSelectASemesterToShowOnHomescreen": "You did not select a Semester\n to show on homescreen.\nGo to the Grades page\nand select a Semester:)",
+  "@strYouDidNotSelectASemesterToShowOnHomescreen": {},
   "strGoToGradesScreen": "Go to Grades screen",
+  "@strGoToGradesScreen": {},
   "strTopic": "Topic",
+  "@strTopic": {},
   "strEndDate": "End Date:",
+  "@strEndDate": {},
   "strNoEndDate": "No End Date",
+  "@strNoEndDate": {},
   "strHello": "Hello!",
+  "@strHello": {},
   "strYouUpdatedYourAppWantToSeeNewFeatures": "Ohh you updated your app! Do you want to see the new features?",
+  "@strYouUpdatedYourAppWantToSeeNewFeatures": {},
   "strShowNewFeatures": "Show new Features",
+  "@strShowNewFeatures": {},
   "strSchoolApp": "School App",
+  "@strSchoolApp": {},
   "strWelcomeToYourNewSchoolApp": "Welcome to your new School App!\nHere you can save not only your Timetables but also the ones from your friends!",
+  "@strWelcomeToYourNewSchoolApp": {},
   "strTimetable": "Timetable",
+  "@strTimetable": {},
   "strDoYouWantToCreateYourTimetable": "Do you want to create your Timetable?",
+  "@strDoYouWantToCreateYourTimetable": {},
   "strCreateYourSemesterAndLetTheAppHandleTheRest": "Create your semester and let the app handle the rest!",
+  "@strCreateYourSemesterAndLetTheAppHandleTheRest": {},
   "strFeelFreeToCreateATaskForTheFuture": "Feel free to create a Task for the future so you dont forget it:)\nOf course, you will get notified if you so desire!",
+  "@strFeelFreeToCreateATaskForTheFuture": {},
   "strDoYouWantToSeeTheUpcomingHolidays": "Do you want to see the upcoming holidays?",
+  "@strDoYouWantToSeeTheUpcomingHolidays": {},
   "strYourReadyToGetStarted": "Your ready to get started!",
+  "@strYourReadyToGetStarted": {},
   "strStart": "Start!",
+  "@strStart": {},
   "strSkip": "Skip",
+  "@strSkip": {},
   "strNext": "Next",
+  "@strNext": {},
   "strVersions": "Versions",
+  "@strVersions": {},
   "strStatistics": "Statistics",
+  "@strStatistics": {},
   "strCustomSubject": "Custom Subject",
+  "@strCustomSubject": {},
   "strEditCustomHolidays": "Edit custom Holidays",
+  "@strEditCustomHolidays": {},
   "strHolidaysEnd": "End of Holidays",
+  "@strHolidaysEnd": {},
   "strHolidaysStart": "Start of Holidays",
+  "@strHolidaysStart": {},
   "strCreateCustomHolidays": "Create custom Holidays",
+  "@strCreateCustomHolidays": {},
   "strHolidaysDateError": "There appears to be an issue with your dates!",
+  "@strHolidaysDateError": {},
   "strWhichTimetableWouldYouLikeToTranslate": "Which Timetable would you like to Translate?",
+  "@strWhichTimetableWouldYouLikeToTranslate": {},
   "strOnlyTheDayNames": "(Only the Day names)",
+  "@strOnlyTheDayNames": {},
   "strWhichSemestersWouldYouLikeToTranslate": "Which Semesters would you like to Translate?",
+  "@strWhichSemestersWouldYouLikeToTranslate": {},
   "strOnlyTheGradeGroups": "(Only the Gradegroups)",
+  "@strOnlyTheGradeGroups": {},
   "strSuccessfullyTranslated": "Successfully translated!",
+  "@strSuccessfullyTranslated": {},
   "strSaturdayLessons": "Saturday lessons",
+  "@strSaturdayLessons": {},
   "strBreaksBetweenLessons": "Breaks between lessons",
+  "@strBreaksBetweenLessons": {},
   "strLengthOfSchoolHours": "Lesson Length",
+  "@strLengthOfSchoolHours": {},
   "strStartOfSchool": "Start of school",
+  "@strStartOfSchool": {},
   "strSetTimes": "Set Times",
+  "@strSetTimes": {},
   "strSetBreaks": "Set Breaks",
+  "@strSetBreaks": {},
   "strXLesson": "{number}. Lesson",
+  "@strXLesson": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
   "strBreakXMin": "Break: {minutes} minutes",
+  "@strBreakXMin": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
   "strMinutes": "Minutes",
+  "@strMinutes": {},
   "strSelectBreakLength": "Select break length",
+  "@strSelectBreakLength": {},
   "strSuccessfullyAddedBreak": "Break successfully added!",
+  "@strSuccessfullyAddedBreak": {},
   "strAddBreak": "Add Break",
+  "@strAddBreak": {},
   "strDoYouWantToRemoveTheLastLesson": "Do you want to remove the last Lesson?",
+  "@strDoYouWantToRemoveTheLastLesson": {},
   "strDoYouWantToAddALesson": "Do you want to add a Lesson?",
+  "@strDoYouWantToAddALesson": {},
   "strSecureBackupFileDoesNot": "Secure-Backup file does not exist! (do you know what you're doing?)",
+  "@strSecureBackupFileDoesNot": {},
   "strFilesHaveBeenDeleteOrAddedBackup": "Files have been deleted or added to the backup!",
+  "@strFilesHaveBeenDeleteOrAddedBackup": {},
   "strVersionOfAppDoesNotMatchWithBackup": "The version of your app does not match the version of the backup!",
+  "@strVersionOfAppDoesNotMatchWithBackup": {},
   "strBackup": "Backup",
+  "@strBackup": {},
   "strCreateBackup": "Backup-Data",
+  "@strCreateBackup": {},
   "strRestoreBackup": "Restore-Data",
+  "@strRestoreBackup": {},
   "strTheBackupIsNotEncrypted": "The backup is not encrypted!",
+  "@strTheBackupIsNotEncrypted": {},
   "strAreYouSureThatYouWantToCreateABackup": "Are you sure that you want to create a backup?",
+  "@strAreYouSureThatYouWantToCreateABackup": {},
   "strBackupFailed": "Backup failed!",
+  "@strBackupFailed": {},
   "strBackupSuccessfullyCreatedUnder": "Backup successfully created!\n{path}",
+  "@strBackupSuccessfullyCreatedUnder": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
   "strAllOfYourDataWillBeOverwritten": "All of your data will be overwritten!",
+  "@strAllOfYourDataWillBeOverwritten": {},
   "strAreYouSureThatYouWantToRestoreYourData": "Are you sure that you want to restore your data?",
+  "@strAreYouSureThatYouWantToRestoreYourData": {},
   "strDoYouWantToContinue": "Do you want to continue?",
+  "@strDoYouWantToContinue": {},
   "strRestoreFailed": "Restore failed!\n{path}",
+  "@strRestoreFailed": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
   "strRestoredSuccessfully": "Restored successfully!\n{path}",
+  "@strRestoredSuccessfully": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
   "strThereWasAnError": "There was an error! :(",
+  "@strThereWasAnError": {},
   "strThereWasAnErrorWhileSaving": "An error occurred while saving! :(",
+  "@strThereWasAnErrorWhileSaving": {},
   "strWidgets": "Widgets",
+  "@strWidgets": {},
   "strPinToHomeScreen": "Add timetable to home screen",
+  "@strPinToHomeScreen": {},
   "strYouDontHaveATimetableJet": "It looks like you don't have a timetable set up yet.\nPlease create one and try again.",
+  "@strYouDontHaveATimetableJet": {},
   "strShowTasksOnHomeScreen": "Show tasks on homescreen",
+  "@strShowTasksOnHomeScreen": {},
   "strWeight": "Weight",
+  "@strWeight": {},
   "strPinWeightedSubjectsAtTop": "Pin weighted subjects at the top",
+  "@strPinWeightedSubjectsAtTop": {},
   "strSortSubjects": "Sort Subjects",
+  "@strSortSubjects": {},
   "strByName": "by name",
+  "@strByName": {},
   "strByGrade": "by grade",
+  "@strByGrade": {},
   "strManually": "manually",
+  "@strManually": {},
   "strDragSubjectsIntoDesiredOrder": "Drag the subjects listed below into the desired order.",
+  "@strDragSubjectsIntoDesiredOrder": {},
   "strGradeSystem": "Grading system",
+  "@strGradeSystem": {},
   "strPoints_0_15": "Points 0 - 15",
+  "@strPoints_0_15": {},
   "strGrade_1_6": "Grades 1 - 6",
+  "@strGrade_1_6": {},
   "strGrade_6_1": "Grades 6 - 1",
+  "@strGrade_6_1": {},
   "strGrade_A_F": "Grades A - F",
+  "@strGrade_A_F": {},
   "strNotLoggedIn": "not logged in",
+  "@strNotLoggedIn": {},
   "strLogindataSuccessfullySaved": "Login data successfully saved",
+  "@strLogindataSuccessfullySaved": {},
   "strSuccessfullySaved": "Successfully saved",
+  "@strSuccessfullySaved": {},
   "strSubstitutionPlan": "Open substitution plan",
+  "@strSubstitutionPlan": {},
   "strHighContrastOnHomeScreen": "Increase text contrast on homescreen",
+  "@strHighContrastOnHomeScreen": {},
   "strReducedClassHours": "Reduced class hours",
+  "@strReducedClassHours": {},
   "strYouDontHaveAnyReducedTimesSetUpYet": "You don't have any reduced times set up yet.",
+  "@strYouDontHaveAnyReducedTimesSetUpYet": {},
   "strReducedTimesCannotBeUsed": "Reduced times cannot be used because the timetable has too many lessons.",
+  "@strReducedTimesCannotBeUsed": {},
   "strFinishedTasks": "Completed Tasks",
+  "@strFinishedTasks": {},
   "strShowFinishedTasks": "show Completed Tasks",
+  "@strShowFinishedTasks": {},
   "strNoTasksFinishedYet": "No tasks completed yet. Keep going!",
+  "@strNoTasksFinishedYet": {},
   "strNotes": "Notes",
+  "@strNotes": {},
   "strAddNote": "Add Note",
+  "@strAddNote": {},
   "strTaskNote": "Task Note: {linkedSubjectName}",
+  "@strTaskNote": {
+    "placeholders": {
+      "linkedSubjectName": {
+        "type": "String"
+      }
+    }
+  },
   "strTitle": "Title",
+  "@strTitle": {},
   "strEditNote": "Edit note",
+  "@strEditNote": {},
   "strCreateANote": "Create a note",
+  "@strCreateANote": {},
   "strDoYouWantToDeleteLinkedNote": "Do you want to delete the linked note?",
+  "@strDoYouWantToDeleteLinkedNote": {},
   "strDoYouWantToDeleteAllLinkedNote": "Do you want to delete the linked notes?",
+  "@strDoYouWantToDeleteAllLinkedNote": {},
   "strImagePreviewTitle": "Image",
+  "@strImagePreviewTitle": {},
   "strDoYouWantToCreateACopyOfTheFile": "Would you like to create a copy of the file?",
+  "@strDoYouWantToCreateACopyOfTheFile": {},
   "strLastModifiedOn": "Last modified on",
-  "strCreatedOn": "Created on"
+  "@strLastModifiedOn": {},
+  "strCreatedOn": "Created on",
+  "@strCreatedOn": {},
+  "strAddReminder": "Add reminder",
+  "@strAddReminder": {},
+  "strAdd": "Add",
+  "@strAdd": {},
+  "strXDaysBefore": "{days, plural, =0{When the set time is reached} =1 {One day before} other {{days} days before}}",
+  "@strXDaysBefore": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "strAtXOClock": "at {time}",
+  "@strAtXOClock": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "strMustAtLeastOneNotificationPresent": "There must be at least one notification present.",
+  "@strMustAtLeastOneNotificationPresent": {},
+  "strTaskNotification": "Task Notification",
+  "@strTaskNotification": {},
+  "strSetTaskNotification": "Set Task Notification",
+  "@strSetTaskNotification": {},
+  "strAt": "At",
+  "@strAt": {}
 }

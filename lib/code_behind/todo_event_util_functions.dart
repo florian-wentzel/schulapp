@@ -28,18 +28,30 @@ Future<TodoEvent?> createNewTodoEventSheet(
   return todoEvent;
 }
 
-Future<void> setNotificationScheduleList(BuildContext context) async {
-  final List<NotificationSchedule> notificationScheduleList =
-      TimetableManager().settings.getVar(
-            Settings.notificationScheduleListKey,
-          );
+Future<List<NotificationSchedule>?> setNotificationScheduleList(
+  BuildContext context,
+) {
+  //create a copy
+  List<NotificationSchedule> list = TimetableManager()
+      .settings
+      .getVar<List<NotificationSchedule>>(
+        Settings.notificationScheduleListKey,
+      )
+      .map(
+    (schedule) {
+      return NotificationSchedule.fromJson(
+        schedule.toJson(),
+      );
+    },
+  ).toList();
 
-  final newList = await showModalBottomSheet<List<NotificationSchedule>?>(
+  return showModalBottomSheet<List<NotificationSchedule>?>(
     context: context,
-    isScrollControlled: true,
-    scrollControlDisabledMaxHeightRatio: 0.5,
+    scrollControlDisabledMaxHeightRatio: 0.7,
     builder: (context) {
-      return const SetNotificationScheduleListWidget();
+      return SetNotificationScheduleListWidget(
+        notificationScheduleList: list,
+      );
     },
   );
 }
