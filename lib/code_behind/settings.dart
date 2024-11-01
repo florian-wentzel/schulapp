@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:encrypt/encrypt.dart' as encrypt;
 import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/grading_system_manager.dart';
+import 'package:schulapp/code_behind/notification_schedule.dart';
 import 'package:schulapp/code_behind/save_manager.dart';
 import 'package:schulapp/code_behind/school_semester.dart';
 import 'package:schulapp/code_behind/school_time.dart';
@@ -100,6 +101,8 @@ class Settings {
   static const reducedClassHoursKey = "reducedClassHours";
   static const paulDessauPdfBytesKey = "paulDessauPdfBytes";
   static const paulDessauPdfBytesSavedDateKey = "paulDessauPdfBytesSavedDate";
+  static const notificationScheduleListKey = "notificationScheduleList";
+  static const notificationScheduleEnabledKey = "notificationScheduleEnabled";
 
   static final key = encrypt.Key.fromUtf8("a/wdkaw1ln=921jt48wadan249Bamd=#");
   static final _iv = encrypt.IV.fromUtf8("a2lA.8_n&dXa0?.e");
@@ -312,6 +315,45 @@ class Settings {
         if (type == null) return null;
 
         return type.millisecondsSinceEpoch.toString();
+      },
+    ),
+    SettingsVar<bool>(
+      key: notificationScheduleEnabledKey,
+      defaultValue: () => true,
+    ),
+    SettingsVar<List<NotificationSchedule>>(
+      key: notificationScheduleListKey,
+      defaultValue: () {
+        return [
+          NotificationSchedule(timeBefore: Duration.zero),
+          NotificationSchedule(
+            timeBefore: const Duration(days: 1),
+            timeOfDay: const TimeOfDay(
+              hour: 12,
+              minute: 0,
+            ),
+          ),
+        ];
+      },
+      saveCustomType: (list) {
+        List<Map<String, dynamic>> json = List.generate(
+          list.length,
+          (index) => list[index].toJson(),
+        );
+        return jsonEncode(json);
+      },
+      loadCustomType: (savedString) {
+        if (savedString == null) return null;
+
+        List<Map<String, dynamic>> jsonList =
+            (jsonDecode(savedString) as List).cast();
+
+        return List.generate(
+          jsonList.length,
+          (index) => NotificationSchedule.fromJson(
+            jsonList[index],
+          ),
+        );
       },
     ),
   ];

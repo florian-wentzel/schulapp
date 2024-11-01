@@ -5,11 +5,10 @@ import 'package:schulapp/code_behind/timetable_manager.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/screens/settings_screen.dart';
 
-// ignore: must_be_immutable
 class SemesterScreenSettingsDialog extends StatefulWidget {
-  SchoolSemester semester;
+  final SchoolSemester semester;
 
-  SemesterScreenSettingsDialog({super.key, required this.semester});
+  const SemesterScreenSettingsDialog({super.key, required this.semester});
 
   @override
   State<SemesterScreenSettingsDialog> createState() =>

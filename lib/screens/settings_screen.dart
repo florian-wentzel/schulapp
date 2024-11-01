@@ -6,12 +6,14 @@ import 'package:flutter/material.dart';
 import 'package:schulapp/app.dart';
 import 'package:schulapp/code_behind/backup_manager.dart';
 import 'package:schulapp/code_behind/grading_system_manager.dart';
+import 'package:schulapp/code_behind/notification_schedule.dart';
 import 'package:schulapp/code_behind/school_semester.dart';
 import 'package:schulapp/code_behind/school_time.dart';
 import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/timetable.dart';
 import 'package:schulapp/code_behind/timetable_manager.dart';
 import 'package:schulapp/code_behind/timetable_util_functions.dart';
+import 'package:schulapp/code_behind/todo_event_util_functions.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/code_behind/version_manager.dart';
 import 'package:schulapp/extensions.dart';
@@ -133,6 +135,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _highContrastOnHomeScreen(),
         _reducedClassHoursEnabled(),
         _reducedClassHours(),
+        _todoEventNotificationScheduleEnabled(),
+        _todoEventNotificationScheduleList(),
         _pinHomeWidget(),
         _createBackup(),
         _selectLanguage(),
@@ -603,6 +607,47 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ElevatedButton(
           onPressed: _setTimesPressed,
           child: Text(AppLocalizationsManager.localizations.strSetTimes),
+        ),
+      ],
+    );
+  }
+
+  Widget _todoEventNotificationScheduleEnabled() {
+    return SettingsScreen.listItem(
+      context,
+      title: "Aufgaben benachrichtungen",
+      afterTitle: [
+        Switch.adaptive(
+          value: TimetableManager().settings.getVar(
+                Settings.notificationScheduleEnabledKey,
+              ),
+          onChanged: (value) {
+            TimetableManager().settings.setVar(
+                  Settings.notificationScheduleEnabledKey,
+                  value,
+                );
+
+            setState(() {});
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _todoEventNotificationScheduleList() {
+    return SettingsScreen.listItem(
+      context,
+      title: null,
+      hide: !TimetableManager().settings.getVar(
+            Settings.notificationScheduleEnabledKey,
+          ),
+      body: [
+        ElevatedButton(
+          onPressed: () async {
+            await setNotificationScheduleList(context);
+            setState(() {});
+          },
+          child: const Text("Erinnerung Einstellen"),
         ),
       ],
     );

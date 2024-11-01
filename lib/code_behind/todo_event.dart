@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/notification_manager.dart';
+import 'package:schulapp/code_behind/notification_schedule.dart';
+import 'package:schulapp/code_behind/settings.dart';
+import 'package:schulapp/code_behind/timetable_manager.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 
 class TodoEvent {
@@ -11,7 +14,6 @@ class TodoEvent {
   static const String _desciptionKey = "desciption";
   static const String _finishedKey = "finished";
   static const String _customEventKey = "isCustomEvent";
-  static const int notificationMultiplier = 10;
 
   static const IconData homeworkIcon = Icons.assignment;
   static const IconData presentationIcon = Icons.speaker_notes;
@@ -66,38 +68,7 @@ class TodoEvent {
 
     Duration timeLeft = endDateTime.difference(DateTime.now());
 
-    if (timeLeft.inDays > 0) {
-      return AppLocalizationsManager.localizations.strInXDays(timeLeft.inDays);
-    } else if (timeLeft.inDays < 0) {
-      return AppLocalizationsManager.localizations
-          .strExpiredXDaysAgo(timeLeft.inDays.abs());
-    }
-
-    if (timeLeft.inHours > 0) {
-      return AppLocalizationsManager.localizations
-          .strInXHours(timeLeft.inHours);
-    } else if (timeLeft.inHours < 0) {
-      return AppLocalizationsManager.localizations
-          .strExpiredXHoursAgo(timeLeft.inHours.abs());
-    }
-
-    if (timeLeft.inMinutes > 0) {
-      return AppLocalizationsManager.localizations
-          .strInXMinutes(timeLeft.inMinutes);
-    } else if (timeLeft.inMinutes < 0) {
-      return AppLocalizationsManager.localizations
-          .strExpiredXMinutesAgo(timeLeft.inMinutes.abs());
-    }
-
-    if (timeLeft.inSeconds > 0) {
-      return AppLocalizationsManager.localizations
-          .strInXSeconds(timeLeft.inSeconds);
-    } else if (timeLeft.inSeconds < 0) {
-      return AppLocalizationsManager.localizations
-          .strExpiredXSecondsAgo(timeLeft.inSeconds.abs());
-    }
-
-    return AppLocalizationsManager.localizations.strNow;
+    return _getTimeLeftString(timeLeft);
   }
 
   IconData getIcon() {
@@ -230,27 +201,83 @@ class TodoEvent {
     DateTime? endDateTime = endTime;
     if (endDateTime == null) return;
 
-    await NotificationManager().scheduleNotification(
-      id: key * notificationMultiplier,
-      scheduledDateTime: endDateTime.subtract(const Duration(days: 1)),
-      title: "$linkedSubjectName : ${TodoEvent.typeToString(type)}",
-      body: AppLocalizationsManager.localizations.strTomorrow,
-    );
-    return NotificationManager().scheduleNotification(
-      id: key * notificationMultiplier + 1,
-      scheduledDateTime: endDateTime,
-      title: "$linkedSubjectName : ${TodoEvent.typeToString(type)}",
-      body: AppLocalizationsManager.localizations.strNow,
-    );
+    final List<NotificationSchedule> notificationScheduleList =
+        TimetableManager().settings.getVar(
+              Settings.notificationScheduleListKey,
+            );
+
+    final notificationMultiplier = notificationScheduleList.length + 1;
+    for (int i = 0; i < notificationScheduleList.length; i++) {
+      final correctedDateTime =
+          notificationScheduleList[i].getCorrectedDateTime(endDateTime);
+      String title = linkedSubjectName;
+
+      if (name.isEmpty) {
+        title += " (${TodoEvent.typeToString(type)})";
+      } else {
+        title += ", $name";
+      }
+
+      final dateDiff = endDateTime.difference(correctedDateTime);
+
+      final body = _getTimeLeftString(dateDiff);
+
+      await NotificationManager().scheduleNotification(
+        id: key * notificationMultiplier + i,
+        scheduledDateTime: correctedDateTime,
+        title: title,
+        body: body,
+      );
+    }
+  }
+
+  String _getTimeLeftString(Duration timeLeft) {
+    if (timeLeft.inDays > 0) {
+      return AppLocalizationsManager.localizations.strInXDays(timeLeft.inDays);
+    } else if (timeLeft.inDays < 0) {
+      return AppLocalizationsManager.localizations
+          .strExpiredXDaysAgo(timeLeft.inDays.abs());
+    }
+
+    if (timeLeft.inHours > 0) {
+      return AppLocalizationsManager.localizations
+          .strInXHours(timeLeft.inHours);
+    } else if (timeLeft.inHours < 0) {
+      return AppLocalizationsManager.localizations
+          .strExpiredXHoursAgo(timeLeft.inHours.abs());
+    }
+
+    if (timeLeft.inMinutes > 0) {
+      return AppLocalizationsManager.localizations
+          .strInXMinutes(timeLeft.inMinutes);
+    } else if (timeLeft.inMinutes < 0) {
+      return AppLocalizationsManager.localizations
+          .strExpiredXMinutesAgo(timeLeft.inMinutes.abs());
+    }
+
+    if (timeLeft.inSeconds > 0) {
+      return AppLocalizationsManager.localizations
+          .strInXSeconds(timeLeft.inSeconds);
+    } else if (timeLeft.inSeconds < 0) {
+      return AppLocalizationsManager.localizations
+          .strExpiredXSecondsAgo(timeLeft.inSeconds.abs());
+    }
+
+    return AppLocalizationsManager.localizations.strNow;
   }
 
   Future<void> cancleNotification() async {
-    await NotificationManager().cancleNotification(
-      key * notificationMultiplier,
-    );
-    await NotificationManager().cancleNotification(
-      key * notificationMultiplier + 1,
-    );
+    final List<NotificationSchedule> notificationScheduleList =
+        TimetableManager().settings.getVar(
+              Settings.notificationScheduleListKey,
+            );
+
+    final notificationMultiplier = notificationScheduleList.length + 1;
+    for (int i = 0; i < notificationScheduleList.length; i++) {
+      await NotificationManager().cancleNotification(
+        key * notificationMultiplier + i,
+      );
+    }
   }
 
   static T switchTodoType<T>(
