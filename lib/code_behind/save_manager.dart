@@ -13,6 +13,7 @@ import 'package:schulapp/code_behind/timetable.dart';
 import 'package:schulapp/code_behind/timetable_manager.dart';
 import 'package:schulapp/code_behind/zip_manager.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
+import 'package:share_plus/share_plus.dart';
 
 class SaveManager {
   static final SaveManager _instance = SaveManager._privateConstructor();
@@ -337,6 +338,21 @@ class SaveManager {
     return Timetable.fromJson(json);
   }
 
+  Future<void> shareTimetable(Timetable timetable) async {
+    final exportFile = SaveManager().exportTimetable(
+      timetable,
+      SaveManager().getTempDir().path,
+    );
+
+    await Share.shareXFiles(
+      [XFile(exportFile.path)],
+      subject: AppLocalizationsManager.localizations.strShareYourTimetable,
+      text: AppLocalizationsManager.localizations.strShareYourTimetable,
+    );
+
+    SaveManager().deleteTempDir();
+  }
+
   File exportTimetable(Timetable timetable, String path) {
     final now = DateTime.now();
     final exportName = " ${now.day}.${now.month}.${now.year}";
@@ -401,20 +417,17 @@ class SaveManager {
   ///Creates a new temp Dir.
   ///IMPORTANT: You need to call deleteTempDir after using it
   Directory getTempDir() {
-    if (applicationDocumentsDirectory == null) {
-      loadApplicationDocumentsDirectory();
-      throw Exception("document dir not loaded");
-    }
+    String mainDirPath = getMainSaveDir().path;
 
     final dir = Directory(
-      join(applicationDocumentsDirectory!.path, tempDirName),
+      join(mainDirPath, tempDirName),
     );
 
     if (dir.existsSync()) {
       dir.deleteSync(recursive: true);
     }
 
-    dir.createSync(recursive: true);
+    dir.createSync();
 
     return dir;
   }

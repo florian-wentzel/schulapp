@@ -9,7 +9,6 @@ import 'package:schulapp/code_behind/timetable_manager.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/screens/timetable_screen.dart';
-import 'package:share_plus/share_plus.dart';
 
 class ExportTimetablePage extends StatefulWidget {
   final void Function() goToHomePage;
@@ -75,20 +74,31 @@ class EexportTimetablePageState extends State<ExportTimetablePage> {
       ignoring: _exporting,
       child: ListTile(
         title: Text(timetable.name),
-        trailing: IconButton(
-          onPressed: () {
-            Navigator.of(context).push<bool>(
-              MaterialPageRoute(
-                builder: (context) => TimetableScreen(
-                  timetable: timetable,
-                  title: AppLocalizationsManager.localizations.strTimetableX(
-                    timetable.name,
+        trailing: Wrap(
+          spacing: 12,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            IconButton(
+              onPressed: () => SaveManager().shareTimetable(timetable),
+              icon: const Icon(Icons.share),
+            ),
+            IconButton(
+              onPressed: () {
+                Navigator.of(context).push<bool>(
+                  MaterialPageRoute(
+                    builder: (context) => TimetableScreen(
+                      timetable: timetable,
+                      title:
+                          AppLocalizationsManager.localizations.strTimetableX(
+                        timetable.name,
+                      ),
+                    ),
                   ),
-                ),
-              ),
-            );
-          },
-          icon: const Icon(Icons.info),
+                );
+              },
+              icon: const Icon(Icons.info),
+            ),
+          ],
         ),
         onTap: () async {
           _exporting = true;
@@ -181,12 +191,6 @@ class EexportTimetablePageState extends State<ExportTimetablePage> {
     }
 
     await MultiPlatformManager.shareFile(exportFile);
-
-    await Share.shareXFiles(
-      [XFile(exportFile.path)],
-      subject: AppLocalizationsManager.localizations.strShareYourTimetable,
-      text: AppLocalizationsManager.localizations.strShareYourTimetable,
-    );
 
     widget.goToHomePage();
   }
