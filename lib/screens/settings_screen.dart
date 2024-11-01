@@ -933,7 +933,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
       return;
     }
 
+    await TimetableManager().removeTodoEventNotifications();
+
     TimetableManager().markAllDataToBeReloaded();
+
+    //register notifications
+    TimetableManager().sortedTodoEvents;
 
     if (mounted) {
       Utils.showInfo(

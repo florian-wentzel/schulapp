@@ -417,4 +417,10 @@ class TimetableManager {
     _todoEvents = null;
     _settings = null;
   }
+
+  Future<void> removeTodoEventNotifications() async {
+    for (int i = 0; i < todoEvents.length; i++) {
+      await todoEvents[i].cancleNotification();
+    }
+  }
 }
