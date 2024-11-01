@@ -614,22 +614,22 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
 
     if (!mounted) return;
 
-    bool updateLessons = await Utils.showBoolInputDialog(
-      context,
-      question:
-          AppLocalizationsManager.localizations.strDoYouWantToUpdateAllLessons,
-      description: AppLocalizationsManager.localizations.strRoomsWontChange,
-    );
+    // bool updateLessons = await Utils.showBoolInputDialog(
+    //   context,
+    //   question:
+    //       AppLocalizationsManager.localizations.strDoYouWantToUpdateAllLessons,
+    //   description: AppLocalizationsManager.localizations.strRoomsWontChange,
+    // );
 
-    if (updateLessons) {
-      Utils.updateTimetableLessons(
-        widget.timetable,
-        prefab,
-        newName: newPrefab.$1.name,
-        newTeacher: newPrefab.$1.teacher,
-        newColor: newPrefab.$1.color,
-      );
-    }
+    // if (updateLessons) {
+    Utils.updateTimetableLessons(
+      widget.timetable,
+      prefab,
+      newName: newPrefab.$1.name,
+      newTeacher: newPrefab.$1.teacher,
+      newColor: newPrefab.$1.color,
+    );
+    // }
 
     _lessonPrefabs[index] = newPrefab.$1;
     _sortLessonPrefabs();

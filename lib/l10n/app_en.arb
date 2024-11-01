@@ -803,5 +803,7 @@
   "strSetTaskNotification": "Set Task Notification",
   "@strSetTaskNotification": {},
   "strAt": "At",
-  "@strAt": {}
+  "@strAt": {},
+  "strShareYourTimetable": "Share your Timetable!",
+  "@strShareYourTimetable": {}
 }

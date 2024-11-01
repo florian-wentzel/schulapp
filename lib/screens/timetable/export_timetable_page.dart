@@ -9,12 +9,12 @@ import 'package:schulapp/code_behind/timetable_manager.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/screens/timetable_screen.dart';
+import 'package:share_plus/share_plus.dart';
 
-// ignore: must_be_immutable
 class ExportTimetablePage extends StatefulWidget {
-  void Function() goToHomePage;
+  final void Function() goToHomePage;
 
-  ExportTimetablePage({
+  const ExportTimetablePage({
     super.key,
     required this.goToHomePage,
   });
@@ -180,11 +180,13 @@ class EexportTimetablePageState extends State<ExportTimetablePage> {
       }
     }
 
-    final result = await MultiPlatformManager.shareFile(exportFile);
+    await MultiPlatformManager.shareFile(exportFile);
 
-    if (result != ShareResult.success) {
-      return;
-    }
+    await Share.shareXFiles(
+      [XFile(exportFile.path)],
+      subject: AppLocalizationsManager.localizations.strShareYourTimetable,
+      text: AppLocalizationsManager.localizations.strShareYourTimetable,
+    );
 
     widget.goToHomePage();
   }

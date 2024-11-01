@@ -286,5 +286,6 @@
   "strMustAtLeastOneNotificationPresent": "Es muss mindestens eine Benachrichtigung vorhanden sein.",
   "strTaskNotification": "Aufgabenbenachrichtigung",
   "strSetTaskNotification": "Aufgabenbenachrichtigung Einstellen",
-  "strAt": "Um"
+  "strAt": "Um",
+  "strShareYourTimetable": "Teile deinen Stundenplan!"
 }
