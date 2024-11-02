@@ -10,7 +10,7 @@ import 'package:schulapp/screens/notes_screen.dart';
 import 'package:schulapp/screens/vertretungsplan_paul_dessau_screen.dart';
 import 'package:schulapp/screens/tasks_screen.dart';
 import 'package:schulapp/screens/settings_screen.dart';
-import 'package:schulapp/screens/timetable_screen.dart';
+import 'package:schulapp/screens/home_screen.dart';
 
 class CustomDestination {
   final String label;
@@ -40,7 +40,7 @@ class _NavigationBarDrawerState extends State<NavigationBarDrawer> {
   final List<CustomDestination?> destinations = <CustomDestination?>[
     CustomDestination(
       label: AppLocalizationsManager.localizations.strStartScreen,
-      route: TimetableScreen.route,
+      route: HomeScreen.route,
       icon: const Icon(Icons.home_outlined),
       selectedIcon: const Icon(Icons.home),
     ),

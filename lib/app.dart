@@ -14,7 +14,7 @@ import 'package:schulapp/screens/holidays_screen.dart';
 import 'package:schulapp/screens/notes_screen.dart';
 import 'package:schulapp/screens/tasks_screen.dart';
 import 'package:schulapp/screens/settings_screen.dart';
-import 'package:schulapp/screens/timetable_screen.dart';
+import 'package:schulapp/screens/home_screen.dart';
 import 'package:schulapp/theme/theme_manager.dart';
 import 'package:schulapp/theme/themes.dart';
 import 'package:schulapp/widgets/custom_bottom_navigation_bar.dart';
@@ -53,8 +53,8 @@ final _router = GoRouter(
       },
       routes: [
         GoRoute(
-          path: TimetableScreen.route,
-          builder: (context, state) => TimetableScreen(
+          path: HomeScreen.route,
+          builder: (context, state) => HomeScreen(
             title: AppLocalizationsManager.localizations.strStartScreen,
             timetable: Utils.getHomescreenTimetable(),
             isHomeScreen: true,

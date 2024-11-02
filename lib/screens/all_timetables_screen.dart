@@ -9,7 +9,7 @@ import 'package:schulapp/home_widget/home_widget_manager.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/screens/timetable/create_timetable_screen.dart';
 import 'package:schulapp/screens/timetable/import_export_timetable_screen.dart';
-import 'package:schulapp/screens/timetable_screen.dart';
+import 'package:schulapp/screens/home_screen.dart';
 import 'package:schulapp/code_behind/timetable_util_functions.dart';
 import 'package:schulapp/widgets/navigation_bar_drawer.dart';
 
@@ -114,7 +114,7 @@ class _AllTimetablesScreenState extends State<AllTimetablesScreen> {
         onTap: () async {
           await Navigator.of(context).push<bool>(
             MaterialPageRoute(
-              builder: (context) => TimetableScreen(
+              builder: (context) => HomeScreen(
                 timetable: tt,
                 title:
                     AppLocalizationsManager.localizations.strTimetableWithName(

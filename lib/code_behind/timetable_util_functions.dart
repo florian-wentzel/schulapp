@@ -12,7 +12,7 @@ import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/extensions.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/screens/timetable/create_timetable_screen.dart';
-import 'package:schulapp/screens/timetable_screen.dart';
+import 'package:schulapp/screens/home_screen.dart';
 import 'package:schulapp/widgets/date_selection_button.dart';
 import 'package:schulapp/widgets/time_selection_button.dart';
 import 'package:schulapp/widgets/timetable/timetable_widget.dart';
@@ -276,7 +276,7 @@ Future<Timetable?> showSelectTimetableSheet(
                     trailing: IconButton(
                       onPressed: () {
                         Navigator.of(context).push(MaterialPageRoute(
-                          builder: (context) => TimetableScreen(
+                          builder: (context) => HomeScreen(
                             title: AppLocalizationsManager.localizations
                                 .strTimetableWithName(
                               timetables[index].name,

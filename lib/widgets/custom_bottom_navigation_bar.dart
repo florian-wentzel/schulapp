@@ -4,7 +4,7 @@ import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/screens/grades_screen.dart';
 import 'package:schulapp/screens/notes_screen.dart';
 import 'package:schulapp/screens/tasks_screen.dart';
-import 'package:schulapp/screens/timetable_screen.dart';
+import 'package:schulapp/screens/home_screen.dart';
 
 class CustomBottomNavigationBar extends StatefulWidget {
   final String currRoute;
@@ -18,7 +18,7 @@ class CustomBottomNavigationBar extends StatefulWidget {
 class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
   final List<String> pageRoutes = [
     GradesScreen.route,
-    TimetableScreen.route,
+    HomeScreen.route,
     TasksScreen.route,
   ];
 

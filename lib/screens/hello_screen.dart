@@ -4,7 +4,7 @@ import 'package:schulapp/code_behind/timetable_manager.dart';
 import 'package:schulapp/code_behind/version_manager.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/screens/holidays_screen.dart';
-import 'package:schulapp/screens/timetable_screen.dart';
+import 'package:schulapp/screens/home_screen.dart';
 import 'package:schulapp/code_behind/timetable_util_functions.dart';
 import 'package:schulapp/code_behind/todo_event_util_functions.dart';
 
@@ -233,7 +233,7 @@ class _HelloScreenState extends State<HelloScreen> {
 
     if (!mounted) return;
 
-    context.go(TimetableScreen.route);
+    context.go(HomeScreen.route);
   }
 
   bool _isLastPage() {

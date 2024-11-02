@@ -36,15 +36,14 @@ import 'package:schulapp/widgets/timetable/timetable_one_day_widget.dart';
 import 'package:schulapp/widgets/task/todo_event_list_item_widget.dart';
 import 'package:schulapp/code_behind/todo_event_util_functions.dart';
 
-// ignore: must_be_immutable
-class TimetableScreen extends StatefulWidget {
+class HomeScreen extends StatefulWidget {
   static const String route = "/";
 
-  String title;
-  Timetable? timetable;
-  bool isHomeScreen;
+  final String title;
+  final Timetable? timetable;
+  final bool isHomeScreen;
 
-  TimetableScreen({
+  const HomeScreen({
     super.key,
     required this.title,
     required this.timetable,
@@ -52,10 +51,10 @@ class TimetableScreen extends StatefulWidget {
   });
 
   @override
-  State<TimetableScreen> createState() => _TimetableScreenState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _TimetableScreenState extends State<TimetableScreen> {
+class _HomeScreenState extends State<HomeScreen> {
   StreamSubscription? _intentSubscription;
 
   final _verticalPageViewController = PageController();
@@ -118,7 +117,7 @@ class _TimetableScreenState extends State<TimetableScreen> {
         ],
       ),
       drawer: widget.isHomeScreen
-          ? NavigationBarDrawer(selectedRoute: TimetableScreen.route)
+          ? NavigationBarDrawer(selectedRoute: HomeScreen.route)
           : null,
       floatingActionButton: _floatingActionButton(context),
       body: _body(),
@@ -239,7 +238,7 @@ class _TimetableScreenState extends State<TimetableScreen> {
           onPressed: () async {
             await createNewTimetable(context);
             if (!mounted) return;
-            context.go(TimetableScreen.route);
+            context.go(HomeScreen.route);
           },
           child: Text(
             AppLocalizationsManager.localizations.strCreateTimetable,
