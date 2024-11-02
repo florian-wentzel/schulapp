@@ -17,7 +17,7 @@ import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/extensions.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/screens/grades_screen.dart';
-import 'package:schulapp/screens/tasks_screen.dart';
+import 'package:schulapp/screens/todo_events_screen.dart';
 import 'package:schulapp/screens/semester/school_grade_subject_screen.dart';
 import 'package:schulapp/widgets/semester/school_grade_subject_widget.dart';
 import 'package:schulapp/widgets/strike_through_container.dart';
@@ -763,10 +763,10 @@ class _CustomPopUpShowLessonState extends State<CustomPopUpShowLesson> {
             setState(() {});
           },
           onInfoPressed: () async {
-            context.go(TasksScreen.route, extra: todoEvent);
+            context.go(TodoEventsScreen.route, extra: todoEvent);
           },
           onLongPressed: () {
-            context.go(TasksScreen.route, extra: todoEvent);
+            context.go(TodoEventsScreen.route, extra: todoEvent);
           },
         ),
       );

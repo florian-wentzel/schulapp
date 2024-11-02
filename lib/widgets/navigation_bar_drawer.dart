@@ -8,7 +8,7 @@ import 'package:schulapp/screens/grades_screen.dart';
 import 'package:schulapp/screens/holidays_screen.dart';
 import 'package:schulapp/screens/notes_screen.dart';
 import 'package:schulapp/screens/vertretungsplan_paul_dessau_screen.dart';
-import 'package:schulapp/screens/tasks_screen.dart';
+import 'package:schulapp/screens/todo_events_screen.dart';
 import 'package:schulapp/screens/settings_screen.dart';
 import 'package:schulapp/screens/home_screen.dart';
 
@@ -58,7 +58,7 @@ class _NavigationBarDrawerState extends State<NavigationBarDrawer> {
     ),
     CustomDestination(
       label: AppLocalizationsManager.localizations.strTasks,
-      route: TasksScreen.route,
+      route: TodoEventsScreen.route,
       icon: const Icon(Icons.assignment_outlined),
       selectedIcon: const Icon(Icons.assignment),
     ),

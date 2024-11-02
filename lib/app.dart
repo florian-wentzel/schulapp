@@ -12,7 +12,7 @@ import 'package:schulapp/screens/grades_screen.dart';
 import 'package:schulapp/screens/hello_screen.dart';
 import 'package:schulapp/screens/holidays_screen.dart';
 import 'package:schulapp/screens/notes_screen.dart';
-import 'package:schulapp/screens/tasks_screen.dart';
+import 'package:schulapp/screens/todo_events_screen.dart';
 import 'package:schulapp/screens/settings_screen.dart';
 import 'package:schulapp/screens/home_screen.dart';
 import 'package:schulapp/theme/theme_manager.dart';
@@ -69,8 +69,8 @@ final _router = GoRouter(
           builder: (context, state) => const GradesScreen(),
         ),
         GoRoute(
-          path: TasksScreen.route,
-          builder: (context, state) => TasksScreen(
+          path: TodoEventsScreen.route,
+          builder: (context, state) => TodoEventsScreen(
             todoEvent: state.extra as TodoEvent?,
           ),
         ),

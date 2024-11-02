@@ -25,7 +25,7 @@ import 'package:schulapp/screens/grades_screen.dart';
 import 'package:schulapp/screens/hello_screen.dart';
 import 'package:schulapp/screens/holidays_screen.dart';
 import 'package:schulapp/screens/versions_screen.dart';
-import 'package:schulapp/screens/tasks_screen.dart';
+import 'package:schulapp/screens/todo_events_screen.dart';
 import 'package:schulapp/screens/timetable/create_timetable_screen.dart';
 import 'package:schulapp/screens/timetable/import_export_timetable_screen.dart';
 import 'package:schulapp/screens/vertretungsplan_paul_dessau_screen.dart';
