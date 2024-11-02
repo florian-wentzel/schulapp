@@ -7,7 +7,7 @@ import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/code_behind/version_manager.dart';
 import 'package:schulapp/home_widget/home_widget_manager.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
-import 'package:schulapp/screens/all_timetables_screen.dart';
+import 'package:schulapp/screens/timetables_screen.dart';
 import 'package:schulapp/screens/grades_screen.dart';
 import 'package:schulapp/screens/hello_screen.dart';
 import 'package:schulapp/screens/holidays_screen.dart';
@@ -61,8 +61,8 @@ final _router = GoRouter(
           ),
         ),
         GoRoute(
-          path: AllTimetablesScreen.route,
-          builder: (context, state) => const AllTimetablesScreen(),
+          path: TimetablesScreen.route,
+          builder: (context, state) => const TimetablesScreen(),
         ),
         GoRoute(
           path: GradesScreen.route,

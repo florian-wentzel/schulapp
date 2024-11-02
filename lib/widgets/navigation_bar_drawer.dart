@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/timetable_manager.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
-import 'package:schulapp/screens/all_timetables_screen.dart';
+import 'package:schulapp/screens/timetables_screen.dart';
 import 'package:schulapp/screens/grades_screen.dart';
 import 'package:schulapp/screens/holidays_screen.dart';
 import 'package:schulapp/screens/notes_screen.dart';
@@ -46,7 +46,7 @@ class _NavigationBarDrawerState extends State<NavigationBarDrawer> {
     ),
     CustomDestination(
       label: AppLocalizationsManager.localizations.strTimetables,
-      route: AllTimetablesScreen.route,
+      route: TimetablesScreen.route,
       icon: const Icon(Icons.dataset_outlined),
       selectedIcon: const Icon(Icons.dataset),
     ),

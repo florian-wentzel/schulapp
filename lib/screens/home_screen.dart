@@ -20,7 +20,7 @@ import 'package:schulapp/code_behind/todo_event.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/code_behind/version_manager.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
-import 'package:schulapp/screens/all_timetables_screen.dart';
+import 'package:schulapp/screens/timetables_screen.dart';
 import 'package:schulapp/screens/grades_screen.dart';
 import 'package:schulapp/screens/hello_screen.dart';
 import 'package:schulapp/screens/holidays_screen.dart';
@@ -782,7 +782,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (!goToAllTimetables) return;
 
     if (mounted) {
-      context.go(AllTimetablesScreen.route);
+      context.go(TimetablesScreen.route);
     }
   }
 }

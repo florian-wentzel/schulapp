@@ -13,20 +13,20 @@ import 'package:schulapp/screens/home_screen.dart';
 import 'package:schulapp/code_behind/timetable_util_functions.dart';
 import 'package:schulapp/widgets/navigation_bar_drawer.dart';
 
-class AllTimetablesScreen extends StatefulWidget {
-  static const route = "/all-timetables";
-  const AllTimetablesScreen({super.key});
+class TimetablesScreen extends StatefulWidget {
+  static const route = "/timetables";
+  const TimetablesScreen({super.key});
 
   @override
-  State<AllTimetablesScreen> createState() => _AllTimetablesScreenState();
+  State<TimetablesScreen> createState() => _TimetablesScreenState();
 }
 
-class _AllTimetablesScreenState extends State<AllTimetablesScreen> {
+class _TimetablesScreenState extends State<TimetablesScreen> {
   @override
   Widget build(BuildContext context) {
     MainApp.changeNavBarVisibilitySecure(context, value: true);
     return Scaffold(
-      drawer: NavigationBarDrawer(selectedRoute: AllTimetablesScreen.route),
+      drawer: NavigationBarDrawer(selectedRoute: TimetablesScreen.route),
       appBar: AppBar(
         title: Text(
           AppLocalizationsManager.localizations.strTimetables,
