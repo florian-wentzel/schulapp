@@ -400,14 +400,7 @@ class SaveManager {
   }
 
   void deleteTempDir() {
-    if (applicationDocumentsDirectory == null) {
-      loadApplicationDocumentsDirectory();
-      throw Exception("document dir not loaded");
-    }
-
-    final dir = Directory(
-      join(applicationDocumentsDirectory!.path, tempDirName),
-    );
+    final dir = getTempDir();
 
     if (dir.existsSync()) {
       dir.deleteSync(recursive: true);
@@ -423,9 +416,9 @@ class SaveManager {
       join(mainDirPath, tempDirName),
     );
 
-    if (dir.existsSync()) {
-      dir.deleteSync(recursive: true);
-    }
+    // if (dir.existsSync()) {
+    //   dir.deleteSync(recursive: true);
+    // }
 
     dir.createSync();
 
@@ -433,7 +426,7 @@ class SaveManager {
   }
 
   ///WARNING: only call it if you know what your doing!!
-  void deleteMainSaveDir() {
+  void deleteMainSaveDirExceptTemp() {
     if (applicationDocumentsDirectory == null) {
       loadApplicationDocumentsDirectory();
       throw Exception("document dir not loaded");
@@ -444,8 +437,34 @@ class SaveManager {
     );
 
     if (dir.existsSync()) {
-      dir.deleteSync(recursive: true);
+      _deleteDirSync(
+        dir,
+        skipDirWithName: basename(getTempDir().path),
+      );
     }
+  }
+
+  void _deleteDirSync(
+    Directory dir, {
+    String? skipDirWithName,
+  }) {
+    dir.listSync(recursive: false).forEach(
+      (entity) {
+        if (entity is File) {
+          entity.deleteSync();
+        } else if (entity is Directory) {
+          if (skipDirWithName != null &&
+              basename(entity.path) == skipDirWithName) {
+            return;
+          }
+          _deleteDirSync(
+            entity,
+            skipDirWithName: skipDirWithName,
+          );
+          entity.deleteSync();
+        }
+      },
+    );
   }
 
   Directory getMainSaveDir() {

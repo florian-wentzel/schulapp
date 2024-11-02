@@ -30,6 +30,7 @@ class BackupManager {
       copyDirectorySync(
         source: mainDir,
         destination: tempDir,
+        skipDirWithName: basename(tempDir.path),
       );
 
       await createSecureBackupFile(tempDir);
@@ -88,7 +89,7 @@ class BackupManager {
       }
 
       //delete All files
-      SaveManager().deleteMainSaveDir();
+      SaveManager().deleteMainSaveDirExceptTemp();
 
       final mainDir = SaveManager().getMainSaveDir();
 
@@ -110,6 +111,7 @@ class BackupManager {
   static void copyDirectorySync({
     required Directory source,
     required Directory destination,
+    String? skipDirWithName,
   }) {
     if (!destination.existsSync()) {
       destination.createSync(recursive: true);
@@ -118,14 +120,18 @@ class BackupManager {
     /// get all files from source (recursive: false is important here)
     source.listSync(recursive: false).forEach(
       (entity) {
-        final newPath =
-            destination.path + Platform.pathSeparator + basename(entity.path);
+        final newPath = join(destination.path, basename(entity.path));
         if (entity is File) {
           entity.copySync(newPath);
         } else if (entity is Directory) {
+          if (skipDirWithName != null &&
+              basename(entity.path) == skipDirWithName) {
+            return;
+          }
           copyDirectorySync(
             source: entity,
             destination: Directory(newPath),
+            skipDirWithName: skipDirWithName,
           );
         }
       },
