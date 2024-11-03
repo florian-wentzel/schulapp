@@ -54,56 +54,6 @@ class Utils {
         (Platform.isWindows || Platform.isLinux || Platform.isMacOS);
   }
 
-  static void removeEmptySchoolLessons(
-    Timetable timetable, {
-    required bool Function(SchoolLesson) shouldChangeLesson,
-    required void Function(SchoolLesson, int) updateSchoolLesson,
-  }) {
-    for (int schoolDayIndex = 0;
-        schoolDayIndex < timetable.schoolDays.length;
-        schoolDayIndex++) {
-      for (int lessonIndex = 0;
-          lessonIndex < timetable.maxLessonCount;
-          lessonIndex++) {
-        SchoolLesson lesson =
-            timetable.schoolDays[schoolDayIndex].lessons[lessonIndex];
-
-        if (!shouldChangeLesson(lesson)) {
-          continue;
-        }
-
-        updateSchoolLesson(lesson, lessonIndex);
-      }
-    }
-  }
-
-  static void changeLessonNumberToVisible(Timetable timetable) {
-    removeEmptySchoolLessons(
-      timetable,
-      shouldChangeLesson: (schoolLesson) {
-        return SchoolLesson.isEmptyLessonName(schoolLesson.name);
-      },
-      updateSchoolLesson: (schoolLesson, lessonIndex) {
-        schoolLesson.name = "-${lessonIndex + 1}-";
-        schoolLesson.room = "";
-      },
-    );
-  }
-
-  static void changeLessonNumberToNonVisible(Timetable timetable) {
-    removeEmptySchoolLessons(
-      timetable,
-      shouldChangeLesson: (schoolLesson) {
-        return schoolLesson.name.startsWith("-") &&
-            schoolLesson.name.endsWith("-");
-      },
-      updateSchoolLesson: (schoolLesson, lessonIndex) {
-        schoolLesson.name = SchoolLesson.emptyLessonName;
-        schoolLesson.room = "";
-      },
-    );
-  }
-
   static void updateTimetableLessons(
     Timetable timetable,
     SchoolLessonPrefab prefab, {
@@ -145,7 +95,6 @@ class Utils {
     return ModalRoute.of(context)?.isCurrent ?? false;
   }
 
-  //TODO: update all showBoolInputDialog (showYesAndNoInsteadOfOK = true?)
   static Future<bool> showBoolInputDialog(
     BuildContext context, {
     required String question,
@@ -361,15 +310,6 @@ class Utils {
     return TimeOfDay(hour: hour, minute: minute);
   }
 
-  static Map<String, dynamic> colorToJson(Color c) {
-    return {
-      aKey: c.alpha,
-      rKey: c.red,
-      gKey: c.green,
-      bKey: c.blue,
-    };
-  }
-
   static void showInfo(
     BuildContext context, {
     required String msg,
@@ -424,14 +364,6 @@ class Utils {
     ScaffoldMessenger.of(context).hideCurrentSnackBar(
       reason: closedReason,
     );
-  }
-
-  static Color jsonToColor(Map<String, dynamic> json) {
-    int a = json[aKey];
-    int r = json[rKey];
-    int g = json[gKey];
-    int b = json[bKey];
-    return Color.fromARGB(a, r, g, b);
   }
 
   static SchoolSemester? getMainSemester() {

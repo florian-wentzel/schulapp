@@ -42,3 +42,28 @@ extension DoubleExtension on double {
     }
   }
 }
+
+extension ColorExtension on Color {
+  static const aKey = "a";
+  static const rKey = "r";
+  static const gKey = "g";
+  static const bKey = "b";
+
+  Map<String, dynamic> toJson() {
+    return {
+      aKey: alpha,
+      rKey: red,
+      gKey: green,
+      bKey: blue,
+    };
+  }
+
+  static Color fromJson(Map<String, dynamic>? json) {
+    int a = json?[aKey] ?? 0;
+    int r = json?[rKey] ?? 0;
+    int g = json?[gKey] ?? 0;
+    int b = json?[bKey] ?? 0;
+
+    return Color.fromARGB(a, r, g, b);
+  }
+}

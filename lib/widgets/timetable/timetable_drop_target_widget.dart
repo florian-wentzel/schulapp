@@ -196,11 +196,12 @@ class _TimetableDropTargetWidgetState extends State<TimetableDropTargetWidget> {
         },
         onAcceptWithDetails:
             (DragTargetDetails<SchoolLessonPrefab> schoolLessonPrefab) {
-          lesson.setFromPrefab(schoolLessonPrefab.data);
+          day.setLessonFromPrefab(lessonIndex, schoolLessonPrefab.data);
+          setState(() {});
         },
         builder: (context, candidateData, rejectedData) {
           return InkWell(
-            onTap: SchoolLesson.isEmptyLessonName(lesson.name)
+            onTap: SchoolLesson.isEmptyLesson(lesson)
                 ? null
                 : () => onLessonWidgetTap(
                       context,

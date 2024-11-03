@@ -332,7 +332,7 @@ class _TimetableWidgetState extends State<TimetableWidget> {
               timeIndex < dayContainerControllers.length;
               timeIndex++) {
             final containerController = dayContainerControllers[timeIndex];
-            if (SchoolLesson.isEmptyLessonName(day.lessons[timeIndex].name)) {
+            if (SchoolLesson.isEmptyLesson(day.lessons[timeIndex])) {
               continue;
             }
             containerController.strikeThrough = value;
@@ -699,10 +699,22 @@ class _CustomPopUpShowLessonState extends State<CustomPopUpShowLesson> {
                                     .strNoEndDate //kann nicht eintreten eigentlich
                                 : "(${Utils.dateToString(widget.event!.endTime!)})",
                             showYesAndNoInsteadOfOK: true,
+                            markTrueAsRed: true,
                           );
-                          if (!removeTodoEvent) return;
+                          if (!removeTodoEvent || !context.mounted) return;
 
-                          TimetableManager().removeTodoEvent(widget.event!);
+                          final deleteNote = await Utils.showBoolInputDialog(
+                            context,
+                            question: AppLocalizationsManager
+                                .localizations.strDoYouWantToDeleteLinkedNote,
+                            showYesAndNoInsteadOfOK: true,
+                            markTrueAsRed: true,
+                          );
+
+                          TimetableManager().removeTodoEvent(
+                            widget.event!,
+                            deleteLinkedSchoolNote: deleteNote,
+                          );
 
                           if (!context.mounted) return;
 

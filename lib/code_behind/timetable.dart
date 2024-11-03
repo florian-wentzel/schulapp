@@ -6,7 +6,6 @@ import 'package:schulapp/code_behind/school_lesson.dart';
 import 'package:schulapp/code_behind/school_time.dart';
 import 'package:schulapp/code_behind/special_lesson.dart';
 import 'package:schulapp/code_behind/timetable_manager.dart';
-import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/extensions.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 
@@ -213,14 +212,6 @@ class Timetable {
         _maxLessonCount = maxLessonCount,
         _schoolDays = schoolDays,
         _schoolTimes = schoolTimes;
-
-  void changeLessonNumberVisibility(bool isVisalbe) {
-    if (isVisalbe) {
-      Utils.changeLessonNumberToVisible(this);
-    } else {
-      Utils.changeLessonNumberToNonVisible(this);
-    }
-  }
 
   DateTime getNextLessonDate(
     String subjectName,

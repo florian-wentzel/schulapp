@@ -212,6 +212,8 @@ class _GradesScreenState extends State<GradesScreen> {
                       .strDoYouWantToDeleteX(
                     semester.name,
                   ),
+                  showYesAndNoInsteadOfOK: true,
+                  markTrueAsRed: true,
                 );
 
                 if (!delete) return;

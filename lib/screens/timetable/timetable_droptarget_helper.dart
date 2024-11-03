@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/school_day.dart';
 import 'package:schulapp/code_behind/school_lesson.dart';
 import 'package:schulapp/code_behind/school_time.dart';
-import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/timetable.dart';
-import 'package:schulapp/code_behind/timetable_manager.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/extensions.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
@@ -32,10 +30,6 @@ void onLessonWidgetTap(
       barrierDismissible: true,
       fullscreenDialog: true,
     ),
-  );
-
-  timetable.changeLessonNumberVisibility(
-    TimetableManager().settings.getVar(Settings.showLessonNumbersKey),
   );
 
   setState.call();
@@ -110,12 +104,10 @@ class _CustomPopUpCreateTimetableState
           alignment: Alignment.topRight,
           child: IconButton(
             onPressed: () {
-              SchoolLesson defaultSchoolLesson =
-                  SchoolLesson.defaultSchoolLesson;
-              widget.schoolLesson.name = defaultSchoolLesson.name;
-              widget.schoolLesson.room = defaultSchoolLesson.room;
-              widget.schoolLesson.teacher = defaultSchoolLesson.teacher;
-              widget.schoolLesson.color = defaultSchoolLesson.color;
+              final lessonIndex =
+                  widget.schoolDay.lessons.indexOf(widget.schoolLesson);
+
+              widget.schoolDay.setLessonFromPrefab(lessonIndex, null);
 
               Navigator.pop(context);
             },
@@ -274,6 +266,7 @@ class _CustomPopUpCreateTimetableState
                       .strWarningXIsEmptyContinue(
                     AppLocalizationsManager.localizations.strRoom,
                   ),
+                  showYesAndNoInsteadOfOK: true,
                 );
                 if (!update) {
                   return;
@@ -313,6 +306,7 @@ class _CustomPopUpCreateTimetableState
                     .strWarningXIsEmptyContinue(
                   AppLocalizationsManager.localizations.strTeacher,
                 ),
+                showYesAndNoInsteadOfOK: true,
               );
               if (!update) {
                 return;

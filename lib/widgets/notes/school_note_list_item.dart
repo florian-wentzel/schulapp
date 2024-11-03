@@ -71,6 +71,8 @@ class _SchoolNoteListItemState extends State<SchoolNoteListItem> {
                             .strDoYouWantToDeleteX(
                           getTitle(widget.schoolNote),
                         ),
+                        showYesAndNoInsteadOfOK: true,
+                        markTrueAsRed: true,
                       );
 
                       if (!delete) return;

@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:schulapp/code_behind/grading_system_manager.dart';
 
@@ -10,7 +11,7 @@ void main() {
     "Test if GradingSystemManager works",
     () {
       for (int i = 0; i < 16; i++) {
-        print(
+        debugPrint(
           GradingSystemManager.convertGradeToSystem(
             i,
             GradingSystem.grade_6_1,

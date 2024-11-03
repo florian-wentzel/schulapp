@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:schulapp/code_behind/utils.dart';
 
@@ -17,8 +18,8 @@ void main() {
         );
 
         int weekIndex = Utils.getWeekIndex(currDate);
-        print("${currDate.day}.${currDate.month}");
-        print(weekIndex);
+        debugPrint("${currDate.day}.${currDate.month}");
+        debugPrint(weekIndex.toString());
       }
     },
   );

@@ -38,9 +38,7 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
     _lessonPrefabs = Utils.createLessonPrefabsFromTt(widget.timetable);
     _sortLessonPrefabs();
     _originalName = String.fromCharCodes(widget.timetable.name.codeUnits);
-    widget.timetable.changeLessonNumberVisibility(
-      TimetableManager().settings.getVar(Settings.showLessonNumbersKey),
-    );
+
     super.initState();
   }
 
@@ -60,6 +58,7 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
           question: AppLocalizationsManager
               .localizations.strDoYouWantToExitWithoutSaving,
           showYesAndNoInsteadOfOK: true,
+          markTrueAsRed: true,
         );
 
         _canPop = exit;
@@ -181,7 +180,6 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
                         Settings.showLessonNumbersKey,
                         value,
                       );
-                  widget.timetable.changeLessonNumberVisibility(value);
                   setState(() {});
                 },
               ),
@@ -203,10 +201,6 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
                         if (!addLesson) return;
 
                         widget.timetable.addLesson();
-                        bool value = TimetableManager().settings.getVar(
-                              Settings.showLessonNumbersKey,
-                            );
-                        widget.timetable.changeLessonNumberVisibility(value);
                         setState(() {});
                       },
                 child: const Icon(Icons.add),
@@ -224,15 +218,13 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
                           question: AppLocalizationsManager
                               .localizations.strDoYouWantToRemoveTheLastLesson,
                           showYesAndNoInsteadOfOK: true,
+                          markTrueAsRed: true,
                         );
 
                         if (!removeLesson) return;
 
                         widget.timetable.removeLesson();
-                        bool value = TimetableManager().settings.getVar(
-                              Settings.showLessonNumbersKey,
-                            );
-                        widget.timetable.changeLessonNumberVisibility(value);
+
                         setState(() {});
                       },
                 child: const Icon(Icons.remove),
@@ -407,18 +399,17 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
     }
 
     TextEditingController nameController = TextEditingController();
-    nameController.text = prefab?.name ?? "";
-
     TextEditingController teacherController = TextEditingController();
-    teacherController.text = prefab?.teacher ?? "";
-
     TextEditingController roomController = TextEditingController();
-    roomController.text = prefab?.room ?? "";
 
     Color color = prefab?.color ?? Colors.white;
-    String name = "";
-    String teacher = "";
-    String room = "";
+    String name = prefab?.name ?? "";
+    String teacher = prefab?.teacher ?? "";
+    String room = prefab?.room ?? "";
+
+    nameController.text = name;
+    teacherController.text = teacher;
+    roomController.text = room;
 
     bool createPressed = false;
 
@@ -598,6 +589,7 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
           prefab.name,
         ),
         showYesAndNoInsteadOfOK: true,
+        markTrueAsRed: true,
       );
 
       if (delete) {
@@ -619,6 +611,7 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
     //   question:
     //       AppLocalizationsManager.localizations.strDoYouWantToUpdateAllLessons,
     //   description: AppLocalizationsManager.localizations.strRoomsWontChange,
+    //   showYesAndNoInsteadOfOK: true,
     // );
 
     // if (updateLessons) {

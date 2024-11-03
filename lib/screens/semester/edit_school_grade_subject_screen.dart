@@ -229,6 +229,8 @@ class _EditSchoolGradeSubjectScreenState
                           .strDoYouWantToDeleteX(
                         gg.name,
                       ),
+                      showYesAndNoInsteadOfOK: true,
+                      markTrueAsRed: true,
                     );
                     if (!awnser) return;
 

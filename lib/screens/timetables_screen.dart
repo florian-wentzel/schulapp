@@ -175,6 +175,8 @@ class _TimetablesScreenState extends State<TimetablesScreen> {
                       .strDoYouWantToDeleteX(
                     tt.name,
                   ),
+                  showYesAndNoInsteadOfOK: true,
+                  markTrueAsRed: true,
                 );
 
                 if (!delete) return;

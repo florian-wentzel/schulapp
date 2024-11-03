@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:schulapp/code_behind/timetable.dart';
 import 'package:schulapp/code_behind/utils.dart';
+import 'package:schulapp/extensions.dart';
 
 class HomeWidgetManager {
   static const groupID = "group.schulapp";
@@ -30,7 +31,7 @@ class HomeWidgetManager {
     try {
       final json = timetable.toJson();
 
-      json[timesColorKey] = Utils.colorToJson(Colors.transparent);
+      json[timesColorKey] = Colors.transparent.toJson();
       // json["timesColor"] = Utils.colorToJson(Theme.of(context).scaffoldBackgroundColor);
 
       String jsonString = jsonEncode(json);

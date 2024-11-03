@@ -351,7 +351,7 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
               timeIndex < dayContainerControllers.length;
               timeIndex++) {
             final containerController = dayContainerControllers[timeIndex];
-            if (SchoolLesson.isEmptyLessonName(day.lessons[timeIndex].name)) {
+            if (SchoolLesson.isEmptyLesson(day.lessons[timeIndex])) {
               continue;
             }
             containerController.strikeThrough = value;

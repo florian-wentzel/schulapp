@@ -1,4 +1,7 @@
+import 'dart:collection';
+
 import 'package:schulapp/code_behind/school_lesson.dart';
+import 'package:schulapp/code_behind/school_lesson_prefab.dart';
 
 class SchoolDay {
   static const nameKey = "name";
@@ -9,7 +12,9 @@ class SchoolDay {
   final List<SchoolLesson> _lessons;
 
   String get name => _name;
-  List<SchoolLesson> get lessons => _lessons;
+  UnmodifiableListView<SchoolLesson> get lessons => UnmodifiableListView(
+        _lessons,
+      );
 
   set name(value) {
     _name = value;
@@ -36,7 +41,10 @@ class SchoolDay {
     List<Map<String, dynamic>> lsJson = (json[lessonsKey] as List).cast();
     List<SchoolLesson> ls = List.generate(
       lsJson.length,
-      (index) => SchoolLesson.fromJson(lsJson[index]),
+      (index) => SchoolLesson.fromJson(
+        lsJson[index],
+        index,
+      ),
     );
     return SchoolDay(
       name: name,
@@ -55,10 +63,21 @@ class SchoolDay {
   }
 
   void addLesson() {
-    _lessons.add(SchoolLesson.defaultSchoolLesson);
+    _lessons.add(
+      EmptySchoolLesson(lessonIndex: _lessons.length),
+    );
   }
 
   void removeLesson() {
     _lessons.removeLast();
+  }
+
+  ///if prefab is null lesson gets replaced with [EmptySchoolLesson]
+  void setLessonFromPrefab(int lessonIndex, SchoolLessonPrefab? prefab) {
+    if (prefab == null) {
+      _lessons[lessonIndex] = EmptySchoolLesson(lessonIndex: lessonIndex);
+      return;
+    }
+    _lessons[lessonIndex] = SchoolLesson.fromPrefab(prefab);
   }
 }

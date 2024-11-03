@@ -257,6 +257,8 @@ class _SchoolGradeSubjectScreenState extends State<SchoolGradeSubjectScreen> {
                   AppLocalizationsManager.localizations.strDoYouWantToDeleteX(
                 widget.subject.name,
               ),
+              showYesAndNoInsteadOfOK: true,
+              markTrueAsRed: true,
             );
 
             if (!value) return;

@@ -108,7 +108,7 @@ class _TodoEventsScreenState extends State<TodoEventsScreen> {
                     onPressed: () async {
                       await Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder: (context) => TodoEventsScreen(
+                          builder: (context) => const TodoEventsScreen(
                             showFinishedTasks: true,
                           ),
                         ),
@@ -462,6 +462,7 @@ class _TodoEventsScreenState extends State<TodoEventsScreen> {
         finishString,
         selectedTodoEvents.length,
       ),
+      showYesAndNoInsteadOfOK: true,
     );
     if (!finishOrUnfinish) return;
 
@@ -496,6 +497,8 @@ class _TodoEventsScreenState extends State<TodoEventsScreen> {
           AppLocalizationsManager.localizations.strDoYouWantToDeleteXTasks(
         selectedTodoEvents.length,
       ),
+      showYesAndNoInsteadOfOK: true,
+      markTrueAsRed: true,
     );
 
     if (!delete) return;
@@ -522,6 +525,8 @@ class _TodoEventsScreenState extends State<TodoEventsScreen> {
         context,
         question: AppLocalizationsManager
             .localizations.strDoYouWantToDeleteAllLinkedNote,
+        showYesAndNoInsteadOfOK: true,
+        markTrueAsRed: true,
       );
       deleteNote = delete;
     }
@@ -627,6 +632,8 @@ class TodoEventInfoPopUp extends StatelessWidget {
                     context,
                     question: AppLocalizationsManager
                         .localizations.strDoYouWantToDeleteLinkedNote,
+                    showYesAndNoInsteadOfOK: true,
+                    markTrueAsRed: true,
                   );
                   deleteNote = delete;
                 }
