@@ -684,8 +684,8 @@ class _CreateTimetableBottomSheetState
                 validator: (value) {
                   final errorMsg = AppLocalizationsManager.localizations
                       .strLessonCountMustBeInRange(
-                    _maxLessonCount,
                     _minLessonCount,
+                    _maxLessonCount,
                   );
                   if (_lessonCountController.text.trim().isEmpty) {
                     return errorMsg;
