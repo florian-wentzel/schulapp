@@ -1,6 +1,10 @@
 {
   "@@locale": "de",
   "language_name": "Deutsch",
+  "version_0_7_3": "Tagesfortschritt zur Statistik hinzugefügt",
+  "version_0_7_2": "Funktion zum Teilen des Stundenplans im Export-Bildschirm hinzugefügt",
+  "version_0_7_1": "Aufgabenbenachrichtigungen können jetzt angepasst werden",
+  "version_0_7_0": "Notizen hinzugefügt, die mit Aufgaben verknüpft werden können\n(Lange drücken auf die untere Leiste, um auf Notizen zuzugreifen)",
   "version_0_6_0": "Erledigte Aufgaben werden separat angezeigt",
   "version_0_5_2": "Aufgaben ohne Abgabedatum hinzugefügt",
   "version_0_5_1": "Langes Drücken auf den Tagesnamen  hinzugefügt, um alle Stunden des Tages als ausgefallen zu markieren",
