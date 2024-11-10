@@ -805,5 +805,7 @@
   "strAt": "At",
   "@strAt": {},
   "strShareYourTimetable": "Share your Timetable!",
-  "@strShareYourTimetable": {}
+  "@strShareYourTimetable": {},
+  "strDayProgress": "Day Progress",
+  "@strDayProgress": {}
 }

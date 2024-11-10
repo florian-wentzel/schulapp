@@ -287,5 +287,6 @@
   "strTaskNotification": "Aufgabenbenachrichtigung",
   "strSetTaskNotification": "Aufgabenbenachrichtigung Einstellen",
   "strAt": "Um",
-  "strShareYourTimetable": "Teile deinen Stundenplan!"
+  "strShareYourTimetable": "Teile deinen Stundenplan!",
+  "strDayProgress": "Tagesfortschritt"
 }

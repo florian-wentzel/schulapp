@@ -13,12 +13,14 @@ import 'package:schulapp/code_behind/holidays.dart';
 import 'package:schulapp/code_behind/holidays_manager.dart';
 import 'package:schulapp/code_behind/save_manager.dart';
 import 'package:schulapp/code_behind/school_semester.dart';
+import 'package:schulapp/code_behind/school_time.dart';
 import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/timetable.dart';
 import 'package:schulapp/code_behind/timetable_manager.dart';
 import 'package:schulapp/code_behind/todo_event.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/code_behind/version_manager.dart';
+import 'package:schulapp/extensions.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/screens/timetables_screen.dart';
 import 'package:schulapp/screens/grades_screen.dart';
@@ -59,7 +61,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final _verticalPageViewController = PageController();
 
+  List<SchoolTime>? ttSchoolTimes;
+
   Holidays? currentOrNextHolidays;
+  Timer? _dayProgressTimer;
+
+  double _dayProgress = 0;
 
   int _currPageIndex = 0;
 
@@ -72,12 +79,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
     _initReceiveSharingIntent();
 
+    _initTtSchoolTimes();
+
     super.initState();
   }
 
   @override
   void dispose() {
     _intentSubscription?.cancel();
+    _cancelDayProgressTimer();
+
     super.dispose();
   }
 
@@ -191,14 +202,15 @@ class _HomeScreenState extends State<HomeScreen> {
           foregroundColor: Colors.white,
           label: AppLocalizationsManager.localizations.strEdit,
           onTap: () async {
-            if (widget.timetable == null) return;
+            final tt = widget.timetable;
+            if (tt == null) return;
 
-            final ttCopy = widget.timetable!.copy();
+            final ttCopy = tt.copy();
 
             bool? newTtCreated = await Navigator.of(context).push<bool>(
               MaterialPageRoute(
                 builder: (context) => CreateTimetableScreen(
-                  timetable: widget.timetable!,
+                  timetable: tt,
                 ),
               ),
             );
@@ -207,7 +219,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
             if (!newTtCreated) {
               //reset timetable
-              widget.timetable!.setValuesFrom(ttCopy);
+              tt.setValuesFrom(ttCopy);
             }
 
             setState(() {});
@@ -232,7 +244,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _body() {
-    if (widget.timetable == null) {
+    final tt = widget.timetable;
+    if (tt == null) {
       return Center(
         child: ElevatedButton(
           onPressed: () async {
@@ -259,7 +272,7 @@ class _HomeScreenState extends State<HomeScreen> {
         width: width,
         height: height,
         child: TimetableOneDayWidget(
-          timetable: widget.timetable!,
+          timetable: tt,
           showTodoEvents: widget.isHomeScreen,
         ),
       );
@@ -267,7 +280,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return _timetableBuilder(
       child: TimetableWidget(
-        timetable: widget.timetable!,
+        timetable: tt,
         showTodoEvents: widget.isHomeScreen,
       ),
       width: width,
@@ -285,6 +298,12 @@ class _HomeScreenState extends State<HomeScreen> {
       controller: _verticalPageViewController,
       onPageChanged: (value) {
         _currPageIndex = value;
+        const statsPageIndex = 1;
+        if (value == statsPageIndex) {
+          _startDayProgressTimer();
+        } else {
+          _cancelDayProgressTimer();
+        }
         setState(() {});
       },
       children: [
@@ -391,6 +410,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   height: 8,
                 ),
                 _nextTaskWidget(),
+                _dayProgressBar(),
+                const SizedBox(
+                  height: 8,
+                ),
                 _holidaysWidget(),
                 // Container(
                 //   height: height,
@@ -530,6 +553,68 @@ class _HomeScreenState extends State<HomeScreen> {
     return list;
   }
 
+  Widget _dayProgressBar() {
+    final theme = Theme.of(context);
+    final backgroundColor = theme.colorScheme.secondaryContainer;
+    final gradientStartColor = theme.colorScheme.tertiary;
+    final gradientEndColor = theme.colorScheme.primaryContainer;
+    final textColor = theme.colorScheme.onSecondaryContainer;
+
+    return Container(
+      margin: const EdgeInsets.symmetric(
+        horizontal: 8,
+        vertical: 4,
+      ),
+      padding: const EdgeInsets.all(8),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            AppLocalizationsManager.localizations.strDayProgress,
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
+          const SizedBox(
+            height: 8,
+          ),
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 32),
+            height: 18,
+            decoration: BoxDecoration(
+              color: backgroundColor,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Stack(
+              children: [
+                LayoutBuilder(
+                  builder: (context, constraints) => AnimatedContainer(
+                    duration: const Duration(seconds: 1),
+                    width: constraints.maxWidth * _dayProgress,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [gradientStartColor, gradientEndColor],
+                      ),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                ),
+                Center(
+                  child: Text(
+                    '${(_dayProgress * 100).toStringAsFixed(1)}%',
+                    style: TextStyle(
+                      color: textColor,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _nextTaskWidget() {
     TodoEvent? nextTodoEvent = TimetableManager().sortedTodoEvents.firstOrNull;
 
@@ -595,25 +680,18 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       );
     }
-    final width = MediaQuery.of(context).size.width;
 
     return Column(
       children: [
-        SizedBox(
-          width: width,
-          child: InkWell(
-            onTap: () {
-              context.go(HolidaysScreen.route);
-            },
-            child: HolidaysListItemWidget(
-              holidays: currentOrNextHolidays!,
-              showBackground: false,
-              showDateInfo: false,
-            ),
+        InkWell(
+          onTap: () {
+            context.go(HolidaysScreen.route);
+          },
+          child: HolidaysListItemWidget(
+            holidays: currentOrNextHolidays!,
+            showBackground: false,
+            showDateInfo: false,
           ),
-        ),
-        const SizedBox(
-          height: 32,
         ),
       ],
     );
@@ -796,5 +874,94 @@ class _HomeScreenState extends State<HomeScreen> {
     if (mounted) {
       context.go(TimetablesScreen.route);
     }
+  }
+
+  void _startDayProgressTimer() {
+    if (_dayProgressTimer != null) return;
+
+    _dayProgressTimer = Timer.periodic(
+      const Duration(seconds: 1),
+      (Timer timer) => _calcDayProgressTimer(),
+    );
+    WidgetsBinding.instance.addPostFrameCallback(
+      (timeStamp) => _calcDayProgressTimer(),
+    );
+  }
+
+  void _calcDayProgressTimer() {
+    final schoolTimes = ttSchoolTimes;
+
+    if (schoolTimes == null) return;
+
+    final startInSeconds = schoolTimes.first.start.toSeconds();
+    final endInSeconds = schoolTimes.last.end.toSeconds();
+
+    final totalSecondsInDay = endInSeconds - startInSeconds;
+
+    if (totalSecondsInDay == 0) return;
+
+    final now = TimeOfDay.now();
+
+    if (now.isBefore(schoolTimes.first.start)) {
+      setState(() {
+        _dayProgress = 0;
+      });
+      return;
+    }
+    if (schoolTimes.last.end.isBefore(now)) {
+      setState(() {
+        _dayProgress = 1;
+      });
+      return;
+    }
+
+    final secondsPassedToday = now.toSeconds() - startInSeconds;
+
+    double progress = (secondsPassedToday / totalSecondsInDay).clamp(0, 1);
+
+    setState(() {
+      _dayProgress = progress;
+    });
+  }
+
+  void _cancelDayProgressTimer() {
+    _dayProgressTimer?.cancel();
+    _dayProgressTimer = null;
+    _dayProgress = 0;
+  }
+
+  void _initTtSchoolTimes() {
+    final tt = widget.timetable;
+
+    if (tt == null) return;
+
+    ttSchoolTimes = tt.schoolTimes;
+
+    final reducedClassHoursEnabled = TimetableManager().settings.getVar<bool>(
+          Settings.reducedClassHoursEnabledKey,
+        );
+
+    if (!reducedClassHoursEnabled) {
+      return;
+    }
+
+    final reducedClassHours =
+        TimetableManager().settings.getVar<List<SchoolTime>?>(
+              Settings.reducedClassHoursKey,
+            );
+
+    if (reducedClassHours == null) {
+      return;
+    }
+
+    if (reducedClassHours.length < tt.schoolTimes.length) {
+      return;
+    }
+
+    while (reducedClassHours.length > tt.schoolTimes.length) {
+      reducedClassHours.removeLast();
+    }
+
+    ttSchoolTimes = reducedClassHours;
   }
 }

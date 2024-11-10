@@ -354,7 +354,7 @@ class HolidaysListItemWidget extends StatelessWidget {
         horizontal: 8,
         vertical: 4,
       ),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
         color:

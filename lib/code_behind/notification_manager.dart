@@ -48,8 +48,12 @@ class NotificationManager {
     );
   }
 
-  Future<void> askForPermission() {
-    return [Permission.scheduleExactAlarm, Permission.notification].request();
+  Future<Map<Permission, PermissionStatus>?> askForPermission() async {
+    try {
+      return [Permission.scheduleExactAlarm, Permission.notification].request();
+    } catch (_) {
+      return null;
+    }
   }
 
   Future<void> showNotifications(
