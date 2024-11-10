@@ -702,7 +702,12 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     try {
-      ReceiveSharingIntent.instance.getInitialMedia().then(_handleFiles);
+      ReceiveSharingIntent.instance.getInitialMedia().then(
+            (value) => _handleFiles(
+              value,
+              resetAfter: true,
+            ),
+          );
       _intentSubscription = ReceiveSharingIntent.instance
           .getMediaStream()
           .listen(
@@ -714,7 +719,10 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Future<void> _handleFiles(List<SharedMediaFile> files) async {
+  Future<void> _handleFiles(
+    List<SharedMediaFile> files, {
+    bool resetAfter = false,
+  }) async {
     //only go to all timetablesscreen when user saves timetable
     bool goToAllTimetables = false;
 
@@ -777,6 +785,10 @@ class _HomeScreenState extends State<HomeScreen> {
           false;
 
       if (timetableSaved) goToAllTimetables = true;
+    }
+
+    if (resetAfter) {
+      ReceiveSharingIntent.instance.reset();
     }
 
     if (!goToAllTimetables) return;
