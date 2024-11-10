@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/save_manager.dart';
 import 'package:schulapp/code_behind/school_day.dart';
 import 'package:schulapp/code_behind/school_lesson.dart';
+import 'package:schulapp/code_behind/school_lesson_prefab.dart';
 import 'package:schulapp/code_behind/school_time.dart';
 import 'package:schulapp/code_behind/special_lesson.dart';
 import 'package:schulapp/code_behind/timetable_manager.dart';
@@ -187,6 +188,40 @@ class Timetable {
   String? currSpecialLessonsWeekKey;
   List<SpecialLesson>? currSpecialLessonsWeek;
 
+  List<SchoolLessonPrefab> get lessonPrefabs {
+    Map<String, SchoolLessonPrefab> lessonPrefabsMap = {};
+
+    for (int schoolDayIndex = 0;
+        schoolDayIndex < schoolDays.length;
+        schoolDayIndex++) {
+      for (int schoolLessonIndex = 0;
+          schoolLessonIndex < maxLessonCount;
+          schoolLessonIndex++) {
+        SchoolLesson lesson =
+            schoolDays[schoolDayIndex].lessons[schoolLessonIndex];
+
+        if (lesson is EmptySchoolLesson) {
+          continue;
+        }
+
+        bool exists = lessonPrefabsMap.containsKey(lesson.name);
+
+        if (exists) continue;
+
+        SchoolLessonPrefab prefab = SchoolLessonPrefab(
+          name: lesson.name,
+          room: lesson.room,
+          teacher: lesson.teacher,
+          color: lesson.color,
+        );
+
+        lessonPrefabsMap[lesson.name] = prefab;
+      }
+    }
+
+    return lessonPrefabsMap.values.toList();
+  }
+
   set name(String value) {
     value = value.trim();
 
@@ -319,6 +354,22 @@ class Timetable {
       schoolDaysKey: List<Map<String, dynamic>>.generate(
         schoolDays.length,
         (index) => schoolDays[index].toJson(),
+      ),
+    };
+  }
+
+  ///saves name and room for "freistunden"
+  Map<String, dynamic> toJsonOld() {
+    return {
+      nameKey: name,
+      maxLessonCountKey: maxLessonCount,
+      schoolTimesKey: List<Map<String, dynamic>>.generate(
+        schoolTimes.length,
+        (index) => schoolTimes[index].toJson(),
+      ),
+      schoolDaysKey: List<Map<String, dynamic>>.generate(
+        schoolDays.length,
+        (index) => schoolDays[index].toJsonOld(),
       ),
     };
   }

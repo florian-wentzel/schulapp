@@ -414,41 +414,6 @@ class Utils {
     return width / height;
   }
 
-  static List<SchoolLessonPrefab> createLessonPrefabsFromTt(
-      Timetable timetable) {
-    Map<String, SchoolLessonPrefab> lessonPrefabsMap = {};
-
-    for (int schoolDayIndex = 0;
-        schoolDayIndex < timetable.schoolDays.length;
-        schoolDayIndex++) {
-      for (int schoolLessonIndex = 0;
-          schoolLessonIndex < timetable.maxLessonCount;
-          schoolLessonIndex++) {
-        SchoolLesson lesson =
-            timetable.schoolDays[schoolDayIndex].lessons[schoolLessonIndex];
-
-        if (lesson.name.startsWith("-")) {
-          continue;
-        }
-
-        bool exists = lessonPrefabsMap.containsKey(lesson.name);
-
-        if (exists) continue;
-
-        SchoolLessonPrefab prefab = SchoolLessonPrefab(
-          name: lesson.name,
-          room: lesson.room,
-          teacher: lesson.teacher,
-          color: lesson.color,
-        );
-
-        lessonPrefabsMap[lesson.name] = prefab;
-      }
-    }
-
-    return lessonPrefabsMap.values.toList();
-  }
-
   static String dateToString(DateTime date, {bool showYear = true}) {
     if (!showYear) {
       return "${date.day}.${date.month}";
@@ -603,7 +568,7 @@ class Utils {
     if (selectedTimetable == null) return false;
 
     List<SchoolLessonPrefab> selectedTimetablePrefabs =
-        Utils.createLessonPrefabsFromTt(selectedTimetable);
+        selectedTimetable.lessonPrefabs;
 
     final isCustomTask = !selectedTimetablePrefabs.any(
       (element) => element.name == linkedSubjectName,

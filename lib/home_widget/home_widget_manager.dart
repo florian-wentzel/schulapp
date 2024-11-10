@@ -29,7 +29,8 @@ class HomeWidgetManager {
     if (!_isInitialized) return;
 
     try {
-      final json = timetable.toJson();
+      //alter version weil android code noch nicht geupdated wurde
+      final json = timetable.toJsonOld();
 
       json[timesColorKey] = Colors.transparent.toJson();
       // json["timesColor"] = Utils.colorToJson(Theme.of(context).scaffoldBackgroundColor);

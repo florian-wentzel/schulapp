@@ -36,6 +36,17 @@ class SchoolDay {
     };
   }
 
+  ///saves name and room for "freistunden"
+  Map<String, dynamic> toJsonOld() {
+    return {
+      nameKey: name,
+      lessonsKey: List<Map<String, dynamic>>.generate(
+        lessons.length,
+        (index) => lessons[index].toJsonOld(),
+      ),
+    };
+  }
+
   static SchoolDay fromJson(Map<String, dynamic> json) {
     String name = json[nameKey];
     List<Map<String, dynamic>> lsJson = (json[lessonsKey] as List).cast();

@@ -46,6 +46,17 @@ class SchoolLesson {
     };
   }
 
+  ///saves name and room for "freistunden" wird nicht von
+  ///[EmptySchoolLesson] überschrieben
+  Map<String, dynamic> toJsonOld() {
+    return {
+      nameKey: name,
+      roomKey: room,
+      teacherKey: teacher,
+      colorKey: color.toJson(),
+    };
+  }
+
   static SchoolLesson fromJson(Map<String, dynamic> json, int lessonIndex) {
     String? type = json[typeKey];
 

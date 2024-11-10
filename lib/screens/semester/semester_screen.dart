@@ -338,8 +338,7 @@ class _SemesterScreenState extends State<SemesterScreen> {
 
     if (timetable == null) return null;
 
-    List<SchoolLessonPrefab> lessonPrefabs =
-        Utils.createLessonPrefabsFromTt(timetable!);
+    List<SchoolLessonPrefab> lessonPrefabs = timetable!.lessonPrefabs;
 
     List<SchoolGradeSubject> subjects = List.generate(
       lessonPrefabs.length,

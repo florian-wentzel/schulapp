@@ -12,7 +12,7 @@
     <application
         android:name="${applicationName}"
         android:enableOnBackInvokedCallback="true"
-        android:icon="@mipmap/icon"
+        android:icon="@mipmap/ic_launcher"
         android:label="Schulapp">
         <receiver
             android:name="TimetableOneDay"

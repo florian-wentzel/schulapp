@@ -169,7 +169,7 @@ Future<(String, bool)?> showSelectSubjectNameSheet(
   if (selectedTimetable == null) return null;
 
   List<SchoolLessonPrefab> selectedTimetablePrefabs =
-      Utils.createLessonPrefabsFromTt(selectedTimetable);
+      selectedTimetable.lessonPrefabs;
 
   selectedTimetablePrefabs.sort(
     (a, b) => a.name.compareTo(b.name),

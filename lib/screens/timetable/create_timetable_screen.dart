@@ -35,7 +35,7 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
 
   @override
   void initState() {
-    _lessonPrefabs = Utils.createLessonPrefabsFromTt(widget.timetable);
+    _lessonPrefabs = widget.timetable.lessonPrefabs;
     _sortLessonPrefabs();
     _originalName = String.fromCharCodes(widget.timetable.name.codeUnits);
 
@@ -680,8 +680,7 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
     );
 
     if (timetable == null) return;
-    List<SchoolLessonPrefab> prefabs =
-        Utils.createLessonPrefabsFromTt(timetable);
+    List<SchoolLessonPrefab> prefabs = timetable.lessonPrefabs;
     _lessonPrefabs.addAll(prefabs);
     _sortLessonPrefabs();
     setState(() {});
