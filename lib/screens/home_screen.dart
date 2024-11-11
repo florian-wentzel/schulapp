@@ -12,6 +12,7 @@ import 'package:schulapp/code_behind/grading_system_manager.dart';
 import 'package:schulapp/code_behind/holidays.dart';
 import 'package:schulapp/code_behind/holidays_manager.dart';
 import 'package:schulapp/code_behind/save_manager.dart';
+import 'package:schulapp/code_behind/school_lesson.dart';
 import 'package:schulapp/code_behind/school_semester.dart';
 import 'package:schulapp/code_behind/school_time.dart';
 import 'package:schulapp/code_behind/settings.dart';
@@ -888,13 +889,50 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  SchoolTime? _getStartTime(Timetable tt) {
+    //index welcher angibt was wir als start ansehen
+    int startIndex = 0;
+
+    final dayIndex = Utils.getCurrentWeekDayIndex();
+    final schoolDay = tt.schoolDays[dayIndex];
+    final now = DateTime.now();
+    final weekIndex = Utils.getWeekIndex(now);
+    final year = now.year;
+
+    for (int i = startIndex; i < schoolDay.lessons.length; i++) {
+      final isSpecialLesson = TimetableManager().isSpecialLesson(
+        timetable: tt,
+        schoolTimeIndex: i,
+        schoolDayIndex: dayIndex,
+        weekIndex: weekIndex,
+        year: year,
+      );
+      if (!SchoolLesson.isEmptyLesson(schoolDay.lessons[i]) &&
+          !isSpecialLesson) {
+        break;
+      }
+      startIndex++;
+    }
+
+    return ttSchoolTimes?[startIndex];
+  }
+
   void _calcDayProgressTimer() {
     final schoolTimes = ttSchoolTimes;
+    final tt = widget.timetable;
 
+    if (tt == null) return;
     if (schoolTimes == null) return;
 
-    final startInSeconds = schoolTimes.first.start.toSeconds();
-    final endInSeconds = schoolTimes.last.end.toSeconds();
+    final first = _getStartTime(tt);
+    if (first == null) return;
+    print(first.start);
+    final last = _getEndTime(tt);
+    if (last == null) return;
+    print(last.end);
+
+    final startInSeconds = first.start.toSeconds();
+    final endInSeconds = last.end.toSeconds();
 
     final totalSecondsInDay = endInSeconds - startInSeconds;
 
@@ -963,5 +1001,38 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     ttSchoolTimes = reducedClassHours;
+  }
+
+  SchoolTime? _getEndTime(Timetable tt) {
+    final schoolTimes = ttSchoolTimes;
+    if (schoolTimes == null) {
+      return null;
+    }
+
+    //index welcher angibt was wir als ende ansehen
+    int endIndex = schoolTimes.length - 1;
+
+    final dayIndex = Utils.getCurrentWeekDayIndex();
+    final schoolDay = tt.schoolDays[dayIndex];
+    final now = DateTime.now();
+    final weekIndex = Utils.getWeekIndex(now);
+    final year = now.year;
+
+    for (int i = endIndex; i >= 0; i--) {
+      final isSpecialLesson = TimetableManager().isSpecialLesson(
+        timetable: tt,
+        schoolTimeIndex: i,
+        schoolDayIndex: dayIndex,
+        weekIndex: weekIndex,
+        year: year,
+      );
+      if (!SchoolLesson.isEmptyLesson(schoolDay.lessons[i]) &&
+          !isSpecialLesson) {
+        break;
+      }
+      endIndex--;
+    }
+
+    return schoolTimes[endIndex];
   }
 }
