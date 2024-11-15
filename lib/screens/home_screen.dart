@@ -926,10 +926,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
     final first = _getStartTime(tt);
     if (first == null) return;
-    print(first.start);
+
     final last = _getEndTime(tt);
     if (last == null) return;
-    print(last.end);
 
     final startInSeconds = first.start.toSeconds();
     final endInSeconds = last.end.toSeconds();
@@ -955,7 +954,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
     final secondsPassedToday = now.toSeconds() - startInSeconds;
 
-    double progress = (secondsPassedToday / totalSecondsInDay).clamp(0, 1);
+    double progress =
+        (secondsPassedToday.toDouble() / totalSecondsInDay.toDouble())
+            .clamp(0, 1);
 
     setState(() {
       _dayProgress = progress;

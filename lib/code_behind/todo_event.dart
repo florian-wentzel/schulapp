@@ -66,9 +66,7 @@ class TodoEvent {
       return AppLocalizationsManager.localizations.strNoEndDate;
     }
 
-    Duration timeLeft = endDateTime.difference(DateTime.now());
-
-    return _getTimeLeftString(timeLeft);
+    return _getTimeLeftString(DateTime.now(), endDateTime);
   }
 
   IconData getIcon() {
@@ -224,9 +222,10 @@ class TodoEvent {
         title += ", $name";
       }
 
-      final dateDiff = endDateTime.difference(correctedDateTime);
-
-      final body = _getTimeLeftString(dateDiff);
+      final body = _getTimeLeftString(
+        correctedDateTime,
+        endDateTime,
+      );
 
       await NotificationManager().scheduleNotification(
         id: key * notificationMultiplier + i,
@@ -237,12 +236,24 @@ class TodoEvent {
     }
   }
 
-  String _getTimeLeftString(Duration timeLeft) {
-    if (timeLeft.inDays > 0) {
-      return AppLocalizationsManager.localizations.strInXDays(timeLeft.inDays);
-    } else if (timeLeft.inDays < 0) {
+  String _getTimeLeftString(DateTime start, DateTime end) {
+    Duration timeLeft = end.difference(start);
+
+    int daysLeft = DateTime(end.year, end.month, end.day)
+        .difference(
+          DateTime(
+            start.year,
+            start.month,
+            start.day,
+          ),
+        )
+        .inDays;
+
+    if (daysLeft > 0) {
+      return AppLocalizationsManager.localizations.strInXDays(daysLeft);
+    } else if (daysLeft < 0) {
       return AppLocalizationsManager.localizations
-          .strExpiredXDaysAgo(timeLeft.inDays.abs());
+          .strExpiredXDaysAgo(daysLeft.abs());
     }
 
     if (timeLeft.inHours > 0) {
