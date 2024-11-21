@@ -282,7 +282,7 @@
   "strLastModifiedOn": "Zuletzt bearbeitet am",
   "strCreatedOn": "Erstellt am",
   "strAddReminder": "Erinnerung hinzufügen",
-  "@strAddReminder" : {},
+  "@strAddReminder": {},
   "strAdd": "Hinzufügen",
   "@strAdd": {},
   "strXDaysBefore": "{days, plural, =0{Zum eingestellten Zeitpunkt} =1 {Ein Tag davor} other {{days} Tage davor}}",
@@ -292,5 +292,6 @@
   "strSetTaskNotification": "Aufgabenbenachrichtigung Einstellen",
   "strAt": "Um",
   "strShareYourTimetable": "Teile deinen Stundenplan!",
-  "strDayProgress": "Tagesfortschritt"
+  "strDayProgress": "Tagesfortschritt",
+  "strAddXWeek": "{weekName}-Woche hinzufügen"
 }

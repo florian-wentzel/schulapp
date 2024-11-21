@@ -815,5 +815,14 @@
   "strShareYourTimetable": "Share your Timetable!",
   "@strShareYourTimetable": {},
   "strDayProgress": "Day Progress",
-  "@strDayProgress": {}
+  "@strDayProgress": {},
+  "strAddXWeek": "Add {weekName}-Week",
+  "@strAddXWeek": {
+    "placeholders": {
+      "weekName": {
+        "type": "String",
+        "example": "B"
+      }
+    }
+  }
 }

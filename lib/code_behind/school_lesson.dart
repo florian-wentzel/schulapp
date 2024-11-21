@@ -108,9 +108,9 @@ class EmptySchoolLesson extends SchoolLesson {
   EmptySchoolLesson({
     required this.lessonIndex,
   }) : super(
-          name: "---",
-          room: "---",
-          teacher: "---",
+          name: "",
+          room: "",
+          teacher: "",
           color: Colors.transparent,
         );
 

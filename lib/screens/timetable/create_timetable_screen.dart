@@ -12,12 +12,11 @@ import 'package:schulapp/widgets/timetable/timetable_drop_target_widget.dart';
 import 'package:schulapp/widgets/timetable/timetable_one_day_drop_target_widget.dart';
 import 'package:schulapp/code_behind/timetable_util_functions.dart';
 
-// ignore: must_be_immutable
 class CreateTimetableScreen extends StatefulWidget {
-  static const String route = "/createTimetable";
-  Timetable timetable;
+  static const String route = "/edit-timetable";
+  final Timetable timetable;
 
-  CreateTimetableScreen({
+  const CreateTimetableScreen({
     super.key,
     required this.timetable,
   });
@@ -32,6 +31,10 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
   late String _originalName;
 
   bool _canPop = false;
+
+  //TODO
+  ///started mit 1 weil [Timetable.weekNames] [0] = "A"
+  final int _currWeekIndex = 1;
 
   @override
   void initState() {
@@ -171,6 +174,26 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
               const SizedBox(
                 width: 16,
               ),
+              ElevatedButton(
+                onPressed: _canAddAnotherWeek()
+                    ? () async {
+                        _increaseCurrWeekIndex();
+
+                        setState(() {});
+                      }
+                    : null,
+                child: Text(
+                  AppLocalizationsManager.localizations.strAddXWeek(
+                    Timetable.weekNames[_currWeekIndex],
+                  ),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              const SizedBox(
+                width: 16,
+              ),
               Switch.adaptive(
                 value: TimetableManager()
                     .settings
@@ -235,6 +258,12 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
       ),
     );
   }
+
+  bool _canAddAnotherWeek() {
+    return _currWeekIndex < Timetable.weekNames.length;
+  }
+
+  bool _increaseCurrWeekIndex() {}
 
   Widget _pcBody() {
     return TimetableDropTargetWidget(

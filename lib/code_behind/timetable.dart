@@ -1,4 +1,6 @@
 // import 'package:fluent_ui/fluent_ui.dart';
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/save_manager.dart';
 import 'package:schulapp/code_behind/school_day.dart';
@@ -11,6 +13,22 @@ import 'package:schulapp/extensions.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 
 class Timetable {
+  //TODO: Wieviele?!
+  static final weekNames = UnmodifiableListView<String>(
+    <String>[
+      "A",
+      "B",
+      "C",
+      "D",
+      "E",
+      "F",
+      "G",
+      "H",
+      "I",
+      "J",
+      "K",
+    ],
+  );
   static const maxNameLength = 15;
   static const minMaxLessonCount = 5;
   static const maxMaxLessonCount = 12;
@@ -19,6 +37,7 @@ class Timetable {
   static const maxLessonCountKey = "maxLessonCount";
   static const schoolDaysKey = "days";
   static const schoolTimesKey = "times";
+  static const weekTimetablesKey = "bWeekTimetable";
 
   static final defaultPaulDessauTimetable = [
     SchoolTime(
@@ -108,71 +127,47 @@ class Timetable {
     //Ursprünglich hatte ich die eine Liste erstellt und wollte dann mit List.from(lessons) eine copy erstellen
     //aber das hat nicht funktioniert es gab dann den bug das sich alle Tage die gleichen Stunden geteilt haben.
     //Deswegen werden die Listen jetzt einzeln erstellt...
-    const color = Colors.transparent;
 
     return [
       SchoolDay(
         name: AppLocalizationsManager.localizations.strMonday,
         lessons: List.generate(
           hoursCount,
-          (index) => SchoolLesson(
-            name: "-${index + 1}-",
-            room: SchoolLesson.emptyLessonName,
-            teacher: SchoolLesson.emptyLessonName,
-            color: color,
-          ),
+          (index) => EmptySchoolLesson(lessonIndex: index),
         ),
       ),
       SchoolDay(
         name: AppLocalizationsManager.localizations.strTuesday,
         lessons: List.generate(
           hoursCount,
-          (index) => SchoolLesson(
-            name: "-${index + 1}-",
-            room: SchoolLesson.emptyLessonName,
-            teacher: SchoolLesson.emptyLessonName,
-            color: color,
-          ),
+          (index) => EmptySchoolLesson(lessonIndex: index),
         ),
       ),
       SchoolDay(
         name: AppLocalizationsManager.localizations.strWednesday,
         lessons: List.generate(
           hoursCount,
-          (index) => SchoolLesson(
-            name: "-${index + 1}-",
-            room: SchoolLesson.emptyLessonName,
-            teacher: SchoolLesson.emptyLessonName,
-            color: color,
-          ),
+          (index) => EmptySchoolLesson(lessonIndex: index),
         ),
       ),
       SchoolDay(
         name: AppLocalizationsManager.localizations.strThursday,
         lessons: List.generate(
           hoursCount,
-          (index) => SchoolLesson(
-            name: "-${index + 1}-",
-            room: SchoolLesson.emptyLessonName,
-            teacher: SchoolLesson.emptyLessonName,
-            color: color,
-          ),
+          (index) => EmptySchoolLesson(lessonIndex: index),
         ),
       ),
       SchoolDay(
         name: AppLocalizationsManager.localizations.strFriday,
         lessons: List.generate(
           hoursCount,
-          (index) => SchoolLesson(
-            name: "-${index + 1}-",
-            room: SchoolLesson.emptyLessonName,
-            teacher: SchoolLesson.emptyLessonName,
-            color: color,
-          ),
+          (index) => EmptySchoolLesson(lessonIndex: index),
         ),
       ),
     ];
   }
+
+  final List<Timetable>? _weekTimetables;
 
   String _name;
   int _maxLessonCount;
@@ -243,10 +238,12 @@ class Timetable {
     required int maxLessonCount,
     required List<SchoolDay> schoolDays,
     required List<SchoolTime> schoolTimes,
+    required List<Timetable>? weekTimetables,
   })  : _name = name,
         _maxLessonCount = maxLessonCount,
         _schoolDays = schoolDays,
-        _schoolTimes = schoolTimes;
+        _schoolTimes = schoolTimes,
+        _weekTimetables = weekTimetables;
 
   DateTime getNextLessonDate(
     String subjectName,
@@ -316,13 +313,31 @@ class Timetable {
     return null;
   }
 
-  static Timetable? fromJson(Map<String, dynamic> json) {
+  static Timetable? fromJson(Map<String, dynamic>? json) {
+    if (json == null) return null;
+
     Timetable? timetable;
+
     try {
       String n = json[nameKey];
       int mlc = json[maxLessonCountKey]; //maxLessonCount
       List<Map<String, dynamic>> ds = (json[schoolDaysKey] as List).cast();
       List<Map<String, dynamic>> ts = (json[schoolTimesKey] as List).cast();
+      List<Map<String, dynamic>>? ws =
+          (json[weekTimetablesKey] as List?)?.cast();
+
+      List<Timetable>? weeks;
+
+      if (ws != null) {
+        weeks = [];
+        for (int i = 0; i < ws.length; i++) {
+          final tt = Timetable.fromJson(ws[i]);
+
+          if (tt == null) continue;
+
+          weeks.add(tt);
+        }
+      }
 
       timetable = Timetable(
         name: n,
@@ -335,6 +350,7 @@ class Timetable {
           ts.length,
           (index) => SchoolTime.fromJson(ts[index]),
         ),
+        weekTimetables: weeks,
       );
     } catch (e) {
       debugPrint(e.toString());
@@ -344,6 +360,8 @@ class Timetable {
   }
 
   Map<String, dynamic> toJson() {
+    final weeks = _weekTimetables;
+
     return {
       nameKey: name,
       maxLessonCountKey: maxLessonCount,
@@ -355,6 +373,12 @@ class Timetable {
         schoolDays.length,
         (index) => schoolDays[index].toJson(),
       ),
+      weekTimetablesKey: weeks == null
+          ? null
+          : List<Map<String, dynamic>>.generate(
+              weeks.length,
+              (index) => weeks[index].toJson(),
+            ),
     };
   }
 
@@ -385,6 +409,8 @@ class Timetable {
   }
 
   Timetable copy() {
+    final weeks = _weekTimetables;
+
     return Timetable(
       name: name,
       maxLessonCount: maxLessonCount,
@@ -396,6 +422,12 @@ class Timetable {
         schoolTimes.length,
         (index) => schoolTimes[index].clone(),
       ),
+      weekTimetables: weeks == null
+          ? null
+          : List.generate(
+              weeks.length,
+              (index) => weeks[index].copy(),
+            ),
     );
   }
 

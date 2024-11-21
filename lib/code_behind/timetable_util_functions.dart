@@ -361,6 +361,8 @@ class _CreateTimetableBottomSheetState
   final List<int> _lessons = [];
 
   bool _addSaturday = false;
+  //nochmal schauen ob man es in dem screen einstellen möchte
+  // final bool _bWeeksEnabled = false;
 
   int _currPageIndex = 0;
   int _lessonLength = 45;
@@ -530,11 +532,8 @@ class _CreateTimetableBottomSheetState
         name: Timetable.weekNames[index],
         lessons: List.generate(
           lessonCount!,
-          (index) => SchoolLesson(
-            name: SchoolLesson.emptyLessonName, //"-${index + 1}-",
-            room: SchoolLesson.emptyLessonName,
-            teacher: SchoolLesson.emptyLessonName,
-            color: Colors.transparent,
+          (index) => EmptySchoolLesson(
+            lessonIndex: index,
           ),
         ),
       ),
@@ -573,6 +572,7 @@ class _CreateTimetableBottomSheetState
       maxLessonCount: lessonCount,
       schoolDays: schoolDays,
       schoolTimes: schoolTimes,
+      weekTimetables: null,
     );
 
     Navigator.of(context).pop(timetable);
@@ -746,6 +746,24 @@ class _CreateTimetableBottomSheetState
             ),
           ],
         ),
+        //TODO
+        // if (!widget.onlySchoolTimes)
+        //   Row(
+        //     mainAxisAlignment: MainAxisAlignment.center,
+        //     children: [
+        //       const Text("A und B Wochen"),
+        //       const SizedBox(
+        //         width: 4,
+        //       ),
+        //       Switch.adaptive(
+        //         value: _bWeeksEnabled,
+        //         onChanged: (value) {
+        //           _bWeeksEnabled = value;
+        //           setState(() {});
+        //         },
+        //       ),
+        //     ],
+        //   ),
         if (!widget.onlySchoolTimes)
           Row(
             mainAxisAlignment: MainAxisAlignment.center,

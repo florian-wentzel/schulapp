@@ -116,6 +116,7 @@ class TimetableManager {
           maxLessonCount: 0,
           schoolDays: [],
           schoolTimes: [],
+          weekTimetables: null,
         ),
       );
 
