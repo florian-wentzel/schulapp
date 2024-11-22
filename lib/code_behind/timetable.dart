@@ -12,6 +12,77 @@ import 'package:schulapp/code_behind/timetable_manager.dart';
 import 'package:schulapp/extensions.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 
+class WeekTimetable extends Timetable {
+  WeekTimetable({
+    required super.name,
+    required super.maxLessonCount,
+    required super.schoolDays,
+    required super.schoolTimes,
+  }) : super(
+          weekTimetables: null,
+        );
+
+  static WeekTimetable fromTimetable({
+    required String name,
+    required Timetable timetable,
+  }) {
+    return WeekTimetable(
+      name: name,
+      maxLessonCount: timetable.maxLessonCount,
+      schoolTimes: timetable.copy().schoolTimes,
+      schoolDays: timetable.copy().schoolDays,
+    );
+  }
+
+  @override
+  WeekTimetable copy() {
+    return WeekTimetable(
+      name: name,
+      maxLessonCount: maxLessonCount,
+      schoolDays: List.generate(
+        schoolDays.length,
+        (index) => schoolDays[index].clone(),
+      ),
+      schoolTimes: List.generate(
+        schoolTimes.length,
+        (index) => schoolTimes[index].clone(),
+      ),
+    );
+  }
+
+  static WeekTimetable? fromJson(Map<String, dynamic>? json) {
+    if (json == null) return null;
+
+    WeekTimetable? timetable;
+
+    try {
+      String n = json[Timetable.nameKey];
+      int mlc = json[Timetable.maxLessonCountKey]; //maxLessonCount
+      List<Map<String, dynamic>> ds =
+          (json[Timetable.schoolDaysKey] as List).cast();
+      List<Map<String, dynamic>> ts =
+          (json[Timetable.schoolTimesKey] as List).cast();
+
+      timetable = WeekTimetable(
+        name: n,
+        maxLessonCount: mlc,
+        schoolDays: List.generate(
+          ds.length,
+          (index) => SchoolDay.fromJson(ds[index]),
+        ),
+        schoolTimes: List.generate(
+          ts.length,
+          (index) => SchoolTime.fromJson(ts[index]),
+        ),
+      );
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+
+    return timetable;
+  }
+}
+
 class Timetable {
   //TODO: Wieviele?!
   static final weekNames = UnmodifiableListView<String>(
@@ -29,6 +100,7 @@ class Timetable {
       "K",
     ],
   );
+
   static const maxNameLength = 15;
   static const minMaxLessonCount = 5;
   static const maxMaxLessonCount = 12;
@@ -102,15 +174,15 @@ class Timetable {
     );
   }
 
-  static final List<String> weekNames = [
-    AppLocalizationsManager.localizations.strMonday,
-    AppLocalizationsManager.localizations.strTuesday,
-    AppLocalizationsManager.localizations.strWednesday,
-    AppLocalizationsManager.localizations.strThursday,
-    AppLocalizationsManager.localizations.strFriday,
-    AppLocalizationsManager.localizations.strSaturday,
-    AppLocalizationsManager.localizations.strSunday,
-  ];
+  static List<String> get weekDayNames => [
+        AppLocalizationsManager.localizations.strMonday,
+        AppLocalizationsManager.localizations.strTuesday,
+        AppLocalizationsManager.localizations.strWednesday,
+        AppLocalizationsManager.localizations.strThursday,
+        AppLocalizationsManager.localizations.strFriday,
+        AppLocalizationsManager.localizations.strSaturday,
+        AppLocalizationsManager.localizations.strSunday,
+      ];
 
   static List<SchoolDay> defaultSchoolDays(int hoursCount) {
     // final lessons = List.generate(
@@ -167,7 +239,12 @@ class Timetable {
     ];
   }
 
-  final List<Timetable>? _weekTimetables;
+  List<WeekTimetable>? _weekTimetables;
+  UnmodifiableListView<WeekTimetable>? get weekTimetables {
+    final weekTimetables = _weekTimetables;
+    if (weekTimetables == null) return null;
+    return UnmodifiableListView(weekTimetables);
+  }
 
   String _name;
   int _maxLessonCount;
@@ -238,7 +315,7 @@ class Timetable {
     required int maxLessonCount,
     required List<SchoolDay> schoolDays,
     required List<SchoolTime> schoolTimes,
-    required List<Timetable>? weekTimetables,
+    required List<WeekTimetable>? weekTimetables,
   })  : _name = name,
         _maxLessonCount = maxLessonCount,
         _schoolDays = schoolDays,
@@ -326,12 +403,12 @@ class Timetable {
       List<Map<String, dynamic>>? ws =
           (json[weekTimetablesKey] as List?)?.cast();
 
-      List<Timetable>? weeks;
+      List<WeekTimetable>? weeks;
 
       if (ws != null) {
         weeks = [];
         for (int i = 0; i < ws.length; i++) {
-          final tt = Timetable.fromJson(ws[i]);
+          final tt = WeekTimetable.fromJson(ws[i]);
 
           if (tt == null) continue;
 
@@ -513,6 +590,34 @@ class Timetable {
       weekIndex: weekIndex,
       dayIndex: dayIndex,
       timeIndex: timeIndex,
+    );
+  }
+
+  bool canAddAnotherWeek() {
+    final weekTts = _weekTimetables;
+    if (weekTts == null) return true;
+
+    return weekTts.length < weekNames.length - 1;
+  }
+
+  void addAnotherWeek() {
+    if (!canAddAnotherWeek()) return;
+
+    if (_weekTimetables == null) {
+      _weekTimetables = [
+        WeekTimetable.fromTimetable(
+          name: weekNames[1],
+          timetable: this,
+        ),
+      ];
+      return;
+    }
+
+    _weekTimetables?.add(
+      WeekTimetable.fromTimetable(
+        name: weekNames[_weekTimetables!.length + 1],
+        timetable: this,
+      ),
     );
   }
 }

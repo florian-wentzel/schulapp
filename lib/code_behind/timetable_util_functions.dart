@@ -529,7 +529,7 @@ class _CreateTimetableBottomSheetState
     List<SchoolDay> schoolDays = List.generate(
       dayCount,
       (index) => SchoolDay(
-        name: Timetable.weekNames[index],
+        name: Timetable.weekDayNames[index],
         lessons: List.generate(
           lessonCount!,
           (index) => EmptySchoolLesson(

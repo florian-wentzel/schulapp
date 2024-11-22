@@ -913,6 +913,10 @@ class _HomeScreenState extends State<HomeScreen> {
       }
       startIndex++;
     }
+    final schoolTimes = ttSchoolTimes;
+    if (schoolTimes != null && startIndex >= schoolTimes.length) {
+      return null;
+    }
 
     return ttSchoolTimes?[startIndex];
   }
@@ -925,10 +929,20 @@ class _HomeScreenState extends State<HomeScreen> {
     if (schoolTimes == null) return;
 
     final first = _getStartTime(tt);
-    if (first == null) return;
+    if (first == null) {
+      setState(() {
+        _dayProgress = 1;
+      });
+      return;
+    }
 
     final last = _getEndTime(tt);
-    if (last == null) return;
+    if (last == null) {
+      setState(() {
+        _dayProgress = 1;
+      });
+      return;
+    }
 
     final startInSeconds = first.start.toSeconds();
     final endInSeconds = last.end.toSeconds();
@@ -1032,6 +1046,10 @@ class _HomeScreenState extends State<HomeScreen> {
         break;
       }
       endIndex--;
+    }
+
+    if (endIndex < 0) {
+      return null;
     }
 
     return schoolTimes[endIndex];
