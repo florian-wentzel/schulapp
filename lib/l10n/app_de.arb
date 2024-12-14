@@ -1,6 +1,8 @@
 {
   "@@locale": "de",
   "language_name": "Deutsch",
+  "version_0_8_0": "A- und B-Wochen hinzugefügt",
+  "version_0_7_4": "Erledigte Aufgaben werden jetzt auf der Startseite mit einem Haken markiert",
   "version_0_7_3": "Tagesfortschritt zur Statistik hinzugefügt",
   "version_0_7_2": "Funktion zum Teilen des Stundenplans im Export-Bildschirm hinzugefügt",
   "version_0_7_1": "Aufgabenbenachrichtigungen können jetzt angepasst werden",
@@ -299,5 +301,10 @@
   "strDoYouWantToRemoveWeekX": "Möchtest Du die {weekName}-Woche löschen?",
   "strDoYouWantToOverrideTimetableX": "Möchtest du den Stundenplan \"{timetableName}\" wirklich überschreiben?",
   "strSetXWeekAsTheCurrentWeek": "{weekName}-Woche als aktuelle Woche setzen",
-  "strCurrentWeek": "(Jetztige Woche)"
+  "strCurrentWeek": "(Jetztige Woche)",
+  "strActions": "Aktionen",
+  "strRemoveLesson": "Letzte Stunde entfernen",
+  "strAddLesson": "Weitere Stunde hinzufügen",
+  "strDisplayFreePeriodsWithLessonNumber": "Freistunden mit Stundennummer anzeigen",
+  "strDisplayFreePeriodsWithoutPeriodNumber": "Freistunden ohne Stundennummer anzeigen"
 }

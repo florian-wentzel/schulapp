@@ -514,11 +514,12 @@ class Utils {
 
   static Future<T?> showListSelectionBottomSheet<T>(
     BuildContext context, {
-    required String title,
+    required String? title,
     required List<T> items,
     required Widget? Function(BuildContext context, int index) itemBuilder,
     String? underTitle,
     Widget? bottomAction,
+    bool boldTitle = true,
   }) async {
     await showModalBottomSheet(
       context: context,
@@ -529,11 +530,14 @@ class Utils {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(
-                title,
-                style: Theme.of(context).textTheme.headlineMedium,
-                textAlign: TextAlign.center,
-              ),
+              if (title != null)
+                Text(
+                  title,
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                        fontWeight: boldTitle ? FontWeight.bold : null,
+                      ),
+                  textAlign: TextAlign.center,
+                ),
               underTitle == null
                   ? Container()
                   : Column(

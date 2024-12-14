@@ -2,6 +2,10 @@
   "@@locale": "en",
   "language_name": "Englisch",
   "@language_name": {},
+  "version_0_8_0": "A and B weeks added",
+  "@version_0_8_0": {},
+  "version_0_7_4": "Completed tasks are now marked with a checkmark on the home screen",
+  "@version_0_7_4": {},
   "version_0_7_3": "Added Day Progress to Statistics",
   "@version_0_7_3": {},
   "version_0_7_2": "Added timetable sharing functionality in the export screen",
@@ -871,5 +875,15 @@
     }
   },
   "strCurrentWeek": "(Current Week)",
-  "@strCurrentWeek": {}
+  "@strCurrentWeek": {},
+  "strActions": "Actions",
+  "@strActions": {},
+  "strRemoveLesson": "Remove last Lesson",
+  "@strRemoveLesson": {},
+  "strAddLesson": "Add Lesson",
+  "@strAddLesson": {},
+  "strDisplayFreePeriodsWithLessonNumber": "Display free periods with period number",
+  "@strDisplayFreePeriodsWithLessonNumber": {},
+  "strDisplayFreePeriodsWithoutPeriodNumber": "Display free periods without period number",
+  "@strDisplayFreePeriodsWithoutPeriodNumber": {}
 }

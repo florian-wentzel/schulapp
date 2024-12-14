@@ -183,80 +183,35 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
     );
   }
 
-  Widget _bottomNavBar() {
-    final firstRow = <Widget>[
-      const SizedBox(
-        width: 12,
-      ),
-      ElevatedButton(
-        onPressed: () async {
-          _canPop = true;
-
-          final success = await TimetableManager().addOrChangeTimetable(
-            _timetableCopy,
-            originalName: widget.timetable.name,
-            onAlreadyExists: () {
-              return Utils.showBoolInputDialog(
-                context,
-                question: AppLocalizationsManager.localizations
-                    .strDoYouWantToOverrideTimetableX(
-                  _timetableCopy.name,
-                ),
-                markTrueAsRed: true,
-                showYesAndNoInsteadOfOK: true,
-              );
-            },
-          );
-
-          if (!success) {
-            if (mounted) {
-              Utils.showInfo(
-                context,
-                msg: AppLocalizationsManager
-                    .localizations.strThereWasAnErrorWhileSaving,
-                type: InfoType.error,
-              );
-            }
-            return;
-          }
-
-          //den eigentlichen tt auf die richitgen werte die bereits gespeichert wurden setzen
-          widget.timetable.setValuesFrom(_timetableCopy);
-
-          if (!mounted) return;
-
-          HomeWidgetManager.updateWithDefaultTimetable(
-            context: context,
-          );
-          //weil neuer timetable erstellt return true damit kann man später vielleicht was anfangen
-          Navigator.of(context).pop(true);
-        },
-        child: Text(
-          AppLocalizationsManager.localizations.strSave,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-          ),
+  void _onMoreActionsButtonPressed() {
+    final actionWidgets = <(String title, void Function()? onPressed)>[
+      if (!TimetableManager().settings.getVar(Settings.showLessonNumbersKey))
+        (
+          AppLocalizationsManager
+              .localizations.strDisplayFreePeriodsWithLessonNumber,
+          () {
+            TimetableManager().settings.setVar(
+                  Settings.showLessonNumbersKey,
+                  true,
+                );
+            setState(() {});
+          },
         ),
-      ),
-      const SizedBox(
-        width: 16,
-      ),
-      Switch.adaptive(
-        value:
-            TimetableManager().settings.getVar(Settings.showLessonNumbersKey),
-        onChanged: (value) {
-          TimetableManager().settings.setVar(
-                Settings.showLessonNumbersKey,
-                value,
-              );
-          setState(() {});
-        },
-      ),
-      const SizedBox(
-        width: 16,
-      ),
-      ElevatedButton(
-        onPressed: _timetableCopy.maxLessonCount >= Timetable.maxMaxLessonCount
+      if (TimetableManager().settings.getVar(Settings.showLessonNumbersKey))
+        (
+          AppLocalizationsManager
+              .localizations.strDisplayFreePeriodsWithoutPeriodNumber,
+          () {
+            TimetableManager().settings.setVar(
+                  Settings.showLessonNumbersKey,
+                  false,
+                );
+            setState(() {});
+          },
+        ),
+      (
+        AppLocalizationsManager.localizations.strAddLesson,
+        _timetableCopy.maxLessonCount >= Timetable.maxMaxLessonCount
             ? null
             : () async {
                 bool addLesson = await Utils.showBoolInputDialog(
@@ -273,13 +228,10 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
 
                 setState(() {});
               },
-        child: const Icon(Icons.add),
       ),
-      const SizedBox(
-        width: 16,
-      ),
-      ElevatedButton(
-        onPressed: _timetableCopy.maxLessonCount <= Timetable.minMaxLessonCount
+      (
+        AppLocalizationsManager.localizations.strRemoveLesson,
+        _timetableCopy.maxLessonCount <= Timetable.minMaxLessonCount
             ? null
             : () async {
                 bool removeLesson = await Utils.showBoolInputDialog(
@@ -297,35 +249,26 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
 
                 setState(() {});
               },
-        child: const Icon(Icons.remove),
       ),
-    ];
-    final secondRow = <Widget>[
       if (_timetableCopy.weekTimetables.isNotEmpty)
-        ElevatedButton(
-          onPressed:
-              _weekSelection.first != _timetableCopy.getCurrWeekTimetableIndex()
-                  ? () async {
-                      _timetableCopy
-                          .setCurrWeekTimetableIndex(_weekSelection.first);
-
-                      setState(() {});
-                    }
-                  : null,
-          child: Text(
-            AppLocalizationsManager.localizations.strSetXWeekAsTheCurrentWeek(
-                Timetable.weekNames[_weekSelection.first]),
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-            ),
+        (
+          AppLocalizationsManager.localizations.strSetXWeekAsTheCurrentWeek(
+            Timetable.weekNames[_weekSelection.first],
           ),
+          _weekSelection.first != _timetableCopy.getCurrWeekTimetableIndex()
+              ? () async {
+                  _timetableCopy
+                      .setCurrWeekTimetableIndex(_weekSelection.first);
+
+                  setState(() {});
+                }
+              : null,
         ),
-      if (_timetableCopy.weekTimetables.isNotEmpty)
-        const SizedBox(
-          width: 16,
+      (
+        AppLocalizationsManager.localizations.strAddXWeek(
+          Timetable.weekNames[_timetableCopy.weekTimetables.length + 1],
         ),
-      ElevatedButton(
-        onPressed: _timetableCopy.canAddAnotherWeek()
+        _timetableCopy.canAddAnotherWeek()
             ? () async {
                 _timetableCopy.addAnotherWeek();
 
@@ -336,113 +279,148 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
                 setState(() {});
               }
             : null,
-        child: Text(
-          AppLocalizationsManager.localizations.strAddXWeek(
-            Timetable.weekNames[_timetableCopy.weekTimetables.length + 1],
-          ),
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
       ),
-      const SizedBox(
-        width: 16,
-      ),
-      ElevatedButton(
-        onPressed: _weekSelection.first != 0
-            ? () async {
-                bool removeWeek = await Utils.showBoolInputDialog(
-                  context,
-                  question: AppLocalizationsManager.localizations
-                      .strDoYouWantToRemoveWeekX(
-                    Timetable.weekNames[_weekSelection.first],
-                  ),
-                  showYesAndNoInsteadOfOK: true,
-                  markTrueAsRed: true,
-                );
-
-                if (!removeWeek) return;
-
-                _timetableCopy.removeWeekX(_weekSelection.first - 1);
-
-                _weekSelection = {
-                  _weekSelection.first - 1,
-                };
-
-                _animateToSelectedPage();
-
-                setState(() {});
-              }
-            : null,
-        child: Text(
+      if (_timetableCopy.weekTimetables.isNotEmpty)
+        (
           AppLocalizationsManager.localizations.strRemoveXWeek(
             Timetable.weekNames[_weekSelection.first],
           ),
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-          ),
+          _weekSelection.first != 0
+              ? () async {
+                  bool removeWeek = await Utils.showBoolInputDialog(
+                    context,
+                    question: AppLocalizationsManager.localizations
+                        .strDoYouWantToRemoveWeekX(
+                      Timetable.weekNames[_weekSelection.first],
+                    ),
+                    showYesAndNoInsteadOfOK: true,
+                    markTrueAsRed: true,
+                  );
+
+                  if (!removeWeek) return;
+
+                  _timetableCopy.removeWeekX(_weekSelection.first - 1);
+
+                  _weekSelection = {
+                    _weekSelection.first - 1,
+                  };
+
+                  _animateToSelectedPage();
+
+                  setState(() {});
+                }
+              : null,
         ),
-      ),
     ];
 
-    Widget containerWidget({required Widget child}) => Container(
-          padding: const EdgeInsets.all(4),
-          margin: const EdgeInsets.only(
-            bottom: 8,
-            left: 8,
-            right: 8,
+    Utils.showListSelectionBottomSheet(
+      context,
+      title: AppLocalizationsManager.localizations.strActions,
+      items: actionWidgets,
+      itemBuilder: (context, index) {
+        final label = actionWidgets[index].$1;
+        final cb = actionWidgets[index].$2;
+        return ListTile(
+          title: Text(
+            label,
           ),
-          height: kBottomNavigationBarHeight,
-          width: MediaQuery.of(context).size.width,
-          decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Center(
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: child,
-            ),
-          ),
+          enabled: cb != null,
+          onTap: () {
+            cb?.call();
+            Navigator.of(context).pop();
+          },
         );
+      },
+      bottomAction: ElevatedButton(
+        onPressed: () {
+          Navigator.of(context).pop();
+        },
+        child: Text(AppLocalizationsManager.localizations.strCancel),
+      ),
+    );
+  }
 
-    if (Utils.isMobileRatio(context)) {
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          containerWidget(
-            child: Row(
-              children: [
-                ...firstRow,
-              ],
-            ),
-          ),
-          containerWidget(
-            child: Row(
-              children: [
-                ...secondRow,
-              ],
-            ),
-          ),
-        ],
-      );
-    } else {
-      return containerWidget(
+  Widget _bottomNavBar() {
+    return Container(
+      padding: const EdgeInsets.all(4),
+      margin: const EdgeInsets.only(
+        bottom: 8,
+        left: 8,
+        right: 8,
+      ),
+      height: kBottomNavigationBarHeight,
+      width: MediaQuery.of(context).size.width,
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Center(
         child: SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Row(
             children: [
-              ...firstRow,
+              ElevatedButton(
+                onPressed: () async {
+                  _canPop = true;
+
+                  final success = await TimetableManager().addOrChangeTimetable(
+                    _timetableCopy,
+                    originalName: widget.timetable.name,
+                    onAlreadyExists: () {
+                      return Utils.showBoolInputDialog(
+                        context,
+                        question: AppLocalizationsManager.localizations
+                            .strDoYouWantToOverrideTimetableX(
+                          _timetableCopy.name,
+                        ),
+                        markTrueAsRed: true,
+                        showYesAndNoInsteadOfOK: true,
+                      );
+                    },
+                  );
+
+                  if (!success) {
+                    if (mounted) {
+                      Utils.showInfo(
+                        context,
+                        msg: AppLocalizationsManager
+                            .localizations.strThereWasAnErrorWhileSaving,
+                        type: InfoType.error,
+                      );
+                    }
+                    return;
+                  }
+
+                  //den eigentlichen tt auf die richitgen werte die bereits gespeichert wurden setzen
+                  widget.timetable.setValuesFrom(_timetableCopy);
+
+                  if (!mounted) return;
+
+                  HomeWidgetManager.updateWithDefaultTimetable(
+                    context: context,
+                  );
+                  //weil neuer timetable erstellt return true damit kann man später vielleicht was anfangen
+                  Navigator.of(context).pop(true);
+                },
+                child: Text(
+                  AppLocalizationsManager.localizations.strSave,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
               const SizedBox(
                 width: 16,
               ),
-              ...secondRow,
+              ElevatedButton(
+                onPressed: _onMoreActionsButtonPressed,
+                child: const Icon(Icons.more_horiz),
+              ),
             ],
           ),
         ),
-      );
-    }
+      ),
+    );
   }
 
   Widget _lessonPrefabScrollbar() {

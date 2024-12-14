@@ -811,6 +811,10 @@ class Timetable {
     _weekTimetables?.removeAt(
       index,
     );
+
+    if (_weekTimetables?.isEmpty ?? true) {
+      _yearStartedWithWeekIndex = -1;
+    }
   }
 
   int getCurrWeekTimetableIndex() {
