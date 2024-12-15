@@ -824,5 +824,52 @@
         "example": "B"
       }
     }
-  }
+  },
+  "strRemoveXWeek": "Remove {weekName}-Week",
+  "@strRemoveXWeek": {
+    "placeholders": {
+      "weekName": {
+        "type": "String",
+        "example": "B"
+      }
+    }
+  },
+  "strXWeek": "{weekName}-Week",
+  "@strXWeek": {
+    "placeholders": {
+      "weekName": {
+        "type": "String",
+        "example": "B"
+      }
+    }
+  },
+  "strDoYouWantToRemoveWeekX": "Möchtest Du die {weekName}-Woche löschen?",
+  "@strDoYouWantToRemoveWeekX": {
+    "placeholders": {
+      "weekName": {
+        "type": "String",
+        "example": "B"
+      }
+    }
+  },
+  "strDoYouWantToOverrideTimetableX": "Do you really want to overwrite the timetable \"{timetableName}\"",
+  "@strDoYouWantToOverrideTimetableX": {
+    "placeholders": {
+      "timetableName": {
+        "type": "String",
+        "example": "Q1"
+      }
+    }
+  },
+  "strSetXWeekAsTheCurrentWeek": "Set {weekName}-Week as the current week",
+  "@strSetXWeekAsTheCurrentWeek": {
+    "placeholders": {
+      "weekName": {
+        "type": "String",
+        "example": "B"
+      }
+    }
+  },
+  "strCurrentWeek": "(Current Week)",
+  "@strCurrentWeek": {}
 }

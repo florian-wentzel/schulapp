@@ -26,12 +26,11 @@ import 'package:schulapp/widgets/custom_pop_up.dart';
 import 'package:schulapp/widgets/task/todo_event_list_item_widget.dart';
 import 'package:schulapp/widgets/timetable/timetable_lesson_widget.dart';
 
-// ignore: must_be_immutable
 class TimetableWidget extends StatefulWidget {
-  Timetable timetable;
-  bool showTodoEvents;
+  final Timetable timetable;
+  final bool showTodoEvents;
 
-  TimetableWidget(
+  const TimetableWidget(
       {super.key, required this.timetable, required this.showTodoEvents});
 
   @override
@@ -59,11 +58,19 @@ class _TimetableWidgetState extends State<TimetableWidget> {
   late int currWeekIndex;
   late int currYear;
 
+  bool _alreadyShowedErrorBecauseOfReducedHours = false;
+
   @override
   void initState() {
     super.initState();
 
-    ttSchoolTimes = widget.timetable.schoolTimes;
+    _updateTtSchoolTimes(widget.timetable.getCurrWeekTimetable());
+
+    setState(() {});
+  }
+
+  void _updateTtSchoolTimes(Timetable timetable) {
+    ttSchoolTimes = timetable.schoolTimes;
 
     final reducedClassHoursEnabled = TimetableManager().settings.getVar<bool>(
           Settings.reducedClassHoursEnabledKey,
@@ -82,7 +89,8 @@ class _TimetableWidgetState extends State<TimetableWidget> {
       Future.delayed(
         Duration.zero,
         () {
-          if (!mounted) return;
+          if (!mounted || _alreadyShowedErrorBecauseOfReducedHours) return;
+          _alreadyShowedErrorBecauseOfReducedHours = true;
 
           Utils.showInfo(
             context,
@@ -96,11 +104,12 @@ class _TimetableWidgetState extends State<TimetableWidget> {
       return;
     }
 
-    if (reducedClassHours.length < widget.timetable.schoolTimes.length) {
+    if (reducedClassHours.length < timetable.schoolTimes.length) {
       Future.delayed(
         Duration.zero,
         () {
-          if (!mounted) return;
+          if (!mounted || _alreadyShowedErrorBecauseOfReducedHours) return;
+          _alreadyShowedErrorBecauseOfReducedHours = true;
 
           Utils.showInfo(
             context,
@@ -114,36 +123,35 @@ class _TimetableWidgetState extends State<TimetableWidget> {
       return;
     }
 
-    while (reducedClassHours.length > widget.timetable.schoolTimes.length) {
+    while (reducedClassHours.length > timetable.schoolTimes.length) {
       reducedClassHours.removeLast();
     }
 
     ttSchoolTimes = reducedClassHours;
-
-    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
+    final currTimetableWeek = widget.timetable;
     selectedColor = Theme.of(context).colorScheme.secondary.withAlpha(30);
 
     unselectedColor = Colors.transparent;
 
     lessonWidth = (MediaQuery.of(context).size.width * 0.8) /
-        (widget.timetable.schoolDays.length + 1);
+        (currTimetableWeek.schoolDays.length + 1);
     if (lessonWidth < minLessonWidth) {
       lessonWidth = minLessonWidth;
     }
 
     lessonHeight = (MediaQuery.of(context).size.height * 0.8) /
-        (widget.timetable.maxLessonCount);
+        (currTimetableWeek.maxLessonCount);
     if (lessonHeight < minLessonHeight) {
       lessonHeight = minLessonHeight;
     }
 
     return SizedBox(
-      width: lessonWidth * (widget.timetable.schoolDays.length + 1),
-      height: lessonHeight * (widget.timetable.maxLessonCount + 1) +
+      width: lessonWidth * (currTimetableWeek.schoolDays.length + 1),
+      height: lessonHeight * (currTimetableWeek.maxLessonCount + 1) +
           lessonHeight / 4, //_createBreakHighlight
       child: PageView.builder(
         itemCount: pagesCount,
@@ -158,8 +166,6 @@ class _TimetableWidgetState extends State<TimetableWidget> {
   Widget _createPage(int pageIndex) {
     int currWeekIndex = pageIndex - initialPageIndex;
 
-    Timetable tt = widget.timetable;
-
     DateTime currMonday = Utils.getWeekDay(
       DateTime.now().copyWith(
         hour: 0,
@@ -173,6 +179,10 @@ class _TimetableWidgetState extends State<TimetableWidget> {
       Duration(days: 7 * currWeekIndex),
     );
 
+    Timetable tt = widget.timetable.getWeekTimetableForDateTime(currMonday);
+
+    _updateTtSchoolTimes(tt);
+
     this.currWeekIndex = Utils.getWeekIndex(currMonday);
     currYear = currMonday.year;
 
@@ -184,6 +194,7 @@ class _TimetableWidgetState extends State<TimetableWidget> {
       Widget dayWidget = _createDay(
         dayIndex: dayIndex,
         currMonday: currMonday,
+        tt: tt,
       );
       dayWidgets.add(dayWidget);
     }
@@ -290,9 +301,9 @@ class _TimetableWidgetState extends State<TimetableWidget> {
   Widget _createDay({
     required int dayIndex,
     required DateTime currMonday,
+    required Timetable tt,
   }) {
-    final tt = widget.timetable;
-    final day = widget.timetable.schoolDays[dayIndex];
+    final day = tt.schoolDays[dayIndex];
 
     List<Widget> lessonWidgets = [];
 
@@ -420,7 +431,9 @@ class _TimetableWidgetState extends State<TimetableWidget> {
                     child: Align(
                       alignment: Alignment.bottomRight,
                       child: Text(
-                        "!",
+                        customTask?.finished ?? false
+                            ? Timetable.tickMark
+                            : Timetable.exclamationMark,
                         textAlign: TextAlign.justify,
                         style: GoogleFonts.dmSerifDisplay(
                           textStyle: Theme.of(context)
@@ -442,7 +455,9 @@ class _TimetableWidgetState extends State<TimetableWidget> {
                     child: Align(
                       alignment: Alignment.bottomRight,
                       child: Text(
-                        "!",
+                        customTask?.finished ?? false
+                            ? Timetable.tickMark
+                            : Timetable.exclamationMark,
                         textAlign: TextAlign.justify,
                         style: GoogleFonts.dmSerifDisplay(
                           textStyle: Theme.of(context)
@@ -687,32 +702,39 @@ class _CustomPopUpShowLessonState extends State<CustomPopUpShowLesson> {
                   onPressed: widget.event == null
                       ? null
                       : () async {
+                          final event = widget.event;
+                          if (event == null) return;
+
                           bool removeTodoEvent =
                               await Utils.showBoolInputDialog(
                             context,
                             question: AppLocalizationsManager.localizations
                                 .strDoYouWantToDeleteTaskX(
-                              widget.event!.linkedSubjectName,
+                              event.linkedSubjectName,
                             ),
-                            description: widget.event!.endTime == null
+                            description: event.endTime == null
                                 ? AppLocalizationsManager.localizations
                                     .strNoEndDate //kann nicht eintreten eigentlich
-                                : "(${Utils.dateToString(widget.event!.endTime!)})",
+                                : "(${Utils.dateToString(event.endTime!)})",
                             showYesAndNoInsteadOfOK: true,
                             markTrueAsRed: true,
                           );
                           if (!removeTodoEvent || !context.mounted) return;
+                          bool deleteNote = false;
 
-                          final deleteNote = await Utils.showBoolInputDialog(
-                            context,
-                            question: AppLocalizationsManager
-                                .localizations.strDoYouWantToDeleteLinkedNote,
-                            showYesAndNoInsteadOfOK: true,
-                            markTrueAsRed: true,
-                          );
+                          if (event.linkedSchoolNote != null) {
+                            final delete = await Utils.showBoolInputDialog(
+                              context,
+                              question: AppLocalizationsManager
+                                  .localizations.strDoYouWantToDeleteLinkedNote,
+                              showYesAndNoInsteadOfOK: true,
+                              markTrueAsRed: true,
+                            );
+                            deleteNote = delete;
+                          }
 
                           TimetableManager().removeTodoEvent(
-                            widget.event!,
+                            event,
                             deleteLinkedSchoolNote: deleteNote,
                           );
 

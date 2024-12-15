@@ -62,6 +62,16 @@ class Utils {
     String? newRoom,
     Color? newColor,
   }) {
+    for (var tt in timetable.weekTimetables) {
+      updateTimetableLessons(
+        tt,
+        prefab,
+        newName: newName,
+        newTeacher: newTeacher,
+        newRoom: newRoom,
+        newColor: newColor,
+      );
+    }
     for (int schoolDayIndex = 0;
         schoolDayIndex < timetable.schoolDays.length;
         schoolDayIndex++) {
@@ -408,8 +418,8 @@ class Utils {
   static double getMobileRatio() => 9 / 16;
 
   static double getAspectRatio(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-    final height = MediaQuery.of(context).size.height;
+    final width = MediaQuery.sizeOf(context).width;
+    final height = MediaQuery.sizeOf(context).height;
 
     return width / height;
   }
@@ -567,8 +577,19 @@ class Utils {
     Timetable? selectedTimetable = Utils.getHomescreenTimetable();
     if (selectedTimetable == null) return false;
 
-    List<SchoolLessonPrefab> selectedTimetablePrefabs =
-        selectedTimetable.lessonPrefabs;
+    Map<String, SchoolLessonPrefab> prefabs = {};
+
+    for (var p in selectedTimetable.lessonPrefabs) {
+      prefabs[p.name] = p;
+    }
+
+    for (var tt in selectedTimetable.weekTimetables) {
+      for (var p in tt.lessonPrefabs) {
+        prefabs[p.name] = p;
+      }
+    }
+
+    List<SchoolLessonPrefab> selectedTimetablePrefabs = prefabs.values.toList();
 
     final isCustomTask = !selectedTimetablePrefabs.any(
       (element) => element.name == linkedSubjectName,

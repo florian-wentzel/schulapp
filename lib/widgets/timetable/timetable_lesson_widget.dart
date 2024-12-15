@@ -211,7 +211,9 @@ class _TimetableLessonWidgetState extends State<TimetableLessonWidget> {
                         child: Align(
                           alignment: Alignment.bottomRight,
                           child: Text(
-                            "!",
+                            widget.currEvent?.finished ?? false
+                                ? Timetable.tickMark
+                                : Timetable.exclamationMark,
                             textAlign: TextAlign.justify,
                             style: GoogleFonts.dmSerifDisplay(
                               textStyle: Theme.of(context)
@@ -234,7 +236,9 @@ class _TimetableLessonWidgetState extends State<TimetableLessonWidget> {
                         child: Align(
                           alignment: Alignment.bottomRight,
                           child: Text(
-                            "!",
+                            widget.currEvent?.finished ?? false
+                                ? Timetable.tickMark
+                                : Timetable.exclamationMark,
                             textAlign: TextAlign.justify,
                             style: GoogleFonts.dmSerifDisplay(
                               textStyle: Theme.of(context)

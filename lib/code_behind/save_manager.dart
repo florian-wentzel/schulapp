@@ -604,11 +604,30 @@ class SaveManager {
     File(path).writeAsStringSync(fileContent);
   }
 
+  bool renameTimetable(Timetable timetable, String originalName) {
+    if (timetable.name == originalName) return true;
+
+    Directory timetableDir = getTimetableDir(
+      Timetable.placeholderName(originalName),
+    );
+
+    try {
+      timetableDir.renameSync(join(getTimetablesDir().path, timetable.name));
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Directory getTimetableDir(Timetable tt) {
+    String timetableDirPath = join(getTimetablesDir().path, tt.name);
+
+    return Directory(timetableDirPath);
+  }
+
   bool delteTimetable(Timetable timetable) {
     try {
-      String timetableDirPath = join(getTimetablesDir().path, timetable.name);
-
-      Directory timetableDir = Directory(timetableDirPath);
+      Directory timetableDir = getTimetableDir(timetable);
 
       if (timetableDir.existsSync()) {
         timetableDir.deleteSync(recursive: true);

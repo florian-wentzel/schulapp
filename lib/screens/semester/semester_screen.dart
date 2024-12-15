@@ -318,6 +318,7 @@ class _SemesterScreenState extends State<SemesterScreen> {
   Future<List<SchoolGradeSubject>?> _showImportSubjectsSheet(
       BuildContext context) async {
     Timetable? timetable;
+
     await Utils.showListSelectionBottomSheet(
       context,
       title:
@@ -338,7 +339,18 @@ class _SemesterScreenState extends State<SemesterScreen> {
 
     if (timetable == null) return null;
 
-    List<SchoolLessonPrefab> lessonPrefabs = timetable!.lessonPrefabs;
+    Map<String, SchoolLessonPrefab> prefabs = {};
+
+    for (var p in timetable!.lessonPrefabs) {
+      prefabs[p.name] = p;
+    }
+
+    for (var tt in timetable!.weekTimetables) {
+      for (var p in tt.lessonPrefabs) {
+        prefabs[p.name] = p;
+      }
+    }
+    List<SchoolLessonPrefab> lessonPrefabs = prefabs.values.toList();
 
     List<SchoolGradeSubject> subjects = List.generate(
       lessonPrefabs.length,

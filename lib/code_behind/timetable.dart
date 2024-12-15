@@ -9,17 +9,26 @@ import 'package:schulapp/code_behind/school_lesson_prefab.dart';
 import 'package:schulapp/code_behind/school_time.dart';
 import 'package:schulapp/code_behind/special_lesson.dart';
 import 'package:schulapp/code_behind/timetable_manager.dart';
+import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/extensions.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 
 class WeekTimetable extends Timetable {
+  Timetable parent;
+
+  @override
+  UnmodifiableListView<WeekTimetable> get weekTimetables =>
+      UnmodifiableListView([]);
+
   WeekTimetable({
     required super.name,
     required super.maxLessonCount,
     required super.schoolDays,
     required super.schoolTimes,
+    required this.parent,
   }) : super(
           weekTimetables: null,
+          yearStartedWithWeekIndex: -1,
         );
 
   static WeekTimetable fromTimetable({
@@ -31,6 +40,7 @@ class WeekTimetable extends Timetable {
       maxLessonCount: timetable.maxLessonCount,
       schoolTimes: timetable.copy().schoolTimes,
       schoolDays: timetable.copy().schoolDays,
+      parent: timetable,
     );
   }
 
@@ -38,6 +48,7 @@ class WeekTimetable extends Timetable {
   WeekTimetable copy() {
     return WeekTimetable(
       name: name,
+      parent: parent,
       maxLessonCount: maxLessonCount,
       schoolDays: List.generate(
         schoolDays.length,
@@ -50,7 +61,53 @@ class WeekTimetable extends Timetable {
     );
   }
 
-  static WeekTimetable? fromJson(Map<String, dynamic>? json) {
+  @override
+  void setSpecialLesson({
+    required int weekIndex,
+    required int year,
+    required CancelledSpecialLesson specialLesson,
+  }) {
+    TimetableManager().setSpecialLesson(
+      timetable: parent,
+      year: year,
+      weekIndex: weekIndex,
+      specialLesson: specialLesson,
+    );
+  }
+
+  @override
+  bool isSpecialLesson({
+    required int year,
+    required int weekIndex,
+    required int schoolDayIndex,
+    required int schoolTimeIndex,
+  }) {
+    return TimetableManager().isSpecialLesson(
+      timetable: parent,
+      year: year,
+      weekIndex: weekIndex,
+      schoolDayIndex: schoolDayIndex,
+      schoolTimeIndex: schoolTimeIndex,
+    );
+  }
+
+  @override
+  void removeSpecialLesson({
+    required int year,
+    required int weekIndex,
+    required int dayIndex,
+    required int timeIndex,
+  }) {
+    TimetableManager().removeSpecialLesson(
+      timetable: parent,
+      year: year,
+      weekIndex: weekIndex,
+      dayIndex: dayIndex,
+      timeIndex: timeIndex,
+    );
+  }
+
+  static WeekTimetable? fromJson(Map<String, dynamic>? json, Timetable parent) {
     if (json == null) return null;
 
     WeekTimetable? timetable;
@@ -65,6 +122,7 @@ class WeekTimetable extends Timetable {
 
       timetable = WeekTimetable(
         name: n,
+        parent: parent,
         maxLessonCount: mlc,
         schoolDays: List.generate(
           ds.length,
@@ -84,7 +142,11 @@ class WeekTimetable extends Timetable {
 }
 
 class Timetable {
-  //TODO: Wieviele?!
+  static const exclamationMark = "!";
+  static const tickMark = "✓";
+
+  //immer einer mehr als man letztendlich einstellen kann
+  //also 4
   static final weekNames = UnmodifiableListView<String>(
     <String>[
       "A",
@@ -92,12 +154,6 @@ class Timetable {
       "C",
       "D",
       "E",
-      "F",
-      "G",
-      "H",
-      "I",
-      "J",
-      "K",
     ],
   );
 
@@ -107,6 +163,7 @@ class Timetable {
 
   static const nameKey = "name";
   static const maxLessonCountKey = "maxLessonCount";
+  static const yearStartedWithWeekIndexKey = "yearStartedWithWeekIndex";
   static const schoolDaysKey = "days";
   static const schoolTimesKey = "times";
   static const weekTimetablesKey = "bWeekTimetable";
@@ -239,10 +296,16 @@ class Timetable {
     ];
   }
 
+  //index
+  int _yearStartedWithWeekIndex;
   List<WeekTimetable>? _weekTimetables;
-  UnmodifiableListView<WeekTimetable>? get weekTimetables {
+  UnmodifiableListView<WeekTimetable> get weekTimetables {
     final weekTimetables = _weekTimetables;
-    if (weekTimetables == null) return null;
+    if (weekTimetables == null) {
+      return UnmodifiableListView(
+        [],
+      );
+    }
     return UnmodifiableListView(weekTimetables);
   }
 
@@ -316,8 +379,10 @@ class Timetable {
     required List<SchoolDay> schoolDays,
     required List<SchoolTime> schoolTimes,
     required List<WeekTimetable>? weekTimetables,
+    int yearStartedWithWeekIndex = -1,
   })  : _name = name,
         _maxLessonCount = maxLessonCount,
+        _yearStartedWithWeekIndex = yearStartedWithWeekIndex,
         _schoolDays = schoolDays,
         _schoolTimes = schoolTimes,
         _weekTimetables = weekTimetables;
@@ -326,34 +391,112 @@ class Timetable {
     String subjectName,
   ) {
     //-1 kann man weglassen weil die Stude am heutigen Tag ruhig ignoriert werden kann
-    int currDayIndex = DateTime.now().weekday.clamp(0, _schoolDays.length);
+    int currDayIndex = DateTime.now().weekday.clamp(0, schoolDays.length);
 
+    int nextWeekIndex = -1;
     int nextDayIndex = -1;
     int nextLessonIndex = -1;
 
+    List<Timetable> allWeekTimetables = <Timetable>[this, ...weekTimetables];
+
+    int currWeekTimetableIndex = getCurrWeekTimetableIndex();
+
+    if (currWeekTimetableIndex != -1) {
+      //allWeekTimetables sortieren also welche woche heute ist, muss ganz vorne sein
+      allWeekTimetables = allWeekTimetables.sublist(
+        currWeekTimetableIndex,
+      )..addAll(
+          allWeekTimetables.sublist(
+            0,
+            currWeekTimetableIndex,
+          ),
+        );
+    }
+
     outerLoop:
-    for (int i = 0; i < _schoolDays.length; i++) {
-      int index = (i + currDayIndex) % (_schoolDays.length);
-      final schoolDay = _schoolDays[index];
-      for (int j = 0; j < schoolDay.lessons.length; j++) {
-        final schoolLesson = schoolDay.lessons[j];
-        if (schoolLesson.name == subjectName) {
-          nextDayIndex = index;
-          nextLessonIndex = j;
-          break outerLoop;
+    for (int weekIndex = 0; weekIndex < allWeekTimetables.length; weekIndex++) {
+      final tt = allWeekTimetables[weekIndex];
+
+      int startForI = 0;
+
+      if (weekIndex == 0) {
+        startForI = currDayIndex;
+      }
+
+      for (int i = startForI; i < tt.schoolDays.length; i++) {
+        final schoolDay = tt.schoolDays[i];
+        for (int j = 0; j < schoolDay.lessons.length; j++) {
+          final schoolLesson = schoolDay.lessons[j];
+          if (schoolLesson.name == subjectName) {
+            nextDayIndex = i;
+            nextLessonIndex = j;
+            nextWeekIndex = weekIndex;
+            break outerLoop;
+          }
         }
       }
     }
 
-    if (nextDayIndex == -1 || nextLessonIndex == -1) return DateTime.now();
+    //falls nextDayIndex oder nextLessonIndex oder nextWeekIndex nicht gesetzt wurden sind gehen wir davon aus
+    //dass vielleicht die Tage die wir oben überspringen mussten ein Match gewesen wären
+    //also z.B. wenn sie keine B-Woche haben
+    if (nextDayIndex == -1 || nextLessonIndex == -1 || nextWeekIndex == -1) {
+      final tt = allWeekTimetables[0];
+      outerLoop:
+      for (int i = 0; i < tt.schoolDays.length; i++) {
+        int index = (i + currDayIndex) % (tt.schoolDays.length);
 
-    final schoolTime = schoolTimes[nextLessonIndex].start;
+        final schoolDay = tt.schoolDays[index];
+        for (int j = 0; j < schoolDay.lessons.length; j++) {
+          final schoolLesson = schoolDay.lessons[j];
+          if (schoolLesson.name == subjectName) {
+            nextDayIndex = index;
+            nextLessonIndex = j;
+            //wir müssen dann sagen, dass es die woche nach allen ist,
+            //weil wir sonst die aufgabe in dergleichen machen würden
+            //aber nur wenn wir AB-Wochen haben
+            if (allWeekTimetables.length == 1) {
+              nextWeekIndex = -1;
+            } else {
+              nextWeekIndex = allWeekTimetables.length;
+            }
+            break outerLoop;
+          }
+        }
+      }
+    }
 
-    if (nextDayIndex < currDayIndex) {
-      //es ist erst nächste woche
+    if (nextDayIndex == -1 ||
+        nextLessonIndex == -1 ||
+        (nextWeekIndex == -1 && currWeekTimetableIndex != -1)) {
+      return DateTime.now();
+    }
+
+    if (nextWeekIndex == -1) {
+      final schoolTime = schoolTimes[nextLessonIndex].start;
+
+      if (nextDayIndex < currDayIndex) {
+        //es ist erst nächste woche
+        final lessonDate = DateTime.now().add(
+          Duration(
+            days: nextDayIndex -
+                (DateTime.now().weekday - 1) +
+                DateTime.daysPerWeek,
+          ),
+        );
+
+        return DateTime(
+          lessonDate.year,
+          lessonDate.month,
+          lessonDate.day,
+          schoolTime.hour,
+          schoolTime.minute,
+        );
+      }
+      //diese woche
       final lessonDate = DateTime.now().add(
         Duration(
-          days: nextDayIndex - (DateTime.now().weekday - 1) + 7,
+          days: (nextDayIndex - (currDayIndex - 1).abs()),
         ),
       );
 
@@ -365,10 +508,22 @@ class Timetable {
         schoolTime.minute,
       );
     }
+
+    //wenn wir AB-Wochen haben
+    Timetable selectedTT;
+    if (nextWeekIndex == allWeekTimetables.length) {
+      selectedTT = allWeekTimetables.first;
+    } else {
+      selectedTT = allWeekTimetables[nextWeekIndex];
+    }
+    final schoolTime = selectedTT.schoolTimes[nextLessonIndex].start;
+
     //diese woche
     final lessonDate = DateTime.now().add(
       Duration(
-        days: (nextDayIndex - (currDayIndex - 1).abs()),
+        days: (nextDayIndex -
+            (currDayIndex - 1).abs() +
+            DateTime.daysPerWeek * nextWeekIndex),
       ),
     );
 
@@ -398,6 +553,7 @@ class Timetable {
     try {
       String n = json[nameKey];
       int mlc = json[maxLessonCountKey]; //maxLessonCount
+      int yearStartedWithWeekIndex = json[yearStartedWithWeekIndexKey] ?? -1;
       List<Map<String, dynamic>> ds = (json[schoolDaysKey] as List).cast();
       List<Map<String, dynamic>> ts = (json[schoolTimesKey] as List).cast();
       List<Map<String, dynamic>>? ws =
@@ -405,20 +561,10 @@ class Timetable {
 
       List<WeekTimetable>? weeks;
 
-      if (ws != null) {
-        weeks = [];
-        for (int i = 0; i < ws.length; i++) {
-          final tt = WeekTimetable.fromJson(ws[i]);
-
-          if (tt == null) continue;
-
-          weeks.add(tt);
-        }
-      }
-
       timetable = Timetable(
         name: n,
         maxLessonCount: mlc,
+        yearStartedWithWeekIndex: yearStartedWithWeekIndex,
         schoolDays: List.generate(
           ds.length,
           (index) => SchoolDay.fromJson(ds[index]),
@@ -427,8 +573,21 @@ class Timetable {
           ts.length,
           (index) => SchoolTime.fromJson(ts[index]),
         ),
-        weekTimetables: weeks,
+        weekTimetables: null,
       );
+
+      if (ws != null) {
+        weeks = [];
+        for (int i = 0; i < ws.length; i++) {
+          final tt = WeekTimetable.fromJson(ws[i], timetable);
+
+          if (tt == null) continue;
+
+          weeks.add(tt);
+        }
+      }
+
+      timetable.setWeekTimetables(weeks);
     } catch (e) {
       debugPrint(e.toString());
     }
@@ -442,6 +601,7 @@ class Timetable {
     return {
       nameKey: name,
       maxLessonCountKey: maxLessonCount,
+      yearStartedWithWeekIndexKey: _yearStartedWithWeekIndex,
       schoolTimesKey: List<Map<String, dynamic>>.generate(
         schoolTimes.length,
         (index) => schoolTimes[index].toJson(),
@@ -491,6 +651,7 @@ class Timetable {
     return Timetable(
       name: name,
       maxLessonCount: maxLessonCount,
+      yearStartedWithWeekIndex: _yearStartedWithWeekIndex,
       schoolDays: List.generate(
         schoolDays.length,
         (index) => schoolDays[index].clone(),
@@ -513,6 +674,8 @@ class Timetable {
     _maxLessonCount = ttCopy.maxLessonCount;
     _schoolDays = ttCopy.schoolDays;
     _schoolTimes = ttCopy.schoolTimes;
+    _weekTimetables = ttCopy._weekTimetables;
+    _yearStartedWithWeekIndex = ttCopy._yearStartedWithWeekIndex;
   }
 
   void addLesson() {
@@ -537,6 +700,10 @@ class Timetable {
       SchoolTime(start: start, end: end),
     );
     _maxLessonCount++;
+
+    for (final tt in weekTimetables) {
+      tt.addLesson();
+    }
   }
 
   void removeLesson() {
@@ -548,6 +715,10 @@ class Timetable {
     }
     _schoolTimes.removeLast();
     _maxLessonCount--;
+
+    for (final tt in weekTimetables) {
+      tt.removeLesson();
+    }
   }
 
   bool isSpecialLesson({
@@ -597,7 +768,7 @@ class Timetable {
     final weekTts = _weekTimetables;
     if (weekTts == null) return true;
 
-    return weekTts.length < weekNames.length - 1;
+    return weekTts.length < weekNames.length - 2;
   }
 
   void addAnotherWeek() {
@@ -610,6 +781,8 @@ class Timetable {
           timetable: this,
         ),
       ];
+
+      setCurrWeekTimetableIndex(0);
       return;
     }
 
@@ -619,5 +792,94 @@ class Timetable {
         timetable: this,
       ),
     );
+    setCurrWeekTimetableIndex(0);
+  }
+
+  static Timetable placeholderName(String originalName) => Timetable(
+        name: originalName,
+        maxLessonCount: 0,
+        schoolDays: [],
+        schoolTimes: [],
+        weekTimetables: null,
+      );
+
+  void removeWeekX(int index) {
+    if (index < 0 || index > (_weekTimetables?.length ?? 0)) {
+      return;
+    }
+
+    _weekTimetables?.removeAt(
+      index,
+    );
+  }
+
+  int getCurrWeekTimetableIndex() {
+    return getWeekTimetableIndexForDateTime(
+      DateTime.now(),
+    );
+  }
+
+  int getWeekTimetableIndexForDateTime(DateTime date) {
+    if (_yearStartedWithWeekIndex == -1) {
+      return -1;
+    }
+
+    //get first week index
+    int currWeekIndex = Utils.getWeekIndex(
+          date,
+        ) -
+        1;
+
+    int correctedWeekIndex = (currWeekIndex + _yearStartedWithWeekIndex) %
+        (weekTimetables.length + 1);
+
+    return correctedWeekIndex;
+  }
+
+  void setCurrWeekTimetableIndex(int currWeekTimetableIndex) {
+    //get first week index
+    int currWeekIndex = Utils.getWeekIndex(
+          DateTime.now(),
+        ) -
+        1;
+
+    //wir gehen davon aus, dass _yearStartedWithWeekIndex = 0 ist um es dann später zu bestimmen
+    int correctedIndex = (currWeekIndex + 0) % (weekTimetables.length + 1);
+
+    if (currWeekTimetableIndex < correctedIndex) {
+      _yearStartedWithWeekIndex = (weekTimetables.length + 1) -
+          (currWeekTimetableIndex - correctedIndex).abs();
+      return;
+    }
+
+    if (currWeekTimetableIndex > correctedIndex) {
+      _yearStartedWithWeekIndex =
+          (currWeekTimetableIndex - correctedIndex).abs();
+      return;
+    }
+
+    //wenn schon beide indecies gleich sind wissen wir dass _yearStartedWithWeekIndex = 0 ist
+    _yearStartedWithWeekIndex = 0;
+  }
+
+  Timetable getCurrWeekTimetable() {
+    return getWeekTimetableForDateTime(
+      DateTime.now(),
+    );
+  }
+
+  Timetable getWeekTimetableForDateTime(DateTime date) {
+    int index = getWeekTimetableIndexForDateTime(date);
+
+    //wenn _yearStartedWithWeekIndex nicht gesetzt ist, dann ist index = -1
+    if (index <= 0) {
+      return this;
+    }
+
+    return weekTimetables[index - 1];
+  }
+
+  void setWeekTimetables(List<WeekTimetable>? weeks) {
+    _weekTimetables = weeks;
   }
 }

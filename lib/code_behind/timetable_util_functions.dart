@@ -168,8 +168,19 @@ Future<(String, bool)?> showSelectSubjectNameSheet(
   Timetable? selectedTimetable = Utils.getHomescreenTimetable();
   if (selectedTimetable == null) return null;
 
-  List<SchoolLessonPrefab> selectedTimetablePrefabs =
-      selectedTimetable.lessonPrefabs;
+  Map<String, SchoolLessonPrefab> prefabs = {};
+
+  for (var p in selectedTimetable.lessonPrefabs) {
+    prefabs[p.name] = p;
+  }
+
+  for (var tt in selectedTimetable.weekTimetables) {
+    for (var p in tt.lessonPrefabs) {
+      prefabs[p.name] = p;
+    }
+  }
+
+  List<SchoolLessonPrefab> selectedTimetablePrefabs = prefabs.values.toList();
 
   selectedTimetablePrefabs.sort(
     (a, b) => a.name.compareTo(b.name),

@@ -293,5 +293,11 @@
   "strAt": "Um",
   "strShareYourTimetable": "Teile deinen Stundenplan!",
   "strDayProgress": "Tagesfortschritt",
-  "strAddXWeek": "{weekName}-Woche hinzufügen"
+  "strAddXWeek": "{weekName}-Woche hinzufügen",
+  "strRemoveXWeek": "{weekName}-Woche entfernen",
+  "strXWeek": "{weekName}-Woche",
+  "strDoYouWantToRemoveWeekX": "Möchtest Du die {weekName}-Woche löschen?",
+  "strDoYouWantToOverrideTimetableX": "Möchtest du den Stundenplan \"{timetableName}\" wirklich überschreiben?",
+  "strSetXWeekAsTheCurrentWeek": "{weekName}-Woche als aktuelle Woche setzen",
+  "strCurrentWeek": "(Jetztige Woche)"
 }

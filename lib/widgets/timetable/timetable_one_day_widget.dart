@@ -15,13 +15,12 @@ import 'package:schulapp/widgets/strike_through_container.dart';
 import 'package:schulapp/widgets/timetable/time_to_next_lesson_widget.dart';
 import 'package:schulapp/widgets/timetable/timetable_lesson_widget.dart';
 
-// ignore: must_be_immutable
 class TimetableOneDayWidget extends StatefulWidget {
-  Timetable timetable;
-  bool showTodoEvents;
-  Size? logicalSize;
+  final Timetable timetable;
+  final bool showTodoEvents;
+  final Size? logicalSize;
 
-  TimetableOneDayWidget({
+  const TimetableOneDayWidget({
     super.key,
     required this.timetable,
     required this.showTodoEvents,
@@ -51,13 +50,17 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
   late int currWeekIndex;
   late int currYear;
 
+  bool _alreadyShowedErrorBecauseOfReducedHours = false;
+
   @override
   void initState() {
     super.initState();
 
+    final currWeekTimetable = widget.timetable.getCurrWeekTimetable();
+
     int showNextWeek = 0;
     if (DateTime.now().weekday == DateTime.sunday) {
-      showNextWeek = widget.timetable.schoolDays.length;
+      showNextWeek = currWeekTimetable.schoolDays.length;
     }
     _pageController = PageController(
       initialPage: initialMondayPageIndex +
@@ -65,7 +68,13 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
           showNextWeek,
     );
 
-    ttSchoolTimes = widget.timetable.schoolTimes;
+    _updateTtSchoolTimes(currWeekTimetable);
+
+    setState(() {});
+  }
+
+  void _updateTtSchoolTimes(Timetable timetable) {
+    ttSchoolTimes = timetable.schoolTimes;
 
     final reducedClassHoursEnabled = TimetableManager().settings.getVar<bool>(
           Settings.reducedClassHoursEnabledKey,
@@ -84,7 +93,8 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
       Future.delayed(
         Duration.zero,
         () {
-          if (!mounted) return;
+          if (!mounted || _alreadyShowedErrorBecauseOfReducedHours) return;
+          _alreadyShowedErrorBecauseOfReducedHours = true;
 
           Utils.showInfo(
             context,
@@ -98,11 +108,12 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
       return;
     }
 
-    if (reducedClassHours.length < widget.timetable.schoolTimes.length) {
+    if (reducedClassHours.length < timetable.schoolTimes.length) {
       Future.delayed(
         Duration.zero,
         () {
-          if (!mounted) return;
+          if (!mounted || _alreadyShowedErrorBecauseOfReducedHours) return;
+          _alreadyShowedErrorBecauseOfReducedHours = true;
 
           Utils.showInfo(
             context,
@@ -116,17 +127,16 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
       return;
     }
 
-    while (reducedClassHours.length > widget.timetable.schoolTimes.length) {
+    while (reducedClassHours.length > timetable.schoolTimes.length) {
       reducedClassHours.removeLast();
     }
 
     ttSchoolTimes = reducedClassHours;
-
-    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
+    final currTimetableWeek = widget.timetable;
     double mediaQueryWidth = -1;
     double mediaQueryHeight = -1;
 
@@ -143,8 +153,9 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
       lessonWidth = minLessonWidth;
     }
 
+    //es könnte deswegen noch fehler geben
     lessonHeight =
-        mediaQueryHeight * 0.8 / (widget.timetable.maxLessonCount + 1);
+        mediaQueryHeight * 0.8 / (currTimetableWeek.maxLessonCount + 1);
 
     if (lessonHeight < minLessonHeight) {
       lessonHeight = minLessonHeight;
@@ -172,12 +183,13 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
       return _createDay(
         currMonday: currMonday,
         dayIndex: Utils.getCurrentWeekDayIndex(),
+        tt: widget.timetable.getWeekTimetableForDateTime(currMonday),
       );
     }
 
     return SizedBox(
       width: lessonWidth * 2,
-      height: lessonHeight * (widget.timetable.maxLessonCount + 1) +
+      height: lessonHeight * (currTimetableWeek.maxLessonCount + 1) +
           lessonHeight / 4, //_createBreakHighlight
       child: PageView.builder(
         controller: _pageController,
@@ -214,9 +226,12 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
           this.currWeekIndex = Utils.getWeekIndex(currMonday);
           currYear = currMonday.year;
 
+          tt = widget.timetable.getWeekTimetableForDateTime(currMonday);
+
           return _createDay(
             dayIndex: currDayIndex,
             currMonday: currMonday,
+            tt: tt,
           );
         },
       ),
@@ -306,8 +321,9 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
   Widget _createDay({
     required DateTime currMonday,
     required int dayIndex,
+    required Timetable tt,
   }) {
-    final tt = widget.timetable;
+    _updateTtSchoolTimes(tt);
     final day = tt.schoolDays[dayIndex];
 
     List<Widget> lessonWidgets = [];
@@ -332,7 +348,7 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
                 int currDayIndex = Utils.getCurrentWeekDayIndex();
                 int showNextWeek = 0;
                 if (DateTime.now().weekday == DateTime.sunday) {
-                  showNextWeek = widget.timetable.schoolDays.length;
+                  showNextWeek = tt.schoolDays.length;
                 }
                 _pageController.animateToPage(
                   initialMondayPageIndex + currDayIndex + showNextWeek,
@@ -437,7 +453,9 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
                     child: Align(
                       alignment: Alignment.bottomRight,
                       child: Text(
-                        "!",
+                        customTask?.finished ?? false
+                            ? Timetable.tickMark
+                            : Timetable.exclamationMark,
                         textAlign: TextAlign.justify,
                         style: GoogleFonts.dmSerifDisplay(
                           textStyle: Theme.of(context)
@@ -459,7 +477,9 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
                     child: Align(
                       alignment: Alignment.bottomRight,
                       child: Text(
-                        "!",
+                        customTask?.finished ?? false
+                            ? Timetable.tickMark
+                            : Timetable.exclamationMark,
                         textAlign: TextAlign.justify,
                         style: GoogleFonts.dmSerifDisplay(
                           textStyle: Theme.of(context)

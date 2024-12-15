@@ -25,6 +25,11 @@ class TimetableManager {
 
   List<Timetable> get timetables {
     _timetables ??= SaveManager().loadAllTimetables(); //load timetable
+
+    _timetables?.sort(
+      (a, b) => a.name.compareTo(b.name),
+    );
+
     return _timetables!;
   }
 
@@ -106,48 +111,84 @@ class TimetableManager {
   }
 
   ///Adds the [Timetable] and saves it to lokal storage
-  ///replaces the [Timetable] when it already exists
-  void addOrChangeTimetable(Timetable timetable, {String? originalName}) {
-    if (originalName != null) {
-      //um sicher zu gehen das er wirklich gelöscht wird
-      SaveManager().delteTimetable(
-        Timetable(
-          name: originalName,
-          maxLessonCount: 0,
-          schoolDays: [],
-          schoolTimes: [],
-          weekTimetables: null,
-        ),
+  ///replaces the [Timetable] when it already exists and [onAlreadyExists] returns true
+  Future<bool> addOrChangeTimetable(
+    Timetable timetable, {
+    required String? originalName,
+    Future<bool> Function()? onAlreadyExists,
+  }) async {
+    try {
+      final alreadyExists = timetables.any(
+        (element) => element.name == timetable.name,
       );
+      //wenn original name null ist dann wurde der stundenplan neu erstellt
+      //das heißt dass man ihn nicht kopieren muss
+      if (originalName == null) {
+        //testen ob es den neuen namen schon gibt
+        if (alreadyExists) {
+          final replace = await onAlreadyExists?.call() ?? false;
+          if (!replace) {
+            return false;
+          }
 
-      if (timetables.any((element) => element.name == originalName)) {
-        // throw Exception("there is already a timetable called: ${timetable.name}");
-        final tt =
-            timetables.firstWhere((element) => element.name == originalName);
+          final tt = timetables.cast<Timetable?>().firstWhere(
+                (element) => element?.name == timetable.name,
+              );
 
-        bool removed = removeTimetable(tt);
+          if (tt != null) {
+            removeTimetable(tt);
+          }
 
-        if (!removed) {
-          debugPrint("timetable ${tt.name} could not be removed");
+          _timetables?.add(timetable);
+
+          SaveManager().saveTimetable(timetable);
+
+          return true;
+        }
+        //muss erstellt werden
+        _timetables?.add(timetable);
+        SaveManager().saveTimetable(timetable);
+        return true;
+      }
+
+      //fragen ob man überschreiben möchte
+      if (timetable.name != originalName && alreadyExists) {
+        final replace = await onAlreadyExists?.call() ?? false;
+        if (!replace) {
+          return false;
         }
       }
-    }
 
-    if (timetables.any((element) => element.name == timetable.name)) {
-      // throw Exception("there is already a timetable called: ${timetable.name}");
-      final tt =
-          timetables.firstWhere((element) => element.name == timetable.name);
+      SaveManager().renameTimetable(timetable, originalName);
 
-      bool removed = _timetables!.remove(tt);
+      final mainTimetableName = TimetableManager().settings.getVar(
+            Settings.mainTimetableNameKey,
+          );
 
-      if (!removed) {
-        debugPrint("timetable ${tt.name} could not be removed");
+      if (mainTimetableName == originalName) {
+        TimetableManager().settings.setVar(
+              Settings.mainTimetableNameKey,
+              timetable.name,
+            );
       }
+
+      final tt = timetables.cast<Timetable?>().firstWhere(
+            (element) => element?.name == originalName,
+            orElse: () => null,
+          );
+
+      if (tt == null) {
+        _timetables!.add(timetable);
+      } else {
+        tt.setValuesFrom(timetable);
+      }
+
+      SaveManager().saveTimetable(timetable);
+
+      return true;
+    } catch (_) {
+      return false;
     }
-
-    _timetables!.add(timetable);
-
-    SaveManager().saveTimetable(timetable);
   }
 
   bool removeTimetableAt(int index) {
