@@ -521,9 +521,9 @@ class Timetable {
     //diese woche
     final lessonDate = DateTime.now().add(
       Duration(
-        days: (nextDayIndex -
-            (currDayIndex - 1).abs() +
-            DateTime.daysPerWeek * nextWeekIndex),
+        days: nextDayIndex -
+            (DateTime.now().weekday - 1) +
+            DateTime.daysPerWeek * nextWeekIndex,
       ),
     );
 
