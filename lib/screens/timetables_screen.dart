@@ -101,6 +101,11 @@ class _TimetablesScreenState extends State<TimetablesScreen> {
             ) ??
         "";
 
+    String extraTimetableName = TimetableManager().settings.getVar(
+              Settings.extraTimetableOnHomeScreenKey,
+            ) ??
+        "";
+
     return Container(
       margin: const EdgeInsets.symmetric(
         horizontal: 8,
@@ -132,9 +137,29 @@ class _TimetablesScreenState extends State<TimetablesScreen> {
         //   style: Theme.of(context).textTheme.bodyLarge,
         // ),
         trailing: Wrap(
-          spacing: 12, // space between two icons
+          spacing: 8, // space between two icons
           crossAxisAlignment: WrapCrossAlignment.center,
           children: <Widget>[
+            Checkbox.adaptive(
+              value: extraTimetableName == tt.name,
+              onChanged: (bool? value) {
+                assert(value != null);
+                if (value == null) return;
+                if (value) {
+                  TimetableManager().settings.setVar(
+                        Settings.extraTimetableOnHomeScreenKey,
+                        tt.name,
+                      );
+                } else {
+                  TimetableManager().settings.setVar(
+                        Settings.extraTimetableOnHomeScreenKey,
+                        null,
+                      );
+                }
+                HomeWidgetManager.updateWithDefaultTimetable();
+                setState(() {});
+              },
+            ),
             Checkbox.adaptive(
               value: mainTimetableName == tt.name,
               onChanged: (bool? value) {

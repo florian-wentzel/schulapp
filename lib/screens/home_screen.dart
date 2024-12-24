@@ -103,12 +103,47 @@ class _HomeScreenState extends State<HomeScreen> {
     bool showSubstitutionplanAction =
         TimetableManager().settings.getVar(Settings.usernameKey) != null;
 
+    String? extraTimetableName = TimetableManager()
+        .settings
+        .getVar(Settings.extraTimetableOnHomeScreenKey);
+
+    Timetable? extraTimetable =
+        TimetableManager().timetables.cast<Timetable?>().firstWhere(
+              (element) => element?.name == extraTimetableName,
+              orElse: () => null,
+            );
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
         actions: [
           Visibility(
-            visible: showSubstitutionplanAction,
+            visible: extraTimetable != null && widget.isHomeScreen,
+            child: IconButton(
+              onPressed: () async {
+                final ett = extraTimetable;
+
+                if (ett == null) return;
+
+                await Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => HomeScreen(
+                      title: AppLocalizationsManager.localizations
+                          .strTimetableWithName(
+                        ett.name,
+                      ),
+                      timetable: ett,
+                    ),
+                  ),
+                );
+
+                setState(() {});
+              },
+              icon: const Icon(Icons.event),
+            ),
+          ),
+          Visibility(
+            visible: showSubstitutionplanAction && widget.isHomeScreen,
             child: IconButton(
               tooltip:
                   AppLocalizationsManager.localizations.strSubstitutionPlan,

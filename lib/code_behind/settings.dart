@@ -103,6 +103,7 @@ class Settings {
   static const paulDessauPdfBytesSavedDateKey = "paulDessauPdfBytesSavedDate";
   static const notificationScheduleListKey = "notificationScheduleList";
   static const notificationScheduleEnabledKey = "notificationScheduleEnabled";
+  static const extraTimetableOnHomeScreenKey = "extraTimetableOnHomeScreen";
 
   static final key = encrypt.Key.fromUtf8("a/wdkaw1ln=921jt48wadan249Bamd=#");
   static final _iv = encrypt.IV.fromUtf8("a2lA.8_n&dXa0?.e");
@@ -355,6 +356,10 @@ class Settings {
           ),
         );
       },
+    ),
+    SettingsVar<String?>(
+      key: extraTimetableOnHomeScreenKey,
+      defaultValue: () => null,
     ),
   ];
 

@@ -16,7 +16,6 @@ import 'package:schulapp/code_behind/timetable_util_functions.dart';
 import 'package:schulapp/code_behind/todo_event_util_functions.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/code_behind/version_manager.dart';
-import 'package:schulapp/extensions.dart';
 import 'package:schulapp/home_widget/home_widget_manager.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/screens/versions_screen.dart';

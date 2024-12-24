@@ -388,6 +388,7 @@ class _VertretungsplanPaulDessauScreenState
       }
     }
     _loading = false;
+    if (!mounted) return;
     setState(() {});
   }
 
