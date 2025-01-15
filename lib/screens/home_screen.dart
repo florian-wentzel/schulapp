@@ -1,17 +1,14 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:go_router/go_router.dart';
-import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:schulapp/app.dart';
 import 'package:schulapp/code_behind/grading_system_manager.dart';
 import 'package:schulapp/code_behind/holidays.dart';
 import 'package:schulapp/code_behind/holidays_manager.dart';
-import 'package:schulapp/code_behind/save_manager.dart';
 import 'package:schulapp/code_behind/school_lesson.dart';
 import 'package:schulapp/code_behind/school_semester.dart';
 import 'package:schulapp/code_behind/school_time.dart';
@@ -22,8 +19,8 @@ import 'package:schulapp/code_behind/todo_event.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/code_behind/version_manager.dart';
 import 'package:schulapp/extensions.dart';
+import 'package:schulapp/home_widget/home_widget_manager.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
-import 'package:schulapp/screens/timetables_screen.dart';
 import 'package:schulapp/screens/grades_screen.dart';
 import 'package:schulapp/screens/hello_screen.dart';
 import 'package:schulapp/screens/holidays_screen.dart';
@@ -78,7 +75,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
     _fetchHolidays();
 
-    _initReceiveSharingIntent();
+    // _initReceiveSharingIntent();
 
     _initTtSchoolTimes();
 
@@ -275,6 +272,38 @@ class _HomeScreenState extends State<HomeScreen> {
             setState(() {});
           },
         ),
+        SpeedDialChild(
+          child: const Icon(Icons.event),
+          backgroundColor: Colors.lightBlue.shade200,
+          foregroundColor: Colors.white,
+          label:
+              AppLocalizationsManager.localizations.strSetHomeScreenTimetable,
+          onTap: () async {
+            Timetable? tt = await showSelectTimetableSheet(
+              context,
+              title: AppLocalizationsManager
+                  .localizations.strSetHomeScreenTimetable,
+            );
+
+            if (tt == null) return;
+
+            TimetableManager().settings.setVar(
+                  Settings.mainTimetableNameKey,
+                  tt.name,
+                );
+
+            if (!context.mounted) return;
+
+            HomeWidgetManager.updateWithDefaultTimetable(
+              context: context,
+            );
+
+            //damit der screen neu erstellt und der neue timetable angezeigt wird
+            context.go(
+              "${HomeScreen.route}?reload=${DateTime.now().millisecondsSinceEpoch}",
+            );
+          },
+        ),
       ],
     );
   }
@@ -287,7 +316,8 @@ class _HomeScreenState extends State<HomeScreen> {
           onPressed: () async {
             await createNewTimetable(context);
             if (!mounted) return;
-            context.go(HomeScreen.route);
+            //damit er neu geladen wird
+            context.go("${HomeScreen.route}?reload=true");
           },
           child: Text(
             AppLocalizationsManager.localizations.strCreateTimetable,
@@ -810,107 +840,107 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void _initReceiveSharingIntent() async {
-    if (!Platform.isAndroid && !Platform.isIOS) {
-      return;
-    }
+  // void _initReceiveSharingIntent() async {
+  //   if (!Platform.isAndroid && !Platform.isIOS) {
+  //     return;
+  //   }
 
-    try {
-      ReceiveSharingIntent.instance.getInitialMedia().then(
-            (value) => _handleFiles(
-              value,
-              resetAfter: true,
-            ),
-          );
-      _intentSubscription = ReceiveSharingIntent.instance
-          .getMediaStream()
-          .listen(
-            _handleFiles,
-            onError: (error) => debugPrint("getIntentDataStream error: $error"),
-          );
-    } catch (e) {
-      debugPrint(e.toString());
-    }
-  }
+  //   try {
+  //     ReceiveSharingIntent.instance.getInitialMedia().then(
+  //           (value) => _handleFiles(
+  //             value,
+  //             resetAfter: true,
+  //           ),
+  //         );
+  //     _intentSubscription = ReceiveSharingIntent.instance
+  //         .getMediaStream()
+  //         .listen(
+  //           _handleFiles,
+  //           onError: (error) => debugPrint("getIntentDataStream error: $error"),
+  //         );
+  //   } catch (e) {
+  //     debugPrint(e.toString());
+  //   }
+  // }
 
-  Future<void> _handleFiles(
-    List<SharedMediaFile> files, {
-    bool resetAfter = false,
-  }) async {
-    //only go to all timetablesscreen when user saves timetable
-    bool goToAllTimetables = false;
+  // Future<void> _handleFiles(
+  //   List<SharedMediaFile> files, {
+  //   bool resetAfter = false,
+  // }) async {
+  //   //only go to all timetablesscreen when user saves timetable
+  //   bool goToAllTimetables = false;
 
-    for (SharedMediaFile mediaFile in files) {
-      final file = File(mediaFile.path);
+  //   for (SharedMediaFile mediaFile in files) {
+  //     final file = File(mediaFile.path);
 
-      if (!file.existsSync()) {
-        continue;
-      }
+  //     if (!file.existsSync()) {
+  //       continue;
+  //     }
 
-      if (mounted) {
-        Utils.showInfo(
-          context,
-          duration: const Duration(seconds: 1),
-          msg: AppLocalizationsManager.localizations.strImportingTimetable,
-        );
-      }
+  //     if (mounted) {
+  //       Utils.showInfo(
+  //         context,
+  //         duration: const Duration(seconds: 1),
+  //         msg: AppLocalizationsManager.localizations.strImportingTimetable,
+  //       );
+  //     }
 
-      Timetable? timetable;
+  //     Timetable? timetable;
 
-      try {
-        timetable = SaveManager().importTimetable(file);
-      } catch (e) {
-        debugPrint(e.toString());
-      }
+  //     try {
+  //       timetable = SaveManager().importTimetable(file);
+  //     } catch (e) {
+  //       debugPrint(e.toString());
+  //     }
 
-      await Future.delayed(
-        const Duration(milliseconds: 500),
-      );
+  //     await Future.delayed(
+  //       const Duration(milliseconds: 500),
+  //     );
 
-      if (mounted) {
-        if (timetable == null) {
-          Utils.showInfo(
-            context,
-            msg: AppLocalizationsManager.localizations.strImportingFailed,
-            type: InfoType.error,
-          );
-        } else {
-          Utils.showInfo(
-            context,
-            msg: AppLocalizationsManager.localizations.strImportSuccessful,
-            type: InfoType.success,
-          );
-        }
-      }
-      if (timetable == null) continue;
+  //     if (mounted) {
+  //       if (timetable == null) {
+  //         Utils.showInfo(
+  //           context,
+  //           msg: AppLocalizationsManager.localizations.strImportingFailed,
+  //           type: InfoType.error,
+  //         );
+  //       } else {
+  //         Utils.showInfo(
+  //           context,
+  //           msg: AppLocalizationsManager.localizations.strImportSuccessful,
+  //           type: InfoType.success,
+  //         );
+  //       }
+  //     }
+  //     if (timetable == null) continue;
 
-      await Future.delayed(
-        const Duration(milliseconds: 250),
-      );
+  //     await Future.delayed(
+  //       const Duration(milliseconds: 250),
+  //     );
 
-      if (!mounted) return;
+  //     if (!mounted) return;
 
-      bool timetableSaved = await Navigator.of(context).push<bool?>(
-            MaterialPageRoute(
-              builder: (context) =>
-                  CreateTimetableScreen(timetable: timetable!),
-            ),
-          ) ??
-          false;
+  //     bool timetableSaved = await Navigator.of(context).push<bool?>(
+  //           MaterialPageRoute(
+  //             builder: (context) =>
+  //                 CreateTimetableScreen(timetable: timetable!),
+  //           ),
+  //         ) ??
+  //         false;
 
-      if (timetableSaved) goToAllTimetables = true;
-    }
+  //     if (timetableSaved) goToAllTimetables = true;
+  //   }
 
-    if (resetAfter) {
-      ReceiveSharingIntent.instance.reset();
-    }
+  //   if (resetAfter) {
+  //     ReceiveSharingIntent.instance.reset();
+  //   }
 
-    if (!goToAllTimetables) return;
+  //   if (!goToAllTimetables) return;
 
-    if (mounted) {
-      context.go(TimetablesScreen.route);
-    }
-  }
+  //   if (mounted) {
+  //     context.go(TimetablesScreen.route);
+  //   }
+  // }
 
   void _startDayProgressTimer() {
     if (_dayProgressTimer != null) return;

@@ -253,6 +253,7 @@ Future<(String, bool)?> showSelectSubjectNameSheet(
 Future<Timetable?> showSelectTimetableSheet(
   BuildContext context, {
   required String title,
+  VoidCallback? onRemove,
 }) async {
   List<Timetable> timetables = TimetableManager().timetables;
 
@@ -260,7 +261,7 @@ Future<Timetable?> showSelectTimetableSheet(
 
   await showModalBottomSheet(
     context: context,
-    scrollControlDisabledMaxHeightRatio: 0.6,
+    scrollControlDisabledMaxHeightRatio: 0.7,
     builder: (context) {
       return Container(
         margin: const EdgeInsets.all(16),
@@ -306,6 +307,17 @@ Future<Timetable?> showSelectTimetableSheet(
                 ),
               ),
             ),
+            if (onRemove != null)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(null);
+                    onRemove.call();
+                  },
+                  child: const Icon(Icons.delete, color: Colors.red),
+                ),
+              ),
           ],
         ),
       );

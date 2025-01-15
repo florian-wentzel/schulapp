@@ -55,7 +55,7 @@ class _TimetablesScreenState extends State<TimetablesScreen> {
           ),
           SpeedDialChild(
             child: const Icon(Icons.import_export),
-            backgroundColor: Colors.lightBlue,
+            backgroundColor: Colors.blueAccent,
             foregroundColor: Colors.white,
             label: AppLocalizationsManager.localizations.strImportExport,
             onTap: () async {
@@ -65,6 +65,57 @@ class _TimetablesScreenState extends State<TimetablesScreen> {
                 ),
               );
               setState(() {});
+            },
+          ),
+          SpeedDialChild(
+            child: const Icon(Icons.event),
+            backgroundColor: Colors.lightBlue,
+            foregroundColor: Colors.white,
+            label:
+                AppLocalizationsManager.localizations.strSetHomeScreenTimetable,
+            onTap: () async {
+              Timetable? tt = await showSelectTimetableSheet(
+                context,
+                title: AppLocalizationsManager
+                    .localizations.strSetHomeScreenTimetable,
+              );
+
+              if (tt == null) return;
+
+              TimetableManager().settings.setVar(
+                    Settings.mainTimetableNameKey,
+                    tt.name,
+                  );
+
+              if (!context.mounted) return;
+
+              HomeWidgetManager.updateWithDefaultTimetable(
+                context: context,
+              );
+            },
+          ),
+          SpeedDialChild(
+            child: const Icon(Icons.event),
+            backgroundColor: Colors.lightBlueAccent,
+            foregroundColor: Colors.white,
+            label: AppLocalizationsManager
+                .localizations.strSetExtraHomeScreenTimetable,
+            onTap: () async {
+              Timetable? tt = await showSelectTimetableSheet(context,
+                  title: AppLocalizationsManager.localizations
+                      .strSetExtraHomeScreenTimetable, onRemove: () {
+                TimetableManager().settings.setVar(
+                      Settings.extraTimetableOnHomeScreenKey,
+                      null,
+                    );
+              });
+
+              if (tt == null) return;
+
+              TimetableManager().settings.setVar(
+                    Settings.extraTimetableOnHomeScreenKey,
+                    tt.name,
+                  );
             },
           ),
         ],
@@ -96,15 +147,10 @@ class _TimetablesScreenState extends State<TimetablesScreen> {
   Widget _itemBuilder(BuildContext context, int index) {
     Timetable tt = TimetableManager().timetables[index];
 
-    String mainTimetableName = TimetableManager().settings.getVar(
-              Settings.mainTimetableNameKey,
-            ) ??
-        "";
-
-    String extraTimetableName = TimetableManager().settings.getVar(
-              Settings.extraTimetableOnHomeScreenKey,
-            ) ??
-        "";
+    // String mainTimetableName = TimetableManager().settings.getVar(
+    //           Settings.mainTimetableNameKey,
+    //         ) ??
+    //     "";
 
     return Container(
       margin: const EdgeInsets.symmetric(
@@ -132,54 +178,30 @@ class _TimetablesScreenState extends State<TimetablesScreen> {
           setState(() {});
         },
         title: Text(tt.name),
-        // leading: Text(
-        //   (index + 1).toString(),
-        //   style: Theme.of(context).textTheme.bodyLarge,
-        // ),
         trailing: Wrap(
-          spacing: 8, // space between two icons
+          spacing: 8,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: <Widget>[
-            Checkbox.adaptive(
-              value: extraTimetableName == tt.name,
-              onChanged: (bool? value) {
-                assert(value != null);
-                if (value == null) return;
-                if (value) {
-                  TimetableManager().settings.setVar(
-                        Settings.extraTimetableOnHomeScreenKey,
-                        tt.name,
-                      );
-                } else {
-                  TimetableManager().settings.setVar(
-                        Settings.extraTimetableOnHomeScreenKey,
-                        null,
-                      );
-                }
-                HomeWidgetManager.updateWithDefaultTimetable();
-                setState(() {});
-              },
-            ),
-            Checkbox.adaptive(
-              value: mainTimetableName == tt.name,
-              onChanged: (bool? value) {
-                assert(value != null);
-                if (value == null) return;
-                if (value) {
-                  TimetableManager().settings.setVar(
-                        Settings.mainTimetableNameKey,
-                        tt.name,
-                      );
-                } else {
-                  TimetableManager().settings.setVar(
-                        Settings.mainTimetableNameKey,
-                        null,
-                      );
-                }
-                HomeWidgetManager.updateWithDefaultTimetable();
-                setState(() {});
-              },
-            ),
+            // Checkbox.adaptive(
+            //   value: mainTimetableName == tt.name,
+            //   onChanged: (bool? value) {
+            //     assert(value != null);
+            //     if (value == null) return;
+            //     if (value) {
+            //       TimetableManager().settings.setVar(
+            //             Settings.mainTimetableNameKey,
+            //             tt.name,
+            //           );
+            //     } else {
+            //       TimetableManager().settings.setVar(
+            //             Settings.mainTimetableNameKey,
+            //             null,
+            //           );
+            //     }
+            //     HomeWidgetManager.updateWithDefaultTimetable();
+            //     setState(() {});
+            //   },
+            // ),
             IconButton(
               onPressed: () async {
                 await Navigator.of(context).push<bool>(

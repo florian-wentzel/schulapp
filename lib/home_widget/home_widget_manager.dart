@@ -10,6 +10,7 @@ import 'package:schulapp/extensions.dart';
 
 class HomeWidgetManager {
   static const groupID = "group.schulapp";
+  static const name = "TimetableOneDay";
   static const qualifiedAndroidName = "com.flologames.schulapp.TimetableOneDay";
   static const timetableId = "timetable";
   static const timesColorKey = "timesColor";
@@ -40,6 +41,8 @@ class HomeWidgetManager {
       await HomeWidget.saveWidgetData(timetableId, jsonString);
 
       await HomeWidget.updateWidget(
+        name: name,
+        androidName: name,
         qualifiedAndroidName: qualifiedAndroidName,
       );
     } catch (e) {
@@ -70,6 +73,8 @@ class HomeWidgetManager {
     }
 
     await HomeWidget.requestPinWidget(
+      name: name,
+      androidName: name,
       qualifiedAndroidName: qualifiedAndroidName,
     );
   }
