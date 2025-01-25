@@ -1,6 +1,7 @@
 {
   "@@locale": "de",
   "language_name": "Deutsch",
+  "version_0_8_2": "Verbesserungen an der Benutzeroberfläche und Schulstunden-Vorlagen werden jetzt gespeichert",
   "version_0_8_1": "Extra Stundenplan zur Startseite hinzugefügt",
   "version_0_8_0": "A- und B-Wochen hinzugefügt",
   "version_0_7_4": "Erledigte Aufgaben werden jetzt auf der Startseite mit einem Haken markiert",

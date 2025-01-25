@@ -21,7 +21,8 @@ class Utils {
   static const bKey = "b";
 
   static final List<Color> _gradeColors = [
-    const Color.fromARGB(255, 127, 127, 127),
+    // const Color.fromARGB(255, 127, 127, 127),
+    const Color.fromARGB(0, 127, 127, 127),
     const Color.fromARGB(255, 237, 84, 71),
     const Color.fromARGB(255, 237, 84, 71),
     const Color.fromARGB(255, 247, 144, 49),

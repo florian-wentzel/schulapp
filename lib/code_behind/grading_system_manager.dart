@@ -6,6 +6,8 @@ import 'package:schulapp/code_behind/timetable_manager.dart';
 class GradingSystemManager {
   GradingSystemManager._privateConstructor();
 
+  static const dashString = "-";
+
   static const _converterMap = <GradingSystem, String Function(int grade)>{
     GradingSystem.grade_0_15: _convertGrade_0_15,
     GradingSystem.grade_1_6: _convertGrade_1_6,
@@ -23,7 +25,7 @@ class GradingSystemManager {
 
   static String convertGradeToSelectedSystem(int grade) {
     if (grade.isNaN || grade.isInfinite) {
-      return "-";
+      return dashString;
     }
 
     final GradingSystem currGradeSystem = TimetableManager().settings.getVar(
@@ -35,10 +37,10 @@ class GradingSystemManager {
 
   static String convertGradeAverageToSelectedSystem(double grade) {
     if (grade.isNaN || grade.isInfinite) {
-      return "-";
+      return dashString;
     }
     if (grade == -1) {
-      return "-";
+      return dashString;
     }
 
     final GradingSystem currGradeSystem = TimetableManager().settings.getVar(

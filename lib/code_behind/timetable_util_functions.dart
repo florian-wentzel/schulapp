@@ -596,6 +596,7 @@ class _CreateTimetableBottomSheetState
       schoolDays: schoolDays,
       schoolTimes: schoolTimes,
       weekTimetables: null,
+      lessonPrefabs: null,
     );
 
     Navigator.of(context).pop(timetable);

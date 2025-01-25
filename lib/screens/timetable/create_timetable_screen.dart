@@ -362,7 +362,7 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
               ElevatedButton(
                 onPressed: () async {
                   _canPop = true;
-
+                  _timetableCopy.setLessonPrefabs(_lessonPrefabs);
                   final success = await TimetableManager().addOrChangeTimetable(
                     _timetableCopy,
                     originalName: widget.timetable.name,

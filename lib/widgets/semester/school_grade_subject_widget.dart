@@ -107,6 +107,8 @@ class SchoolGradeSubjectWidget extends StatelessWidget {
             ),
           ),
           Container(
+            width: 75,
+            height: 75,
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
               shape: BoxShape.circle,

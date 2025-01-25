@@ -29,6 +29,7 @@ class WeekTimetable extends Timetable {
   }) : super(
           weekTimetables: null,
           yearStartedWithWeekIndex: -1,
+          lessonPrefabs: null,
         );
 
   static WeekTimetable fromTimetable({
@@ -167,6 +168,7 @@ class Timetable {
   static const schoolDaysKey = "days";
   static const schoolTimesKey = "times";
   static const weekTimetablesKey = "bWeekTimetable";
+  static const lessonPrefabsKey = "lessonPrefabs";
 
   static final defaultPaulDessauTimetable = [
     SchoolTime(
@@ -323,8 +325,14 @@ class Timetable {
   String? currSpecialLessonsWeekKey;
   List<SpecialLesson>? currSpecialLessonsWeek;
 
+  //die Liste, welche die Gespeicherten prefabs enthält
+  final List<SchoolLessonPrefab> _lessonPrefabs;
   List<SchoolLessonPrefab> get lessonPrefabs {
     Map<String, SchoolLessonPrefab> lessonPrefabsMap = {};
+
+    for (int i = 0; i < _lessonPrefabs.length; i++) {
+      lessonPrefabsMap[_lessonPrefabs[i].name] = _lessonPrefabs[i];
+    }
 
     for (int schoolDayIndex = 0;
         schoolDayIndex < schoolDays.length;
@@ -379,13 +387,15 @@ class Timetable {
     required List<SchoolDay> schoolDays,
     required List<SchoolTime> schoolTimes,
     required List<WeekTimetable>? weekTimetables,
+    required List<SchoolLessonPrefab>? lessonPrefabs,
     int yearStartedWithWeekIndex = -1,
   })  : _name = name,
         _maxLessonCount = maxLessonCount,
         _yearStartedWithWeekIndex = yearStartedWithWeekIndex,
         _schoolDays = schoolDays,
         _schoolTimes = schoolTimes,
-        _weekTimetables = weekTimetables;
+        _weekTimetables = weekTimetables,
+        _lessonPrefabs = lessonPrefabs ?? [];
 
   DateTime getNextLessonDate(
     String subjectName,
@@ -558,6 +568,17 @@ class Timetable {
       List<Map<String, dynamic>> ts = (json[schoolTimesKey] as List).cast();
       List<Map<String, dynamic>>? ws =
           (json[weekTimetablesKey] as List?)?.cast();
+      List<Map<String, dynamic>> lessonPrefabsMap =
+          (json[lessonPrefabsKey] as List?)?.cast() ?? [];
+
+      List<SchoolLessonPrefab> lessonPrefabs = [];
+
+      for (var json in lessonPrefabsMap) {
+        SchoolLessonPrefab? lessonPrefab = SchoolLessonPrefab.fromJson(json);
+        if (lessonPrefab != null) {
+          lessonPrefabs.add(lessonPrefab);
+        }
+      }
 
       List<WeekTimetable>? weeks;
 
@@ -574,6 +595,7 @@ class Timetable {
           (index) => SchoolTime.fromJson(ts[index]),
         ),
         weekTimetables: null,
+        lessonPrefabs: lessonPrefabs,
       );
 
       if (ws != null) {
@@ -616,6 +638,10 @@ class Timetable {
               weeks.length,
               (index) => weeks[index].toJson(),
             ),
+      lessonPrefabsKey: List<Map<String, dynamic>>.generate(
+        lessonPrefabs.length,
+        (index) => lessonPrefabs[index].toJson(),
+      ),
     };
   }
 
@@ -666,6 +692,10 @@ class Timetable {
               weeks.length,
               (index) => weeks[index].copy(),
             ),
+      lessonPrefabs: List.generate(
+        _lessonPrefabs.length,
+        (index) => _lessonPrefabs[index].copy(),
+      ),
     );
   }
 
@@ -676,6 +706,8 @@ class Timetable {
     _schoolTimes = ttCopy.schoolTimes;
     _weekTimetables = ttCopy._weekTimetables;
     _yearStartedWithWeekIndex = ttCopy._yearStartedWithWeekIndex;
+    _lessonPrefabs.clear();
+    _lessonPrefabs.addAll(ttCopy._lessonPrefabs);
   }
 
   void addLesson() {
@@ -801,6 +833,7 @@ class Timetable {
         schoolDays: [],
         schoolTimes: [],
         weekTimetables: null,
+        lessonPrefabs: null,
       );
 
   void removeWeekX(int index) {
@@ -885,5 +918,10 @@ class Timetable {
 
   void setWeekTimetables(List<WeekTimetable>? weeks) {
     _weekTimetables = weeks;
+  }
+
+  void setLessonPrefabs(List<SchoolLessonPrefab> lessonPrefabs) {
+    _lessonPrefabs.clear();
+    _lessonPrefabs.addAll(lessonPrefabs);
   }
 }
