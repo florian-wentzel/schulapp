@@ -2,6 +2,8 @@
   "@@locale": "en",
   "language_name": "Englisch",
   "@language_name": {},
+  "version_0_8_3": "Added Tutorials",
+  "@version_0_8_3": {},
   "version_0_8_2": "Improvements to the user interface and school lesson prefabs are now saved",
   "@version_0_8_2": {},
   "version_0_8_1": "Added extra timetable to home screen",
@@ -893,5 +895,13 @@
   "strSetHomeScreenTimetable": "Set Timetable for Homescreen",
   "@strSetHomeScreenTimetable": {},
   "strSetExtraHomeScreenTimetable": "Set Extra Timetable for Homescreen",
-  "@strSetExtraHomeScreenTimetable": {}
+  "@strSetExtraHomeScreenTimetable": {},
+  "strAddNewLessons": "Use this area to add new lessons to your schedule.",
+  "@strAddNewLessons": {},
+  "strDragAndDropLessonsAndClickToEdit": "Once you've created lessons, you can drag and drop them into the timetable. \nSimply click on any lesson to change its details.",
+  "@strDragAndDropLessonsAndClickToEdit": {},
+  "strAccessAdditionalOptions": "Access more options like adding A-Week and B-Week for more flexibility in your schedule.",
+  "@strAccessAdditionalOptions": {},
+  "strSaveTimetable": "Don't forget to save your timetable once you're happy with the changes!",
+  "@strSaveTimetable": {}
 }

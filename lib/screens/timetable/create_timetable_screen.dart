@@ -5,12 +5,15 @@ import 'package:schulapp/code_behind/school_lesson_prefab.dart';
 import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/timetable.dart';
 import 'package:schulapp/code_behind/timetable_manager.dart';
+import 'package:schulapp/code_behind/tutorial/tutorial.dart';
+import 'package:schulapp/code_behind/tutorial/tutorial_step.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/home_widget/home_widget_manager.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/widgets/timetable/timetable_drop_target_widget.dart';
 import 'package:schulapp/widgets/timetable/timetable_one_day_drop_target_widget.dart';
 import 'package:schulapp/code_behind/timetable_util_functions.dart';
+import 'package:schulapp/widgets/tutorial_overlay.dart';
 
 class CreateTimetableScreen extends StatefulWidget {
   static const String route = "/edit-timetable";
@@ -26,7 +29,15 @@ class CreateTimetableScreen extends StatefulWidget {
 }
 
 class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
+  final GlobalKey _saveButtonKey = GlobalKey();
+  final GlobalKey _createLessonPrefabKey = GlobalKey();
+  final GlobalKey _lessonPrefabScrollbarKey = GlobalKey();
+  final GlobalKey _moreActionsButtonKey = GlobalKey();
+
   final _pageController = PageController();
+  final _prefabScrollController = ScrollController();
+
+  late Tutorial _tutorial;
 
   //only edit this tt so there are no changes to the original one
   late Timetable _timetableCopy;
@@ -62,6 +73,63 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
     // _originalName = String.fromCharCodes(widget.timetable.name.codeUnits);
 
     super.initState();
+
+    _tutorial = Tutorial(
+      steps: [
+        TutorialStep(
+          highlightKey: _createLessonPrefabKey,
+          tutorialWidget: Text(
+            AppLocalizationsManager.localizations.strAddNewLessons,
+          ),
+        ),
+        TutorialStep(
+          highlightKey: _lessonPrefabScrollbarKey,
+          tutorialWidget: Text(
+            AppLocalizationsManager
+                .localizations.strDragAndDropLessonsAndClickToEdit,
+          ),
+        ),
+        TutorialStep(
+          highlightKey: _moreActionsButtonKey,
+          tutorialWidget: Text(
+            AppLocalizationsManager.localizations.strAccessAdditionalOptions,
+          ),
+        ),
+        TutorialStep(
+          highlightKey: _saveButtonKey,
+          tutorialWidget: Text(
+            AppLocalizationsManager.localizations.strSaveTimetable,
+          ),
+        ),
+      ],
+    );
+
+    bool showTutorial = TimetableManager()
+        .settings
+        .getVar(Settings.showTutorialInCreateTimetableScreenKey);
+
+    if (showTutorial) {
+      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+        _prefabScrollController.animateTo(
+          _prefabScrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.easeInOut,
+        );
+        Future.delayed(
+          const Duration(milliseconds: 500),
+          () {
+            if (!mounted) return;
+            TutorialOverlay.show(context, _tutorial);
+          },
+        );
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _prefabScrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -360,6 +428,7 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
           child: Row(
             children: [
               ElevatedButton(
+                key: _saveButtonKey,
                 onPressed: () async {
                   _canPop = true;
                   _timetableCopy.setLessonPrefabs(_lessonPrefabs);
@@ -399,6 +468,12 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
                   HomeWidgetManager.updateWithDefaultTimetable(
                     context: context,
                   );
+
+                  TimetableManager().settings.setVar(
+                        Settings.showTutorialInCreateTimetableScreenKey,
+                        false,
+                      );
+
                   //weil neuer timetable erstellt return true damit kann man später vielleicht was anfangen
                   Navigator.of(context).pop(true);
                 },
@@ -413,6 +488,7 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
                 width: 16,
               ),
               ElevatedButton(
+                key: _moreActionsButtonKey,
                 onPressed: _onMoreActionsButtonPressed,
                 child: const Icon(Icons.more_horiz),
               ),
@@ -533,6 +609,7 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
 
     children.add(
       InkWell(
+        key: _createLessonPrefabKey,
         onTap: _createNewPrefab,
         child: Container(
           width: minContainerHeight,
@@ -555,8 +632,10 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
     );
 
     return Center(
+      key: _lessonPrefabScrollbarKey,
       child: SingleChildScrollView(
-        primary: true,
+        // primary: true,
+        controller: _prefabScrollController,
         scrollDirection: Axis.horizontal,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,

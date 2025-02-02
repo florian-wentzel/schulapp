@@ -1,6 +1,7 @@
 {
   "@@locale": "de",
   "language_name": "Deutsch",
+  "version_0_8_3": "Tutorials hinzugefügt",
   "version_0_8_2": "Verbesserungen an der Benutzeroberfläche und Schulstunden-Vorlagen werden jetzt gespeichert",
   "version_0_8_1": "Extra Stundenplan zur Startseite hinzugefügt",
   "version_0_8_0": "A- und B-Wochen hinzugefügt",
@@ -310,5 +311,9 @@
   "strDisplayFreePeriodsWithLessonNumber": "Freistunden mit Stundennummer anzeigen",
   "strDisplayFreePeriodsWithoutPeriodNumber": "Freistunden ohne Stundennummer anzeigen",
   "strSetHomeScreenTimetable": "Stundenplan auf\nStartbildschirm setzen",
-  "strSetExtraHomeScreenTimetable": "Zusätzlichen Stundenplan\nauf Startbildschirm setzen"
+  "strSetExtraHomeScreenTimetable": "Zusätzlichen Stundenplan\nauf Startbildschirm setzen",
+  "strAddNewLessons": "Verwende diesen Bereich, um neue Unterrichtseinheiten zu deinem Stundenplan hinzuzufügen.",
+  "strDragAndDropLessonsAndClickToEdit": "Sobald du Unterrichtseinheiten erstellt hast, kannst du sie per Drag & Drop in den Stundenplan ziehen.\nKlicke einfach auf eine beliebige Unterrichtseinheit, um deren Details zu ändern.",
+  "strAccessAdditionalOptions": "Für weitere Optionen, wie das Hinzufügen von A-Woche und B-Woche, kannst du diesen Knopf verwenden.",
+  "strSaveTimetable": "Vergiss nicht, deinen Stundenplan zu speichern, sobald du mit den Änderungen zufrieden bist!"
 }

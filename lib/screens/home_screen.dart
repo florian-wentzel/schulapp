@@ -16,6 +16,8 @@ import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/timetable.dart';
 import 'package:schulapp/code_behind/timetable_manager.dart';
 import 'package:schulapp/code_behind/todo_event.dart';
+import 'package:schulapp/code_behind/tutorial/tutorial.dart';
+import 'package:schulapp/code_behind/tutorial/tutorial_step.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/code_behind/version_manager.dart';
 import 'package:schulapp/extensions.dart';
@@ -55,6 +57,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  late Tutorial _tutorial;
+
   StreamSubscription? _intentSubscription;
 
   final _verticalPageViewController = PageController();
@@ -776,7 +780,38 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {});
   }
 
+  void _showTutorial() {
+    // if (widget.timetable == null) return;
+
+    // _tutorial = Tutorial(
+    //   steps: [
+    //     TutorialStep(
+    //       highlightKey: GlobalKey(),
+    //       tutorialWidget: Text(
+    //         "",
+    //       ),
+    //     ),
+    //     TutorialStep(
+    //       highlightKey: GlobalKey(),
+    //       tutorialWidget: Container(
+    //         color: Colors.green,
+    //       ),
+    //     ),
+    //     TutorialStep(
+    //       highlightKey: GlobalKey(),
+    //       tutorialWidget: Container(
+    //         color: Colors.blue,
+    //       ),
+    //     ),
+    //   ],
+    // );
+
+    // _verticalPageViewController
+  }
+
   void _postFrameCallback(Duration _) async {
+    _showTutorial();
+
     final currVersion = await VersionManager().getVersionString();
 
     if (!mounted) return;
