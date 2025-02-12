@@ -44,7 +44,20 @@ class _TodoEventsScreenState extends State<TodoEventsScreen> {
     Future.delayed(
       Duration.zero,
       () async {
-        if (widget.todoEvent != null && mounted) {
+        final todoEvent = widget.todoEvent;
+        if (todoEvent != null && mounted) {
+          if (todoEvent.finished && !widget.showFinishedTasks) {
+            await Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => TodoEventsScreen(
+                  todoEvent: todoEvent,
+                  showFinishedTasks: true,
+                ),
+              ),
+            );
+            setState(() {});
+            return;
+          }
           await Utils.showCustomPopUp(
             context: context,
             heroObject: widget.todoEvent!,
@@ -87,10 +100,10 @@ class _TodoEventsScreenState extends State<TodoEventsScreen> {
       appBar: AppBar(
         title: widget.showFinishedTasks
             ? Text(
-                AppLocalizationsManager.localizations.strFinishedTasks,
+                "${AppLocalizationsManager.localizations.strFinishedTasks} (${TimetableManager().sortedFinishedTodoEvents.length})",
               )
             : Text(
-                AppLocalizationsManager.localizations.strTasks,
+                "${AppLocalizationsManager.localizations.strTasks} (${TimetableManager().sortedUnfinishedTodoEvents.length})",
               ),
         leading: widget.showFinishedTasks
             ? IconButton(

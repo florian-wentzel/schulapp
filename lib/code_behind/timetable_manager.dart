@@ -39,8 +39,18 @@ class TimetableManager {
   }
 
   List<TodoEvent> get todoEvents {
-    _todoEvents ??= SaveManager().loadAllTodoEvents();
+    if (_todoEvents == null) {
+      _todoEvents = SaveManager().loadAllTodoEvents();
+      _setTodoEventsNotifications();
+    }
     return _todoEvents!;
+  }
+
+  Future<void> _setTodoEventsNotifications() async {
+    for (int i = 0; i < todoEvents.length; i++) {
+      await todoEvents[i].cancleNotification();
+      await todoEvents[i].addNotification();
+    }
   }
 
   List<TodoEvent> get sortedUnfinishedTodoEvents {
@@ -89,25 +99,12 @@ class TimetableManager {
       },
     );
 
-    for (int i = 0; i < todoEvents.length; i++) {
-      todoEvents[i].cancleNotification().then((value) {
-        todoEvents[i].key = i;
-        todoEvents[i].addNotification();
-      });
-    }
-
     return todoEvents;
   }
 
   Settings get settings {
     _settings ??= SaveManager().loadSettings();
     return _settings!;
-  }
-
-  int getNextSchoolEventKey() {
-    //sortieren und neu nummerieren damit es keine Fehler gibt
-    sortedTodoEvents;
-    return todoEvents.length;
   }
 
   ///Adds the [Timetable] and saves it to lokal storage
@@ -252,23 +249,21 @@ class TimetableManager {
   }
 
   void addOrChangeTodoEvent(TodoEvent event) {
-    if (event.key >= todoEvents.length) {
-      //neues element
-      todoEvents.add(event);
-      //notification hinzufügen
-      event.addNotification();
-    } else {
-      //wurde geändert
-      todoEvents[event.key] = event.copy();
-      event.cancleNotification().then(
+    final index = todoEvents.indexWhere((element) => element.key == event.key);
+    if (index != -1) {
+      todoEvents[index].cancleNotification().then(
             (value) => event.addNotification(),
           );
+      todoEvents[index] = event;
+    } else {
+      todoEvents.add(event);
+      event.addNotification();
     }
+
     SaveManager().saveTodoEvents(todoEvents);
   }
 
   bool removeTodoEvent(TodoEvent event, {bool deleteLinkedSchoolNote = false}) {
-    if (event.key < 0 || event.key >= todoEvents.length) return false;
     event.cancleNotification();
 
     if (deleteLinkedSchoolNote) {
@@ -280,13 +275,17 @@ class TimetableManager {
       }
     }
 
-    todoEvents.remove(event);
+    final removed = todoEvents.remove(event);
 
-    for (int i = 0; i < todoEvents.length; i++) {
-      todoEvents[i].cancleNotification().then((value) {
-        todoEvents[i].key = i;
-        todoEvents[i].addNotification();
-      });
+    if (!removed) {
+      final index =
+          todoEvents.indexWhere((element) => element.key == event.key);
+      if (index != -1) {
+        todoEvents[index].cancleNotification();
+        todoEvents.removeAt(index);
+      } else {
+        return false;
+      }
     }
 
     return SaveManager().saveTodoEvents(todoEvents);

@@ -764,7 +764,6 @@ class SaveManager {
         todos.length,
         (index) => TodoEvent.fromJson(
           todos[index],
-          index,
         ),
       );
     } catch (e) {

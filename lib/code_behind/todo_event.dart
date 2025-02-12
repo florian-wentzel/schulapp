@@ -1,8 +1,11 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/notification_manager.dart';
 import 'package:schulapp/code_behind/notification_schedule.dart';
 import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/timetable_manager.dart';
+import 'package:schulapp/code_behind/unique_id_generator.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 
 class TodoEvent {
@@ -10,6 +13,7 @@ class TodoEvent {
   static const String _linkedSubjectNameKey = "linkedSubjectName";
   static const String _linkedSchoolNoteKey = "linkedNote";
   static const String _endTimeKey = "endTime";
+  static const String _uniqueKeyKey = "key";
   static const String _typeKey = "type";
   static const String _desciptionKey = "desciption";
   static const String _finishedKey = "finished";
@@ -21,8 +25,10 @@ class TodoEvent {
   static const IconData examIcon = Icons.school;
   static const int maxNameLength = 25;
 
-  //identifyer set at runtime
-  int key;
+  ///identifyer set at runtime from [UniqueIdGenerator.createUniqueId()]
+  int get key => _key;
+  final int _key;
+
   final String name;
   final String linkedSubjectName;
 
@@ -39,7 +45,7 @@ class TodoEvent {
   static const int maxDescriptionLength = 150;
 
   TodoEvent({
-    required this.key,
+    int? key,
     required this.name,
     required this.linkedSubjectName,
     required this.linkedSchoolNote,
@@ -48,7 +54,7 @@ class TodoEvent {
     required this.desciption,
     required this.finished,
     required this.isCustomEvent,
-  });
+  }) : _key = key ?? UniqueIdGenerator.createUniqueId();
 
   bool isExpired() {
     if (finished) return false;
@@ -89,14 +95,16 @@ class TodoEvent {
       _desciptionKey: desciption,
       _finishedKey: finished,
       _customEventKey: isCustomEvent,
+      _uniqueKeyKey: _key,
     };
   }
 
-  static TodoEvent fromJson(Map<String, dynamic> json, int key) {
+  static TodoEvent fromJson(Map<String, dynamic> json) {
     String name = json[_nameKey];
     String linkedSubjectName = json[_linkedSubjectNameKey];
     String? linkedSchoolNote = json[_linkedSchoolNoteKey];
     int? milliSec = json[_endTimeKey];
+    int? key = json[_uniqueKeyKey];
     DateTime? endTime;
 
     if (milliSec != null) {
@@ -172,11 +180,11 @@ class TodoEvent {
 
   TodoEvent copy() {
     return TodoEvent(
-      key: key,
+      key: _key,
       name: name,
       linkedSchoolNote: linkedSchoolNote,
       linkedSubjectName: linkedSubjectName,
-      endTime: endTime,
+      endTime: endTime?.copyWith(),
       type: type,
       desciption: desciption,
       finished: finished,
@@ -210,7 +218,8 @@ class TodoEvent {
               Settings.notificationScheduleListKey,
             );
 
-    final notificationMultiplier = notificationScheduleList.length + 1;
+    final notificationMultiplier =
+        notificationScheduleList.length.toString().length;
     for (int i = 0; i < notificationScheduleList.length; i++) {
       final correctedDateTime =
           notificationScheduleList[i].getCorrectedDateTime(endDateTime);
@@ -228,7 +237,7 @@ class TodoEvent {
       );
 
       await NotificationManager().scheduleNotification(
-        id: key * notificationMultiplier + i,
+        id: _key * pow(10, notificationMultiplier).toInt() + i,
         scheduledDateTime: correctedDateTime,
         title: title,
         body: body,
@@ -289,10 +298,11 @@ class TodoEvent {
               Settings.notificationScheduleListKey,
             );
 
-    final notificationMultiplier = notificationScheduleList.length + 1;
+    final notificationMultiplier =
+        notificationScheduleList.length.toString().length;
     for (int i = 0; i < notificationScheduleList.length; i++) {
       await NotificationManager().cancleNotification(
-        key * notificationMultiplier + i,
+        _key * pow(10, notificationMultiplier).toInt() + i,
       );
     }
   }

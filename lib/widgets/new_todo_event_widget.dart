@@ -4,7 +4,6 @@ import 'package:schulapp/code_behind/school_note.dart';
 import 'package:schulapp/code_behind/school_note_part.dart';
 import 'package:schulapp/code_behind/school_notes_manager.dart';
 import 'package:schulapp/code_behind/timetable.dart';
-import 'package:schulapp/code_behind/timetable_manager.dart';
 import 'package:schulapp/code_behind/todo_event.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
@@ -457,7 +456,7 @@ class _NewTodoEventWidgetState extends State<NewTodoEventWidget> {
     // }
     Navigator.of(context).pop(
       TodoEvent(
-        key: widget.event?.key ?? TimetableManager().getNextSchoolEventKey(),
+        key: widget.event?.key,
         name: name,
         desciption: desciption,
         linkedSchoolNote: linkedSchoolNote?.saveFileName,

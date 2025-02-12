@@ -936,9 +936,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     TimetableManager().markAllDataToBeReloaded();
 
-    //register notifications
-    TimetableManager().sortedTodoEvents;
-
     if (mounted) {
       Utils.showInfo(
         context,
