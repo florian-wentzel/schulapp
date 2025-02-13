@@ -32,6 +32,7 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
   final GlobalKey _saveButtonKey = GlobalKey();
   final GlobalKey _createLessonPrefabKey = GlobalKey();
   final GlobalKey _lessonPrefabScrollbarKey = GlobalKey();
+  final GlobalKey _appBarTitleKey = GlobalKey();
   final GlobalKey _moreActionsButtonKey = GlobalKey();
 
   final _pageController = PageController();
@@ -87,6 +88,13 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
           tutorialWidget: Text(
             AppLocalizationsManager
                 .localizations.strDragAndDropLessonsAndClickToEdit,
+          ),
+        ),
+        TutorialStep(
+          highlightKey: _appBarTitleKey,
+          tutorialWidget: Text(
+            AppLocalizationsManager
+                .localizations.strChangeTimetableNameByClickingOnIt,
           ),
         ),
         TutorialStep(
@@ -164,6 +172,7 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
       child: Scaffold(
         appBar: AppBar(
           title: InkWell(
+            key: _appBarTitleKey,
             onTap: _changeTimetableName,
             child: Text(
               _timetableCopy.name,

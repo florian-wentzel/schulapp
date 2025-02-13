@@ -33,6 +33,7 @@ class Tutorial {
     _previousStepIndex = _currentStepIndex;
 
     _currentStepIndex++;
+    _stepChanged();
   }
 
   void goToPreviousStep() {
@@ -41,6 +42,7 @@ class Tutorial {
     if (_currentStepIndex > 0) {
       _currentStepIndex--;
     }
+    _stepChanged();
   }
 
   bool get isOver => _currentStepIndex == steps.length;
@@ -50,5 +52,14 @@ class Tutorial {
   void goToEnd() {
     _previousStepIndex = _currentStepIndex;
     _currentStepIndex = steps.length;
+    _stepChanged();
+  }
+
+  void _stepChanged() {
+    currentStep?.action?.call();
+  }
+
+  void init() {
+    _stepChanged();
   }
 }

@@ -11,6 +11,7 @@ import 'package:schulapp/code_behind/school_time.dart';
 import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/special_lesson.dart';
 import 'package:schulapp/code_behind/timetable.dart';
+import 'package:schulapp/code_behind/timetable_controller.dart';
 import 'package:schulapp/code_behind/timetable_manager.dart';
 import 'package:schulapp/code_behind/todo_event.dart';
 import 'package:schulapp/code_behind/utils.dart';
@@ -27,11 +28,16 @@ import 'package:schulapp/widgets/task/todo_event_list_item_widget.dart';
 import 'package:schulapp/widgets/timetable/timetable_lesson_widget.dart';
 
 class TimetableWidget extends StatefulWidget {
+  final TimetableController controller;
   final Timetable timetable;
   final bool showTodoEvents;
 
-  const TimetableWidget(
-      {super.key, required this.timetable, required this.showTodoEvents});
+  const TimetableWidget({
+    super.key,
+    required this.controller,
+    required this.timetable,
+    required this.showTodoEvents,
+  });
 
   @override
   State<TimetableWidget> createState() => _TimetableWidgetState();
@@ -62,6 +68,21 @@ class _TimetableWidgetState extends State<TimetableWidget> {
 
   @override
   void initState() {
+    // widget.controller.swipeToRight = () {
+    //   _pageController.animateToPage(
+    //     _pageController.page!.toInt() + 1,
+    //     duration: const Duration(milliseconds: 500),
+    //     curve: Curves.easeInOutCirc,
+    //   );
+    // };
+    // widget.controller.swipeToLeft = () {
+    //   _pageController.animateToPage(
+    //     _pageController.page!.toInt() - 1,
+    //     duration: const Duration(milliseconds: 500),
+    //     curve: Curves.easeInOutCirc,
+    //   );
+    // };
+
     super.initState();
 
     _updateTtSchoolTimes(widget.timetable.getCurrWeekTimetable());
@@ -188,10 +209,13 @@ class _TimetableWidgetState extends State<TimetableWidget> {
 
     List<Widget> dayWidgets = [];
 
-    dayWidgets.add(_createTimes());
+    final currDayPage = pageIndex == initialPageIndex;
+
+    dayWidgets.add(_createTimes(currDayPage));
 
     for (int dayIndex = 0; dayIndex < tt.schoolDays.length; dayIndex++) {
       Widget dayWidget = _createDay(
+        currDayPage: currDayPage,
         dayIndex: dayIndex,
         currMonday: currMonday,
         tt: tt,
@@ -210,11 +234,12 @@ class _TimetableWidgetState extends State<TimetableWidget> {
     );
   }
 
-  Widget _createTimes() {
+  Widget _createTimes(bool currDayPage) {
     List<Widget> timeWidgets = [];
 
     timeWidgets.add(
       SizedBox(
+        key: currDayPage ? widget.controller.timeLeftKey : null,
         width: lessonWidth,
         height: lessonHeight,
         child: Center(
@@ -299,6 +324,7 @@ class _TimetableWidgetState extends State<TimetableWidget> {
   }
 
   Widget _createDay({
+    required bool currDayPage,
     required int dayIndex,
     required DateTime currMonday,
     required Timetable tt,
@@ -323,6 +349,7 @@ class _TimetableWidgetState extends State<TimetableWidget> {
 
     lessonWidgets.add(
       InkWell(
+        key: dayIndex == 0 && currDayPage ? widget.controller.dayNameKey : null,
         onTap: notTappable
             ? null
             : () {
@@ -522,7 +549,25 @@ class _TimetableWidgetState extends State<TimetableWidget> {
         year: currYear,
       );
 
+      // if (dayIndex == 0 && lessonIndex == 0) {
+      //   widget.controller.markSpecialLesson = () {
+      //     containerController.strikeThrough = true;
+      //     // tt.isSpecialLesson(
+      //     //   schoolDayIndex: dayIndex,
+      //     //   schoolTimeIndex: lessonIndex,
+      //     //   weekIndex: currWeekIndex,
+      //     //   year: currYear,
+      //     // );
+      //   };
+      //   widget.controller.removeSpecialLessonMark = () {
+      //     containerController.strikeThrough = false;
+      //   };
+      // }
+
       Widget lessonWidget = TimetableLessonWidget(
+        key: dayIndex == 0 && lessonIndex == 0 && currDayPage
+            ? widget.controller.firstLessonKey
+            : null,
         containerController: containerController,
         heroString: heroString,
         containerColor: containerColor,

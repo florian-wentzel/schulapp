@@ -14,6 +14,7 @@ import 'package:schulapp/code_behind/school_semester.dart';
 import 'package:schulapp/code_behind/school_time.dart';
 import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/timetable.dart';
+import 'package:schulapp/code_behind/timetable_controller.dart';
 import 'package:schulapp/code_behind/timetable_manager.dart';
 import 'package:schulapp/code_behind/todo_event.dart';
 import 'package:schulapp/code_behind/tutorial/tutorial.dart';
@@ -37,6 +38,7 @@ import 'package:schulapp/widgets/navigation_bar_drawer.dart';
 import 'package:schulapp/widgets/timetable/timetable_one_day_widget.dart';
 import 'package:schulapp/widgets/task/todo_event_list_item_widget.dart';
 import 'package:schulapp/code_behind/todo_event_util_functions.dart';
+import 'package:schulapp/widgets/tutorial_overlay.dart';
 
 class HomeScreen extends StatefulWidget {
   static const String route = "/";
@@ -57,11 +59,14 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final _timetableController = TimetableController();
+  final _timetableKey = GlobalKey();
+
+  final _verticalPageViewController = PageController();
+
   late Tutorial _tutorial;
 
   StreamSubscription? _intentSubscription;
-
-  final _verticalPageViewController = PageController();
 
   List<SchoolTime>? ttSchoolTimes;
 
@@ -342,6 +347,8 @@ class _HomeScreenState extends State<HomeScreen> {
         width: width,
         height: height,
         child: TimetableOneDayWidget(
+          key: _timetableKey,
+          controller: _timetableController,
           timetable: tt,
           showTodoEvents: widget.isHomeScreen,
         ),
@@ -350,6 +357,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return _timetableBuilder(
       child: TimetableWidget(
+        key: _timetableKey,
+        controller: _timetableController,
         timetable: tt,
         showTodoEvents: widget.isHomeScreen,
       ),
@@ -781,32 +790,67 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _showTutorial() {
-    // if (widget.timetable == null) return;
+    if (widget.timetable == null) return;
 
-    // _tutorial = Tutorial(
-    //   steps: [
-    //     TutorialStep(
-    //       highlightKey: GlobalKey(),
-    //       tutorialWidget: Text(
-    //         "",
-    //       ),
-    //     ),
-    //     TutorialStep(
-    //       highlightKey: GlobalKey(),
-    //       tutorialWidget: Container(
-    //         color: Colors.green,
-    //       ),
-    //     ),
-    //     TutorialStep(
-    //       highlightKey: GlobalKey(),
-    //       tutorialWidget: Container(
-    //         color: Colors.blue,
-    //       ),
-    //     ),
-    //   ],
-    // );
+    _tutorial = Tutorial(
+      steps: [
+        TutorialStep(
+          highlightKey: _timetableKey,
+          tutorialWidget: Text(
+            AppLocalizationsManager
+                .localizations.strYouCanSeeTheComingWeeksTimetable,
+          ),
+          action: () {
+            // _timetableController.swipeToRight?.call();
+          },
+        ),
+        TutorialStep(
+          highlightKey: _timetableController.firstLessonKey,
+          tutorialWidget: Text(
+            AppLocalizationsManager
+                .localizations.strByClickingOnSubjectsYouCanAddHomework,
+          ),
+        ),
+        TutorialStep(
+          highlightKey: _timetableController.dayNameKey,
+          tutorialWidget: Text(
+            AppLocalizationsManager
+                .localizations.strByClickingOnTheDayNameYouReturnToToday,
+          ),
+        ),
+        TutorialStep(
+          highlightKey: _timetableController.timeLeftKey,
+          tutorialWidget: Text(
+            AppLocalizationsManager.localizations.strDisplayOfTheRemainingTime,
+          ),
+        ),
+      ],
+    );
 
-    // _verticalPageViewController
+    bool showTutorial = TimetableManager().settings.getVar<bool>(
+          Settings.showTutorialOnHomeScreenKey,
+        );
+
+    if (showTutorial) {
+      if (!mounted) return;
+      TutorialOverlay.show(
+        context,
+        _tutorial,
+        onOverlayRemoved: () {
+          TimetableManager().settings.setVar<bool>(
+                Settings.showTutorialOnHomeScreenKey,
+                false,
+              );
+
+          if (!mounted) return;
+          _verticalPageViewController.animateToPage(
+            1,
+            duration: const Duration(milliseconds: 500),
+            curve: Curves.easeInOutCirc,
+          );
+        },
+      );
+    }
   }
 
   void _postFrameCallback(Duration _) async {

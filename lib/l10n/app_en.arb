@@ -903,5 +903,15 @@
   "strAccessAdditionalOptions": "Access more options like adding A-Week and B-Week for more flexibility in your schedule.",
   "@strAccessAdditionalOptions": {},
   "strSaveTimetable": "Don't forget to save your timetable once you're happy with the changes!",
-  "@strSaveTimetable": {}
+  "@strSaveTimetable": {},
+  "strChangeTimetableNameByClickingOnIt": "Change the timetable name by clicking on it.",
+  "@strChangeTimetableNameByClickingOnIt": {},
+  "strYouCanSeeTheComingWeeksTimetable": "You can see the coming weeks by swiping.",
+  "@strYouCanSeeTheComingWeeksTimetable": {},
+  "strByClickingOnSubjectsYouCanAddHomework": "By clicking on subjects, you can add homework and grades. To mark it as canceled, long press.",
+  "@strByClickingOnSubjectsYouCanAddHomework": {},
+  "strByClickingOnTheDayNameYouReturnToToday": "By clicking on the day name, you return to today's date. Long pressing marks the entire day as canceled.",
+  "@strByClickingOnTheDayNameYouReturnToToday": {},
+  "strDisplayOfTheRemainingTime": "This displays the remaining time until the next class or break.",
+  "@strDisplayOfTheRemainingTime": {}
 }

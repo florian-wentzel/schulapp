@@ -6,6 +6,7 @@ import 'package:schulapp/code_behind/school_time.dart';
 import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/special_lesson.dart';
 import 'package:schulapp/code_behind/timetable.dart';
+import 'package:schulapp/code_behind/timetable_controller.dart';
 import 'package:schulapp/code_behind/timetable_manager.dart';
 import 'package:schulapp/code_behind/todo_event.dart';
 import 'package:schulapp/code_behind/utils.dart';
@@ -16,6 +17,7 @@ import 'package:schulapp/widgets/timetable/time_to_next_lesson_widget.dart';
 import 'package:schulapp/widgets/timetable/timetable_lesson_widget.dart';
 
 class TimetableOneDayWidget extends StatefulWidget {
+  final TimetableController controller;
   final Timetable timetable;
   final bool showTodoEvents;
   final Size? logicalSize;
@@ -24,6 +26,7 @@ class TimetableOneDayWidget extends StatefulWidget {
     super.key,
     required this.timetable,
     required this.showTodoEvents,
+    required this.controller,
     this.logicalSize,
   });
 
@@ -52,20 +55,38 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
 
   bool _alreadyShowedErrorBecauseOfReducedHours = false;
 
+  int _showNextWeek = 0;
+
   @override
   void initState() {
+    // widget.controller.swipeToRight = () {
+    //   _pageController.animateToPage(
+    //     _pageController.page!.toInt() + 1,
+    //     duration: const Duration(milliseconds: 500),
+    //     curve: Curves.easeInOutCirc,
+    //   );
+    // };
+
+    // widget.controller.swipeToLeft = () {
+    //   _pageController.animateToPage(
+    //     _pageController.page!.toInt() - 1,
+    //     duration: const Duration(milliseconds: 500),
+    //     curve: Curves.easeInOutCirc,
+    //   );
+    // };
+
     super.initState();
 
     final currWeekTimetable = widget.timetable.getCurrWeekTimetable();
 
-    int showNextWeek = 0;
     if (DateTime.now().weekday == DateTime.sunday) {
-      showNextWeek = currWeekTimetable.schoolDays.length;
+      _showNextWeek = currWeekTimetable.schoolDays.length;
     }
+
     _pageController = PageController(
       initialPage: initialMondayPageIndex +
           Utils.getCurrentWeekDayIndex() +
-          showNextWeek,
+          _showNextWeek,
     );
 
     _updateTtSchoolTimes(currWeekTimetable);
@@ -180,7 +201,9 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
       currWeekIndex = Utils.getWeekIndex(currMonday);
       currYear = currMonday.year;
 
+      //TODO: sollte nie passieren aber man weiß ja nie
       return _createDay(
+        currDay: 0,
         currMonday: currMonday,
         dayIndex: Utils.getCurrentWeekDayIndex(),
         tt: widget.timetable.getWeekTimetableForDateTime(currMonday),
@@ -229,6 +252,7 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
           tt = widget.timetable.getWeekTimetableForDateTime(currMonday);
 
           return _createDay(
+            currDay: index,
             dayIndex: currDayIndex,
             currMonday: currMonday,
             tt: tt,
@@ -238,11 +262,12 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
     );
   }
 
-  Widget _createTimes() {
+  Widget _createTimes(bool isCurrDay) {
     List<Widget> timeWidgets = [];
 
     timeWidgets.add(
       SizedBox(
+        key: isCurrDay ? widget.controller.timeLeftKey : null,
         width: lessonWidth,
         height: lessonHeight,
         child: Center(
@@ -319,10 +344,13 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
   }
 
   Widget _createDay({
+    required int currDay,
     required DateTime currMonday,
     required int dayIndex,
     required Timetable tt,
   }) {
+    final isCurrDay = currDay ==
+        initialMondayPageIndex + Utils.getCurrentWeekDayIndex() + _showNextWeek;
     _updateTtSchoolTimes(tt);
     final day = tt.schoolDays[dayIndex];
 
@@ -342,6 +370,9 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
 
     lessonWidgets.add(
       InkWell(
+        key: dayIndex == Utils.getCurrentWeekDayIndex() && isCurrDay
+            ? widget.controller.dayNameKey
+            : null,
         onTap: Utils.sameDay(currLessonDateTime, DateTime.now())
             ? null
             : () {
@@ -544,7 +575,29 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
 
       dayContainerControllers.add(containerController);
 
+      final currDayIndex = Utils.getCurrentWeekDayIndex();
+
+      // if (dayIndex == currDayIndex && lessonIndex == 0) {
+      //   widget.controller.markSpecialLesson = () {
+      //     containerController.strikeThrough = true;
+      //     // tt.isSpecialLesson(
+      //     //   schoolDayIndex: dayIndex,
+      //     //   schoolTimeIndex: lessonIndex,
+      //     //   weekIndex: currWeekIndex,
+      //     //   year: currYear,
+      //     // );
+      //   };
+      //   widget.controller.removeSpecialLessonMark = () {
+      //     containerController.strikeThrough = false;
+      //   };
+      // }
+
+      final key = isCurrDay && dayIndex == currDayIndex && lessonIndex == 0
+          ? widget.controller.firstLessonKey
+          : null;
+
       Widget lessonWidget = TimetableLessonWidget(
+        key: key,
         containerController: containerController,
         heroString: heroString,
         containerColor: containerColor,
@@ -572,7 +625,7 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        _createTimes(),
+        _createTimes(isCurrDay),
         Column(
           children: lessonWidgets,
         ),

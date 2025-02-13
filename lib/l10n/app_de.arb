@@ -315,5 +315,10 @@
   "strAddNewLessons": "Verwende diesen Bereich, um neue Unterrichtseinheiten zu deinem Stundenplan hinzuzufügen.",
   "strDragAndDropLessonsAndClickToEdit": "Sobald du Unterrichtseinheiten erstellt hast, kannst du sie per Drag & Drop in den Stundenplan ziehen.\nKlicke einfach auf eine beliebige Unterrichtseinheit, um deren Details zu ändern.",
   "strAccessAdditionalOptions": "Für weitere Optionen, wie das Hinzufügen von A-Woche und B-Woche, kannst du diesen Knopf verwenden.",
-  "strSaveTimetable": "Vergiss nicht, deinen Stundenplan zu speichern, sobald du mit den Änderungen zufrieden bist!"
+  "strSaveTimetable": "Vergiss nicht, deinen Stundenplan zu speichern, sobald du mit den Änderungen zufrieden bist!",
+  "strChangeTimetableNameByClickingOnIt": "Den Namen des Stundenplans kannst du ändern, indem du hier klickst.",
+  "strYouCanSeeTheComingWeeksTimetable": "Du kannst den Stundenplan der kommenden Wochen sehen.",
+  "strByClickingOnSubjectsYouCanAddHomework": "Durch das Klicken auf Fächer kannst du Hausaufgaben und Noten hinzufügen. Um es als ausgefallen zu markieren, lange drücken.",
+  "strByClickingOnTheDayNameYouReturnToToday": "Durch das Klicken auf den Tagesnamen gelangst du zum heutigen Datum zurück. Langes Drücken markiert den ganzen Tag als ausgefallen.",
+  "strDisplayOfTheRemainingTime": "Hier wird dir die verbleibende Zeit bis zur nächsten Stunde oder Pause angezeigt."
 }
