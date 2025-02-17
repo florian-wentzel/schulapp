@@ -250,7 +250,7 @@ class Settings {
     ),
     SettingsVar<bool>(
       key: highContrastTextOnHomescreenKey,
-      defaultValue: () => false,
+      defaultValue: () => true,
     ),
     SettingsVar<bool>(
       key: hiddenDebugModeKey,

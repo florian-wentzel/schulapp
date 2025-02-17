@@ -59,9 +59,22 @@ class _GradesScreenState extends State<GradesScreen> {
 
           if (semester == null) return;
 
-          TimetableManager().addOrChangeSemester(semester);
+          await TimetableManager().addOrChangeSemester(
+            semester,
+            onAlreadyExists: () {
+              return Utils.showBoolInputDialog(
+                context,
+                question: AppLocalizationsManager.localizations
+                    .strDoYouWantToOverrideSemesterX(
+                  semester.name,
+                ),
+                showYesAndNoInsteadOfOK: true,
+                markTrueAsRed: true,
+              );
+            },
+          );
 
-          if (!mounted) return;
+          if (!context.mounted) return;
 
           setState(() {});
         },
@@ -195,12 +208,29 @@ class _GradesScreenState extends State<GradesScreen> {
                 String originalName =
                     String.fromCharCodes(semester.name.codeUnits);
 
-                semester.name = editedSemester.name;
+                String changedName =
+                    String.fromCharCodes(editedSemester.name.codeUnits);
 
-                TimetableManager().addOrChangeSemester(
-                  semester,
+                editedSemester.setValuesFrom(semester);
+                editedSemester.name = changedName;
+
+                await TimetableManager().addOrChangeSemester(
+                  editedSemester,
                   originalName: originalName,
+                  onAlreadyExists: () {
+                    return Utils.showBoolInputDialog(
+                      context,
+                      question: AppLocalizationsManager.localizations
+                          .strDoYouWantToOverrideSemesterX(
+                        editedSemester.name,
+                      ),
+                      showYesAndNoInsteadOfOK: true,
+                      markTrueAsRed: true,
+                    );
+                  },
                 );
+
+                setState(() {});
               },
               icon: const Icon(Icons.edit),
             ),

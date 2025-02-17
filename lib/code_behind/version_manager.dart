@@ -17,12 +17,20 @@ class VersionManager {
     final packageInfo = await PackageInfo.fromPlatform();
 
     String version = packageInfo.version;
-    // String buildNumber = packageInfo.buildNumber;
+
+    return version;
+  }
+
+  Future<String> getVersionWithBuildnumberString() async {
+    final packageInfo = await PackageInfo.fromPlatform();
+
+    String version = packageInfo.version;
+    String buildNumber = packageInfo.buildNumber;
 
     String text = version;
-    // if (buildNumber.isNotEmpty) {
-    //   text += "+$buildNumber";
-    // }
+    if (buildNumber.isNotEmpty) {
+      text += "+$buildNumber";
+    }
 
     return text;
   }

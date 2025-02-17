@@ -320,5 +320,7 @@
   "strYouCanSeeTheComingWeeksTimetable": "Du kannst den Stundenplan der kommenden Wochen sehen.",
   "strByClickingOnSubjectsYouCanAddHomework": "Durch das Klicken auf Fächer kannst du Hausaufgaben und Noten hinzufügen. Um es als ausgefallen zu markieren, lange drücken.",
   "strByClickingOnTheDayNameYouReturnToToday": "Durch das Klicken auf den Tagesnamen gelangst du zum heutigen Datum zurück. Langes Drücken markiert den ganzen Tag als ausgefallen.",
-  "strDisplayOfTheRemainingTime": "Hier wird dir die verbleibende Zeit bis zur nächsten Stunde oder Pause angezeigt."
+  "strDisplayOfTheRemainingTime": "Hier wird dir die verbleibende Zeit bis zur nächsten Stunde oder Pause angezeigt.",
+  "strDoYouWantToOverrideAllSubjects": "Möchtest Du alle bereits vorhandenen Unterrichtseinheiten überschreiben?",
+  "strDoYouWantToOverrideSemesterX": "Möchtest du das Semester \"{semesterName}\" wirklich überschreiben?"
 }

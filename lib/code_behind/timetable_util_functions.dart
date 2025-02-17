@@ -53,7 +53,7 @@ Future<SchoolSemester?> showCreateSemesterSheet(
               headingText!,
               style: TextStyle(
                 color: textColor,
-                fontSize: 24.0, // Adjust the font size as needed
+                fontSize: 24.0,
                 fontWeight: FontWeight.bold,
               ),
             ),

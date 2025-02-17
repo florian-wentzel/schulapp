@@ -10,6 +10,7 @@ import 'package:schulapp/code_behind/todo_event.dart';
 import 'package:schulapp/code_behind/todo_event_util_functions.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
+import 'package:schulapp/widgets/high_contrast_text.dart';
 import 'package:schulapp/widgets/strike_through_container.dart';
 
 class TimetableLessonWidget extends StatefulWidget {
@@ -146,61 +147,22 @@ class _TimetableLessonWidgetState extends State<TimetableLessonWidget> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Stack(
-                            children: [
-                              if (highContrastEnabled)
-                                Text(
-                                  widget.lesson.name,
-                                  textAlign: TextAlign.center,
-                                  overflow: TextOverflow.fade,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodyLarge
-                                      ?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                        foreground: Paint()
-                                          ..style = PaintingStyle.stroke
-                                          ..strokeWidth = 2
-                                          ..color =
-                                              Theme.of(context).canvasColor,
-                                      ),
-                                ),
-                              Text(
-                                widget.lesson.name,
-                                textAlign: TextAlign.center,
-                                style: Theme.of(context).textTheme.bodyLarge,
-                              ),
-                            ],
+                          HighContrastText(
+                            text: widget.lesson.name,
+                            highContrastEnabled: highContrastEnabled,
+                            textStyle: Theme.of(context).textTheme.bodyLarge,
+                            fontWeight: null,
+                            outlineWidth: 2,
                           ),
                           widget.lesson.room.isEmpty
-                              ? Container()
-                              : Stack(
-                                  children: [
-                                    if (highContrastEnabled)
-                                      Text(
-                                        widget.lesson.room,
-                                        textAlign: TextAlign.center,
-                                        overflow: TextOverflow.fade,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyLarge
-                                            ?.copyWith(
-                                              fontWeight: FontWeight.bold,
-                                              foreground: Paint()
-                                                ..style = PaintingStyle.stroke
-                                                ..strokeWidth = 2
-                                                ..color = Theme.of(context)
-                                                    .canvasColor,
-                                            ),
-                                      ),
-                                    Text(
-                                      widget.lesson.room,
-                                      textAlign: TextAlign.center,
-                                      style:
-                                          Theme.of(context).textTheme.bodyLarge,
-                                      overflow: TextOverflow.fade,
-                                    ),
-                                  ],
+                              ? const SizedBox.shrink()
+                              : HighContrastText(
+                                  text: widget.lesson.room,
+                                  highContrastEnabled: highContrastEnabled,
+                                  textStyle:
+                                      Theme.of(context).textTheme.bodyLarge,
+                                  fontWeight: null,
+                                  outlineWidth: 2,
                                 ),
                         ],
                       ),
@@ -210,45 +172,16 @@ class _TimetableLessonWidgetState extends State<TimetableLessonWidget> {
                         visible: widget.showTaskOnHomescreen,
                         child: Align(
                           alignment: Alignment.bottomRight,
-                          child: Text(
-                            widget.currEvent?.finished ?? false
+                          child: HighContrastText(
+                            text: widget.currEvent?.finished ?? false
                                 ? Timetable.tickMark
                                 : Timetable.exclamationMark,
-                            textAlign: TextAlign.justify,
-                            style: GoogleFonts.dmSerifDisplay(
-                              textStyle: Theme.of(context)
-                                  .textTheme
-                                  .headlineMedium
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    foreground: Paint()
-                                      ..style = PaintingStyle.stroke
-                                      ..strokeWidth = 4
-                                      ..color = Theme.of(context).canvasColor,
-                                  ),
+                            fillColor: widget.currEvent?.getColor(),
+                            textStyle: GoogleFonts.dmSerifDisplay(
+                              textStyle:
+                                  Theme.of(context).textTheme.headlineMedium,
                             ),
-                          ),
-                        ),
-                      ),
-                    if (widget.currEvent != null)
-                      Visibility(
-                        visible: widget.showTaskOnHomescreen,
-                        child: Align(
-                          alignment: Alignment.bottomRight,
-                          child: Text(
-                            widget.currEvent?.finished ?? false
-                                ? Timetable.tickMark
-                                : Timetable.exclamationMark,
-                            textAlign: TextAlign.justify,
-                            style: GoogleFonts.dmSerifDisplay(
-                              textStyle: Theme.of(context)
-                                  .textTheme
-                                  .headlineMedium
-                                  ?.copyWith(
-                                    color: widget.currEvent?.getColor(),
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                            ),
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),

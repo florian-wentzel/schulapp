@@ -232,4 +232,10 @@ class SchoolSemester {
     if (averageA > averageB) return -1;
     return 1;
   }
+
+  void setValuesFrom(SchoolSemester semester) {
+    name = semester.name;
+    _subjects.clear();
+    _subjects.addAll(semester.subjects);
+  }
 }

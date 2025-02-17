@@ -862,7 +862,7 @@
       }
     }
   },
-  "strDoYouWantToOverrideTimetableX": "Do you really want to overwrite the timetable \"{timetableName}\"",
+  "strDoYouWantToOverrideTimetableX": "Do you really want to overwrite the timetable \"{timetableName}\"?",
   "@strDoYouWantToOverrideTimetableX": {
     "placeholders": {
       "timetableName": {
@@ -913,5 +913,16 @@
   "strByClickingOnTheDayNameYouReturnToToday": "By clicking on the day name, you return to today's date. Long pressing marks the entire day as canceled.",
   "@strByClickingOnTheDayNameYouReturnToToday": {},
   "strDisplayOfTheRemainingTime": "This displays the remaining time until the next class or break.",
-  "@strDisplayOfTheRemainingTime": {}
+  "@strDisplayOfTheRemainingTime": {},
+  "strDoYouWantToOverrideAllSubjects": "Do you want to overwrite all existing lessons?",
+  "@strDoYouWantToOverrideAllSubjects": {},
+  "strDoYouWantToOverrideSemesterX": "Do you really want to overwrite the timetable \"{semesterName}\"?",
+  "@strDoYouWantToOverrideSemesterX": {
+    "placeholders": {
+      "semesterName": {
+        "type": "String",
+        "example": "Q1"
+      }
+    }
+  }
 }

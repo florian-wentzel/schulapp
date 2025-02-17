@@ -10,6 +10,7 @@ import 'package:schulapp/code_behind/tutorial/tutorial_step.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/home_widget/home_widget_manager.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
+import 'package:schulapp/widgets/high_contrast_text.dart';
 import 'package:schulapp/widgets/timetable/timetable_drop_target_widget.dart';
 import 'package:schulapp/widgets/timetable/timetable_one_day_drop_target_widget.dart';
 import 'package:schulapp/code_behind/timetable_util_functions.dart';
@@ -261,12 +262,12 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
   }
 
   void _onMoreActionsButtonPressed() {
-    final actionWidgets = <(String title, void Function()? onPressed)>[
+    final actionWidgets = <(String title, Future<void> Function()? onPressed)>[
       if (!TimetableManager().settings.getVar(Settings.showLessonNumbersKey))
         (
           AppLocalizationsManager
               .localizations.strDisplayFreePeriodsWithLessonNumber,
-          () {
+          () async {
             TimetableManager().settings.setVar(
                   Settings.showLessonNumbersKey,
                   true,
@@ -278,7 +279,7 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
         (
           AppLocalizationsManager
               .localizations.strDisplayFreePeriodsWithoutPeriodNumber,
-          () {
+          () async {
             TimetableManager().settings.setVar(
                   Settings.showLessonNumbersKey,
                   false,
@@ -388,6 +389,10 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
                 }
               : null,
         ),
+      (
+        AppLocalizationsManager.localizations.strImportSubjectsFromTimetable,
+        _importSubjectsFromOtherTimetable,
+      ),
     ];
 
     Utils.showListSelectionBottomSheet(
@@ -402,8 +407,9 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
             label,
           ),
           enabled: cb != null,
-          onTap: () {
-            cb?.call();
+          onTap: () async {
+            await cb?.call();
+            if (!context.mounted) return;
             Navigator.of(context).pop();
           },
         );
@@ -603,9 +609,13 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
                   height: minContainerHeight,
                   // width: minContainerWidth,
                   child: Center(
-                    child: Text(
-                      prefab.name,
-                      textAlign: TextAlign.center,
+                    child: HighContrastText(
+                      text: prefab.name,
+                      textStyle: Theme.of(context).textTheme.labelLarge,
+                      highContrastEnabled: TimetableManager().settings.getVar(
+                            Settings.highContrastTextOnHomescreenKey,
+                          ),
+                      outlineWidth: 2,
                     ),
                   ),
                 ),
@@ -941,7 +951,7 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
     );
   }
 
-  void _importSubjectsFromOtherTimetable() async {
+  Future<void> _importSubjectsFromOtherTimetable() async {
     Timetable? timetable = await showSelectTimetableSheet(
       context,
       title: AppLocalizationsManager
@@ -949,6 +959,15 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
     );
 
     if (timetable == null) return;
+
+    if (!mounted) return;
+
+    final overridePrefabs = await Utils.showBoolInputDialog(
+      context,
+      question: AppLocalizationsManager
+          .localizations.strDoYouWantToOverrideAllSubjects,
+      showYesAndNoInsteadOfOK: true,
+    );
 
     Map<String, SchoolLessonPrefab> prefabsMap = {};
 
@@ -961,10 +980,36 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
         prefabsMap[p.name] = p;
       }
     }
+
+    if (overridePrefabs) {
+      for (var p in _lessonPrefabs) {
+        if (!prefabsMap.containsKey(p.name)) {
+          prefabsMap[p.name] = p;
+        }
+      }
+    } else {
+      for (var p in _lessonPrefabs) {
+        prefabsMap[p.name] = p;
+      }
+    }
+
+    _lessonPrefabs.clear();
+
     List<SchoolLessonPrefab> prefabs = prefabsMap.values.toList();
 
     _lessonPrefabs.addAll(prefabs);
     _sortLessonPrefabs();
+
+    for (var prefab in _lessonPrefabs) {
+      Utils.updateTimetableLessons(
+        _timetableCopy,
+        prefab,
+        newName: prefab.name,
+        newTeacher: prefab.teacher,
+        newColor: prefab.color,
+      );
+    }
+
     setState(() {});
   }
 

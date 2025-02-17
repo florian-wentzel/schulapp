@@ -20,6 +20,7 @@ import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/screens/grades_screen.dart';
 import 'package:schulapp/screens/todo_events_screen.dart';
 import 'package:schulapp/screens/semester/school_grade_subject_screen.dart';
+import 'package:schulapp/widgets/high_contrast_text.dart';
 import 'package:schulapp/widgets/semester/school_grade_subject_widget.dart';
 import 'package:schulapp/widgets/strike_through_container.dart';
 import 'package:schulapp/widgets/timetable/time_to_next_lesson_widget.dart';
@@ -457,44 +458,15 @@ class _TimetableWidgetState extends State<TimetableWidget> {
                     visible: customTask != null && showTaskOnHomescreen,
                     child: Align(
                       alignment: Alignment.bottomRight,
-                      child: Text(
-                        customTask?.finished ?? false
+                      child: HighContrastText(
+                        text: customTask?.finished ?? false
                             ? Timetable.tickMark
                             : Timetable.exclamationMark,
-                        textAlign: TextAlign.justify,
-                        style: GoogleFonts.dmSerifDisplay(
-                          textStyle: Theme.of(context)
-                              .textTheme
-                              .headlineMedium
-                              ?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                foreground: Paint()
-                                  ..style = PaintingStyle.stroke
-                                  ..strokeWidth = 4
-                                  ..color = Theme.of(context).canvasColor,
-                              ),
+                        fillColor: customTask?.getColor(),
+                        textStyle: GoogleFonts.dmSerifDisplay(
+                          textStyle: Theme.of(context).textTheme.headlineMedium,
                         ),
-                      ),
-                    ),
-                  ),
-                  Visibility(
-                    visible: customTask != null && showTaskOnHomescreen,
-                    child: Align(
-                      alignment: Alignment.bottomRight,
-                      child: Text(
-                        customTask?.finished ?? false
-                            ? Timetable.tickMark
-                            : Timetable.exclamationMark,
-                        textAlign: TextAlign.justify,
-                        style: GoogleFonts.dmSerifDisplay(
-                          textStyle: Theme.of(context)
-                              .textTheme
-                              .headlineMedium
-                              ?.copyWith(
-                                color: customTask?.getColor(),
-                                fontWeight: FontWeight.bold,
-                              ),
-                        ),
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),

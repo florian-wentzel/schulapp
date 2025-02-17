@@ -611,8 +611,42 @@ class SaveManager {
       Timetable.placeholderName(originalName),
     );
 
+    Directory targetDir = Directory(
+      join(
+        getTimetablesDir().path,
+        timetable.name,
+      ),
+    );
+
     try {
-      timetableDir.renameSync(join(getTimetablesDir().path, timetable.name));
+      if (targetDir.existsSync()) {
+        targetDir.deleteSync(recursive: true);
+      }
+      timetableDir.renameSync(targetDir.path);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  bool renameSemester(SchoolSemester semester, String originalName) {
+    if (semester.name == originalName) return true;
+    String semesterDirPath = join(getSemestersDir().path, originalName);
+
+    Directory semesterDir = Directory(semesterDirPath);
+
+    Directory targetDir = Directory(
+      join(
+        getTimetablesDir().path,
+        semester.name,
+      ),
+    );
+
+    try {
+      if (targetDir.existsSync()) {
+        targetDir.deleteSync(recursive: true);
+      }
+      semesterDir.renameSync(targetDir.path);
       return true;
     } catch (_) {
       return false;

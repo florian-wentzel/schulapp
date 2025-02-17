@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/school_lesson.dart';
 import 'package:schulapp/code_behind/school_lesson_prefab.dart';
+import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/timetable.dart';
+import 'package:schulapp/code_behind/timetable_manager.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/screens/timetable/timetable_droptarget_helper.dart';
+import 'package:schulapp/widgets/high_contrast_text.dart';
 
 class TimetableDropTargetWidget extends StatefulWidget {
   final Timetable timetable;
@@ -169,20 +172,20 @@ class _TimetableDropTargetWidgetState extends State<TimetableDropTargetWidget> {
             height: lessonHeight * 0.8,
             child: FittedBox(
               fit: BoxFit.contain,
-              child: Column(
-                children: [
-                  Text(
-                    day.name,
-                    style: Theme.of(context).textTheme.headlineSmall,
-                    textAlign: TextAlign.center,
-                  ),
-                ],
+              child: Text(
+                day.name,
+                style: Theme.of(context).textTheme.headlineSmall,
+                textAlign: TextAlign.center,
               ),
             ),
           ),
         ),
       ),
     );
+
+    final highContrastEnabled = TimetableManager().settings.getVar(
+          Settings.highContrastTextOnHomescreenKey,
+        );
 
     for (int lessonIndex = 0; lessonIndex < day.lessons.length; lessonIndex++) {
       final currSchoolTime = tt.schoolTimes[lessonIndex];
@@ -254,30 +257,26 @@ class _TimetableDropTargetWidgetState extends State<TimetableDropTargetWidget> {
                       color: lesson.color,
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        FittedBox(
-                          fit: BoxFit.contain,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Text(
-                                lesson.name,
-                                textAlign: TextAlign.center,
-                                style: Theme.of(context).textTheme.labelSmall,
-                              ),
-                              Text(
-                                lesson.room,
-                                textAlign: TextAlign.center,
-                                style: Theme.of(context).textTheme.labelSmall,
-                                overflow: TextOverflow.fade,
-                              ),
-                            ],
+                    child: FittedBox(
+                      fit: BoxFit.contain,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          HighContrastText(
+                            text: lesson.name,
+                            textStyle: Theme.of(context).textTheme.labelSmall,
+                            highContrastEnabled: highContrastEnabled,
+                            outlineWidth: 2,
                           ),
-                        ),
-                      ],
+                          HighContrastText(
+                            text: lesson.room,
+                            textStyle: Theme.of(context).textTheme.labelSmall,
+                            highContrastEnabled: highContrastEnabled,
+                            outlineWidth: 2,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),

@@ -785,7 +785,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         title: AppLocalizationsManager.localizations.strVersion,
         body: [
           FutureBuilder(
-            future: VersionManager().getVersionString(),
+            future: VersionManager().getVersionWithBuildnumberString(),
             builder: (context, snapshot) {
               if (!snapshot.hasData) {
                 return const LinearProgressIndicator();
@@ -983,13 +983,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     if (newList == null) return;
 
+    TimetableManager().removeTodoEventNotifications();
+
     TimetableManager().settings.setVar(
           Settings.notificationScheduleListKey,
           newList,
         );
 
-    //reset notification
-    TimetableManager().sortedTodoEvents;
+    TimetableManager().setTodoEventsNotifications();
 
     setState(() {});
   }

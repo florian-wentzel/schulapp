@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/school_notes_manager.dart';
 import 'package:schulapp/code_behind/special_lesson.dart';
 import 'package:schulapp/code_behind/todo_event.dart';
@@ -41,12 +40,12 @@ class TimetableManager {
   List<TodoEvent> get todoEvents {
     if (_todoEvents == null) {
       _todoEvents = SaveManager().loadAllTodoEvents();
-      _setTodoEventsNotifications();
+      setTodoEventsNotifications();
     }
     return _todoEvents!;
   }
 
-  Future<void> _setTodoEventsNotifications() async {
+  Future<void> setTodoEventsNotifications() async {
     for (int i = 0; i < todoEvents.length; i++) {
       await todoEvents[i].cancleNotification();
       await todoEvents[i].addNotification();
@@ -154,6 +153,15 @@ class TimetableManager {
         if (!replace) {
           return false;
         }
+
+        final tt = timetables.cast<Timetable?>().firstWhere(
+              (element) => element?.name == timetable.name,
+              orElse: () => null,
+            );
+
+        if (tt != null) {
+          removeTimetable(tt);
+        }
       }
 
       SaveManager().renameTimetable(timetable, originalName);
@@ -209,43 +217,92 @@ class TimetableManager {
     }
   }
 
-  void addOrChangeSemester(SchoolSemester semester, {String? originalName}) {
-    if (originalName != null) {
-      //um sicher zu gehen das er wirklich gelöscht wird
-      SaveManager().deleteSemester(
-        SchoolSemester(
-          name: originalName,
-          subjects: [],
-        ),
+  Future<bool> addOrChangeSemester(
+    SchoolSemester semester, {
+    String? originalName,
+    Future<bool> Function()? onAlreadyExists,
+  }) async {
+    try {
+      final alreadyExists = semesters.any(
+        (element) => element.name == semester.name,
       );
 
-      if (semesters.any((element) => element.name == originalName)) {
-        // throw Exception("there is already a timetable called: ${timetable.name}");
-        final semester =
-            semesters.firstWhere((element) => element.name == originalName);
+      //wenn original name null ist dann wurde der stundenplan neu erstellt
+      //das heißt dass man ihn nicht kopieren muss
+      if (originalName == null) {
+        //testen ob es den neuen namen schon gibt
+        if (alreadyExists) {
+          final replace = await onAlreadyExists?.call() ?? false;
+          if (!replace) {
+            return false;
+          }
 
-        bool removed = removeSemester(semester);
+          final s = semesters.cast<SchoolSemester?>().firstWhere(
+                (element) => element?.name == semester.name,
+              );
 
-        if (!removed) {
-          debugPrint("Semester ${semester.name} could not be removed");
+          if (s != null) {
+            removeSemester(s);
+          }
+
+          _semesters?.add(semester);
+          SaveManager().saveSemester(semester);
+
+          return true;
+        }
+        //muss erstellt werden
+        _semesters?.add(semester);
+        SaveManager().saveSemester(semester);
+        return true;
+      }
+
+      //fragen ob man überschreiben möchte
+      if (semester.name != originalName && alreadyExists) {
+        final replace = await onAlreadyExists?.call() ?? false;
+        if (!replace) {
+          return false;
+        }
+
+        final s = semesters.cast<SchoolSemester?>().firstWhere(
+              (element) => element?.name == semester.name,
+              orElse: () => null,
+            );
+
+        if (s != null) {
+          removeSemester(s);
         }
       }
-    }
 
-    if (semesters.any((element) => element.name == semester.name)) {
-      final sem =
-          semesters.firstWhere((element) => element.name == semester.name);
+      SaveManager().renameSemester(semester, originalName);
 
-      bool removed = semesters.remove(sem);
+      final mainSemesterName = TimetableManager().settings.getVar<String?>(
+            Settings.mainSemesterNameKey,
+          );
 
-      if (!removed) {
-        debugPrint("semester ${sem.name} could not be removed");
+      if (mainSemesterName == originalName) {
+        TimetableManager().settings.setVar(
+              Settings.mainSemesterNameKey,
+              semester.name,
+            );
       }
+
+      final s = semesters.cast<SchoolSemester?>().firstWhere(
+            (element) => element?.name == originalName,
+            orElse: () => null,
+          );
+
+      if (s == null) {
+        _semesters?.add(semester);
+      } else {
+        s.setValuesFrom(semester);
+      }
+
+      SaveManager().saveSemester(semester);
+
+      return true;
+    } catch (_) {
+      return false;
     }
-
-    _semesters!.add(semester);
-
-    SaveManager().saveSemester(semester);
   }
 
   void addOrChangeTodoEvent(TodoEvent event) {

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:timezone/timezone.dart';
@@ -42,10 +43,12 @@ class NotificationManager {
       iOS: initializationSettingsIOS,
     );
 
-    await notificationsPlugin.initialize(
+    bool? success = await notificationsPlugin.initialize(
       initializationSettings,
       onDidReceiveNotificationResponse: (details) {},
     );
+
+    debugPrint("Notifications initialized: $success");
   }
 
   Future<Map<Permission, PermissionStatus>?> askForPermission() async {
