@@ -60,4 +60,8 @@ class SchoolLessonPrefab {
       color: _color.withValues(),
     );
   }
+
+  List<SchoolLessonPrefab> get allLessonPrefabs {
+    return [];
+  }
 }

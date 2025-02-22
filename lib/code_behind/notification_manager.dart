@@ -53,7 +53,7 @@ class NotificationManager {
 
   Future<Map<Permission, PermissionStatus>?> askForPermission() async {
     try {
-      return [Permission.scheduleExactAlarm, Permission.notification].request();
+      return [Permission.notification].request();
     } catch (_) {
       return null;
     }
