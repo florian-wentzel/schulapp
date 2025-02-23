@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:schulapp/code_behind/file_io_manager.dart';
 import 'package:schulapp/code_behind/school_note.dart';
 import 'package:schulapp/code_behind/special_lesson.dart';
 import 'package:schulapp/code_behind/todo_event.dart';
@@ -13,7 +14,6 @@ import 'package:schulapp/code_behind/timetable.dart';
 import 'package:schulapp/code_behind/timetable_manager.dart';
 import 'package:schulapp/code_behind/zip_manager.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
-import 'package:share_plus/share_plus.dart';
 
 class SaveManager {
   static final SaveManager _instance = SaveManager._privateConstructor();
@@ -338,19 +338,17 @@ class SaveManager {
     return Timetable.fromJson(json);
   }
 
-  Future<void> shareTimetable(Timetable timetable) async {
+  Future<String> shareTimetable(Timetable timetable) async {
     final exportFile = SaveManager().exportTimetable(
       timetable,
       SaveManager().getTempDir().path,
     );
 
-    await Share.shareXFiles(
-      [XFile(exportFile.path)],
-      subject: AppLocalizationsManager.localizations.strShareYourTimetable,
-      text: AppLocalizationsManager.localizations.strShareYourTimetable,
-    );
+    final code = await FileIoManager().uploadFile(exportFile);
 
     SaveManager().deleteTempDir();
+
+    return code;
   }
 
   File exportTimetable(Timetable timetable, String path) {

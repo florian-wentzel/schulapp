@@ -2,13 +2,17 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:schulapp/code_behind/multi_platform_manager.dart';
 import 'package:schulapp/code_behind/save_manager.dart';
+import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/timetable.dart';
 import 'package:schulapp/code_behind/timetable_manager.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/screens/home_screen.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ExportTimetablePage extends StatefulWidget {
   final void Function() goToHomePage;
@@ -79,7 +83,7 @@ class EexportTimetablePageState extends State<ExportTimetablePage> {
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             IconButton(
-              onPressed: () => SaveManager().shareTimetable(timetable),
+              onPressed: () => _onShareTimetable(timetable),
               icon: const Icon(Icons.share),
             ),
             IconButton(
@@ -193,5 +197,181 @@ class EexportTimetablePageState extends State<ExportTimetablePage> {
     await MultiPlatformManager.shareFile(exportFile);
 
     widget.goToHomePage();
+  }
+
+  void _onShareTimetable(Timetable timetable) async {
+    bool allowed = TimetableManager()
+        .settings
+        .getVar<bool>(Settings.termsOfServiceGoFileIoAllowed);
+
+    if (!allowed) {
+      allowed = await Utils.showBoolInputDialog(
+        context,
+        question: AppLocalizationsManager
+            .localizations.strDoYouAgreeToTermsAndServiceOfGoFileIo,
+        description: AppLocalizationsManager
+            .localizations.strFeatureUsesGoFileIoToStoreDataOnline,
+        showYesAndNoInsteadOfOK: true,
+        extraButton: TextButton(
+          onPressed: () {
+            launchUrl(Uri.parse('https://gofile.io/terms'));
+          },
+          child: Text(AppLocalizationsManager.localizations.strTermsOfService),
+        ),
+      );
+
+      if (!allowed) {
+        if (mounted) {
+          Utils.showInfo(
+            context,
+            msg: AppLocalizationsManager.localizations
+                .strYouMustAgreeToTheTermsOfServiceToUseThisFeature,
+            type: InfoType.error,
+          );
+        }
+        return;
+      }
+      TimetableManager()
+          .settings
+          .setVar<bool>(Settings.termsOfServiceGoFileIoAllowed, true);
+    }
+
+    try {
+      final code = SaveManager().shareTimetable(timetable);
+
+      if (!mounted) return;
+
+      await showModalBottomSheet(
+        context: context,
+        builder: (context) {
+          return FutureBuilder(
+            future: code,
+            builder: (context, snapshot) {
+              Widget child;
+              if (!snapshot.hasData) {
+                child = const Center(
+                  key: ValueKey("CircularProgressIndicator"),
+                  child: CircularProgressIndicator(),
+                );
+              } else {
+                final headingText = snapshot.data;
+
+                if (headingText == null) {
+                  Utils.showInfo(
+                    context,
+                    msg: AppLocalizationsManager
+                        .localizations.strThereWasAnError,
+                    type: InfoType.error,
+                  );
+                  Navigator.of(context).pop();
+                  return const SizedBox.shrink();
+                }
+
+                child = ShareTimetableBottomSheet(
+                  key: const ValueKey("ShareTimetableBottomSheet"),
+                  headingText: headingText,
+                );
+              }
+
+              return AnimatedSwitcher(
+                transitionBuilder: (Widget child, Animation<double> animation) {
+                  return FadeTransition(
+                    opacity: animation,
+                    child: SizeTransition(
+                      sizeFactor: animation,
+                      child: child,
+                    ),
+                  );
+                },
+                duration: const Duration(
+                  milliseconds: 400,
+                ),
+                child: child,
+              );
+            },
+          );
+        },
+      );
+    } catch (e) {
+      if (mounted) {
+        Utils.showInfo(
+          context,
+          msg: e.toString(),
+          type: InfoType.error,
+        );
+      }
+    }
+  }
+}
+
+class ShareTimetableBottomSheet extends StatefulWidget {
+  const ShareTimetableBottomSheet({
+    super.key,
+    required this.headingText,
+  });
+
+  final String headingText;
+
+  @override
+  State<ShareTimetableBottomSheet> createState() =>
+      _ShareTimetableBottomSheetState();
+}
+
+class _ShareTimetableBottomSheetState extends State<ShareTimetableBottomSheet> {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                widget.headingText,
+                style: const TextStyle(
+                  fontSize: 24.0,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              IconButton(
+                onPressed: () {
+                  Clipboard.setData(
+                    ClipboardData(text: widget.headingText),
+                  );
+                  Utils.showInfo(
+                    context,
+                    msg: AppLocalizationsManager
+                        .localizations.strCopiedToClipboard,
+                    type: InfoType.success,
+                  );
+                },
+                icon: const Icon(Icons.copy),
+              ),
+            ],
+          ),
+          const SizedBox(
+            height: 12,
+          ),
+          Text(
+            AppLocalizationsManager.localizations.strDataSavedViaGoFile,
+          ),
+          const Spacer(),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              Share.share(
+                widget.headingText,
+                subject:
+                    "${AppLocalizationsManager.localizations.strShareYourTimetable}\n${AppLocalizationsManager.localizations.strCode}: ${widget.headingText}",
+              );
+            },
+            child: Text(
+              AppLocalizationsManager.localizations.strShareYourTimetable,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

@@ -107,6 +107,8 @@ class Settings {
   static const showTutorialInCreateTimetableScreenKey =
       "showTutorialInCreateTimetableScreen";
   static const showTutorialOnHomeScreenKey = "showTutorialInHomeScreen";
+  static const termsOfServiceGoFileIoAllowed =
+      "termsOfServiceGoFileIoAllowedKey";
 
   static final key = encrypt.Key.fromUtf8("a/wdkaw1ln=921jt48wadan249Bamd=#");
   static final _iv = encrypt.IV.fromUtf8("a2lA.8_n&dXa0?.e");
@@ -371,6 +373,10 @@ class Settings {
     SettingsVar<bool>(
       key: showTutorialOnHomeScreenKey,
       defaultValue: () => true,
+    ),
+    SettingsVar<bool>(
+      key: termsOfServiceGoFileIoAllowed,
+      defaultValue: () => false,
     ),
   ];
 

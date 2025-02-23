@@ -110,6 +110,7 @@ class Utils {
     BuildContext context, {
     required String question,
     String? description,
+    TextButton? extraButton,
     bool autofocus = false,
     bool showYesAndNoInsteadOfOK = false,
     bool markTrueAsRed = false,
@@ -122,6 +123,7 @@ class Utils {
           title: Text(question),
           content: description == null ? null : Text(description),
           actions: <Widget>[
+            if (extraButton != null) extraButton,
             TextButton(
               style: markTrueAsRed
                   ? TextButton.styleFrom(
