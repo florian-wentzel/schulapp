@@ -6,14 +6,14 @@ import 'package:path/path.dart';
 import 'package:schulapp/code_behind/save_manager.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 
-class FileIoManager {
-  static final FileIoManager _instance = FileIoManager._internal();
+class GoFileIoManager {
+  static final GoFileIoManager _instance = GoFileIoManager._internal();
 
-  factory FileIoManager() {
+  factory GoFileIoManager() {
     return _instance;
   }
 
-  FileIoManager._internal();
+  GoFileIoManager._internal();
 
   Future<String> uploadFile(File file) async {
     if (!file.existsSync()) {
@@ -66,8 +66,6 @@ class FileIoManager {
 
     var streamedResponse = await client.send(request);
 
-    client.close();
-
     if (streamedResponse.statusCode == 200) {
       Directory appDocDir = SaveManager().getTempDir();
       String filePath = join(appDocDir.path, fileName);
@@ -78,8 +76,12 @@ class FileIoManager {
       await streamedResponse.stream.pipe(fileSink);
       await fileSink.close();
 
+      client.close();
+
       return filePath;
     } else {
+      client.close();
+
       throw AppLocalizationsManager.localizations.strDownloadFailed(
         streamedResponse.statusCode.toString(),
         await streamedResponse.stream.bytesToString(),

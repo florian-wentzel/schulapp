@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:schulapp/code_behind/file_io_manager.dart';
+import 'package:schulapp/code_behind/go_file_io_manager.dart';
 import 'package:schulapp/code_behind/school_note.dart';
 import 'package:schulapp/code_behind/special_lesson.dart';
 import 'package:schulapp/code_behind/todo_event.dart';
@@ -344,7 +344,7 @@ class SaveManager {
       SaveManager().getTempDir().path,
     );
 
-    final code = await FileIoManager().uploadFile(exportFile);
+    final code = await GoFileIoManager().uploadFile(exportFile);
 
     SaveManager().deleteTempDir();
 

@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:schulapp/code_behind/file_io_manager.dart';
+import 'package:schulapp/code_behind/go_file_io_manager.dart';
 import 'package:schulapp/code_behind/save_manager.dart';
 import 'package:schulapp/code_behind/timetable.dart';
 import 'package:schulapp/code_behind/utils.dart';
@@ -235,7 +235,7 @@ class _ImportTimetablePageState extends State<ImportTimetablePage> {
     String? downloadedPath;
 
     try {
-      downloadedPath = await FileIoManager().downloadFile(code);
+      downloadedPath = await GoFileIoManager().downloadFile(code);
     } catch (e) {
       if (mounted) {
         Utils.showInfo(
