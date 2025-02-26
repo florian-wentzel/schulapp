@@ -17,6 +17,7 @@ import 'package:schulapp/screens/settings_screen.dart';
 import 'package:schulapp/screens/home_screen.dart';
 import 'package:schulapp/theme/theme_manager.dart';
 import 'package:schulapp/theme/themes.dart';
+import 'package:schulapp/widgets/click_me_widget.dart';
 import 'package:schulapp/widgets/custom_bottom_navigation_bar.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -38,9 +39,13 @@ final _router = GoRouter(
             return Material(
               child: Scaffold(
                 backgroundColor: Theme.of(context).canvasColor,
-                body: Center(
-                  child: child,
-                ),
+                body: ClickMeWidget.enabled
+                    ? ClickMeWidget(
+                        child: child,
+                      )
+                    : Center(
+                        child: child,
+                      ),
                 bottomNavigationBar: showBottomNavBar && value
                     ? CustomBottomNavigationBar(
                         currRoute: state.fullPath ?? "",
