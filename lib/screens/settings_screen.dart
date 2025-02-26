@@ -18,10 +18,10 @@ import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/code_behind/version_manager.dart';
 import 'package:schulapp/home_widget/home_widget_manager.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
+import 'package:schulapp/l10n/generated/app_localizations.dart';
 import 'package:schulapp/screens/versions_screen.dart';
 import 'package:schulapp/theme/theme_manager.dart';
 import 'package:schulapp/widgets/navigation_bar_drawer.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class SettingsScreen extends StatefulWidget {
   static const String route = "/settings";

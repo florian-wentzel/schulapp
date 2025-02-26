@@ -7,6 +7,7 @@ import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/code_behind/version_manager.dart';
 import 'package:schulapp/home_widget/home_widget_manager.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
+import 'package:schulapp/l10n/generated/app_localizations.dart';
 import 'package:schulapp/screens/timetables_screen.dart';
 import 'package:schulapp/screens/grades_screen.dart';
 import 'package:schulapp/screens/hello_screen.dart';
@@ -19,7 +20,6 @@ import 'package:schulapp/theme/theme_manager.dart';
 import 'package:schulapp/theme/themes.dart';
 import 'package:schulapp/widgets/click_me_widget.dart';
 import 'package:schulapp/widgets/custom_bottom_navigation_bar.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 final _router = GoRouter(
   routes: [

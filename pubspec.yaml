@@ -33,7 +33,7 @@ dependencies:
   # receive_sharing_intent: ^1.8.0
   encrypt: ^5.0.3
   http: ^1.2.2
-  pdfrx: ^1.0.84
+  pdfrx: ^1.1.11
   image_picker: ^1.1.2
   image: ^4.3.0
   open_file: ^3.5.8
