@@ -107,10 +107,10 @@ class _ClickMeWidgetState extends State<ClickMeWidget>
                           ],
                         ),
                         child: const Text(
-                          'Probiere mich aus!',
+                          'Drück mich!',
                           style: TextStyle(
                             color: Colors.white,
-                            fontSize: 18,
+                            fontSize: 38,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
