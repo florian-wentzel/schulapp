@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 class ClickMeWidget extends StatefulWidget {
   static const Duration waitTillShowDuration = Duration(minutes: 5);
-  static const enabled = true;
+  static const enabled = false;
   final Widget child;
 
   const ClickMeWidget({super.key, required this.child});

@@ -1,0 +1,14 @@
+[
+    {
+        "relation": [
+            "delegate_permission/common.handle_all_urls"
+        ],
+        "target": {
+            "namespace": "android_app",
+            "package_name": "com.flologames.schulapp",
+            "sha256_cert_fingerprints": [
+                "8B:5F:56:3C:7A:F6:E3:C8:3A:C4:57:2D:02:17:96:5D:34:D6:36:24:AA:EA:B0:3B:A9:C0:9D:A0:DD:B9:CC:91"
+            ]
+        }
+    }
+]
