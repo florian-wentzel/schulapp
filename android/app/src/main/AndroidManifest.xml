@@ -80,6 +80,13 @@
                     android:scheme="content"
                     android:pathPattern=".*\\.timetable"/>
             </intent-filter> -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="http" android:host="flologames.github.io/schulapp" />
+                <data android:scheme="https" />
+            </intent-filter>
         </activity>
 
         <!--
