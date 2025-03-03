@@ -32,16 +32,35 @@ class TimetableWidget extends StatefulWidget {
   final TimetableController controller;
   final Timetable timetable;
   final bool showTodoEvents;
+  final bool showPageView;
+  final bool showHolidaysAndDates;
+  final bool highlightCurrLessonAndDay;
+  final Size? size;
 
   const TimetableWidget({
     super.key,
     required this.controller,
     required this.timetable,
     required this.showTodoEvents,
+    this.showPageView = true,
+    this.showHolidaysAndDates = true,
+    this.highlightCurrLessonAndDay = true,
+    this.size,
   });
 
   @override
   State<TimetableWidget> createState() => _TimetableWidgetState();
+
+  static Size getPrefferedSize(Timetable timetable, {double multiplier = 1}) {
+    return Size(
+      _TimetableWidgetState.minLessonWidth *
+          (timetable.schoolDays.length + 1) *
+          multiplier,
+      _TimetableWidgetState.minLessonHeight *
+          (timetable.maxLessonCount + 1) *
+          multiplier,
+    );
+  }
 }
 
 class _TimetableWidgetState extends State<TimetableWidget> {
@@ -66,6 +85,10 @@ class _TimetableWidgetState extends State<TimetableWidget> {
   late int currYear;
 
   bool _alreadyShowedErrorBecauseOfReducedHours = false;
+
+  late Size mediaQuerySize;
+
+  double get _breakLightHeight => lessonHeight / 4;
 
   @override
   void initState() {
@@ -154,34 +177,50 @@ class _TimetableWidgetState extends State<TimetableWidget> {
 
   @override
   Widget build(BuildContext context) {
+    mediaQuerySize = widget.size ??
+        Size(
+          MediaQuery.of(context).size.width * 0.9,
+          MediaQuery.of(context).size.height, // * 0.8
+        );
+
     final currTimetableWeek = widget.timetable;
     selectedColor = Theme.of(context).colorScheme.secondary.withAlpha(30);
 
     unselectedColor = Colors.transparent;
 
-    lessonWidth = (MediaQuery.of(context).size.width * 0.8) /
-        (currTimetableWeek.schoolDays.length + 1);
+    lessonWidth =
+        (mediaQuerySize.width) / (currTimetableWeek.schoolDays.length + 1);
     if (lessonWidth < minLessonWidth) {
       lessonWidth = minLessonWidth;
     }
 
-    lessonHeight = (MediaQuery.of(context).size.height * 0.8) /
-        (currTimetableWeek.maxLessonCount);
+    lessonHeight = (mediaQuerySize.height -
+            (widget.highlightCurrLessonAndDay ? _breakLightHeight : 0)) /
+        (currTimetableWeek.maxLessonCount + 2);
+
     if (lessonHeight < minLessonHeight) {
       lessonHeight = minLessonHeight;
     }
 
-    return SizedBox(
-      width: lessonWidth * (currTimetableWeek.schoolDays.length + 1),
-      height: lessonHeight * (currTimetableWeek.maxLessonCount + 1) +
-          lessonHeight / 4, //_createBreakHighlight
-      child: PageView.builder(
+    final Widget child;
+
+    if (widget.showPageView) {
+      child = PageView.builder(
         itemCount: pagesCount,
         controller: _pageController,
         itemBuilder: (context, index) {
           return _createPage(index);
         },
-      ),
+      );
+    } else {
+      child = _createPage(initialPageIndex);
+    }
+
+    return SizedBox(
+      width: lessonWidth * (currTimetableWeek.schoolDays.length + 1),
+      height: lessonHeight * (currTimetableWeek.maxLessonCount + 1) +
+          _breakLightHeight,
+      child: child,
     );
   }
 
@@ -245,6 +284,7 @@ class _TimetableWidgetState extends State<TimetableWidget> {
         height: lessonHeight,
         child: Center(
           child: TimeToNextLessonWidget(
+            showTime: widget.highlightCurrLessonAndDay,
             ttSchoolTimes: ttSchoolTimes,
             onNewLessonCB: () {
               if (mounted) {
@@ -267,7 +307,7 @@ class _TimetableWidgetState extends State<TimetableWidget> {
 
       bool addBreakWidget = false;
 
-      if (schoolTime.isCurrentlyRunning()) {
+      if (schoolTime.isCurrentlyRunning() && widget.highlightCurrLessonAndDay) {
         containerColor = selectedColor;
       } else {
         if (lessonIndex + 1 < ttSchoolTimes.length) {
@@ -277,11 +317,12 @@ class _TimetableWidgetState extends State<TimetableWidget> {
           int nextSchoolTimeStartInSec = nextSchoolTime.start.toSeconds();
 
           addBreakWidget = (currTimeInSec > currSchoolTimeEndInSec &&
-              currTimeInSec < nextSchoolTimeStartInSec);
+                  currTimeInSec < nextSchoolTimeStartInSec) &&
+              widget.highlightCurrLessonAndDay;
         }
       }
 
-      Widget widget = Container(
+      Widget timeWidget = Container(
         color: containerColor,
         width: lessonWidth,
         height: lessonHeight,
@@ -304,7 +345,7 @@ class _TimetableWidgetState extends State<TimetableWidget> {
         ),
       );
 
-      timeWidgets.add(widget);
+      timeWidgets.add(timeWidget);
 
       if (addBreakWidget) {
         timeWidgets.add(_createBreakHighlight());
@@ -319,7 +360,7 @@ class _TimetableWidgetState extends State<TimetableWidget> {
   Widget _createBreakHighlight() {
     return Container(
       color: selectedColor,
-      height: lessonHeight / 4,
+      height: _breakLightHeight,
       width: lessonWidth,
     );
   }
@@ -343,8 +384,9 @@ class _TimetableWidgetState extends State<TimetableWidget> {
     );
 
     final showTaskOnHomescreen = TimetableManager().settings.getVar(
-          Settings.showTasksOnHomeScreenKey,
-        );
+              Settings.showTasksOnHomeScreenKey,
+            ) &&
+        widget.showTodoEvents;
 
     final List<StrikeThroughContainerController> dayContainerControllers = [];
 
@@ -401,7 +443,8 @@ class _TimetableWidgetState extends State<TimetableWidget> {
           }
         },
         child: Container(
-          color: Utils.sameDay(currLessonDateTime, DateTime.now())
+          color: Utils.sameDay(currLessonDateTime, DateTime.now()) &&
+                  widget.highlightCurrLessonAndDay
               ? selectedColor
               : unselectedColor,
           width: lessonWidth,
@@ -419,19 +462,22 @@ class _TimetableWidgetState extends State<TimetableWidget> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        FutureBuilder(
-                          future: HolidaysManager.getRunningHolidays(
-                            currLessonDateTime,
+                        Visibility(
+                          visible: widget.showHolidaysAndDates,
+                          child: FutureBuilder(
+                            future: HolidaysManager.getRunningHolidays(
+                              currLessonDateTime,
+                            ),
+                            builder: (context, snapshot) {
+                              if (!snapshot.hasData) {
+                                return const SizedBox.shrink();
+                              }
+                              return Text(
+                                snapshot.data!.getFormattedName(),
+                                textAlign: TextAlign.center,
+                              );
+                            },
                           ),
-                          builder: (context, snapshot) {
-                            if (!snapshot.hasData) {
-                              return const SizedBox.shrink();
-                            }
-                            return Text(
-                              snapshot.data!.getFormattedName(),
-                              textAlign: TextAlign.center,
-                            );
-                          },
                         ),
                         customTask == null || !showTaskOnHomescreen
                             ? const SizedBox.shrink()
@@ -444,12 +490,15 @@ class _TimetableWidgetState extends State<TimetableWidget> {
                           style: Theme.of(context).textTheme.headlineSmall,
                           textAlign: TextAlign.center,
                         ),
-                        Text(
-                          Utils.dateToString(
-                            currLessonDateTime,
-                            showYear: false,
+                        Visibility(
+                          visible: widget.showHolidaysAndDates,
+                          child: Text(
+                            Utils.dateToString(
+                              currLessonDateTime,
+                              showYear: false,
+                            ),
+                            textAlign: TextAlign.center,
                           ),
-                          textAlign: TextAlign.center,
                         ),
                       ],
                     ),
@@ -466,6 +515,7 @@ class _TimetableWidgetState extends State<TimetableWidget> {
                         textStyle: GoogleFonts.dmSerifDisplay(
                           textStyle: Theme.of(context).textTheme.headlineMedium,
                         ),
+                        outlineWidth: 2,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -496,8 +546,9 @@ class _TimetableWidgetState extends State<TimetableWidget> {
 
       bool addBreakWidget = false;
 
-      if (Utils.sameDay(currLessonDateTime, DateTime.now()) ||
-          currSchoolTime.isCurrentlyRunning()) {
+      if ((Utils.sameDay(currLessonDateTime, DateTime.now()) ||
+              currSchoolTime.isCurrentlyRunning()) &&
+          widget.highlightCurrLessonAndDay) {
         containerColor = selectedColor;
       }
 
@@ -507,7 +558,8 @@ class _TimetableWidgetState extends State<TimetableWidget> {
         int currSchoolTimeEndInSec = currSchoolTime.end.toSeconds();
         int nextSchoolTimeStartInSec = nextSchoolTime.start.toSeconds();
         addBreakWidget = (currTimeInSec > currSchoolTimeEndInSec &&
-            currTimeInSec < nextSchoolTimeStartInSec);
+                currTimeInSec < nextSchoolTimeStartInSec) &&
+            widget.highlightCurrLessonAndDay;
       }
       final StrikeThroughContainerController containerController =
           StrikeThroughContainerController();
@@ -515,11 +567,12 @@ class _TimetableWidgetState extends State<TimetableWidget> {
       dayContainerControllers.add(containerController);
 
       containerController.strikeThrough = tt.isSpecialLesson(
-        schoolDayIndex: dayIndex,
-        schoolTimeIndex: lessonIndex,
-        weekIndex: currWeekIndex,
-        year: currYear,
-      );
+            schoolDayIndex: dayIndex,
+            schoolTimeIndex: lessonIndex,
+            weekIndex: currWeekIndex,
+            year: currYear,
+          ) &&
+          widget.highlightCurrLessonAndDay;
 
       // if (dayIndex == 0 && lessonIndex == 0) {
       //   widget.controller.markSpecialLesson = () {
@@ -569,15 +622,14 @@ class _TimetableWidgetState extends State<TimetableWidget> {
   }
 }
 
-// ignore: must_be_immutable
 class CustomPopUpShowLesson extends StatefulWidget {
-  SchoolLesson lesson;
-  SchoolDay day;
-  SchoolTime schoolTime;
-  String heroString;
-  TodoEvent? event;
+  final SchoolLesson lesson;
+  final SchoolDay day;
+  final SchoolTime schoolTime;
+  final String heroString;
+  final TodoEvent? event;
 
-  CustomPopUpShowLesson({
+  const CustomPopUpShowLesson({
     super.key,
     required this.heroString,
     required this.day,

@@ -2,6 +2,8 @@
   "@@locale": "en",
   "language_name": "Englisch",
   "@language_name": {},
+  "version_0_8_5": "Added timetable sharing as Image",
+  "@version_0_8_5": {},
   "version_0_8_4": "Added timetable sharing via online code",
   "@version_0_8_4": {},
   "version_0_8_3": "Added Tutorials",
@@ -508,6 +510,14 @@
       }
     }
   },
+  "strExportAsFile": "Exportieren als ({extension})-Datei",
+  "@strExportAsFile": {
+    "placeholders": {
+      "extension": {
+        "type": "String"
+      }
+    }
+  },
   "strNoFileSelected": "No file Selected!",
   "@strNoFileSelected": {},
   "strSelectedFileDoesNotExist": "Selected file does not exist!",
@@ -931,12 +941,14 @@
   "@strCopiedToClipboard": {},
   "strImportViaCode": "Import via online Code",
   "@strImportViaCode": {},
+  "strShareViaOnlineCode": "Share via online Code",
+  "@strShareViaOnlineCode": {},
   "strCode": "Code",
   "@strCode": {},
   "strDataSavedViaGoFile": "The data is saved via GoFile.io and will be deleted after a while.",
   "@strDataSavedViaGoFile": {},
   "strFailedToUploadFile": "Failed to upload file. Status code: {statusCode}\nResponse: {body}",
-  "@strFailedToUploadFile":{
+  "@strFailedToUploadFile": {
     "placeholders": {
       "statusCode": {
         "type": "String",
@@ -949,7 +961,7 @@
     }
   },
   "strDownloadFailed": "Download failed with status: ${statusCode}\nResponse: ${body}",
-  "@strDownloadFailed":{
+  "@strDownloadFailed": {
     "placeholders": {
       "statusCode": {
         "type": "String",
@@ -962,7 +974,7 @@
     }
   },
   "strFailedToRetrieveAccountToken": "Failed to retrieve account token. Status code: ${statusCode}\nResponse: ${body}",
-  "@strFailedToRetrieveAccountToken":{
+  "@strFailedToRetrieveAccountToken": {
     "placeholders": {
       "statusCode": {
         "type": "String",
@@ -975,7 +987,7 @@
     }
   },
   "strCouldNotGetFileLink": "Couldn't get file link. Status code: ${statusCode}\nResponse: ${body}",
-  "@strCouldNotGetFileLink":{
+  "@strCouldNotGetFileLink": {
     "placeholders": {
       "statusCode": {
         "type": "String",
@@ -996,5 +1008,7 @@
   "strYouMustAgreeToTheTermsOfServiceToUseThisFeature": "You must agree to the Terms of Service in order to use this feature.",
   "@strYouMustAgreeToTheTermsOfServiceToUseThisFeature": {},
   "strTermsOfService": "Terms of Service",
-  "@strTermsOfService": {}
+  "@strTermsOfService": {},
+  "strShareImage": "Share as Image",
+  "@strShareImage": {}
 }

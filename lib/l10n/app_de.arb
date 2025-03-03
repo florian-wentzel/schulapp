@@ -1,6 +1,7 @@
 {
   "@@locale": "de",
   "language_name": "Deutsch",
+  "version_0_8_5": "Teilen des Stundenplans als Bild hinzugefügt",
   "version_0_8_4": "Teilen des Stundenplans per Online-Code hinzugefügt",
   "version_0_8_3": "Tutorials hinzugefügt",
   "version_0_8_2": "Verbesserungen an der Benutzeroberfläche und Schulstunden-Vorlagen werden jetzt gespeichert",
@@ -172,6 +173,7 @@
   "strExportTimetable": "Stundenplan Exportieren",
   "strImport": "Importieren",
   "strExport": "Exportieren",
+  "strExportAsFile": "Exportieren als ({extension})-Datei",
   "strSelectTimetableFile": "Stundenplan-Datei auswählen ({extension})",
   "strNoFileSelected": "Keine Datei ausgewählt!",
   "strSelectedFileDoesNotExist": "Ausgewählte Datei existiert nicht!",
@@ -326,6 +328,7 @@
   "strDoYouWantToOverrideSemesterX": "Möchtest du das Semester \"{semesterName}\" wirklich überschreiben?",
   "strCopiedToClipboard": "In die Zwischenablage kopiert",
   "strImportViaCode": "via online Code importieren",
+  "strShareViaOnlineCode": "Teilen als Online-Code",
   "strCode": "Code",
   "strDataSavedViaGoFile": "Die Daten werden über GoFile.io gespeichert und nach einiger Zeit gelöscht.",
   "strFailedToUploadFile": "Datei-Upload fehlgeschlagen. Statuscode: {statusCode}\nAntwort: {body}",
@@ -336,5 +339,6 @@
   "strDoYouAgreeToTermsAndServiceOfGoFileIo": "Stimmst du den Nutzungsbedingungen von GoFile.io zu?",
   "strFeatureUsesGoFileIoToStoreDataOnline": "Diese Funktion verwendet GoFile.io, um die Daten für einige Tage online zu speichern. Hast du die Nutzungsbedingungen und die Datenschutzerklärung gelesen und stimmst diesen zu?",
   "strYouMustAgreeToTheTermsOfServiceToUseThisFeature": "Du musst den Nutzungsbedingungen zustimmen, um diese Funktion nutzen zu können.",
-  "strTermsOfService": "Nutzungsbedingungen"
+  "strTermsOfService": "Nutzungsbedingungen",
+  "strShareImage": "Teilen als Bild"
 }

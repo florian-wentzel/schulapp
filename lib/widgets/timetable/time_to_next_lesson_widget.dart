@@ -6,15 +6,16 @@ import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/extensions.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 
-// ignore: must_be_immutable
 class TimeToNextLessonWidget extends StatefulWidget {
-  List<SchoolTime> ttSchoolTimes;
-  void Function() onNewLessonCB;
+  final List<SchoolTime> ttSchoolTimes;
+  final void Function() onNewLessonCB;
+  final bool showTime;
 
-  TimeToNextLessonWidget({
+  const TimeToNextLessonWidget({
     super.key,
     required this.ttSchoolTimes,
     required this.onNewLessonCB,
+    this.showTime = true,
   });
 
   @override
@@ -71,7 +72,7 @@ class _TimeToNextLessonWidgetState extends State<TimeToNextLessonWidget> {
             textAlign: TextAlign.center,
           ),
           Visibility(
-            visible: _currTimeString.isNotEmpty,
+            visible: _currTimeString.isNotEmpty && widget.showTime,
             child: Text(
               _currTimeString,
               textAlign: TextAlign.center,

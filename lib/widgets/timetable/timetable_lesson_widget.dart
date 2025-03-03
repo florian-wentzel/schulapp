@@ -181,6 +181,7 @@ class _TimetableLessonWidgetState extends State<TimetableLessonWidget> {
                               textStyle:
                                   Theme.of(context).textTheme.headlineMedium,
                             ),
+                            outlineWidth: 2,
                             fontWeight: FontWeight.bold,
                           ),
                         ),

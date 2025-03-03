@@ -49,7 +49,8 @@ class _HighContrastTextState extends State<HighContrastText> {
               foreground: Paint()
                 ..style = PaintingStyle.stroke
                 ..strokeWidth = widget.outlineWidth
-                ..color = Theme.of(context).canvasColor,
+                ..color = Theme.of(context).canvasColor.withAlpha(255),
+              // ..color = outlineColor.withAlpha(80),
             ),
           ),
         Text(

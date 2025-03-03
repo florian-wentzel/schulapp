@@ -395,31 +395,9 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
       ),
     ];
 
-    Utils.showListSelectionBottomSheet(
+    Utils.showStringAcionListBottomSheet(
       context,
-      title: AppLocalizationsManager.localizations.strActions,
       items: actionWidgets,
-      itemBuilder: (context, index) {
-        final label = actionWidgets[index].$1;
-        final cb = actionWidgets[index].$2;
-        return ListTile(
-          title: Text(
-            label,
-          ),
-          enabled: cb != null,
-          onTap: () async {
-            await cb?.call();
-            if (!context.mounted) return;
-            Navigator.of(context).pop();
-          },
-        );
-      },
-      bottomAction: ElevatedButton(
-        onPressed: () {
-          Navigator.of(context).pop();
-        },
-        child: Text(AppLocalizationsManager.localizations.strCancel),
-      ),
     );
   }
 

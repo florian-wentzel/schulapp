@@ -1,6 +1,8 @@
 import 'dart:io';
-
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:schulapp/code_behind/school_lesson.dart';
 import 'package:schulapp/code_behind/school_lesson_prefab.dart';
@@ -9,7 +11,10 @@ import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/timetable.dart';
 import 'package:schulapp/code_behind/timetable_manager.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
+import 'package:schulapp/theme/theme_manager.dart';
+import 'package:schulapp/theme/themes.dart';
 import 'package:schulapp/widgets/custom_pop_up.dart';
+import 'package:image/image.dart' as img;
 
 class Utils {
   static const hourKey = "hour";
@@ -515,6 +520,43 @@ class Utils {
         date1.day == date2.day;
   }
 
+  static Future<bool?> showStringAcionListBottomSheet(
+    BuildContext context, {
+    required List<(String text, Future<void> Function()? action)> items,
+  }) async {
+    bool result = false;
+    await Utils.showListSelectionBottomSheet(
+      context,
+      title: AppLocalizationsManager.localizations.strActions,
+      items: items,
+      itemBuilder: (context, index) {
+        final label = items[index].$1;
+        final cb = items[index].$2;
+        return ListTile(
+          title: Text(
+            label,
+          ),
+          enabled: cb != null,
+          onTap: () async {
+            await cb?.call();
+            result = true;
+            if (!context.mounted) return;
+            Navigator.of(context).pop();
+          },
+        );
+      },
+      bottomAction: ElevatedButton(
+        onPressed: () {
+          result = false;
+          Navigator.of(context).pop();
+        },
+        child: Text(AppLocalizationsManager.localizations.strCancel),
+      ),
+    );
+
+    return result;
+  }
+
   static Future<T?> showListSelectionBottomSheet<T>(
     BuildContext context, {
     required String? title,
@@ -613,6 +655,172 @@ class Utils {
     int weekIndex = daysDifference ~/ 7 + 1;
 
     return weekIndex;
+  }
+
+  static Future<Uint8List?> createImageFromWidget(
+    BuildContext context,
+    Widget widget, {
+    Duration? wait,
+    Size? logicalSize,
+    Size? imageSize,
+    bool addBorder = false,
+  }) async {
+    final repaintBoundary = RenderRepaintBoundary();
+
+    logicalSize ??=
+        View.of(context).physicalSize / View.of(context).devicePixelRatio;
+    imageSize ??= View.of(context).physicalSize;
+
+    final canvasColor = Theme.of(context).canvasColor;
+
+    final renderView = RenderView(
+      child: RenderPositionedBox(
+        alignment: Alignment.center,
+        child: repaintBoundary,
+      ),
+      configuration: ViewConfiguration(
+        logicalConstraints: BoxConstraints(
+          minWidth: 0.0,
+          maxWidth: logicalSize.width,
+          minHeight: 0.0,
+          maxHeight: logicalSize.height,
+        ),
+        devicePixelRatio: 3,
+      ),
+      view: View.of(context),
+    );
+
+    final pipelineOwner = PipelineOwner();
+    final buildOwner = BuildOwner(focusManager: FocusManager());
+
+    pipelineOwner.rootNode = renderView;
+    renderView.prepareInitialFrame();
+
+    final RenderObjectToWidgetElement<RenderBox> rootElement =
+        RenderObjectToWidgetAdapter<RenderBox>(
+      container: repaintBoundary,
+      child: MediaQuery(
+        data: MediaQuery.of(context).copyWith(),
+        child: Directionality(
+          textDirection: ui.TextDirection.ltr,
+          child: MaterialApp(
+            debugShowCheckedModeBanner: false,
+            theme: lightTheme,
+            darkTheme: darkTheme,
+            themeMode: ThemeManager().themeMode,
+            home: Scaffold(
+              body: widget,
+            ),
+          ),
+        ),
+      ),
+    ).attachToRenderTree(buildOwner);
+
+    buildOwner.buildScope(rootElement);
+
+    if (wait != null) {
+      await Future.delayed(wait);
+    }
+
+    buildOwner
+      ..buildScope(rootElement)
+      ..finalizeTree();
+
+    pipelineOwner
+      ..flushLayout()
+      ..flushCompositingBits()
+      ..flushPaint();
+
+    final image = await repaintBoundary.toImage(
+        pixelRatio: imageSize.width / logicalSize.width);
+
+    final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+
+    final bytes = byteData?.buffer.asUint8List();
+
+    if (addBorder) {
+      const borderWidth = 32;
+      return addBorderToImage(
+        bytes!,
+        borderWidth: borderWidth,
+        // borderRadius: borderWidth * 2,
+        borderColor: img.ColorFloat32.rgba(
+          canvasColor.r,
+          canvasColor.g,
+          canvasColor.b,
+          canvasColor.a,
+        ),
+      );
+    }
+
+    return bytes;
+  }
+
+  static Uint8List addBorderToImage(
+    Uint8List pngBytes, {
+    required int borderWidth,
+    // required int borderRadius,
+    required img.Color borderColor,
+  }) {
+    // Decode the PNG into an Image object
+    img.Image? image = img.decodeImage(pngBytes);
+    if (image == null) return pngBytes;
+
+    // Calculate new dimensions
+    int newWidth = image.width + 2 * borderWidth;
+    int newHeight = image.height + 2 * borderWidth;
+
+    // Create a new image with a black background
+    img.Image borderedImage = img.Image(
+      width: newWidth,
+      height: newHeight,
+    );
+
+    img.fill(borderedImage, color: borderColor); // Fill with black
+
+    // Copy the original image into the center
+    borderedImage = img.compositeImage(
+      borderedImage,
+      image,
+      dstX: borderWidth,
+      dstY: borderWidth,
+    );
+
+    // // Create a mask with rounded corners
+    // img.Image mask = img.Image(
+    //   width: newWidth,
+    //   height: newHeight,
+    // );
+
+    // img.fill(
+    //   mask,
+    //   color: img.ColorFloat32.rgba(0, 0, 0, 0),
+    // ); // Fully transparent
+
+    // // Draw a rounded rectangle (opaque white) as the visible area
+    // img.drawRect(
+    //   mask,
+    //   x1: 0,
+    //   y1: 0,
+    //   x2: newWidth,
+    //   y2: newHeight,
+    //   // radius: borderRadius,
+    //   color: img.ColorFloat32.rgba(255, 255, 255, 255),
+    // );
+
+    // // Apply the mask to make the corners transparent
+    // img.Image finalImage =
+    //     img.copyResize(borderedImage, width: newWidth, height: newHeight);
+    // img.compositeImage(
+    //   finalImage,
+    //   mask,
+    //   blend: img.BlendMode.difference,
+    // );
+
+    // Encode back to PNG
+    return Uint8List.fromList(
+      img.encodePng(borderedImage),
+    );
   }
 }
 

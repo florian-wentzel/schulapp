@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:path/path.dart';
@@ -884,6 +885,22 @@ class SaveManager {
       return true;
     } catch (e) {
       return false;
+    }
+  }
+
+  File? saveTempImage(Uint8List imageBytes, String fileName) {
+    try {
+      final tempDir = getTempDir();
+      final tempImagePath = join(
+        tempDir.path,
+        fileName,
+      );
+
+      final file = File(tempImagePath);
+      file.writeAsBytesSync(imageBytes);
+      return file;
+    } catch (_) {
+      return null;
     }
   }
 
