@@ -348,6 +348,10 @@ class _HomeScreenState extends State<HomeScreen> {
         height: height,
         child: TimetableOneDayWidget(
           key: _timetableKey,
+          logicalSize: Size(
+            width,
+            height,
+          ),
           controller: _timetableController,
           timetable: tt,
           showTodoEvents: widget.isHomeScreen,
@@ -361,6 +365,10 @@ class _HomeScreenState extends State<HomeScreen> {
         controller: _timetableController,
         timetable: tt,
         showTodoEvents: widget.isHomeScreen,
+        size: Size(
+          width,
+          height,
+        ),
       ),
       width: width,
       height: height,

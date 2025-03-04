@@ -56,16 +56,15 @@ class TimetableWidget extends StatefulWidget {
       _TimetableWidgetState.minLessonWidth *
           (timetable.schoolDays.length + 1) *
           multiplier,
-      _TimetableWidgetState.minLessonHeight *
-          (timetable.maxLessonCount + 1) *
-          multiplier,
+      //_TimetableWidgetState.minLessonHeight
+      50 * (timetable.maxLessonCount + 1) * multiplier,
     );
   }
 }
 
 class _TimetableWidgetState extends State<TimetableWidget> {
   static const double minLessonWidth = 100;
-  static const double minLessonHeight = 50;
+  static const double minLessonHeight = 30;
   static const int pagesCount = 200;
   static const int initialPageIndex = pagesCount ~/ 2;
 
@@ -196,7 +195,7 @@ class _TimetableWidgetState extends State<TimetableWidget> {
 
     lessonHeight = (mediaQuerySize.height -
             (widget.highlightCurrLessonAndDay ? _breakLightHeight : 0)) /
-        (currTimetableWeek.maxLessonCount + 2);
+        (currTimetableWeek.maxLessonCount + 1);
 
     if (lessonHeight < minLessonHeight) {
       lessonHeight = minLessonHeight;

@@ -57,6 +57,8 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
 
   int _showNextWeek = 0;
 
+  double get _breakLightHeight => lessonHeight / 4;
+
   @override
   void initState() {
     // widget.controller.swipeToRight = () {
@@ -169,14 +171,14 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
       mediaQueryHeight = widget.logicalSize!.height;
     }
 
-    lessonWidth = mediaQueryWidth * 0.8 / 2;
+    lessonWidth = mediaQueryWidth * 0.9 / 2;
     if (lessonWidth < minLessonWidth) {
       lessonWidth = minLessonWidth;
     }
 
     //es könnte deswegen noch fehler geben
-    lessonHeight =
-        mediaQueryHeight * 0.8 / (currTimetableWeek.maxLessonCount + 1);
+    lessonHeight = (mediaQueryHeight - _breakLightHeight) /
+        (currTimetableWeek.maxLessonCount + 1);
 
     if (lessonHeight < minLessonHeight) {
       lessonHeight = minLessonHeight;
@@ -186,34 +188,34 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
 
     unselectedColor = Colors.transparent;
 
-    if (widget.logicalSize != null) {
-      DateTime currMonday = Utils.getWeekDay(
-        DateTime.now().copyWith(
-          hour: 0,
-          minute: 0,
-          second: 0,
-          millisecond: 0,
-          microsecond: 0,
-        ),
-        DateTime.monday,
-      );
+    // if (widget.logicalSize != null) {
+    //   DateTime currMonday = Utils.getWeekDay(
+    //     DateTime.now().copyWith(
+    //       hour: 0,
+    //       minute: 0,
+    //       second: 0,
+    //       millisecond: 0,
+    //       microsecond: 0,
+    //     ),
+    //     DateTime.monday,
+    //   );
 
-      currWeekIndex = Utils.getWeekIndex(currMonday);
-      currYear = currMonday.year;
+    //   currWeekIndex = Utils.getWeekIndex(currMonday);
+    //   currYear = currMonday.year;
 
-      //TODO: sollte nie passieren aber man weiß ja nie
-      return _createDay(
-        currDay: 0,
-        currMonday: currMonday,
-        dayIndex: Utils.getCurrentWeekDayIndex(),
-        tt: widget.timetable.getWeekTimetableForDateTime(currMonday),
-      );
-    }
+    //   //TODO: sollte nie passieren aber man weiß ja nie
+    //   return _createDay(
+    //     currDay: 0,
+    //     currMonday: currMonday,
+    //     dayIndex: Utils.getCurrentWeekDayIndex(),
+    //     tt: widget.timetable.getWeekTimetableForDateTime(currMonday),
+    //   );
+    // }
 
     return SizedBox(
       width: lessonWidth * 2,
       height: lessonHeight * (currTimetableWeek.maxLessonCount + 1) +
-          lessonHeight / 4, //_createBreakHighlight
+          _breakLightHeight,
       child: PageView.builder(
         controller: _pageController,
         itemCount: pagesCount,
@@ -636,7 +638,7 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
   Widget _createBreakHighlight() {
     return Container(
       color: selectedColor,
-      height: lessonHeight / 4,
+      height: _breakLightHeight,
       width: lessonWidth,
     );
   }
