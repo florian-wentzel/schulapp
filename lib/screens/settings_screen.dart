@@ -19,6 +19,7 @@ import 'package:schulapp/code_behind/version_manager.dart';
 import 'package:schulapp/home_widget/home_widget_manager.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/l10n/generated/app_localizations.dart';
+import 'package:schulapp/main.dart';
 import 'package:schulapp/screens/versions_screen.dart';
 import 'package:schulapp/theme/theme_manager.dart';
 import 'package:schulapp/widgets/navigation_bar_drawer.dart';
@@ -119,6 +120,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
         title: Text(
           AppLocalizationsManager.localizations.strSettings,
         ),
+        actions: [
+          IconButton(
+            onPressed: () async {
+              final openFeedback = await Utils.showBoolInputDialog(
+                context,
+                question: "Möchtest du das Feedback Formular öffnen?",
+                description:
+                    "Gehe nun zu einem Beliebigen Bildschirm und zeige bugs oder Verbesserungsvorschläge an",
+                showYesAndNoInsteadOfOK: true,
+              );
+
+              if (!openFeedback || !context.mounted) return;
+
+              submitFeedback(context);
+            },
+            icon: const Icon(Icons.feedback),
+            tooltip: "Feedback",
+          ),
+        ],
       ),
       body: _body(),
     );
