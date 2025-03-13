@@ -174,7 +174,7 @@ class _GradesScreenState extends State<GradesScreen> {
           spacing: 12,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
-            Checkbox.adaptive(
+            Checkbox(
               value: mainSemesterName == semester.name,
               onChanged: (bool? value) {
                 assert(value != null);
