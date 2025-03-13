@@ -9,6 +9,7 @@ class NotificationManager {
   static final NotificationManager _instance =
       NotificationManager._privateConstructor();
   NotificationManager._privateConstructor();
+  static const maxIdNum = 2147483647;
 
   factory NotificationManager() {
     return _instance;
@@ -53,7 +54,10 @@ class NotificationManager {
 
   Future<Map<Permission, PermissionStatus>?> askForPermission() async {
     try {
-      return [Permission.notification].request();
+      return [
+        Permission.notification,
+        Permission.scheduleExactAlarm,
+      ].request();
     } catch (_) {
       return null;
     }
@@ -78,9 +82,13 @@ class NotificationManager {
     if (!Platform.isIOS && !Platform.isAndroid) {
       return;
     }
+
     if (scheduledDateTime.isBefore(DateTime.now())) return;
 
     await askForPermission();
+
+    if (id > maxIdNum) return;
+
     return notificationsPlugin.zonedSchedule(
       id,
       title,
@@ -97,6 +105,9 @@ class NotificationManager {
     if (!Platform.isIOS && !Platform.isAndroid) {
       return;
     }
+
+    if (id > maxIdNum) return;
+
     return notificationsPlugin.cancel(id);
   }
 }

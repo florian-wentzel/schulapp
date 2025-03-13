@@ -4,6 +4,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_image_clipboard/flutter_image_clipboard.dart';
+import 'package:go_router/go_router.dart';
 import 'package:schulapp/code_behind/multi_platform_manager.dart';
 import 'package:schulapp/code_behind/save_manager.dart';
 import 'package:schulapp/code_behind/settings.dart';
@@ -330,11 +331,33 @@ class EexportTimetablePageState extends State<ExportTimetablePage> {
           if (_exporting) return;
           _exporting = true;
           setState(() {});
+
+          BuildContext? dialogContext;
+
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (BuildContext dContext) {
+              dialogContext = dContext;
+              return const Dialog(
+                child: Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      CircularProgressIndicator(),
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
+
           final size = TimetableWidget.getPrefferedSize(
             timetable,
           );
 
-          final imageBytes = await Utils.createImageFromWidget(
+          final Uint8List? imageBytes = await Utils.createImageFromWidget(
             context,
             SizedBox(
               width: size.width,
@@ -358,6 +381,13 @@ class EexportTimetablePageState extends State<ExportTimetablePage> {
             addBorder: true,
           );
 
+          if (dialogContext?.mounted ?? false) {
+            dialogContext?.pop();
+          }
+
+          _exporting = false;
+          setState(() {});
+
           if (imageBytes == null) {
             if (mounted) {
               Utils.showInfo(
@@ -368,9 +398,6 @@ class EexportTimetablePageState extends State<ExportTimetablePage> {
             }
             return;
           }
-
-          _exporting = false;
-          setState(() {});
 
           if (!mounted) return;
 

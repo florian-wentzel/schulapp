@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/notification_manager.dart';
 import 'package:schulapp/code_behind/notification_schedule.dart';
@@ -27,7 +25,7 @@ class TodoEvent {
 
   ///identifyer set at runtime from [UniqueIdGenerator.createUniqueId()]
   int get key => _key;
-  final int _key;
+  late final int _key;
 
   final String name;
   final String linkedSubjectName;
@@ -54,7 +52,15 @@ class TodoEvent {
     required this.desciption,
     required this.finished,
     required this.isCustomEvent,
-  }) : _key = key ?? UniqueIdGenerator.createUniqueId();
+  }) {
+    key ??= UniqueIdGenerator.createUniqueId();
+
+    if (key > NotificationManager.maxIdNum) {
+      key = UniqueIdGenerator.createUniqueId();
+    }
+
+    _key = key;
+  }
 
   bool isExpired() {
     if (finished) return false;
@@ -218,8 +224,6 @@ class TodoEvent {
               Settings.notificationScheduleListKey,
             );
 
-    final notificationMultiplier =
-        notificationScheduleList.length.toString().length;
     for (int i = 0; i < notificationScheduleList.length; i++) {
       final correctedDateTime =
           notificationScheduleList[i].getCorrectedDateTime(endDateTime);
@@ -237,7 +241,7 @@ class TodoEvent {
       );
 
       await NotificationManager().scheduleNotification(
-        id: _key * pow(10, notificationMultiplier).toInt() + i,
+        id: key + i,
         scheduledDateTime: correctedDateTime,
         title: title,
         body: body,
@@ -298,11 +302,9 @@ class TodoEvent {
               Settings.notificationScheduleListKey,
             );
 
-    final notificationMultiplier =
-        notificationScheduleList.length.toString().length;
     for (int i = 0; i < notificationScheduleList.length; i++) {
       await NotificationManager().cancleNotification(
-        _key * pow(10, notificationMultiplier).toInt() + i,
+        key + i,
       );
     }
   }
