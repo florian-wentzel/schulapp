@@ -1,6 +1,7 @@
 {
   "@@locale": "de",
   "language_name": "Deutsch",
+  "version_0_8_6": "Feedback-Funktion in den Einstellungen hinzugefügt",
   "version_0_8_5": "Teilen des Stundenplans als Bild hinzugefügt",
   "version_0_8_4": "Teilen des Stundenplans per Online-Code hinzugefügt",
   "version_0_8_3": "Tutorials hinzugefügt",
@@ -340,5 +341,14 @@
   "strFeatureUsesGoFileIoToStoreDataOnline": "Diese Funktion verwendet GoFile.io, um die Daten für einige Tage online zu speichern. Hast du die Nutzungsbedingungen und die Datenschutzerklärung gelesen und stimmst diesen zu?",
   "strYouMustAgreeToTheTermsOfServiceToUseThisFeature": "Du musst den Nutzungsbedingungen zustimmen, um diese Funktion nutzen zu können.",
   "strTermsOfService": "Nutzungsbedingungen",
-  "strShareImage": "Teilen als Bild"
+  "strShareImage": "Teilen als Bild",
+  "strFeedbackSent": "Feedback gesendet",
+  "strSendFeedback": "Feedback senden",
+  "strBugReport": "Fehlerbericht",
+  "strFeatureRequest": "Funktionsanfrage",
+  "strGeneralFeedback": "Allgemeines Feedback",
+  "strInformationCanNotBeEmpty": "Information darf nicht leer sein!",
+  "strWhatDoYouWantToTellTheDeveloper": "Was möchtest Du dem Entwickler mitteilen?",
+  "strDoYoutWantToOpenFeedbackMenu": "Möchtest Du das Feedback-Formular öffnen?",
+  "strOpenFeedbackDescription": "Wenn Du im „Feedback“-Modus bist, gehe auf eine beliebige Seite in der App und klicke auf den „Malen“-Knopf auf der rechten Seite, um dem Entwickler visuell zu zeigen, was Du meinst. Nutze auch das Texteingabefeld unten für zusätzliche Erklärungen. Wenn Du fertig bist, sende es ab und warte einen Moment. Am Ende öffnet sich deine Mail — du musst nichts hineinschreiben, einfach abschicken. :)"
 }

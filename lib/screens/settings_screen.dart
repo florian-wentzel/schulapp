@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:schulapp/app.dart';
 import 'package:schulapp/code_behind/backup_manager.dart';
 import 'package:schulapp/code_behind/grading_system_manager.dart';
@@ -19,9 +20,9 @@ import 'package:schulapp/code_behind/version_manager.dart';
 import 'package:schulapp/home_widget/home_widget_manager.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/l10n/generated/app_localizations.dart';
-import 'package:schulapp/main.dart';
 import 'package:schulapp/screens/versions_screen.dart';
 import 'package:schulapp/theme/theme_manager.dart';
+import 'package:schulapp/widgets/custom_feedback_form.dart';
 import 'package:schulapp/widgets/navigation_bar_drawer.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -125,18 +126,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
             onPressed: () async {
               final openFeedback = await Utils.showBoolInputDialog(
                 context,
-                question: "Möchtest du das Feedback Formular öffnen?",
-                description:
-                    "Gehe nun zu einem Beliebigen Bildschirm und zeige bugs oder Verbesserungsvorschläge an",
+                question: AppLocalizationsManager
+                    .localizations.strDoYoutWantToOpenFeedbackMenu,
+                description: AppLocalizationsManager
+                    .localizations.strOpenFeedbackDescription,
                 showYesAndNoInsteadOfOK: true,
               );
 
               if (!openFeedback || !context.mounted) return;
 
-              submitFeedback(context);
+              CustomFeedbackForm.submitFeedback(context);
             },
             icon: const Icon(Icons.feedback),
-            tooltip: "Feedback",
+            tooltip: AppLocalizationsManager.localizations.strSendFeedback,
           ),
         ],
       ),
@@ -970,6 +972,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
       };
       ThemeManager().themeMode = ThemeManager().themeMode;
       setState(() {});
+    }
+
+    if (mounted) {
+      context.go("${SettingsScreen.route}?reload=true");
     }
   }
 

@@ -850,7 +850,9 @@ class SaveManager {
     required Timetable timetable,
   }) {
     if (timetable.currSpecialLessonsWeekKey == null ||
-        timetable.currSpecialLessonsWeek == null) return false;
+        timetable.currSpecialLessonsWeek == null) {
+      return false;
+    }
 
     if (timetable.currSpecialLessonsWeekKey?.isEmpty ?? true) {
       return false;

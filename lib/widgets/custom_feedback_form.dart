@@ -1,8 +1,21 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:feedback/feedback.dart';
 import 'package:flutter/material.dart';
+import 'package:path/path.dart' as path;
 import 'package:schulapp/code_behind/custom_feedback.dart';
+import 'package:schulapp/code_behind/go_file_io_manager.dart';
+import 'package:schulapp/code_behind/save_manager.dart';
+import 'package:schulapp/code_behind/utils.dart';
+import 'package:schulapp/code_behind/version_manager.dart';
+import 'package:schulapp/l10n/app_localizations_manager.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class CustomFeedbackForm extends StatefulWidget {
+  static const email = "schulapp.feedback@gmail.com";
+  static const subject = "App Feedback";
+
   const CustomFeedbackForm({
     super.key,
     required this.onSubmit,
@@ -14,10 +27,66 @@ class CustomFeedbackForm extends StatefulWidget {
 
   @override
   State<CustomFeedbackForm> createState() => _CustomFeedbackFormState();
+
+  static Future<void> submitFeedback(BuildContext context) async {
+    BetterFeedback.of(context).show(
+      (feedback) async {
+        try {
+          final feedbackFile = File(
+            path.join(
+              SaveManager().getTempDir().path,
+              "feedback.png",
+            ),
+          );
+
+          feedbackFile.writeAsBytesSync(feedback.screenshot);
+
+          String code = await GoFileIoManager().uploadFile(feedbackFile);
+
+          final extra = feedback.extra;
+
+          if (extra == null) return;
+
+          extra[CustomFeedback.imageCodeKey] = code;
+
+          final mailtoLink =
+              "mailto:$email?subject=$subject&body=${jsonEncode(extra)}";
+
+          launchUrl(Uri.parse(mailtoLink));
+
+          await Future.delayed(
+            const Duration(milliseconds: 100),
+          );
+
+          SaveManager().deleteTempDir();
+
+          if (context.mounted) {
+            Utils.showInfo(
+              context,
+              msg: AppLocalizationsManager.localizations.strFeedbackSent,
+              type: InfoType.success,
+            );
+          }
+        } catch (e) {
+          if (context.mounted) {
+            Utils.showInfo(
+              context,
+              msg: e.toString(),
+              type: InfoType.error,
+            );
+          }
+        }
+      },
+    );
+  }
 }
 
 class _CustomFeedbackFormState extends State<CustomFeedbackForm> {
-  final CustomFeedback _customFeedback = CustomFeedback();
+  Set<FeedbackType> _feedbackSelection = {FeedbackType.generlFeedback};
+
+  FeedbackType get _feedbackType => _feedbackSelection.first;
+  String _feedbackText = "";
+  bool _sending = false;
 
   @override
   Widget build(BuildContext context) {
@@ -26,77 +95,74 @@ class _CustomFeedbackFormState extends State<CustomFeedbackForm> {
         Expanded(
           child: Stack(
             children: [
-              if (widget.scrollController != null)
-                const FeedbackSheetDragHandle(),
+              const FeedbackSheetDragHandle(),
               ListView(
                 controller: widget.scrollController,
-                // Pad the top by 20 to match the corner radius if drag enabled.
-                padding: EdgeInsets.fromLTRB(
+                padding: const EdgeInsets.fromLTRB(
                   16,
-                  widget.scrollController != null ? 20 : 16,
+                  16,
                   16,
                   0,
                 ),
                 children: [
-                  const Text('What kind of feedback do you want to give?'),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      const Padding(
-                        padding: EdgeInsets.only(right: 8),
-                        child: Text('*'),
+                      Text(
+                        AppLocalizationsManager
+                            .localizations.strWhatDoYouWantToTellTheDeveloper,
+                        style: Theme.of(context).textTheme.headlineLarge,
                       ),
-                      Flexible(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            DropdownButton<FeedbackType>(
-                              value: _customFeedback.feedbackType,
-                              items: FeedbackType.values
-                                  .map(
-                                    (type) => DropdownMenuItem<FeedbackType>(
-                                      value: type,
-                                      child: Text(type
-                                          .toString()
-                                          .split('.')
-                                          .last
-                                          .replaceAll('_', ' ')),
-                                    ),
-                                  )
-                                  .toList(),
-                              onChanged: (feedbackType) => setState(() =>
-                                  _customFeedback.feedbackType = feedbackType),
+                      const SizedBox(height: 16),
+                      SegmentedButton<FeedbackType>(
+                        segments: [
+                          ButtonSegment(
+                            value: FeedbackType.bugReport,
+                            label: Text(
+                              AppLocalizationsManager
+                                  .localizations.strBugReport,
+                              textAlign: TextAlign.center,
                             ),
-                            ElevatedButton(
-                              child: const Text('Open Dialog #2'),
-                              onPressed: () {
-                                showDialog<dynamic>(
-                                  context: context,
-                                  builder: (_) {
-                                    return AlertDialog(
-                                      title: const Text("Dialog #2"),
-                                      content: Container(),
-                                    );
-                                  },
-                                );
-                              },
+                          ),
+                          ButtonSegment(
+                            value: FeedbackType.generlFeedback,
+                            label: Text(
+                              AppLocalizationsManager
+                                  .localizations.strGeneralFeedback,
+                              textAlign: TextAlign.center,
                             ),
-                          ],
+                          ),
+                          ButtonSegment(
+                            value: FeedbackType.featureRequest,
+                            label: Text(
+                              AppLocalizationsManager
+                                  .localizations.strFeatureRequest,
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ],
+                        selected: _feedbackSelection,
+                        showSelectedIcon: false,
+                        emptySelectionAllowed: false,
+                        multiSelectionEnabled: false,
+                        onSelectionChanged: (value) {
+                          setState(() {
+                            _feedbackSelection = value;
+                          });
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      TextField(
+                        maxLines: null,
+                        decoration: InputDecoration(
+                          hintText: AppLocalizationsManager
+                              .localizations.strInformation,
+                          border: const OutlineInputBorder(),
                         ),
+                        onChanged: (newFeedback) => _feedbackText = newFeedback,
                       ),
+                      const SizedBox(height: 16),
                     ],
-                  ),
-                  const SizedBox(height: 16),
-                  const Text('What is your feedback?'),
-                  TextField(
-                    onChanged: (newFeedback) =>
-                        _customFeedback.feedbackText = newFeedback,
-                  ),
-                  const SizedBox(height: 16),
-                  const Text('How does this make you feel?'),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: FeedbackRating.values.map(_ratingToIcon).toList(),
                   ),
                 ],
               ),
@@ -104,39 +170,77 @@ class _CustomFeedbackFormState extends State<CustomFeedbackForm> {
           ),
         ),
         TextButton(
-          // disable this button until the user has specified a feedback type
-          onPressed: _customFeedback.feedbackType != null
-              ? () => widget.onSubmit(
-                    _customFeedback.feedbackText ?? '',
-                    extras: _customFeedback.toJson(),
-                  )
-              : null,
-          child: const Text('submit'),
+          onPressed: _sending ? null : sendFeedback,
+          child: Text(AppLocalizationsManager.localizations.strSendFeedback),
         ),
         const SizedBox(height: 8),
       ],
     );
   }
 
-  Widget _ratingToIcon(FeedbackRating rating) {
-    final bool isSelected = _customFeedback.rating == rating;
-    late IconData icon;
-    switch (rating) {
-      case FeedbackRating.bad:
-        icon = Icons.sentiment_dissatisfied;
-        break;
-      case FeedbackRating.neutral:
-        icon = Icons.sentiment_neutral;
-        break;
-      case FeedbackRating.good:
-        icon = Icons.sentiment_satisfied;
-        break;
+  Future<void> sendFeedback() async {
+    if (_sending) return;
+
+    setState(() {
+      _sending = true;
+    });
+
+    if (_feedbackText.trim().isEmpty) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text(
+              AppLocalizationsManager.localizations.strInformationCanNotBeEmpty,
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text(AppLocalizationsManager.localizations.strOK),
+              ),
+            ],
+          );
+        },
+      );
+
+      setState(() {
+        _sending = false;
+      });
+
+      return;
     }
-    return IconButton(
-      color: isSelected ? Theme.of(context).colorScheme.secondary : Colors.grey,
-      onPressed: () => setState(() => _customFeedback.rating = rating),
-      icon: Icon(icon),
-      iconSize: 36,
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext dContext) {
+        return const Dialog(
+          child: Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    final appVersion = await VersionManager().getVersionWithBuildnumberString();
+
+    final feedBack = CustomFeedback(
+      feedbackType: _feedbackType,
+      feedbackText: _feedbackText,
+      appVersion: appVersion,
+    );
+
+    widget.onSubmit(
+      feedBack.feedbackText,
+      extras: feedBack.toJson(),
     );
   }
 }

@@ -36,4 +36,8 @@ class SchoolNotesManager {
           orElse: () => null,
         );
   }
+
+  void markAllDataToBeReloaded() {
+    _schoolNotes = SaveManager().loadAllSchoolNotes();
+  }
 }

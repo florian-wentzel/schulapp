@@ -514,6 +514,7 @@ class TimetableManager {
     _semesters = null;
     _todoEvents = null;
     _settings = null;
+    SchoolNotesManager().markAllDataToBeReloaded();
   }
 
   Future<void> removeTodoEventNotifications() async {

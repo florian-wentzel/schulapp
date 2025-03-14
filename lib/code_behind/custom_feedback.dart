@@ -1,28 +1,24 @@
 class CustomFeedback {
+  static const feedbackTypeKey = "feedbackType";
+  static const feedbackTextKey = "feedbackText";
+  static const appVersionKey = "appVersion";
+  static const imageCodeKey = "imageCode";
+
   CustomFeedback({
-    this.feedbackType,
-    this.feedbackText,
-    this.rating,
+    required this.feedbackType,
+    required this.feedbackText,
+    required this.appVersion,
   });
 
-  FeedbackType? feedbackType;
-  String? feedbackText;
-  FeedbackRating? rating;
-
-  @override
-  String toString() {
-    return {
-      if (rating != null) 'rating': rating.toString(),
-      'feedback_type': feedbackType.toString(),
-      'feedback_text': feedbackText,
-    }.toString();
-  }
+  FeedbackType feedbackType;
+  String feedbackText;
+  String appVersion;
 
   Map<String, dynamic> toJson() {
-    return <String, dynamic>{
-      if (rating != null) 'rating': rating.toString(),
-      'feedback_type': feedbackType.toString(),
-      'feedback_text': feedbackText,
+    return {
+      feedbackTypeKey: feedbackType.toString(),
+      feedbackTextKey: feedbackText,
+      appVersionKey: appVersion,
     };
   }
 }
@@ -30,10 +26,5 @@ class CustomFeedback {
 enum FeedbackType {
   bugReport,
   featureRequest,
-}
-
-enum FeedbackRating {
-  bad,
-  neutral,
-  good,
+  generlFeedback,
 }
