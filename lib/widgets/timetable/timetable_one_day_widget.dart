@@ -176,7 +176,6 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
       lessonWidth = minLessonWidth;
     }
 
-    //es könnte deswegen noch fehler geben
     lessonHeight = (mediaQueryHeight - _breakLightHeight) /
         (currTimetableWeek.maxLessonCount + 1);
 
@@ -215,7 +214,8 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
     return SizedBox(
       width: lessonWidth * 2,
       height: lessonHeight * (currTimetableWeek.maxLessonCount + 1) +
-          _breakLightHeight,
+          _breakLightHeight -
+          1, //durch mögliche rundungsfehler
       child: PageView.builder(
         controller: _pageController,
         itemCount: pagesCount,

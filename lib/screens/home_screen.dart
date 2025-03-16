@@ -337,10 +337,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
     final width = MediaQuery.of(context).size.width;
     double height =
-        MediaQuery.of(context).size.height - AppBar().preferredSize.height;
+        MediaQuery.of(context).size.height - AppBar().preferredSize.height * 2;
 
     if (Utils.isMobileRatio(context)) {
-      height -= kBottomNavigationBarHeight;
+      height -= kBottomNavigationBarHeight * 1.5;
       height -= 2; //without you could scroll a little bit
 
       return _timetableBuilder(
