@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:schulapp/code_behind/school_lesson.dart';
+import 'package:schulapp/code_behind/school_lesson_prefab.dart';
 import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/special_lesson.dart';
 import 'package:schulapp/code_behind/timetable.dart';
@@ -34,6 +35,8 @@ class TimetableLessonWidget extends StatefulWidget {
   final int dayIndex;
   final int lessonIndex;
 
+  final bool showSubstituteLessons;
+
   const TimetableLessonWidget({
     super.key,
     required this.tt,
@@ -50,6 +53,7 @@ class TimetableLessonWidget extends StatefulWidget {
     required this.lessonHeight,
     required this.lessonWidth,
     required this.showTaskOnHomescreen,
+    this.showSubstituteLessons = true,
   });
 
   @override
@@ -61,12 +65,33 @@ class _TimetableLessonWidgetState extends State<TimetableLessonWidget> {
         Settings.highContrastTextOnHomescreenKey,
       );
 
-  // highContrastEnabled = true;
-
   @override
   Widget build(BuildContext context) {
+    final specialLesson = widget.tt.getSpecialLesson(
+      year: widget.currYear,
+      weekIndex: widget.currWeekIndex,
+      schoolDayIndex: widget.dayIndex,
+      schoolTimeIndex: widget.lessonIndex,
+    );
+
+    SchoolLessonPrefab lessonPrefab = SchoolLessonPrefab.fromSchoolLesson(
+      lesson: widget.lesson,
+    );
+
+    if (specialLesson is SubstituteSpecialLesson &&
+        widget.showSubstituteLessons) {
+      SubstituteSpecialLesson substituteSpecialLesson = specialLesson;
+      lessonPrefab = SchoolLessonPrefab(
+        name: substituteSpecialLesson.name,
+        room: substituteSpecialLesson.room,
+        teacher: substituteSpecialLesson.teacher,
+        color: substituteSpecialLesson.color,
+      );
+    }
+
     return InkWell(
-      onTap: SchoolLesson.isEmptyLesson(widget.lesson)
+      onTap: SchoolLesson.isEmptyLesson(widget.lesson) &&
+              specialLesson is! SubstituteSpecialLesson
           ? null
           : () => _onLessonWidgetTap(
                 dayIndex: widget.dayIndex,
@@ -74,29 +99,114 @@ class _TimetableLessonWidgetState extends State<TimetableLessonWidget> {
                 heroString: widget.heroString,
                 currEvent: widget.currEvent,
                 eventEndTime: widget.currLessonDateTime,
+                lesson: lessonPrefab,
               ),
-      onLongPress: SchoolLesson.isEmptyLesson(widget.lesson)
-          ? null
-          : () {
-              widget.containerController.changeStrikeThrough();
-              if (widget.containerController.strikeThrough) {
-                widget.tt.setSpecialLesson(
-                  weekIndex: widget.currWeekIndex,
-                  year: widget.currYear,
-                  specialLesson: CancelledSpecialLesson(
+      onLongPress: () {
+        final specialLesson = widget.tt.getSpecialLesson(
+          year: widget.currYear,
+          weekIndex: widget.currWeekIndex,
+          schoolDayIndex: widget.dayIndex,
+          schoolTimeIndex: widget.lessonIndex,
+        );
+        Utils.showStringAcionListBottomSheet(
+          context,
+          runActionAfterPop: true,
+          autoRunOnlyPossibleOption: true,
+          items: [
+            if (specialLesson is! CancelledSpecialLesson &&
+                specialLesson == null)
+              (
+                AppLocalizationsManager.localizations.strMarkAsCancelled,
+                SchoolLesson.isEmptyLesson(widget.lesson)
+                    ? null
+                    : () async {
+                        await Future.delayed(
+                          const Duration(milliseconds: 100),
+                        );
+                        widget.containerController.strikeThrough = true;
+                        widget.tt.setSpecialLesson(
+                          weekIndex: widget.currWeekIndex,
+                          year: widget.currYear,
+                          specialLesson: CancelledSpecialLesson(
+                            dayIndex: widget.dayIndex,
+                            timeIndex: widget.lessonIndex,
+                          ),
+                        );
+                      }
+              ),
+            //weil es wenn, nur alleine steht, brauch man nichts hinschreiben,
+            //weil es automatisch ausgeführt wird: autoRunOnlyPossibleOption: true
+            if (specialLesson is CancelledSpecialLesson)
+              (
+                "",
+                () async {
+                  await Future.delayed(
+                    const Duration(milliseconds: 100),
+                  );
+                  widget.containerController.strikeThrough = false;
+                  widget.tt.removeSpecialLesson(
+                    weekIndex: widget.currWeekIndex,
+                    year: widget.currYear,
                     dayIndex: widget.dayIndex,
                     timeIndex: widget.lessonIndex,
-                  ),
-                );
-              } else {
-                widget.tt.removeSpecialLesson(
-                  year: widget.currYear,
-                  weekIndex: widget.currWeekIndex,
-                  dayIndex: widget.dayIndex,
-                  timeIndex: widget.lessonIndex,
-                );
-              }
-            },
+                  );
+                }
+              ),
+            if (specialLesson is! SubstituteSpecialLesson &&
+                specialLesson == null)
+              (
+                AppLocalizationsManager.localizations.strMarkAsSubstitute,
+                () async {
+                  final prefabs = widget.tt.lessonPrefabs;
+
+                  prefabs.remove(
+                    prefabs.cast<SchoolLessonPrefab?>().firstWhere(
+                          (element) => element?.name == widget.lesson.name,
+                          orElse: () => null,
+                        ),
+                  );
+
+                  if (!context.mounted) return;
+
+                  final prefab = await Utils.showSelectLessonPrefabList(
+                    context,
+                    prefabs: prefabs,
+                  );
+
+                  if (prefab == null) return;
+
+                  widget.tt.setSpecialLesson(
+                    weekIndex: widget.currWeekIndex,
+                    year: widget.currYear,
+                    specialLesson: SubstituteSpecialLesson(
+                      dayIndex: widget.dayIndex,
+                      timeIndex: widget.lessonIndex,
+                      prefab: prefab,
+                    ),
+                  );
+
+                  setState(() {});
+                }
+              ),
+            //weil es wenn, nur alleine steht, brauch man nichts hinschreiben,
+            //weil es automatisch ausgeführt wird: autoRunOnlyPossibleOption: true
+            if (specialLesson is SubstituteSpecialLesson)
+              (
+                "",
+                () async {
+                  widget.tt.removeSpecialLesson(
+                    weekIndex: widget.currWeekIndex,
+                    year: widget.currYear,
+                    dayIndex: widget.dayIndex,
+                    timeIndex: widget.lessonIndex,
+                  );
+
+                  setState(() {});
+                }
+              )
+          ],
+        );
+      },
       child: Container(
         color: widget.containerColor,
         width: widget.lessonWidth,
@@ -115,7 +225,7 @@ class _TimetableLessonWidgetState extends State<TimetableLessonWidget> {
                     height: widget.lessonHeight * 0.8,
                     decoration: BoxDecoration(
                       color: ColorTween(
-                        begin: widget.lesson.color,
+                        begin: lessonPrefab.color,
                         end: Theme.of(context).cardColor.withAlpha(targetAlpha),
                       ).lerp(animation.value),
                       borderRadius: BorderRadius.circular(12),
@@ -135,7 +245,7 @@ class _TimetableLessonWidgetState extends State<TimetableLessonWidget> {
                   horizontal: 8,
                 ),
                 decoration: BoxDecoration(
-                  color: widget.lesson.color,
+                  color: lessonPrefab.color,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Stack(
@@ -148,16 +258,16 @@ class _TimetableLessonWidgetState extends State<TimetableLessonWidget> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           HighContrastText(
-                            text: widget.lesson.name,
+                            text: lessonPrefab.name,
                             highContrastEnabled: highContrastEnabled,
                             textStyle: Theme.of(context).textTheme.bodyLarge,
                             fontWeight: null,
                             outlineWidth: 2,
                           ),
-                          widget.lesson.room.isEmpty
+                          lessonPrefab.room.isEmpty
                               ? const SizedBox.shrink()
                               : HighContrastText(
-                                  text: widget.lesson.room,
+                                  text: lessonPrefab.room,
                                   highContrastEnabled: highContrastEnabled,
                                   textStyle:
                                       Theme.of(context).textTheme.bodyLarge,
@@ -167,6 +277,40 @@ class _TimetableLessonWidgetState extends State<TimetableLessonWidget> {
                         ],
                       ),
                     ),
+                    if (specialLesson is SubstituteSpecialLesson &&
+                        widget.showSubstituteLessons)
+                      const Align(
+                        alignment: Alignment.topLeft,
+                        child: Icon(
+                          Icons.swap_horiz,
+                          color: Colors.white,
+                          shadows: [
+                            Shadow(
+                              offset: Offset(1.5, 1.5),
+                              blurRadius: 3.0,
+                              color: Colors.black,
+                            ),
+                          ],
+                        ),
+                      ),
+                    // Align(
+                    //   alignment: Alignment.topLeft,
+                    //   child: Container(
+                    //     padding:
+                    //         EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    //     decoration: BoxDecoration(
+                    //       color: Colors.red,
+                    //       borderRadius: BorderRadius.only(
+                    //         topRight: Radius.circular(10),
+                    //         bottomLeft: Radius.circular(10),
+                    //       ),
+                    //     ),
+                    //     child: Text(
+                    //       'Vertretung',
+                    //       style: TextStyle(color: Colors.white, fontSize: 10),
+                    //     ),
+                    //   ),
+                    // ),
                     if (widget.currEvent != null)
                       Visibility(
                         visible: widget.showTaskOnHomescreen,
@@ -201,10 +345,10 @@ class _TimetableLessonWidgetState extends State<TimetableLessonWidget> {
     required int dayIndex,
     required String heroString,
     required DateTime eventEndTime,
+    required SchoolLessonPrefab lesson,
     TodoEvent? currEvent,
   }) async {
     final day = widget.tt.schoolDays[dayIndex];
-    final lesson = day.lessons[lessonIndex];
     final schoolTime = widget.tt.schoolTimes[lessonIndex];
 
     bool? showNewTodoEvent = await showSchoolLessonHomePopUp(

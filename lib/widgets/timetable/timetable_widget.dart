@@ -6,6 +6,7 @@ import 'package:schulapp/code_behind/save_manager.dart';
 import 'package:schulapp/code_behind/school_day.dart';
 import 'package:schulapp/code_behind/school_grade_subject.dart';
 import 'package:schulapp/code_behind/school_lesson.dart';
+import 'package:schulapp/code_behind/school_lesson_prefab.dart';
 import 'package:schulapp/code_behind/school_semester.dart';
 import 'package:schulapp/code_behind/school_time.dart';
 import 'package:schulapp/code_behind/settings.dart';
@@ -402,12 +403,13 @@ class _TimetableWidgetState extends State<TimetableWidget> {
                 );
               },
         onLongPress: () async {
-          final value = !tt.isSpecialLesson(
+          final value = tt.getSpecialLesson(
             year: currYear,
             weekIndex: currWeekIndex,
             schoolDayIndex: dayIndex,
             schoolTimeIndex: 0,
-          );
+          ) is! CancelledSpecialLesson;
+
           for (int timeIndex = 0;
               timeIndex < dayContainerControllers.length;
               timeIndex++) {
@@ -535,8 +537,18 @@ class _TimetableWidgetState extends State<TimetableWidget> {
       TodoEvent? currEvent;
 
       if (widget.showTodoEvents) {
+        final specialLesson = tt.getSpecialLesson(
+          year: currYear,
+          weekIndex: currWeekIndex,
+          schoolDayIndex: dayIndex,
+          schoolTimeIndex: lessonIndex,
+        );
+
+        SubstituteSpecialLesson? substituteSpecialLesson =
+            (specialLesson is SubstituteSpecialLesson) ? specialLesson : null;
+
         currEvent = TimetableManager().getRunningTodoEvent(
-          linkedSubjectName: lesson.name,
+          linkedSubjectName: substituteSpecialLesson?.name ?? lesson.name,
           lessonDayTime: currLessonDateTime,
         );
       }
@@ -565,12 +577,12 @@ class _TimetableWidgetState extends State<TimetableWidget> {
 
       dayContainerControllers.add(containerController);
 
-      containerController.strikeThrough = tt.isSpecialLesson(
+      containerController.strikeThrough = tt.getSpecialLesson(
             schoolDayIndex: dayIndex,
             schoolTimeIndex: lessonIndex,
             weekIndex: currWeekIndex,
             year: currYear,
-          ) &&
+          ) is CancelledSpecialLesson &&
           widget.highlightCurrLessonAndDay;
 
       // if (dayIndex == 0 && lessonIndex == 0) {
@@ -606,6 +618,7 @@ class _TimetableWidgetState extends State<TimetableWidget> {
         lessonWidth: lessonWidth,
         showTaskOnHomescreen: showTaskOnHomescreen,
         tt: tt,
+        showSubstituteLessons: widget.showTodoEvents,
       );
 
       lessonWidgets.add(lessonWidget);
@@ -622,7 +635,7 @@ class _TimetableWidgetState extends State<TimetableWidget> {
 }
 
 class CustomPopUpShowLesson extends StatefulWidget {
-  final SchoolLesson lesson;
+  final SchoolLessonPrefab lesson;
   final SchoolDay day;
   final SchoolTime schoolTime;
   final String heroString;
@@ -878,7 +891,7 @@ class _CustomPopUpShowLessonState extends State<CustomPopUpShowLesson> {
 
   Widget _showGradesWidget(
     BuildContext context, {
-    required SchoolLesson lesson,
+    required SchoolLessonPrefab lesson,
     SchoolSemester? selectedSemester,
     SchoolGradeSubject? selectedSubject,
   }) {

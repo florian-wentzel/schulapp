@@ -411,7 +411,7 @@ class TimetableManager {
     return null;
   }
 
-  bool isSpecialLesson({
+  SpecialLesson? getSpecialLesson({
     required Timetable timetable,
     required int year,
     required int weekIndex,
@@ -428,13 +428,17 @@ class TimetableManager {
       );
       timetable.currSpecialLessonsWeekKey = currSpecialLessonsKey;
     }
+    final List<SpecialLesson>? currSpecialLessons =
+        timetable.currSpecialLessonsWeek;
 
-    final specialLesson = timetable.currSpecialLessonsWeek?.any(
+    if (currSpecialLessons == null) return null;
+
+    final specialLesson = currSpecialLessons.cast<SpecialLesson?>().firstWhere(
           (element) =>
-              element.dayIndex == schoolDayIndex &&
-              element.timeIndex == schoolTimeIndex,
-        ) ??
-        false;
+              element?.dayIndex == schoolDayIndex &&
+              element?.timeIndex == schoolTimeIndex,
+          orElse: () => null,
+        );
 
     return specialLesson;
   }

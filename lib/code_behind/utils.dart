@@ -520,11 +520,42 @@ class Utils {
         date1.day == date2.day;
   }
 
+  static Future<SchoolLessonPrefab?> showSelectLessonPrefabList(
+    BuildContext context, {
+    required List<SchoolLessonPrefab> prefabs,
+  }) async {
+    SchoolLessonPrefab? selectedPrefab;
+
+    await showStringAcionListBottomSheet(
+      context,
+      items: prefabs.map((e) {
+        return (
+          e.name,
+          () async {
+            selectedPrefab = e;
+          },
+        );
+      }).toList(),
+    );
+
+    return selectedPrefab;
+  }
+
   static Future<bool?> showStringAcionListBottomSheet(
     BuildContext context, {
+    bool runActionAfterPop = false,
+    bool autoRunOnlyPossibleOption = false,
     required List<(String text, Future<void> Function()? action)> items,
   }) async {
+    Future<void> Function()? selectedAction;
+
     bool result = false;
+
+    if (autoRunOnlyPossibleOption && items.length == 1) {
+      await items.first.$2?.call();
+      return true;
+    }
+
     await Utils.showListSelectionBottomSheet(
       context,
       title: AppLocalizationsManager.localizations.strActions,
@@ -538,7 +569,11 @@ class Utils {
           ),
           enabled: cb != null,
           onTap: () async {
-            await cb?.call();
+            if (runActionAfterPop) {
+              selectedAction = cb;
+            } else {
+              await cb?.call();
+            }
             result = true;
             if (!context.mounted) return;
             Navigator.of(context).pop();
@@ -553,6 +588,10 @@ class Utils {
         child: Text(AppLocalizationsManager.localizations.strCancel),
       ),
     );
+
+    if (runActionAfterPop) {
+      await selectedAction?.call();
+    }
 
     return result;
   }

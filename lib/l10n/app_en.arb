@@ -2,6 +2,8 @@
   "@@locale": "en",
   "language_name": "Englisch",
   "@language_name": {},
+  "version_0_8_7": "Substitute lessons can now be marked",
+  "@version_0_8_7": {},
   "version_0_8_6": "Added Feedback functionality in Settings",
   "@version_0_8_6": {},
   "version_0_8_5": "Added timetable sharing as Image",
@@ -1030,5 +1032,9 @@
   "strDoYoutWantToOpenFeedbackMenu": "Do you want to open the feedback menu?",
   "@strDoYoutWantToOpenFeedbackMenu": {},
   "strOpenFeedbackDescription": "When you're in \"Feedback\" mode, go to any page in the app and click the \"Draw\" button on the right side to visually show the developer what you mean. Use the text input at the bottom to add extra details. Once you're done, submit it and wait a moment. Your email will open automatically — no need to write anything, just hit send. :)",
-  "@strOpenFeedbackDescription": {}
+  "@strOpenFeedbackDescription": {},
+  "strMarkAsCancelled": "Mark as Cancelled",
+  "@strMarkAsCancelled": {},
+  "strMarkAsSubstitute": "Mark as substitute",
+  "@strMarkAsSubstitute": {}
 }

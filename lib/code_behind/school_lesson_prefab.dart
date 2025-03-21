@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:schulapp/code_behind/school_lesson.dart';
 import 'package:schulapp/extensions.dart';
 
 ///Prefab welches in der Horizontalen Leiste über dem Stundenplan beim erstellen angezeigt wird
@@ -19,6 +20,13 @@ class SchoolLessonPrefab {
   String get room => _room;
   String get teacher => _teacher;
   Color get color => _color;
+
+  SchoolLessonPrefab.fromSchoolLesson({
+    required SchoolLesson lesson,
+  })  : _name = lesson.name,
+        _room = lesson.room,
+        _teacher = lesson.teacher,
+        _color = lesson.color;
 
   SchoolLessonPrefab({
     required String name,

@@ -18,13 +18,12 @@ class StrikeThroughContainerController {
   }
 }
 
-// ignore: must_be_immutable
 class StrikeThroughContainer extends StatefulWidget {
-  StrikeThroughContainerController controller;
-  Widget child;
-  Size? logicalSize;
+  final StrikeThroughContainerController controller;
+  final Widget child;
+  final Size? logicalSize;
 
-  StrikeThroughContainer({
+  const StrikeThroughContainer({
     super.key,
     required this.child,
     required this.controller,

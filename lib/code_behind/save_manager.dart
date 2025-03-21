@@ -838,6 +838,10 @@ class SaveManager {
         specialLessons.add(
           CancelledSpecialLesson.fromJson(json),
         );
+      } else if (type == SubstituteSpecialLesson.type) {
+        specialLessons.add(
+          SubstituteSpecialLesson.fromJson(json),
+        );
       } //you can just add other types here..
     }
 

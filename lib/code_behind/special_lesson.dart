@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:schulapp/code_behind/school_lesson_prefab.dart';
+import 'package:schulapp/extensions.dart';
 
 abstract class SpecialLesson {
   static const typeKey = "type";
@@ -71,7 +73,7 @@ class CancelledSpecialLesson extends SpecialLesson {
   @override
   Map<String, dynamic> toJson() {
     final map = {
-      SpecialLesson.typeKey: CancelledSpecialLesson.type,
+      SpecialLesson.typeKey: type,
       SpecialLesson.dayIndexKey: _dayIndex,
       SpecialLesson.timeIndexKey: _timeIndex,
     };
@@ -86,6 +88,56 @@ class CancelledSpecialLesson extends SpecialLesson {
     return CancelledSpecialLesson(
       dayIndex: dayIndex,
       timeIndex: timeIndex,
+    );
+  }
+}
+
+class SubstituteSpecialLesson extends SpecialLesson {
+  static const type = "Substitute";
+
+  SubstituteSpecialLesson({
+    required super.dayIndex,
+    required super.timeIndex,
+    required SchoolLessonPrefab prefab,
+  }) : super(
+          name: prefab.name,
+          room: prefab.room,
+          teacher: prefab.teacher,
+          color: prefab.color,
+        );
+
+  @override
+  Map<String, dynamic> toJson() {
+    final map = {
+      SpecialLesson.typeKey: type,
+      SpecialLesson.dayIndexKey: _dayIndex,
+      SpecialLesson.timeIndexKey: _timeIndex,
+      SpecialLesson.nameKey: _name,
+      SpecialLesson.roomKey: _room,
+      SpecialLesson.teacherKey: _teacher,
+      SpecialLesson.colorKey: _color.toJson(),
+    };
+
+    return map;
+  }
+
+  static SpecialLesson fromJson(Map<String, dynamic> json) {
+    final dayIndex = json[SpecialLesson.dayIndexKey];
+    final timeIndex = json[SpecialLesson.timeIndexKey];
+    final name = json[SpecialLesson.nameKey];
+    final room = json[SpecialLesson.roomKey];
+    final teacher = json[SpecialLesson.teacherKey];
+    final color = ColorExtension.fromJson(json[SpecialLesson.colorKey]);
+
+    return SubstituteSpecialLesson(
+      dayIndex: dayIndex,
+      timeIndex: timeIndex,
+      prefab: SchoolLessonPrefab(
+        name: name,
+        room: room,
+        teacher: teacher,
+        color: color,
+      ),
     );
   }
 }

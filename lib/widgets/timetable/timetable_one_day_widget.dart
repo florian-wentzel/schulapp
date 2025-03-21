@@ -215,7 +215,7 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
       width: lessonWidth * 2,
       height: lessonHeight * (currTimetableWeek.maxLessonCount + 1) +
           _breakLightHeight -
-          1, //durch mögliche rundungsfehler
+          0, //durch mögliche rundungsfehler
       child: PageView.builder(
         controller: _pageController,
         itemCount: pagesCount,
@@ -390,12 +390,13 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
                 );
               },
         onLongPress: () async {
-          final value = !tt.isSpecialLesson(
+          final value = tt.getSpecialLesson(
             year: currYear,
             weekIndex: currWeekIndex,
             schoolDayIndex: dayIndex,
             schoolTimeIndex: 0,
-          );
+          ) is CancelledSpecialLesson;
+
           for (int timeIndex = 0;
               timeIndex < dayContainerControllers.length;
               timeIndex++) {
@@ -559,8 +560,18 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
       TodoEvent? currEvent;
 
       if (widget.showTodoEvents) {
+        final specialLesson = tt.getSpecialLesson(
+          year: currYear,
+          weekIndex: currWeekIndex,
+          schoolDayIndex: dayIndex,
+          schoolTimeIndex: lessonIndex,
+        );
+
+        SubstituteSpecialLesson? substituteSpecialLesson =
+            (specialLesson is SubstituteSpecialLesson) ? specialLesson : null;
+
         currEvent = TimetableManager().getRunningTodoEvent(
-          linkedSubjectName: lesson.name,
+          linkedSubjectName: substituteSpecialLesson?.name ?? lesson.name,
           lessonDayTime: currLessonDateTime,
         );
       }
@@ -568,12 +579,12 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
       final StrikeThroughContainerController containerController =
           StrikeThroughContainerController();
 
-      containerController.strikeThrough = tt.isSpecialLesson(
+      containerController.strikeThrough = tt.getSpecialLesson(
         schoolDayIndex: dayIndex,
         schoolTimeIndex: lessonIndex,
         weekIndex: currWeekIndex,
         year: currYear,
-      );
+      ) is CancelledSpecialLesson;
 
       dayContainerControllers.add(containerController);
 

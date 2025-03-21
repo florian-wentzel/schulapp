@@ -137,7 +137,7 @@ Future<Timetable?> showCreateTimetableSheet(
 ///setState after calling this method
 Future<bool?> showSchoolLessonHomePopUp(
   BuildContext context,
-  SchoolLesson lesson,
+  SchoolLessonPrefab lesson,
   SchoolDay day,
   SchoolTime schoolTime,
   TodoEvent? event,
@@ -770,24 +770,6 @@ class _CreateTimetableBottomSheetState
             ),
           ],
         ),
-        //TODO
-        // if (!widget.onlySchoolTimes)
-        //   Row(
-        //     mainAxisAlignment: MainAxisAlignment.center,
-        //     children: [
-        //       const Text("A und B Wochen"),
-        //       const SizedBox(
-        //         width: 4,
-        //       ),
-        //       Switch.adaptive(
-        //         value: _bWeeksEnabled,
-        //         onChanged: (value) {
-        //           _bWeeksEnabled = value;
-        //           setState(() {});
-        //         },
-        //       ),
-        //     ],
-        //   ),
         if (!widget.onlySchoolTimes)
           Row(
             mainAxisAlignment: MainAxisAlignment.center,

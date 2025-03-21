@@ -13,6 +13,7 @@ import 'package:schulapp/code_behind/school_lesson.dart';
 import 'package:schulapp/code_behind/school_semester.dart';
 import 'package:schulapp/code_behind/school_time.dart';
 import 'package:schulapp/code_behind/settings.dart';
+import 'package:schulapp/code_behind/special_lesson.dart';
 import 'package:schulapp/code_behind/timetable.dart';
 import 'package:schulapp/code_behind/timetable_controller.dart';
 import 'package:schulapp/code_behind/timetable_manager.dart';
@@ -156,7 +157,7 @@ class _HomeScreenState extends State<HomeScreen> {
               onPressed: () async {
                 await Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (context) => VertretungsplanPaulDessauScreen(
+                    builder: (context) => const VertretungsplanPaulDessauScreen(
                       loadPDFDirectly: true,
                     ),
                   ),
@@ -687,7 +688,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 Center(
                   child: Text(
-                    '${(_dayProgress * 100).toStringAsFixed(1)}%',
+                    '${(_dayProgress * 100).toStringAsFixed(2)}%',
                     style: TextStyle(
                       color: textColor,
                       fontWeight: FontWeight.bold,
@@ -1048,22 +1049,25 @@ class _HomeScreenState extends State<HomeScreen> {
     final dayIndex = Utils.getCurrentWeekDayIndex();
     final schoolDay = tt.schoolDays[dayIndex];
     final now = DateTime.now();
-    final weekIndex = Utils.getWeekIndex(now);
+    final weekIndex =
+        Utils.getWeekIndex(Utils.getWeekDay(now, DateTime.monday));
     final year = now.year;
 
     for (int i = startIndex; i < schoolDay.lessons.length; i++) {
-      final isSpecialLesson = TimetableManager().isSpecialLesson(
+      final specialLesson = TimetableManager().getSpecialLesson(
         timetable: tt,
         schoolTimeIndex: i,
         schoolDayIndex: dayIndex,
         weekIndex: weekIndex,
         year: year,
       );
-      if (!SchoolLesson.isEmptyLesson(schoolDay.lessons[i]) &&
-          !isSpecialLesson) {
+      if ((SchoolLesson.isEmptyLesson(schoolDay.lessons[i]) &&
+              specialLesson is! SubstituteSpecialLesson) ||
+          specialLesson is CancelledSpecialLesson) {
+        startIndex++;
+      } else {
         break;
       }
-      startIndex++;
     }
     final schoolTimes = ttSchoolTimes;
     if (schoolTimes != null && startIndex >= schoolTimes.length) {
@@ -1124,9 +1128,8 @@ class _HomeScreenState extends State<HomeScreen> {
         (secondsPassedToday.toDouble() / totalSecondsInDay.toDouble())
             .clamp(0, 1);
 
-    setState(() {
-      _dayProgress = progress;
-    });
+    _dayProgress = progress;
+    setState(() {});
   }
 
   void _cancelDayProgressTimer() {
@@ -1182,22 +1185,26 @@ class _HomeScreenState extends State<HomeScreen> {
     final dayIndex = Utils.getCurrentWeekDayIndex();
     final schoolDay = tt.schoolDays[dayIndex];
     final now = DateTime.now();
-    final weekIndex = Utils.getWeekIndex(now);
+    final weekIndex =
+        Utils.getWeekIndex(Utils.getWeekDay(now, DateTime.monday));
     final year = now.year;
 
     for (int i = endIndex; i >= 0; i--) {
-      final isSpecialLesson = TimetableManager().isSpecialLesson(
+      final specialLesson = TimetableManager().getSpecialLesson(
         timetable: tt,
         schoolTimeIndex: i,
         schoolDayIndex: dayIndex,
         weekIndex: weekIndex,
         year: year,
       );
-      if (!SchoolLesson.isEmptyLesson(schoolDay.lessons[i]) &&
-          !isSpecialLesson) {
+
+      if ((SchoolLesson.isEmptyLesson(schoolDay.lessons[i]) &&
+              specialLesson is! SubstituteSpecialLesson) ||
+          specialLesson is CancelledSpecialLesson) {
+        endIndex--;
+      } else {
         break;
       }
-      endIndex--;
     }
 
     if (endIndex < 0) {

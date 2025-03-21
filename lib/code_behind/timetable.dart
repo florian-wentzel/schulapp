@@ -66,7 +66,7 @@ class WeekTimetable extends Timetable {
   void setSpecialLesson({
     required int weekIndex,
     required int year,
-    required CancelledSpecialLesson specialLesson,
+    required SpecialLesson specialLesson,
   }) {
     TimetableManager().setSpecialLesson(
       timetable: parent,
@@ -77,13 +77,13 @@ class WeekTimetable extends Timetable {
   }
 
   @override
-  bool isSpecialLesson({
+  SpecialLesson? getSpecialLesson({
     required int year,
     required int weekIndex,
     required int schoolDayIndex,
     required int schoolTimeIndex,
   }) {
-    return TimetableManager().isSpecialLesson(
+    return TimetableManager().getSpecialLesson(
       timetable: parent,
       year: year,
       weekIndex: weekIndex,
@@ -753,13 +753,13 @@ class Timetable {
     }
   }
 
-  bool isSpecialLesson({
+  SpecialLesson? getSpecialLesson({
     required int year,
     required int weekIndex,
     required int schoolDayIndex,
     required int schoolTimeIndex,
   }) {
-    return TimetableManager().isSpecialLesson(
+    return TimetableManager().getSpecialLesson(
       timetable: this,
       year: year,
       weekIndex: weekIndex,
@@ -771,7 +771,7 @@ class Timetable {
   void setSpecialLesson({
     required int weekIndex,
     required int year,
-    required CancelledSpecialLesson specialLesson,
+    required SpecialLesson specialLesson,
   }) {
     TimetableManager().setSpecialLesson(
       timetable: this,
