@@ -353,5 +353,6 @@
   "strDoYoutWantToOpenFeedbackMenu": "Möchtest Du das Feedback-Formular öffnen?",
   "strOpenFeedbackDescription": "Wenn Du im „Feedback“-Modus bist, gehe auf eine beliebige Seite in der App und klicke auf den „Malen“-Knopf auf der rechten Seite, um dem Entwickler visuell zu zeigen, was Du meinst. Nutze auch das Texteingabefeld unten für zusätzliche Erklärungen. Wenn Du fertig bist, sende es ab und warte einen Moment. Am Ende öffnet sich deine Mail — du musst nichts hineinschreiben, einfach abschicken. :)",
   "strMarkAsCancelled": "Als ausfallend markieren",
-  "strMarkAsSubstitute": "In Vertretungsstunde umwandeln"
+  "strMarkAsSubstitute": "In Vertretungsstunde umwandeln",
+  "strAbiCalculator": "Abitur Rechner"
 }

@@ -12,12 +12,11 @@ import 'package:schulapp/widgets/date_selection_button.dart';
 import 'package:schulapp/widgets/semester/school_grade_subject_widget.dart';
 import 'package:fl_chart/fl_chart.dart';
 
-// ignore: must_be_immutable
 class SchoolGradeSubjectScreen extends StatefulWidget {
-  SchoolGradeSubject subject;
-  SchoolSemester semester;
+  final SchoolGradeSubject subject;
+  final SchoolSemester semester;
 
-  SchoolGradeSubjectScreen({
+  const SchoolGradeSubjectScreen({
     super.key,
     required this.subject,
     required this.semester,
@@ -26,6 +25,284 @@ class SchoolGradeSubjectScreen extends StatefulWidget {
   @override
   State<SchoolGradeSubjectScreen> createState() =>
       _SchoolGradeSubjectScreenState();
+
+  static const maxInfoLength = 50;
+  static Future<Grade?> showAddNewGradeSheet(BuildContext context) async {
+    TextEditingController infoController = TextEditingController();
+
+    DateSelectionButtonController dateController =
+        DateSelectionButtonController(date: DateTime.now());
+
+    int selectedGrade = -1;
+
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      scrollControlDisabledMaxHeightRatio: 0.5,
+      builder: (context) {
+        return SingleChildScrollView(
+          child: Container(
+            margin: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  AppLocalizationsManager.localizations.strAddGrade,
+                  style: Theme.of(context).textTheme.headlineMedium,
+                  textAlign: TextAlign.center,
+                ),
+                TextField(
+                  decoration: InputDecoration(
+                    hintText:
+                        AppLocalizationsManager.localizations.strExtraInfo,
+                  ),
+                  maxLines: 1,
+                  maxLength: maxInfoLength,
+                  textAlign: TextAlign.center,
+                  controller: infoController,
+                ),
+                const SizedBox(
+                  height: 12,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Text(
+                      "${AppLocalizationsManager.localizations.strDate}:",
+                      style: Theme.of(context).textTheme.bodyLarge,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(
+                      width: 8,
+                    ),
+                    Expanded(
+                      child: DateSelectionButton(
+                        controller: dateController,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(
+                  height: 12,
+                ),
+                GridView.builder(
+                  physics: const NeverScrollableScrollPhysics(),
+                  shrinkWrap:
+                      true, // Ensure GridView doesn't take more space than needed
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 4,
+                  ),
+                  itemCount: 16, // Including 0 to 15
+                  itemBuilder: (context, index) {
+                    int grade = 15 - index; // Numbers from 15 to 0
+                    return InkWell(
+                      onTap: () {
+                        selectedGrade = grade;
+                        Navigator.of(context).pop();
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.all(8),
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Utils.getGradeColor(grade),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Center(
+                          child: Text(
+                            GradingSystemManager.convertGradeToSelectedSystem(
+                              grade,
+                            ),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(
+                  height: 12,
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text(
+                    AppLocalizationsManager.localizations.strCancel,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    if (selectedGrade < 0 || selectedGrade > 15) return null;
+
+    return Grade(
+      grade: selectedGrade,
+      date: dateController.date,
+      info: infoController.text.trim(),
+    );
+  }
+
+  static Future<Grade?> showEditGradeSheet(
+      BuildContext context, Grade grade) async {
+    TextEditingController infoController = TextEditingController();
+    infoController.text = grade.info;
+
+    DateSelectionButtonController dateController =
+        DateSelectionButtonController(date: grade.date.copyWith());
+
+    bool deletePressed = false;
+
+    int selectedGrade = -1;
+
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      scrollControlDisabledMaxHeightRatio: 0.5,
+      builder: (context) {
+        return SingleChildScrollView(
+          child: Container(
+            margin: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  AppLocalizationsManager.localizations.strEditGrade,
+                  style: Theme.of(context).textTheme.headlineMedium,
+                  textAlign: TextAlign.center,
+                ),
+                TextField(
+                  decoration: InputDecoration(
+                    hintText:
+                        AppLocalizationsManager.localizations.strExtraInfo,
+                  ),
+                  maxLines: 1,
+                  maxLength: maxInfoLength,
+                  textAlign: TextAlign.center,
+                  controller: infoController,
+                ),
+                const SizedBox(
+                  height: 12,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Text(
+                      "${AppLocalizationsManager.localizations.strDate}:",
+                      style: Theme.of(context).textTheme.bodyLarge,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(
+                      width: 8,
+                    ),
+                    Expanded(
+                      child: DateSelectionButton(
+                        controller: dateController,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(
+                  height: 12,
+                ),
+                GridView.builder(
+                  physics: const NeverScrollableScrollPhysics(),
+                  shrinkWrap:
+                      true, // Ensure GridView doesn't take more space than needed
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 4,
+                  ),
+                  itemCount: 16, // Including 0 to 15
+                  itemBuilder: (context, index) {
+                    int grade = 15 - index; // Numbers from 15 to 0
+                    return InkWell(
+                      onTap: () {
+                        selectedGrade = grade;
+                        Navigator.of(context).pop();
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.all(8),
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Utils.getGradeColor(grade),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Center(
+                          child: Text(
+                            GradingSystemManager.convertGradeToSelectedSystem(
+                              grade,
+                            ),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(
+                  height: 12,
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    selectedGrade = grade.grade;
+                    Navigator.of(context).pop();
+                  },
+                  child: Text(
+                    AppLocalizationsManager.localizations.strOK,
+                  ),
+                ),
+                const SizedBox(
+                  height: 8,
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text(
+                    AppLocalizationsManager.localizations.strCancel,
+                  ),
+                ),
+                const SizedBox(
+                  height: 8,
+                ),
+                IconButton(
+                  onPressed: () {
+                    deletePressed = true;
+                    Navigator.of(context).pop();
+                  },
+                  icon: const Icon(
+                    Icons.delete,
+                    color: Colors.red,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    if (deletePressed) return null;
+
+    if (selectedGrade < 0 || selectedGrade > 15) return grade;
+
+    return Grade(
+      grade: selectedGrade,
+      date: dateController.date,
+      info: infoController.text.trim(),
+    );
+  }
 }
 
 class _SchoolGradeSubjectScreenState extends State<SchoolGradeSubjectScreen> {
@@ -363,7 +640,9 @@ class _SchoolGradeSubjectScreenState extends State<SchoolGradeSubjectScreen> {
                 )..add(
                     IconButton(
                       onPressed: () async {
-                        Grade? grade = await _showAddNewGradeSheet();
+                        Grade? grade =
+                            await SchoolGradeSubjectScreen.showAddNewGradeSheet(
+                                context);
                         if (grade == null) return;
                         gg.grades.add(grade);
                         setState(() {});
@@ -427,283 +706,6 @@ class _SchoolGradeSubjectScreenState extends State<SchoolGradeSubjectScreen> {
     );
   }
 
-  static const maxInfoLength = 50;
-  Future<Grade?> _showEditGradeSheet(Grade grade) async {
-    TextEditingController infoController = TextEditingController();
-    infoController.text = grade.info;
-
-    DateSelectionButtonController dateController =
-        DateSelectionButtonController(date: grade.date.copyWith());
-
-    bool deletePressed = false;
-
-    int selectedGrade = -1;
-
-    await showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      scrollControlDisabledMaxHeightRatio: 0.5,
-      builder: (context) {
-        return SingleChildScrollView(
-          child: Container(
-            margin: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  AppLocalizationsManager.localizations.strEditGrade,
-                  style: Theme.of(context).textTheme.headlineMedium,
-                  textAlign: TextAlign.center,
-                ),
-                TextField(
-                  decoration: InputDecoration(
-                    hintText:
-                        AppLocalizationsManager.localizations.strExtraInfo,
-                  ),
-                  maxLines: 1,
-                  maxLength: maxInfoLength,
-                  textAlign: TextAlign.center,
-                  controller: infoController,
-                ),
-                const SizedBox(
-                  height: 12,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Text(
-                      "${AppLocalizationsManager.localizations.strDate}:",
-                      style: Theme.of(context).textTheme.bodyLarge,
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(
-                      width: 8,
-                    ),
-                    Expanded(
-                      child: DateSelectionButton(
-                        controller: dateController,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(
-                  height: 12,
-                ),
-                GridView.builder(
-                  physics: const NeverScrollableScrollPhysics(),
-                  shrinkWrap:
-                      true, // Ensure GridView doesn't take more space than needed
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 4,
-                  ),
-                  itemCount: 16, // Including 0 to 15
-                  itemBuilder: (context, index) {
-                    int grade = 15 - index; // Numbers from 15 to 0
-                    return InkWell(
-                      onTap: () {
-                        selectedGrade = grade;
-                        Navigator.of(context).pop();
-                      },
-                      child: Container(
-                        margin: const EdgeInsets.all(8),
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Utils.getGradeColor(grade),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Center(
-                          child: Text(
-                            GradingSystemManager.convertGradeToSelectedSystem(
-                              grade,
-                            ),
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-                const SizedBox(
-                  height: 12,
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    selectedGrade = grade.grade;
-                    Navigator.of(context).pop();
-                  },
-                  child: Text(
-                    AppLocalizationsManager.localizations.strOK,
-                  ),
-                ),
-                const SizedBox(
-                  height: 8,
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: Text(
-                    AppLocalizationsManager.localizations.strCancel,
-                  ),
-                ),
-                const SizedBox(
-                  height: 8,
-                ),
-                IconButton(
-                  onPressed: () {
-                    deletePressed = true;
-                    Navigator.of(context).pop();
-                  },
-                  icon: const Icon(
-                    Icons.delete,
-                    color: Colors.red,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-
-    if (deletePressed) return null;
-
-    if (selectedGrade < 0 || selectedGrade > 15) return grade;
-
-    return Grade(
-      grade: selectedGrade,
-      date: dateController.date,
-      info: infoController.text.trim(),
-    );
-  }
-
-  Future<Grade?> _showAddNewGradeSheet() async {
-    TextEditingController infoController = TextEditingController();
-
-    DateSelectionButtonController dateController =
-        DateSelectionButtonController(date: DateTime.now());
-
-    int selectedGrade = -1;
-
-    await showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      scrollControlDisabledMaxHeightRatio: 0.5,
-      builder: (context) {
-        return SingleChildScrollView(
-          child: Container(
-            margin: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  AppLocalizationsManager.localizations.strAddGrade,
-                  style: Theme.of(context).textTheme.headlineMedium,
-                  textAlign: TextAlign.center,
-                ),
-                TextField(
-                  decoration: InputDecoration(
-                    hintText:
-                        AppLocalizationsManager.localizations.strExtraInfo,
-                  ),
-                  maxLines: 1,
-                  maxLength: maxInfoLength,
-                  textAlign: TextAlign.center,
-                  controller: infoController,
-                ),
-                const SizedBox(
-                  height: 12,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Text(
-                      "${AppLocalizationsManager.localizations.strDate}:",
-                      style: Theme.of(context).textTheme.bodyLarge,
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(
-                      width: 8,
-                    ),
-                    Expanded(
-                      child: DateSelectionButton(
-                        controller: dateController,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(
-                  height: 12,
-                ),
-                GridView.builder(
-                  physics: const NeverScrollableScrollPhysics(),
-                  shrinkWrap:
-                      true, // Ensure GridView doesn't take more space than needed
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 4,
-                  ),
-                  itemCount: 16, // Including 0 to 15
-                  itemBuilder: (context, index) {
-                    int grade = 15 - index; // Numbers from 15 to 0
-                    return InkWell(
-                      onTap: () {
-                        selectedGrade = grade;
-                        Navigator.of(context).pop();
-                      },
-                      child: Container(
-                        margin: const EdgeInsets.all(8),
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Utils.getGradeColor(grade),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Center(
-                          child: Text(
-                            GradingSystemManager.convertGradeToSelectedSystem(
-                              grade,
-                            ),
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-                const SizedBox(
-                  height: 12,
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: Text(
-                    AppLocalizationsManager.localizations.strCancel,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-
-    if (selectedGrade < 0 || selectedGrade > 15) return null;
-
-    return Grade(
-      grade: selectedGrade,
-      date: dateController.date,
-      info: infoController.text.trim(),
-    );
-  }
-
   Widget _gradeNumberItemPopUp(GradeGroup gg, int index) {
     Grade grade = gg.grades[index];
 
@@ -742,7 +744,9 @@ class _SchoolGradeSubjectScreenState extends State<SchoolGradeSubjectScreen> {
                 onPressed: () async {
                   Navigator.pop(context);
 
-                  Grade? newGrade = await _showEditGradeSheet(grade);
+                  Grade? newGrade =
+                      await SchoolGradeSubjectScreen.showEditGradeSheet(
+                          context, grade);
                   if (newGrade == null) {
                     gg.grades.removeAt(index);
                   } else {
@@ -953,7 +957,8 @@ class _SchoolGradeSubjectScreenState extends State<SchoolGradeSubjectScreen> {
     }
     return InkWell(
       onTap: () async {
-        Grade? newGrade = await _showAddNewGradeSheet();
+        Grade? newGrade =
+            await SchoolGradeSubjectScreen.showAddNewGradeSheet(context);
         if (newGrade == null) return;
 
         widget.subject.endSetGrade = newGrade;

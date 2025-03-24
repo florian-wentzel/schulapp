@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:schulapp/code_behind/abi_calculator.dart';
 import 'package:schulapp/code_behind/go_file_io_manager.dart';
 import 'package:schulapp/code_behind/school_note.dart';
 import 'package:schulapp/code_behind/special_lesson.dart';
@@ -29,6 +30,7 @@ class SaveManager {
   static const String timetableSaveDirName = "timetables";
   static const String schoolNotesSaveDirName = "notes";
   static const String schoolNoteAddedFilesSaveDirName = "files";
+  static const String abiCalculatorFileName = "abi-calculator.json";
   //for backups
   static const String tempDirName = "temp";
   static const String exportDirName = "exports";
@@ -908,6 +910,42 @@ class SaveManager {
     } catch (_) {
       return null;
     }
+  }
+
+  File getAbiCalculatorFile() {
+    String mainDirPath = getMainSaveDir().path;
+
+    return File(
+      join(mainDirPath, abiCalculatorFileName),
+    );
+  }
+
+  AbiCalculator loadAbiCalculator() {
+    try {
+      final file = getAbiCalculatorFile();
+
+      if (!file.existsSync()) {
+        return AbiCalculator();
+      }
+
+      String jsonString = file.readAsStringSync();
+
+      Map<String, dynamic> jsonData = json.decode(jsonString);
+
+      return AbiCalculator.fromJson(jsonData);
+    } catch (_) {
+      return AbiCalculator();
+    }
+  }
+
+  void saveAbiCalculator(AbiCalculator calculator) {
+    try {
+      final file = getAbiCalculatorFile();
+
+      String jsonString = json.encode(calculator.toJson());
+
+      file.writeAsStringSync(jsonString);
+    } catch (_) {}
   }
 
   // Future<File> moveFile(File sourceFile, String newPath) async {
