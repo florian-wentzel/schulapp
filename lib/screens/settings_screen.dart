@@ -886,6 +886,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _restoreButtonPressed() async {
+    final platform = Theme.of(context).platform;
+
     final restoreData = await Utils.showBoolInputDialog(
       context,
       question: AppLocalizationsManager
@@ -900,6 +902,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     FilePickerResult? result;
     try {
+      if(platform == TargetPlatform.iOS){
+        throw Exception();
+      }
       result = await FilePicker.platform.pickFiles(
         allowMultiple: false,
         type: FileType.custom,

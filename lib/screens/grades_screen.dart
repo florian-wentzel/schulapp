@@ -171,7 +171,7 @@ class _GradesScreenState extends State<GradesScreen> {
           ),
         ),
         trailing: Wrap(
-          spacing: 12,
+          spacing: 4,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             Checkbox(

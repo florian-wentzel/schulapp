@@ -337,8 +337,14 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     final width = MediaQuery.of(context).size.width;
-    double height =
-        MediaQuery.of(context).size.height - AppBar().preferredSize.height * 2;
+
+    //because height is not always the same
+    double height;
+    if (Theme.of(context).platform == TargetPlatform.iOS) {
+      height = MediaQuery.of(context).size.height - AppBar().preferredSize.height * 2;
+    } else {
+      height = MediaQuery.of(context).size.height - AppBar().preferredSize.height * 2;
+    }
 
     if (Utils.isMobileRatio(context)) {
       height -= kBottomNavigationBarHeight * 1.5;

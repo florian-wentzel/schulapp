@@ -128,7 +128,7 @@ class _NewTodoEventWidgetState extends State<NewTodoEventWidget> {
                             const SizedBox(
                               width: 8,
                             ),
-                            Switch(
+                            Switch.adaptive(
                               value: endDateController.noDate,
                               onChanged: (value) {
                                 endDateController.noDate = value;
