@@ -8,6 +8,7 @@ import 'package:schulapp/code_behind/version_manager.dart';
 import 'package:schulapp/home_widget/home_widget_manager.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/l10n/generated/app_localizations.dart';
+import 'package:schulapp/screens/abi_calculation_screen.dart';
 import 'package:schulapp/screens/timetables_screen.dart';
 import 'package:schulapp/screens/grades_screen.dart';
 import 'package:schulapp/screens/hello_screen.dart';
@@ -94,6 +95,10 @@ final _router = GoRouter(
         GoRoute(
           path: NotesScreen.route,
           builder: (context, state) => const NotesScreen(),
+        ),
+        GoRoute(
+          path: AbiCalculationScreen.route,
+          builder: (context, state) => const AbiCalculationScreen(),
         ),
       ],
     ),

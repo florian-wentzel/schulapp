@@ -1036,5 +1036,7 @@
   "strMarkAsCancelled": "Mark as Cancelled",
   "@strMarkAsCancelled": {},
   "strMarkAsSubstitute": "Mark as substitute",
-  "@strMarkAsSubstitute": {}
+  "@strMarkAsSubstitute": {},
+  "strAbiCalculator": "A-level Calculator",
+  "@strAbiCalculator": {}
 }

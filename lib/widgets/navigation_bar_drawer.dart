@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/timetable_manager.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
+import 'package:schulapp/screens/abi_calculation_screen.dart';
 import 'package:schulapp/screens/timetables_screen.dart';
 import 'package:schulapp/screens/grades_screen.dart';
 import 'package:schulapp/screens/holidays_screen.dart';
@@ -55,6 +56,12 @@ class _NavigationBarDrawerState extends State<NavigationBarDrawer> {
       route: GradesScreen.route,
       icon: const Icon(Icons.school_outlined),
       selectedIcon: const Icon(Icons.school),
+    ),
+    CustomDestination(
+      label: AppLocalizationsManager.localizations.strAbiCalculator,
+      route: AbiCalculationScreen.route,
+      icon: const Icon(Icons.calculate_outlined),
+      selectedIcon: const Icon(Icons.calculate),
     ),
     CustomDestination(
       label: AppLocalizationsManager.localizations.strTasks,

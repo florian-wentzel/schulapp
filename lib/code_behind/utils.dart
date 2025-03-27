@@ -111,6 +111,48 @@ class Utils {
     return ModalRoute.of(context)?.isCurrent ?? false;
   }
 
+  ///returns 1 for question1 and 2 for question2 -1 for none
+  static Future<int> show2OptionDialog(
+    BuildContext context, {
+    required String question,
+    required String option1,
+    required String option2,
+    bool disableOption1 = false,
+    bool disableOption2 = false,
+    String? description,
+  }) async {
+    return await showDialog<int>(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text(question),
+              content: description == null ? null : Text(description),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: disableOption1
+                      ? null
+                      : () {
+                          Navigator.pop(context, 1);
+                        },
+                  child: Text(option1),
+                ),
+                TextButton(
+                  onPressed: disableOption2
+                      ? null
+                      : () {
+                          Navigator.pop(context, 2);
+                        },
+                  child: Text(
+                    option2,
+                  ),
+                ),
+              ],
+            );
+          },
+        ) ??
+        -1;
+  }
+
   static Future<bool> showBoolInputDialog(
     BuildContext context, {
     required String question,
@@ -174,47 +216,52 @@ class Utils {
     double distToSnapToPoint = 2,
     int precision = 0,
     bool onlyIntegers = false,
+    bool showDeleteButton = false,
     String? title,
     List<double>? snapPoints,
   }) async {
     double currValue = startValue;
     snapPoints ??= [];
 
-    return showDialog<double>(
+    bool deletePressed = false;
+
+    final value = await showDialog<double>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: title == null ? null : Text(title),
-          content: StatefulBuilder(builder: (context, snapshot) {
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                SizedBox(
-                  child: Slider.adaptive(
-                    value: currValue,
-                    min: minValue,
-                    max: maxValue,
-                    onChanged: (value) {
-                      for (double snapPoint in snapPoints ?? []) {
-                        double dist = (snapPoint - value).abs();
-                        if (dist < distToSnapToPoint) {
-                          value = snapPoint;
+          content: StatefulBuilder(
+            builder: (context, snapshot) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(
+                    child: Slider.adaptive(
+                      value: currValue,
+                      min: minValue,
+                      max: maxValue,
+                      onChanged: (value) {
+                        for (double snapPoint in snapPoints ?? []) {
+                          double dist = (snapPoint - value).abs();
+                          if (dist < distToSnapToPoint) {
+                            value = snapPoint;
+                          }
                         }
-                      }
-                      snapshot.call(
-                        () {
-                          currValue = value;
-                        },
-                      );
-                    },
+                        snapshot.call(
+                          () {
+                            currValue = value;
+                          },
+                        );
+                      },
+                    ),
                   ),
-                ),
-                Text(
-                  "${currValue.toStringAsFixed(precision)} $textAfterValue",
-                ),
-              ],
-            );
-          }),
+                  Text(
+                    "${currValue.toStringAsFixed(precision)} $textAfterValue",
+                  ),
+                ],
+              );
+            },
+          ),
           actions: <Widget>[
             TextButton(
               onPressed: () {
@@ -228,10 +275,34 @@ class Utils {
               },
               child: Text(AppLocalizationsManager.localizations.strCancel),
             ),
+            if (showDeleteButton)
+              TextButton(
+                onPressed: () {
+                  deletePressed = true;
+                  Navigator.pop(context);
+                },
+                child: const Icon(
+                  Icons.delete,
+                  color: Colors.red,
+                ),
+              ),
           ],
         );
       },
     );
+    if (showDeleteButton) {
+      if (deletePressed) {
+        return null;
+      }
+
+      if (value == null) {
+        return startValue;
+      }
+
+      return value;
+    }
+
+    return value;
   }
 
   static Future<String?> showStringInputDialog(
@@ -543,10 +614,13 @@ class Utils {
 
   static Future<bool?> showStringAcionListBottomSheet(
     BuildContext context, {
+    String? title,
     bool runActionAfterPop = false,
     bool autoRunOnlyPossibleOption = false,
     required List<(String text, Future<void> Function()? action)> items,
   }) async {
+    title ??= AppLocalizationsManager.localizations.strActions;
+
     Future<void> Function()? selectedAction;
 
     bool result = false;
@@ -558,7 +632,7 @@ class Utils {
 
     await Utils.showListSelectionBottomSheet(
       context,
-      title: AppLocalizationsManager.localizations.strActions,
+      title: title,
       items: items,
       itemBuilder: (context, index) {
         final label = items[index].$1;
