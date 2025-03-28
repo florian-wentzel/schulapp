@@ -91,7 +91,8 @@ class _AbiCalculationScreenState extends State<AbiCalculationScreen> {
                                 return ListTile(
                                   title: Text("$displayIndex. Semester"),
                                   onTap: () async {
-                                    await _selectSemesterForCalculator(index);
+                                    await _selectSemesterForCalculator(
+                                        context, index,);
 
                                     if (!context.mounted) return;
 
@@ -123,10 +124,11 @@ class _AbiCalculationScreenState extends State<AbiCalculationScreen> {
     );
   }
 
-  Future<void> _selectSemesterForCalculator(int index) async {
+  Future<void> _selectSemesterForCalculator(
+      BuildContext context, int index) async {
     SchoolSemester? semester = await _showSelectSemesterBottomSheet(
       context,
-      title: "Wähle das ${index + 1}. Semester aus",
+      title: "Wähle Q${index + 1} aus",
     );
 
     calculator.setSemesterName(
@@ -198,6 +200,10 @@ class _AbiCalculationScreenState extends State<AbiCalculationScreen> {
   }
 
   Widget _body(BuildContext context) {
+    final average = calculator.getAbiAverage(
+      overrideIfSimulatedExists: _showSimulatedGrades,
+    );
+
     return SingleChildScrollView(
       child: Column(
         children: [
@@ -208,14 +214,23 @@ class _AbiCalculationScreenState extends State<AbiCalculationScreen> {
                 Container(
                   width: 100,
                   height: 100,
-                  padding: EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.amber,
+                    color: Color.lerp(
+                      Utils.getGradeColor(
+                        15,
+                      ),
+                      Utils.getGradeColor(
+                        1,
+                      ),
+                      //mindest durchschnitt ist 4.0
+                      (average - 1) / 3.0,
+                    ),
                     shape: BoxShape.circle,
                   ),
                   child: FittedBox(
                     fit: BoxFit.contain,
-                    child: Text("1.09"),
+                    child: Text(average.toStringAsPrecision(2)),
                   ),
                 ),
                 Row(
@@ -230,7 +245,10 @@ class _AbiCalculationScreenState extends State<AbiCalculationScreen> {
                     ),
                     _sectionValueIndecator(
                       name: "Block II",
-                      value: 100,
+                      value: calculator.getSectionIIPoints(
+                          //brauch man nicht
+                          // overrideIfSimulatedExists: _showSimulatedGrades,
+                          ),
                       maxValue: calculator.maxSectionIIPoints,
                     ),
                   ],
@@ -345,6 +363,9 @@ class _AbiCalculationScreenState extends State<AbiCalculationScreen> {
               ],
             ),
           ),
+          SizedBox(
+            height: 100,
+          ),
         ],
       ),
     );
@@ -402,7 +423,7 @@ class _AbiCalculationScreenState extends State<AbiCalculationScreen> {
                         message: calculator.getSemester(index)?.name ?? "",
                         child: InkWell(
                           onTap: () async {
-                            await _selectSemesterForCalculator(index);
+                            await _selectSemesterForCalculator(context, index);
                             calculator.save();
                             setState(() {});
                           },
@@ -919,21 +940,11 @@ class _AbiCalculationScreenState extends State<AbiCalculationScreen> {
                       builder: (context, builder) {
                         return ElevatedButton(
                           onPressed: () async {
-                            final items = calculator.allSubjects;
+                            final sub = await showSelectSubjectName(context);
 
-                            await Utils.showStringAcionListBottomSheet(
-                              context,
-                              items: items
-                                  .map(
-                                    (e) => (
-                                      e,
-                                      () async {
-                                        selectedSubject = e;
-                                      },
-                                    ),
-                                  )
-                                  .toList(),
-                            );
+                            if (sub == null) return;
+
+                            selectedSubject = sub;
                             builder.call(() {});
                           },
                           child: Text(selectedSubject),
@@ -1074,6 +1085,113 @@ class _AbiCalculationScreenState extends State<AbiCalculationScreen> {
     setState(() {});
   }
 
+  Future<ExamType?> showSelectExamType(
+    BuildContext context, {
+    ExamType? defaultType = null,
+  }) async {
+    Set<ExamType> examTypeSelection = {defaultType ?? ExamType.written};
+    bool cancelPressed = false;
+
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Prüfungsart Setzen"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              StatefulBuilder(
+                builder: (context, setState) {
+                  return SegmentedButton(
+                    segments: [
+                      ButtonSegment(
+                        value: ExamType.written,
+                        label: Text(
+                          SchoolExamSubject.examTypeToTranslatedString(
+                            ExamType.written,
+                          ),
+                        ),
+                      ),
+                      ButtonSegment(
+                        value: ExamType.verbal,
+                        label: Text(
+                          SchoolExamSubject.examTypeToTranslatedString(
+                            ExamType.verbal,
+                          ),
+                        ),
+                      ),
+                      ButtonSegment(
+                        value: ExamType.presentation,
+                        label: Text(
+                          SchoolExamSubject.examTypeToTranslatedString(
+                            ExamType.presentation,
+                          ),
+                        ),
+                      ),
+                    ],
+                    selected: examTypeSelection,
+                    onSelectionChanged: (p0) {
+                      examTypeSelection = p0;
+                      setState.call(() {});
+                    },
+                    emptySelectionAllowed: false,
+                    multiSelectionEnabled: false,
+                    showSelectedIcon: false,
+                  );
+                },
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                cancelPressed = true;
+                Navigator.of(context).pop();
+              },
+              child: Text(AppLocalizationsManager.localizations.strCancel),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text(
+                AppLocalizationsManager.localizations.strOK,
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (cancelPressed) {
+      return defaultType;
+    }
+
+    return examTypeSelection.first;
+  }
+
+  Future<String?> showSelectSubjectName(BuildContext context) async {
+    String? selectedSubjectName;
+
+    final items = calculator.allSubjects;
+
+    await Utils.showStringAcionListBottomSheet(
+      context,
+      items: items
+          .map(
+            (e) => (
+              e,
+              () async {
+                selectedSubjectName = e;
+              },
+            ),
+          )
+          .toList(),
+    );
+
+    return selectedSubjectName;
+  }
+
   List<Widget> _generateExamRows(List<SchoolExamSubject> exams) {
     return List.generate(
       exams.length,
@@ -1193,18 +1311,43 @@ class _AbiCalculationScreenState extends State<AbiCalculationScreen> {
           child: Row(
             children: [
               Expanded(
-                child: Text(
-                  SchoolExamSubject.examTypeToTranslatedString(
-                    exam.examType,
+                child: InkWell(
+                  onTap: () async {
+                    final type = await showSelectExamType(
+                      context,
+                      defaultType: exam.examType,
+                    );
+
+                    if (type == null) return;
+
+                    exam.examType = type;
+                    setState(() {});
+                    calculator.save();
+                  },
+                  child: Text(
+                    SchoolExamSubject.examTypeToTranslatedString(
+                      exam.examType,
+                    ),
                   ),
                 ),
               ),
               Expanded(
-                child: Text(
-                  exam.connectedSubjectName,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
+                child: InkWell(
+                  onTap: () async {
+                    final sub = await showSelectSubjectName(context);
+
+                    if (sub == null) return;
+
+                    exam.connectedSubjectName = sub;
+                    setState(() {});
+                    calculator.save();
+                  },
+                  child: Text(
+                    exam.connectedSubjectName,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),

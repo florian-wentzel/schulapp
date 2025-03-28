@@ -205,7 +205,10 @@ class AbiCalculator {
       }
     }
 
-    return map.keys.toList();
+    return map.keys.toList()
+      ..sort(
+        (a, b) => a.compareTo(b),
+      );
   }
 
   List<String> _advancedSubjects = [];
@@ -241,7 +244,10 @@ class AbiCalculator {
     for (int i = 0; i < abiExamSubjects.length; i++) {
       _abiExamSubjects.add(abiExamSubjects[i]);
     }
+
+    sortSubjects();
   }
+  void sortSubjects() {}
 
   List<String> getAdvancedCourseSubjects() {
     return _advancedSubjects;
@@ -298,7 +304,7 @@ class AbiCalculator {
         (jsonData[simulatedSemestersKey] as List).cast();
 
     final maxSectionIPoints = jsonData[maxSectionIPointsKey];
-    final maxSectionIIPoints = jsonData[maxSectionIPointsKey];
+    final maxSectionIIPoints = jsonData[maxSectionIIPointsKey];
 
     return AbiCalculator(
       semesterNames: semesterNames,
@@ -342,7 +348,21 @@ class AbiCalculator {
     for (int i = 0; i < _semesterNames.length; i++) {
       SchoolSemester? semester = getSemester(i);
 
-      if (semester == null) continue;
+      if (semester == null) {
+        if (overrideIfSimulatedExists) {
+          //gibt es aber simulierte noten?
+          final simSemester = _simulatedSemesters[i];
+
+          for (int j = 0; j < simSemester.subjects.length; j++) {
+            final sub = simSemester.subjects[j];
+
+            maxPoints += 15 * sub.weight.round();
+            final gradepoints = sub.getGradeAverage().round();
+            points += gradepoints * sub.weight.round();
+          }
+        }
+        continue;
+      }
 
       for (int j = 0; j < semester.subjects.length; j++) {
         SchoolGradeSubject sub = semester.subjects[j];
@@ -361,7 +381,18 @@ class AbiCalculator {
     }
 
     if (maxPoints == 0) return 0;
+    return (points / 48 * 40).round();
     return (points * maxSectionIPoints / maxPoints).round();
+  }
+
+  int getSectionIIPoints() {
+    int points = 0;
+
+    for (var exam in _abiExamSubjects) {
+      points += exam.getWeightedPoints();
+    }
+
+    return points;
   }
 
   List<SchoolGradeSubject?> getSubjectsFromAllSemesters(
@@ -395,7 +426,26 @@ class AbiCalculator {
     )) {
       return;
     }
+
     _abiExamSubjects.add(examSubject);
+
+    save();
+  }
+
+  double getAbiAverage({
+    bool overrideIfSimulatedExists = true,
+  }) {
+    int sectionIPoints = getSectionIPoints(
+      overrideIfSimulatedExists: overrideIfSimulatedExists,
+    );
+    int sectionIIPoints = getSectionIIPoints(
+        //brauch man nicht
+        // overrideIfSimulatedExists: overrideIfSimulatedExists,
+        );
+
+    int totalPoints = sectionIPoints + sectionIIPoints;
+
+    return 5.66 - (totalPoints / 180); //Tabelle hinzufügen
   }
 }
 
@@ -443,7 +493,7 @@ class SchoolExamSubject {
     return {
       gradeKey: grade.toJson(),
       connectedSubjectNameKey: connectedSubjectName,
-      examTypeKey: examType,
+      examTypeKey: examType.toString(),
       weightKey: weight,
     };
   }
