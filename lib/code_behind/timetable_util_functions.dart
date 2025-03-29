@@ -673,7 +673,7 @@ class _CreateTimetableBottomSheetState
                     AppLocalizationsManager
                         .localizations.strLengthOfSchoolHours,
                   ),
-                  Slider.adaptive(
+                  Slider(
                     value: _lessonLength.toDouble(),
                     min: 30,
                     max: 90,
@@ -747,7 +747,7 @@ class _CreateTimetableBottomSheetState
                 Text(
                   AppLocalizationsManager.localizations.strBreaksBetweenLessons,
                 ),
-                Slider.adaptive(
+                Slider(
                   value: _timeBetweenLessons.toDouble(),
                   min: 0,
                   max: 45,
@@ -844,6 +844,15 @@ class _SetTimetableBreaksWidgetState extends State<SetTimetableBreaksWidget> {
         Text(
           AppLocalizationsManager.localizations.strSetBreaks,
           style: Theme.of(context).textTheme.headlineMedium,
+        ),
+        Text(
+          AppLocalizationsManager.localizations.strLongPressDragBreaksToReorder,
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+        Text(
+          AppLocalizationsManager.localizations
+              .strReplaceBreaks,
+          style: Theme.of(context).textTheme.bodyMedium,
         ),
         const SizedBox(
           height: 8,

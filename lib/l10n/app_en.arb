@@ -1038,5 +1038,9 @@
   "strMarkAsSubstitute": "Mark as substitute",
   "@strMarkAsSubstitute": {},
   "strAbiCalculator": "A-level Calculator",
-  "@strAbiCalculator": {}
+  "@strAbiCalculator": {},
+  "strLongPressDragBreaksToReorder": "Long press and drag breaks to reorder.",
+  "@strLongPressDragBreaksToReorder": {},
+  "strReplaceBreaks": "Breaks replace the previously set time between lessons.",
+  "@strReplaceBreaks": {}
 }

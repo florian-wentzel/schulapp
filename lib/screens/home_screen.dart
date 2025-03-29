@@ -233,9 +233,12 @@ class _HomeScreenState extends State<HomeScreen> {
           onTap: () async {
             await createNewTimetable(context);
 
-            if (!mounted) return;
-            //not sure
-            setState(() {});
+            if (!context.mounted) return;
+
+            //damit der screen neu erstellt und der neue timetable angezeigt wird
+            context.go(
+              "${HomeScreen.route}?reload=${DateTime.now().millisecondsSinceEpoch}",
+            );
           },
         ),
         SpeedDialChild(
@@ -325,9 +328,13 @@ class _HomeScreenState extends State<HomeScreen> {
         child: ElevatedButton(
           onPressed: () async {
             await createNewTimetable(context);
+
             if (!mounted) return;
-            //damit er neu geladen wird
-            context.go("${HomeScreen.route}?reload=true");
+
+            //damit der screen neu erstellt und der neue timetable angezeigt wird
+            context.go(
+              "${HomeScreen.route}?reload=${DateTime.now().millisecondsSinceEpoch}",
+            );
           },
           child: Text(
             AppLocalizationsManager.localizations.strCreateTimetable,
@@ -341,9 +348,11 @@ class _HomeScreenState extends State<HomeScreen> {
     //because height is not always the same
     double height;
     if (Theme.of(context).platform == TargetPlatform.iOS) {
-      height = MediaQuery.of(context).size.height - AppBar().preferredSize.height * 2;
+      height = MediaQuery.of(context).size.height -
+          AppBar().preferredSize.height * 2;
     } else {
-      height = MediaQuery.of(context).size.height - AppBar().preferredSize.height * 2;
+      height = MediaQuery.of(context).size.height -
+          AppBar().preferredSize.height * 2;
     }
 
     if (Utils.isMobileRatio(context)) {

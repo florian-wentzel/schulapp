@@ -391,7 +391,9 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
         ),
       (
         AppLocalizationsManager.localizations.strImportSubjectsFromTimetable,
-        _importSubjectsFromOtherTimetable,
+        TimetableManager().timetables.isEmpty
+            ? null
+            : _importSubjectsFromOtherTimetable,
       ),
     ];
 
@@ -423,6 +425,15 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
               ElevatedButton(
                 key: _saveButtonKey,
                 onPressed: () async {
+                  final setAsDefault = TimetableManager().timetables.isEmpty;
+                  
+                  if (setAsDefault) {
+                    TimetableManager().settings.setVar(
+                          Settings.mainTimetableNameKey,
+                          _timetableCopy.name,
+                        );
+                  }
+
                   _canPop = true;
                   _timetableCopy.setLessonPrefabs(_lessonPrefabs);
                   final success = await TimetableManager().addOrChangeTimetable(
@@ -525,7 +536,7 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
 
     List<Widget> children = [];
 
-    if (_lessonPrefabs.isEmpty) {
+    if (_lessonPrefabs.isEmpty && TimetableManager().timetables.isNotEmpty) {
       children.add(
         InkWell(
           onTap: _importSubjectsFromOtherTimetable,
@@ -593,7 +604,7 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
                       highContrastEnabled: TimetableManager().settings.getVar(
                             Settings.highContrastTextOnHomescreenKey,
                           ),
-                      outlineWidth: 2,
+                      outlineWidth: 1,
                     ),
                   ),
                 ),

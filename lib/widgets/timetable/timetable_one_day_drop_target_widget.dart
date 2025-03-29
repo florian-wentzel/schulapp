@@ -173,14 +173,14 @@ class _TimetableOneDayDropTargetWidgetState
                                 textStyle:
                                     Theme.of(context).textTheme.labelSmall,
                                 highContrastEnabled: highContrastEnabled,
-                                outlineWidth: 2,
+                                outlineWidth: 1,
                               ),
                               HighContrastText(
                                 text: lesson.room,
                                 textStyle:
                                     Theme.of(context).textTheme.labelSmall,
                                 highContrastEnabled: highContrastEnabled,
-                                outlineWidth: 2,
+                                outlineWidth: 1,
                               ),
                             ],
                           ),

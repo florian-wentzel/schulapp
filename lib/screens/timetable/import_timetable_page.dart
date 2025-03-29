@@ -66,6 +66,9 @@ class _ImportTimetablePageState extends State<ImportTimetablePage> {
   void _selectTimetable() async {
     FilePickerResult? result;
     try {
+      if(Theme.of(context).platform == TargetPlatform.iOS) {
+        throw Exception("");
+      }
       result = await FilePicker.platform.pickFiles(
         allowMultiple: false,
         type: FileType.custom,

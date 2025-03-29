@@ -453,6 +453,9 @@ class EexportTimetablePageState extends State<ExportTimetablePage> {
                                 await MultiPlatformManager.shareFile(file);
                                 return;
                               }
+                              final box =
+                                  context.findRenderObject() as RenderBox?;
+
                               Share.shareXFiles(
                                 [
                                   XFile.fromData(
@@ -462,6 +465,8 @@ class EexportTimetablePageState extends State<ExportTimetablePage> {
                                     lastModified: DateTime.now(),
                                   ),
                                 ],
+                                sharePositionOrigin:
+                                    box!.localToGlobal(Offset.zero) & box.size,
                               );
 
                               SaveManager().deleteTempDir();
@@ -582,18 +587,28 @@ class _ShareTimetableBottomSheetState extends State<ShareTimetableBottomSheet> {
             AppLocalizationsManager.localizations.strDataSavedViaGoFile,
           ),
           const Spacer(),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              Share.share(
-                widget.headingText,
-                subject:
-                    "${AppLocalizationsManager.localizations.strShareYourTimetable}\n${AppLocalizationsManager.localizations.strCode}: ${widget.headingText}",
+          Builder(
+            builder: (context) {
+              return ElevatedButton(
+                onPressed: () {
+                  final box = context.findRenderObject() as RenderBox?;
+              
+                  Rect sharePositionOrigin =
+                      box!.localToGlobal(Offset.zero) & box.size;
+              
+                  Navigator.of(context).pop();
+                  Share.share(
+                    widget.headingText,
+                    sharePositionOrigin: sharePositionOrigin,
+                    subject:
+                        "${AppLocalizationsManager.localizations.strShareYourTimetable}\n${AppLocalizationsManager.localizations.strCode}: ${widget.headingText}",
+                  );
+                },
+                child: Text(
+                  AppLocalizationsManager.localizations.strShareYourTimetable,
+                ),
               );
-            },
-            child: Text(
-              AppLocalizationsManager.localizations.strShareYourTimetable,
-            ),
+            }
           ),
         ],
       ),
