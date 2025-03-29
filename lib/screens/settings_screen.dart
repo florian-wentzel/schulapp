@@ -361,13 +361,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
       title: title,
       underTitle: underTitle,
       items: list,
-      bottomAction: ElevatedButton(
-        onPressed: () {
-          okPressed = true;
-          Navigator.of(context).pop();
-        },
-        child: Text(AppLocalizationsManager.localizations.strOK),
-      ),
+      bottomActions: [
+        ElevatedButton(
+          onPressed: () {
+            okPressed = true;
+            Navigator.of(context).pop();
+          },
+          child: Text(AppLocalizationsManager.localizations.strOK),
+        ),
+      ],
       itemBuilder: (context, index) {
         final timetable = list[index];
         return ListTileWithCheckBox(
@@ -902,7 +904,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     FilePickerResult? result;
     try {
-      if(platform == TargetPlatform.iOS){
+      if (platform == TargetPlatform.iOS) {
         throw Exception();
       }
       result = await FilePicker.platform.pickFiles(

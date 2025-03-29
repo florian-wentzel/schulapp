@@ -612,18 +612,22 @@ class Utils {
     return selectedPrefab;
   }
 
+  ///returns true if the action was executed
+  ///returns false if the action was not executed
+  ///returns null if the delete button was pressed
   static Future<bool?> showStringAcionListBottomSheet(
     BuildContext context, {
     String? title,
     bool runActionAfterPop = false,
     bool autoRunOnlyPossibleOption = false,
+    bool showDeleteButton = false,
     required List<(String text, Future<void> Function()? action)> items,
   }) async {
     title ??= AppLocalizationsManager.localizations.strActions;
 
     Future<void> Function()? selectedAction;
 
-    bool result = false;
+    bool? result = false;
 
     if (autoRunOnlyPossibleOption && items.length == 1) {
       await items.first.$2?.call();
@@ -654,13 +658,26 @@ class Utils {
           },
         );
       },
-      bottomAction: ElevatedButton(
-        onPressed: () {
-          result = false;
-          Navigator.of(context).pop();
-        },
-        child: Text(AppLocalizationsManager.localizations.strCancel),
-      ),
+      bottomActions: [
+        ElevatedButton(
+          onPressed: () {
+            result = false;
+            Navigator.of(context).pop();
+          },
+          child: Text(AppLocalizationsManager.localizations.strCancel),
+        ),
+        if (showDeleteButton)
+          ElevatedButton(
+            onPressed: () {
+              result = null;
+              Navigator.of(context).pop();
+            },
+            child: const Icon(
+              Icons.delete,
+              color: Colors.red,
+            ),
+          ),
+      ],
     );
 
     if (runActionAfterPop) {
@@ -676,7 +693,7 @@ class Utils {
     required List<T> items,
     required Widget? Function(BuildContext context, int index) itemBuilder,
     String? underTitle,
-    Widget? bottomAction,
+    List<Widget>? bottomActions,
     bool boldTitle = true,
   }) async {
     await showModalBottomSheet(
@@ -724,7 +741,7 @@ class Utils {
                   ),
                 ),
               ),
-              bottomAction ?? Container(),
+              if (bottomActions != null) ...bottomActions,
             ],
           ),
         );

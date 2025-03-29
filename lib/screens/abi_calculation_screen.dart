@@ -47,7 +47,9 @@ class _AbiCalculationScreenState extends State<AbiCalculationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: NavigationBarDrawer(selectedRoute: AbiCalculationScreen.route),
+      drawer: const NavigationBarDrawer(
+        selectedRoute: AbiCalculationScreen.route,
+      ),
       appBar: AppBar(
         title: Text(
           AppLocalizationsManager.localizations.strAbiCalculator,
@@ -80,7 +82,10 @@ class _AbiCalculationScreenState extends State<AbiCalculationScreen> {
                       context: context,
                       builder: (BuildContext context) {
                         return AlertDialog(
-                          title: Text("Semester auswählen"),
+                          title: Text(
+                            AppLocalizationsManager
+                                .localizations.strSelectSemester,
+                          ),
                           content: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: List.generate(
@@ -89,10 +94,15 @@ class _AbiCalculationScreenState extends State<AbiCalculationScreen> {
                                 final displayIndex = index + 1;
 
                                 return ListTile(
-                                  title: Text("$displayIndex. Semester"),
+                                  title: Text(
+                                    AppLocalizationsManager.localizations
+                                        .strQX(displayIndex),
+                                  ),
                                   onTap: () async {
                                     await _selectSemesterForCalculator(
-                                        context, index,);
+                                      context,
+                                      index,
+                                    );
 
                                     if (!context.mounted) return;
 
@@ -109,11 +119,13 @@ class _AbiCalculationScreenState extends State<AbiCalculationScreen> {
                     setState(() {});
                     calculator.save();
                   },
-                  child: Text("Semester Setzen"),
+                  child: Text(
+                    AppLocalizationsManager.localizations.strSelectSemester,
+                  ),
                 ),
                 ElevatedButton(
                   onPressed: _onExamPressed,
-                  child: Text("Prüfung hinzufügen"),
+                  child: Text(AppLocalizationsManager.localizations.strAddExam),
                 ),
               ],
             ),
@@ -128,7 +140,10 @@ class _AbiCalculationScreenState extends State<AbiCalculationScreen> {
       BuildContext context, int index) async {
     SchoolSemester? semester = await _showSelectSemesterBottomSheet(
       context,
-      title: "Wähle Q${index + 1} aus",
+      title: AppLocalizationsManager.localizations.strSelectSemesterX(
+        index + 1,
+      ),
+      defaultSemester: calculator.getSemester(index),
     );
 
     calculator.setSemesterName(
@@ -180,23 +195,6 @@ class _AbiCalculationScreenState extends State<AbiCalculationScreen> {
         ),
       ),
     );
-    // return Expanded(
-    //   child: Container(
-    //     padding: EdgeInsets.symmetric(
-    //       horizontal: 8,
-    //     ),
-    //     child: Row(
-    //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    //       children: [
-    //         Text("Block I"),
-    //         Text(
-    //           "356 / 720",
-    //           style: TextStyle(fontSize: 12),
-    //         ),
-    //       ],
-    //     ),
-    //   ),
-    // );
   }
 
   Widget _body(BuildContext context) {
@@ -216,35 +214,37 @@ class _AbiCalculationScreenState extends State<AbiCalculationScreen> {
                   height: 100,
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Color.lerp(
-                      Utils.getGradeColor(
-                        15,
-                      ),
-                      Utils.getGradeColor(
-                        1,
-                      ),
-                      //mindest durchschnitt ist 4.0
-                      (average - 1) / 3.0,
-                    ),
+                    color: average == null
+                        ? Utils.getGradeColor(-1)
+                        : Color.lerp(
+                            Utils.getGradeColor(
+                              15,
+                            ),
+                            Utils.getGradeColor(
+                              1,
+                            ),
+                            //mindest durchschnitt ist 4.0
+                            (average - 1) / 3.0,
+                          ),
                     shape: BoxShape.circle,
                   ),
                   child: FittedBox(
                     fit: BoxFit.contain,
-                    child: Text(average.toStringAsPrecision(2)),
+                    child: Text(average?.toStringAsPrecision(2) ?? "-"),
                   ),
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     _sectionValueIndecator(
-                      name: "Block I",
+                      name: AppLocalizationsManager.localizations.strSectionI,
                       value: calculator.getSectionIPoints(
                         overrideIfSimulatedExists: _showSimulatedGrades,
                       ),
                       maxValue: calculator.maxSectionIPoints,
                     ),
                     _sectionValueIndecator(
-                      name: "Block II",
+                      name: AppLocalizationsManager.localizations.strSectionII,
                       value: calculator.getSectionIIPoints(
                           //brauch man nicht
                           // overrideIfSimulatedExists: _showSimulatedGrades,
@@ -260,7 +260,35 @@ class _AbiCalculationScreenState extends State<AbiCalculationScreen> {
             child: Row(
               children: [
                 Expanded(
-                  child: Text("Simulierte Noten anzeigen"),
+                  child: Row(
+                    spacing: 8,
+                    children: [
+                      Text(
+                        AppLocalizationsManager
+                            .localizations.strShowSimulatedGrades,
+                      ),
+                      Container(
+                        width: 25,
+                        height: 25,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.red),
+                          borderRadius: BorderRadius.circular(cornerRadius),
+                        ),
+                        child: const Center(
+                          child: FittedBox(
+                            fit: BoxFit.contain,
+                            child: Text(
+                              "...",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
                 Switch(
                   value: _showSimulatedGrades,
@@ -275,18 +303,24 @@ class _AbiCalculationScreenState extends State<AbiCalculationScreen> {
           ),
           _customContainer(
             child: SegmentedButton<AbiDisplay>(
-              segments: const [
+              segments: [
                 ButtonSegment(
                   value: AbiDisplay.grade,
-                  label: Text("Note"),
+                  label: Text(
+                    AppLocalizationsManager.localizations.strGrade,
+                  ),
                 ),
                 ButtonSegment(
                   value: AbiDisplay.weights,
-                  label: Text("Gewichtung"),
+                  label: Text(
+                    AppLocalizationsManager.localizations.strWeighting,
+                  ),
                 ),
                 ButtonSegment(
                   value: AbiDisplay.weightedPoints,
-                  label: Text("Gewichtete-Punkte"),
+                  label: Text(
+                    AppLocalizationsManager.localizations.strWeightedPoints,
+                  ),
                 ),
               ],
               showSelectedIcon: false,
@@ -301,7 +335,7 @@ class _AbiCalculationScreenState extends State<AbiCalculationScreen> {
             ),
           ),
           _moduleBuilder(
-            title: "Block I",
+            title: AppLocalizationsManager.localizations.strSectionI,
             subjects: calculator.allSubjects,
           ),
           _customContainer(
@@ -313,7 +347,7 @@ class _AbiCalculationScreenState extends State<AbiCalculationScreen> {
                   children: [
                     Expanded(
                       child: Text(
-                        "Block II",
+                        AppLocalizationsManager.localizations.strSectionII,
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
@@ -321,7 +355,7 @@ class _AbiCalculationScreenState extends State<AbiCalculationScreen> {
                     ),
                     Expanded(
                       child: Text(
-                        "Fach",
+                        AppLocalizationsManager.localizations.strSubject,
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                         ),
@@ -363,7 +397,7 @@ class _AbiCalculationScreenState extends State<AbiCalculationScreen> {
               ],
             ),
           ),
-          SizedBox(
+          const SizedBox(
             height: 100,
           ),
         ],
@@ -428,7 +462,9 @@ class _AbiCalculationScreenState extends State<AbiCalculationScreen> {
                             setState(() {});
                           },
                           child: Text(
-                            "Q$displayIndex",
+                            AppLocalizationsManager.localizations.strQX(
+                              displayIndex,
+                            ),
                             textAlign: TextAlign.center,
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
@@ -542,6 +578,7 @@ class _AbiCalculationScreenState extends State<AbiCalculationScreen> {
   Future<SchoolSemester?> _showSelectSemesterBottomSheet(
     BuildContext context, {
     required String title,
+    SchoolSemester? defaultSemester,
   }) async {
     final semesters = TimetableManager().semesters;
 
@@ -558,15 +595,18 @@ class _AbiCalculationScreenState extends State<AbiCalculationScreen> {
         )
         .toList();
 
-    //TODO: remove already selected semesters
-
-    await Utils.showStringAcionListBottomSheet(
+    final result = await Utils.showStringAcionListBottomSheet(
       context,
       title: title,
       items: items,
+      showDeleteButton: defaultSemester != null,
     );
 
-    return selectedSemester;
+    if (result == null) {
+      return null;
+    }
+
+    return selectedSemester ?? defaultSemester;
   }
 
   List<(String, Color?, VoidCallback)> _getTextAndColorsForSubject(
@@ -649,18 +689,20 @@ class _AbiCalculationScreenState extends State<AbiCalculationScreen> {
     int semesterIndex,
   ) async {
     SchoolSemester? semester = calculator.getSemester(semesterIndex);
-    final whatToChange = await _showWhatToChangeDialog(
-      semester == null,
-      question:
-          "Möchtest du die Note im Semester ändern, oder eine Simuliertenote nur für diesen Abitur Rechner erstellen?",
-      semesterOption: "Note im Semester",
-      simulatedOption: "Simulierte Note",
-    );
-    if (whatToChange == null) {
-      return;
-    }
+    // final whatToChange = await _showWhatToChangeDialog(
+    //   semester == null,
+    //   question:
+    //       "Möchtest du die Note im Semester ändern, oder eine Simuliertenote nur für diesen Abitur Rechner erstellen?",
+    //   semesterOption: "Note im Semester",
+    //   simulatedOption: "Simulierte Note",
+    // );
+    // if (whatToChange == null) {
+    //   return;
+    // }
 
-    if (!mounted) return;
+    // if (!mounted) return;
+
+    const whatToChange = WhatToChange.simulated;
 
     if (whatToChange == WhatToChange.subject &&
         subject != null &&
@@ -731,19 +773,21 @@ class _AbiCalculationScreenState extends State<AbiCalculationScreen> {
     int semesterIndex,
   ) async {
     SchoolSemester? semester = calculator.getSemester(semesterIndex);
-    final whatToChange = await _showWhatToChangeDialog(
-      semester == null,
-      question:
-          "Möchtest du das Gewicht im Semester ändern, oder das der simulierten Note, dies nur für diesen Abitur Rechner erstellen?",
-      semesterOption: "Gewicht im Semester",
-      simulatedOption: "Simuliertes Gewicht",
-    );
+    // final whatToChange = await _showWhatToChangeDialog(
+    //   semester == null,
+    //   question:
+    //       "Möchtest du das Gewicht im Semester ändern, oder das der simulierten Note, dies nur für diesen Abitur Rechner erstellen?",
+    //   semesterOption: "Gewicht im Semester",
+    //   simulatedOption: "Simuliertes Gewicht",
+    // );
 
-    if (whatToChange == null) {
-      return;
-    }
+    // if (whatToChange == null) {
+    //   return;
+    // }
 
-    if (!mounted) return;
+    // if (!mounted) return;
+
+    const whatToChange = WhatToChange.simulated;
 
     if (whatToChange == WhatToChange.subject &&
         subject != null &&
@@ -783,7 +827,7 @@ class _AbiCalculationScreenState extends State<AbiCalculationScreen> {
             8,
             (index) => index.toDouble(),
           ),
-          title: "Gewicht einstellen",
+          title: AppLocalizationsManager.localizations.strSetWeighting,
         );
 
         if (newWeight == null) return;
@@ -815,7 +859,7 @@ class _AbiCalculationScreenState extends State<AbiCalculationScreen> {
             8,
             (index) => index.toDouble(),
           ),
-          title: "Gewicht ändern",
+          title: AppLocalizationsManager.localizations.strChangeWeighting,
         );
       }
 
@@ -829,36 +873,7 @@ class _AbiCalculationScreenState extends State<AbiCalculationScreen> {
     setState(() {});
   }
 
-  Future<WhatToChange?> _showWhatToChangeDialog(
-    bool disableWhatToChangeSubject, {
-    required String question,
-    required String semesterOption,
-    required String simulatedOption,
-  }) async {
-    return WhatToChange.simulated;
-
-    // ignore: dead_code
-    int selection = await Utils.show2OptionDialog(
-      context,
-      question: question,
-      option1: semesterOption,
-      option2: simulatedOption,
-      disableOption1: disableWhatToChangeSubject,
-    );
-
-    if (selection == -1) return null;
-
-    if (selection == 1) {
-      return WhatToChange.subject;
-    }
-    return WhatToChange.simulated;
-  }
-
   Future<void> _onExamPressed() async {
-    const maxNameLength = SchoolSemester.maxNameLength;
-
-    final headingText = "Prüfung hinzufügen";
-
     final textColor =
         Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white;
 
@@ -876,14 +891,16 @@ class _AbiCalculationScreenState extends State<AbiCalculationScreen> {
         return Container(
           margin: const EdgeInsets.all(16),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                headingText,
+                AppLocalizationsManager.localizations.strAddExam,
                 style: TextStyle(
                   color: textColor,
                   fontSize: 24.0,
                   fontWeight: FontWeight.bold,
                 ),
+                textAlign: TextAlign.center,
               ),
               const SizedBox(
                 height: 12,
@@ -934,13 +951,17 @@ class _AbiCalculationScreenState extends State<AbiCalculationScreen> {
                 child: Row(
                   children: [
                     Expanded(
-                      child: Text("Ausgewähltes Schulfach: "),
+                      child: Text(
+                        "${AppLocalizationsManager.localizations.strSubject}:",
+                      ),
                     ),
                     StatefulBuilder(
                       builder: (context, builder) {
                         return ElevatedButton(
                           onPressed: () async {
-                            final sub = await showSelectSubjectName(context);
+                            final sub = await showSelectSubjectName(
+                              context,
+                            );
 
                             if (sub == null) return;
 
@@ -958,7 +979,9 @@ class _AbiCalculationScreenState extends State<AbiCalculationScreen> {
                 child: Row(
                   children: [
                     Expanded(
-                      child: Text("Gewichtung: "),
+                      child: Text(
+                        "${AppLocalizationsManager.localizations.strWeighting}:",
+                      ),
                     ),
                     StatefulBuilder(
                       builder: (context, builder) {
@@ -975,7 +998,8 @@ class _AbiCalculationScreenState extends State<AbiCalculationScreen> {
                                 8,
                                 (index) => index.toDouble(),
                               ),
-                              title: "Gewicht einstellen",
+                              title: AppLocalizationsManager
+                                  .localizations.strSetWeighting,
                             );
 
                             if (weight == null) return;
@@ -995,7 +1019,9 @@ class _AbiCalculationScreenState extends State<AbiCalculationScreen> {
                 child: Row(
                   children: [
                     Expanded(
-                      child: Text("Note: "),
+                      child: Text(
+                        "${AppLocalizationsManager.localizations.strGrade}:",
+                      ),
                     ),
                     StatefulBuilder(
                       builder: (context, builder) {
@@ -1052,7 +1078,7 @@ class _AbiCalculationScreenState extends State<AbiCalculationScreen> {
       if (mounted) {
         Utils.showInfo(
           context,
-          msg: "Du musst ein Fach auswählen",
+          msg: AppLocalizationsManager.localizations.strYouHaveToSelectASubject,
           type: InfoType.error,
         );
       }
@@ -1064,7 +1090,7 @@ class _AbiCalculationScreenState extends State<AbiCalculationScreen> {
       if (mounted) {
         Utils.showInfo(
           context,
-          msg: "Du musst eine Note auswählen",
+          msg: AppLocalizationsManager.localizations.strYouHaveToSelectAGrade,
           type: InfoType.error,
         );
       }
@@ -1087,16 +1113,17 @@ class _AbiCalculationScreenState extends State<AbiCalculationScreen> {
 
   Future<ExamType?> showSelectExamType(
     BuildContext context, {
-    ExamType? defaultType = null,
+    ExamType? defaultType,
   }) async {
     Set<ExamType> examTypeSelection = {defaultType ?? ExamType.written};
-    bool cancelPressed = false;
+    bool okPressed = false;
+    bool deletePressed = false;
 
     await showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text("Prüfungsart Setzen"),
+          title: Text(AppLocalizationsManager.localizations.strSelectExamType),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -1145,37 +1172,55 @@ class _AbiCalculationScreenState extends State<AbiCalculationScreen> {
           actions: [
             TextButton(
               onPressed: () {
-                cancelPressed = true;
                 Navigator.of(context).pop();
               },
               child: Text(AppLocalizationsManager.localizations.strCancel),
             ),
             TextButton(
               onPressed: () {
+                okPressed = true;
                 Navigator.of(context).pop();
               },
               child: Text(
                 AppLocalizationsManager.localizations.strOK,
               ),
             ),
+            if (defaultType != null)
+              IconButton(
+                onPressed: () {
+                  deletePressed = true;
+                  Navigator.of(context).pop();
+                },
+                icon: const Icon(
+                  Icons.delete,
+                  color: Colors.red,
+                ),
+              ),
           ],
         );
       },
     );
 
-    if (cancelPressed) {
-      return defaultType;
+    if (deletePressed) {
+      return null;
     }
 
-    return examTypeSelection.first;
+    if (okPressed) {
+      return examTypeSelection.first;
+    }
+
+    return defaultType;
   }
 
-  Future<String?> showSelectSubjectName(BuildContext context) async {
+  Future<String?> showSelectSubjectName(
+    BuildContext context, {
+    String? defaultName,
+  }) async {
     String? selectedSubjectName;
 
     final items = calculator.allSubjects;
 
-    await Utils.showStringAcionListBottomSheet(
+    final result = await Utils.showStringAcionListBottomSheet(
       context,
       items: items
           .map(
@@ -1187,9 +1232,12 @@ class _AbiCalculationScreenState extends State<AbiCalculationScreen> {
             ),
           )
           .toList(),
+      showDeleteButton: defaultName != null,
     );
 
-    return selectedSubjectName;
+    if (result == null) return null;
+
+    return selectedSubjectName ?? defaultName;
   }
 
   List<Widget> _generateExamRows(List<SchoolExamSubject> exams) {
@@ -1215,7 +1263,8 @@ class _AbiCalculationScreenState extends State<AbiCalculationScreen> {
           if (newGrade == null && mounted) {
             delete = await Utils.showBoolInputDialog(
               context,
-              question: "Möchtest du die Prüfung löschen?",
+              question: AppLocalizationsManager
+                  .localizations.strDoYouWantToDeleteTheExam,
               showYesAndNoInsteadOfOK: true,
               markTrueAsRed: true,
             );
@@ -1230,6 +1279,7 @@ class _AbiCalculationScreenState extends State<AbiCalculationScreen> {
             exam.grade = newGrade;
           }
 
+          calculator.save();
           setState(() {});
         }
 
@@ -1262,7 +1312,8 @@ class _AbiCalculationScreenState extends State<AbiCalculationScreen> {
                     8,
                     (index) => index.toDouble(),
                   ),
-                  title: "Gewicht anpassen",
+                  title:
+                      AppLocalizationsManager.localizations.strChangeWeighting,
                 );
 
                 bool delete = false;
@@ -1270,7 +1321,8 @@ class _AbiCalculationScreenState extends State<AbiCalculationScreen> {
                 if (newWeight == null && mounted) {
                   delete = await Utils.showBoolInputDialog(
                     context,
-                    question: "Möchtest du die Prüfung löschen?",
+                    question: AppLocalizationsManager
+                        .localizations.strDoYouWantToDeleteTheExam,
                     showYesAndNoInsteadOfOK: true,
                     markTrueAsRed: true,
                   );
@@ -1284,7 +1336,7 @@ class _AbiCalculationScreenState extends State<AbiCalculationScreen> {
                 if (newWeight != null) {
                   exam.weight = newWeight.toInt();
                 }
-
+                calculator.save();
                 setState(() {});
               },
             );
@@ -1318,9 +1370,27 @@ class _AbiCalculationScreenState extends State<AbiCalculationScreen> {
                       defaultType: exam.examType,
                     );
 
-                    if (type == null) return;
+                    bool delete = false;
 
-                    exam.examType = type;
+                    if (type == null && mounted) {
+                      delete = await Utils.showBoolInputDialog(
+                        context,
+                        question: AppLocalizationsManager
+                            .localizations.strDoYouWantToDeleteTheExam,
+                        showYesAndNoInsteadOfOK: true,
+                        markTrueAsRed: true,
+                      );
+                    }
+
+                    if (delete) {
+                      calculator.removeAbiExamSubjects(exam);
+                      setState(() {});
+                      return;
+                    }
+                    if (type != null) {
+                      exam.examType = type;
+                    }
+
                     setState(() {});
                     calculator.save();
                   },
@@ -1334,7 +1404,31 @@ class _AbiCalculationScreenState extends State<AbiCalculationScreen> {
               Expanded(
                 child: InkWell(
                   onTap: () async {
-                    final sub = await showSelectSubjectName(context);
+                    final sub = await showSelectSubjectName(
+                      context,
+                      defaultName: exam.connectedSubjectName,
+                    );
+
+                    bool delete = false;
+
+                    if (sub == null && mounted) {
+                      delete = await Utils.showBoolInputDialog(
+                        context,
+                        question: AppLocalizationsManager
+                            .localizations.strDoYouWantToDeleteTheExam,
+                        showYesAndNoInsteadOfOK: true,
+                        markTrueAsRed: true,
+                      );
+                    }
+
+                    if (delete) {
+                      calculator.removeAbiExamSubjects(exam);
+                      setState(() {});
+                      return;
+                    }
+                    if (sub != null) {
+                      exam.connectedSubjectName = sub;
+                    }
 
                     if (sub == null) return;
 
@@ -1345,7 +1439,7 @@ class _AbiCalculationScreenState extends State<AbiCalculationScreen> {
                   child: Text(
                     exam.connectedSubjectName,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -1390,11 +1484,11 @@ class _AbiCalculationScreenState extends State<AbiCalculationScreen> {
     final selection = _abiDisplaySelection.first;
     switch (selection) {
       case AbiDisplay.grade:
-        return "Note";
+        return AppLocalizationsManager.localizations.strGrade;
       case AbiDisplay.weights:
-        return "Gewichtung";
+        return AppLocalizationsManager.localizations.strWeighting;
       case AbiDisplay.weightedPoints:
-        return "Punkte";
+        return AppLocalizationsManager.localizations.strWeightedPoints;
     }
   }
 }
@@ -1409,3 +1503,25 @@ enum AbiDisplay {
   weights,
   weightedPoints,
 }
+
+// Future<WhatToChange?> _showWhatToChangeDialog(
+//   bool disableWhatToChangeSubject, {
+//   required String question,
+//   required String semesterOption,
+//   required String simulatedOption,
+// }) async {
+//   int selection = await Utils.show2OptionDialog(
+//     context,
+//     question: question,
+//     option1: semesterOption,
+//     option2: simulatedOption,
+//     disableOption1: disableWhatToChangeSubject,
+//   );
+
+//   if (selection == -1) return null;
+
+//   if (selection == 1) {
+//     return WhatToChange.subject;
+//   }
+//   return WhatToChange.simulated;
+// }

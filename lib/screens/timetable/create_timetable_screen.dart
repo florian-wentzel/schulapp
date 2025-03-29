@@ -426,7 +426,7 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
                 key: _saveButtonKey,
                 onPressed: () async {
                   final setAsDefault = TimetableManager().timetables.isEmpty;
-                  
+
                   if (setAsDefault) {
                     TimetableManager().settings.setVar(
                           Settings.mainTimetableNameKey,
@@ -951,12 +951,16 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
 
     if (!mounted) return;
 
-    final overridePrefabs = await Utils.showBoolInputDialog(
-      context,
-      question: AppLocalizationsManager
-          .localizations.strDoYouWantToOverrideAllSubjects,
-      showYesAndNoInsteadOfOK: true,
-    );
+    bool overridePrefabs = false;
+
+    if (_lessonPrefabs.isNotEmpty) {
+      overridePrefabs = await Utils.showBoolInputDialog(
+        context,
+        question: AppLocalizationsManager
+            .localizations.strDoYouWantToOverrideAllSubjects,
+        showYesAndNoInsteadOfOK: true,
+      );
+    }
 
     Map<String, SchoolLessonPrefab> prefabsMap = {};
 

@@ -5,6 +5,7 @@ import 'package:schulapp/code_behind/save_manager.dart';
 import 'package:schulapp/code_behind/school_grade_subject.dart';
 import 'package:schulapp/code_behind/school_semester.dart';
 import 'package:schulapp/code_behind/timetable_manager.dart';
+import 'package:schulapp/l10n/app_localizations_manager.dart';
 
 class AbiCalculator {
   static const abiExamSubjectsKey = "abiExamSubjects";
@@ -163,6 +164,20 @@ class AbiCalculator {
     _semesterNames[index] = name;
     if (name == null) {
       _semesters[index] = null;
+    }
+
+    int nullSemesters = 0;
+    for (var semester in _semesterNames) {
+      if (semester == null) {
+        nullSemesters++;
+      }
+    }
+
+    //delete all simulated semesters
+    if (nullSemesters == _semesterNames.length) {
+      for (int i = 0; i < _simulatedSemesters.length; i++) {
+        _simulatedSemesters[i].subjects.clear();
+      }
     }
   }
 
@@ -381,8 +396,9 @@ class AbiCalculator {
     }
 
     if (maxPoints == 0) return 0;
-    return (points / 48 * 40).round();
     return (points * maxSectionIPoints / maxPoints).round();
+    //pukte / anzahl der fächer (ausgeklammerte abziehen) * 40
+    // return (points / 48 * 40).round();
   }
 
   int getSectionIIPoints() {
@@ -432,7 +448,7 @@ class AbiCalculator {
     save();
   }
 
-  double getAbiAverage({
+  double? getAbiAverage({
     bool overrideIfSimulatedExists = true,
   }) {
     int sectionIPoints = getSectionIPoints(
@@ -444,6 +460,10 @@ class AbiCalculator {
         );
 
     int totalPoints = sectionIPoints + sectionIIPoints;
+
+    if (totalPoints == 0) {
+      return null;
+    }
 
     return 5.66 - (totalPoints / 180); //Tabelle hinzufügen
   }
@@ -518,11 +538,11 @@ class SchoolExamSubject {
   static String examTypeToTranslatedString(ExamType type) {
     switch (type) {
       case ExamType.written:
-        return "Schriftlich";
+        return AppLocalizationsManager.localizations.strWrittenExamType;
       case ExamType.verbal:
-        return "Wündlich";
+        return AppLocalizationsManager.localizations.strVerbalExamType;
       case ExamType.presentation:
-        return "5. PK";
+        return AppLocalizationsManager.localizations.strPresentationExamType;
     }
   }
 }

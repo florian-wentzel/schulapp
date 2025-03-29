@@ -832,6 +832,8 @@ class _SetTimetableBreaksWidgetState extends State<SetTimetableBreaksWidget> {
     super.dispose();
   }
 
+  bool showInfoText = true;
+
   @override
   Widget build(BuildContext context) {
     int correctedIndex = 0;
@@ -844,15 +846,59 @@ class _SetTimetableBreaksWidgetState extends State<SetTimetableBreaksWidget> {
         Text(
           AppLocalizationsManager.localizations.strSetBreaks,
           style: Theme.of(context).textTheme.headlineMedium,
+          textAlign: TextAlign.center,
         ),
-        Text(
-          AppLocalizationsManager.localizations.strLongPressDragBreaksToReorder,
-          style: Theme.of(context).textTheme.bodyMedium,
+        const SizedBox(
+          height: 8,
         ),
-        Text(
-          AppLocalizationsManager.localizations
-              .strReplaceBreaks,
-          style: Theme.of(context).textTheme.bodyMedium,
+        AnimatedSwitcher(
+          duration: const Duration(milliseconds: 400),
+          transitionBuilder: (child, animation) {
+            return ScaleTransition(
+              scale: animation,
+              child: FadeTransition(
+                opacity: animation,
+                child: child,
+              ),
+            );
+          },
+          child: showInfoText
+              ? Stack(
+                  key: const ValueKey("infoText"),
+                  clipBehavior: Clip.none,
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).cardColor,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: const EdgeInsets.all(16),
+                      child: Text(
+                        "${AppLocalizationsManager.localizations.strLongPressDragBreaksToReorder} ${AppLocalizationsManager.localizations.strReplaceBreaks}",
+                        style: Theme.of(context).textTheme.bodyMedium,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    Positioned(
+                      top: -10,
+                      right: -10,
+                      child: IconButton(
+                        onPressed: () {
+                          setState(() {
+                            showInfoText = false;
+                          });
+                        },
+                        icon: const Icon(
+                          Icons.close,
+                          color: Colors.red,
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+              : const SizedBox.shrink(
+                  key: ValueKey("empty"),
+                ),
         ),
         const SizedBox(
           height: 8,

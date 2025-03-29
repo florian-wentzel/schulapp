@@ -2,6 +2,8 @@
   "@@locale": "en",
   "language_name": "Englisch",
   "@language_name": {},
+  "version_0_9_0": "Added A-level calculator",
+  "@version_0_9_0": {},
   "version_0_8_7": "Substitute lessons can now be marked",
   "@version_0_8_7": {},
   "version_0_8_6": "Added Feedback functionality in Settings",
@@ -1042,5 +1044,59 @@
   "strLongPressDragBreaksToReorder": "Long press and drag breaks to reorder.",
   "@strLongPressDragBreaksToReorder": {},
   "strReplaceBreaks": "Breaks replace the previously set time between lessons.",
-  "@strReplaceBreaks": {}
+  "@strReplaceBreaks": {},
+  "strSelectSemester": "Select Semester",
+  "@strSelectSemester": {},
+  "strSelectSemesterX": "Select Q{index}",
+  "@strSelectSemesterX": {
+    "placeholders": {
+      "index": {
+        "type": "int",
+        "example": "1"
+      }
+    }
+  },
+  "strQX": "Q{index}",
+  "@strQX": {
+    "placeholders": {
+      "index": {
+        "type": "int",
+        "example": "1"
+      }
+    }
+  },
+  "strSectionI": "Section I",
+  "@strSectionI": {},
+  "strSectionII": "Section II",
+  "@strSectionII": {},
+  "strShowSimulatedGrades": "Show simulated grades",
+  "@strShowSimulatedGrades": {},
+  "strGrade": "Grade",
+  "@strGrade": {},
+  "strWeighting": "Weighting",
+  "@strWeighting": {},
+  "strWeightedPoints": "Weighted Points",
+  "@strWeightedPoints": {},
+  "strSubject": "Subject",
+  "@strSubject": {},
+  "strSetWeighting": "Set Weighting",
+  "@strSetWeighting": {},
+  "strChangeWeighting": "Change Weighting",
+  "@strChangeWeighting": {},
+  "strWrittenExamType": "Written",
+  "@strWrittenExamType": {},
+  "strVerbalExamType": "Verbal",
+  "@strVerbalExamType": {},
+  "strPresentationExamType": "Presentation",
+  "@strPresentationExamType": {},
+  "strYouHaveToSelectASubject": "You have to select a subject!",
+  "@strYouHaveToSelectASubject": {},
+  "strYouHaveToSelectAGrade": "You have to select a grade!",
+  "@strYouHaveToSelectAGrade": {},
+  "strSelectExamType": "Select Exam Type",
+  "@strSelectExamType": {},
+  "strDoYouWantToDeleteTheExam": "Do you want to delete the exam?",
+  "@strDoYouWantToDeleteTheExam": {},
+  "strAddExam": "Add Exam",
+  "@strAddExam": {}
 }
