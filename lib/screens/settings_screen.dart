@@ -39,6 +39,7 @@ class SettingsScreen extends StatefulWidget {
     List<Widget>? body,
     List<Widget>? afterTitle,
     bool hide = false,
+    bool roundedBottonCorners = true,
   }) {
     return AnimatedSwitcher(
       transitionBuilder: (Widget child, Animation<double> animation) {
@@ -57,15 +58,28 @@ class SettingsScreen extends StatefulWidget {
           ? const SizedBox.shrink(
               key: ValueKey("nothing"),
             )
-          : Container(
+          : AnimatedContainer(
               key: const ValueKey("item"),
+              duration: const Duration(milliseconds: 400),
               padding: const EdgeInsets.all(12),
-              margin: const EdgeInsets.symmetric(
-                horizontal: 8,
-                vertical: 4,
+              margin: EdgeInsets.only(
+                top: title == null ? 0 : 8,
+                left: 4,
+                right: 4,
               ),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.only(
+                  bottomLeft: roundedBottonCorners
+                      ? const Radius.circular(16)
+                      : Radius.zero,
+                  bottomRight: roundedBottonCorners
+                      ? const Radius.circular(16)
+                      : Radius.zero,
+                  topLeft:
+                      title == null ? Radius.zero : const Radius.circular(16),
+                  topRight:
+                      title == null ? Radius.zero : const Radius.circular(16),
+                ),
                 color: Theme.of(context).cardColor,
               ),
               child: Column(
@@ -163,6 +177,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _selectLanguage(),
         _paulDessauLogout(),
         _currentVersion(),
+        //weil padding nur nach oben geht muss ganz am ende
+        //für die Symetrie etwas platz sein
+        const SizedBox(
+          height: 8,
+        ),
       ],
     );
   }
@@ -460,6 +479,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return SettingsScreen.listItem(
       context,
       title: AppLocalizationsManager.localizations.strReducedClassHours,
+      roundedBottonCorners: !TimetableManager().settings.getVar(
+            Settings.reducedClassHoursEnabledKey,
+          ),
       afterTitle: [
         Switch.adaptive(
           value: TimetableManager().settings.getVar(
@@ -639,6 +661,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return SettingsScreen.listItem(
       context,
       title: AppLocalizationsManager.localizations.strTaskNotification,
+      roundedBottonCorners: !TimetableManager().settings.getVar(
+            Settings.notificationScheduleEnabledKey,
+          ),
       afterTitle: [
         Switch.adaptive(
           value: TimetableManager().settings.getVar(

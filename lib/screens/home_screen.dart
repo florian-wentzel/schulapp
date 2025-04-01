@@ -171,10 +171,14 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       drawer: widget.isHomeScreen
-          ? NavigationBarDrawer(selectedRoute: HomeScreen.route)
+          ? const NavigationBarDrawer(
+              selectedRoute: HomeScreen.route,
+            )
           : null,
       floatingActionButton: _floatingActionButton(context),
-      body: _body(),
+      body: SafeArea(
+        child: _body(),
+      ),
     );
   }
 
@@ -282,6 +286,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 builder: (context) => const ImportExportTimetableScreen(),
               ),
             );
+
+            if (!context.mounted) return;
+
+            //damit der screen neu erstellt und der neue timetable angezeigt wird
+            context.go(
+              "${HomeScreen.route}?reload=${DateTime.now().millisecondsSinceEpoch}",
+            );
+
             setState(() {});
           },
         ),
