@@ -2,12 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-// ignore: must_be_immutable
 class PeriodicUpdatingWidget extends StatefulWidget {
-  Widget Function() updateWidget;
-  Duration timerDuration;
+  final Widget Function() updateWidget;
+  final Duration timerDuration;
 
-  PeriodicUpdatingWidget({
+  const PeriodicUpdatingWidget({
     super.key,
     required this.updateWidget,
     required this.timerDuration,
