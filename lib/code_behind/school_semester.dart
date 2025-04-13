@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/grading_system_manager.dart';
 import 'package:schulapp/code_behind/save_manager.dart';
+import 'package:schulapp/code_behind/school_lesson_prefab.dart';
 import 'package:schulapp/code_behind/settings.dart';
+import 'package:schulapp/code_behind/timetable.dart';
 import 'package:schulapp/code_behind/timetable_manager.dart';
+import 'package:schulapp/code_behind/unique_id_generator.dart';
 import 'package:schulapp/code_behind/utils.dart';
+import 'package:schulapp/l10n/app_localizations_manager.dart';
 
 import 'grade_group.dart';
 import 'school_grade_subject.dart';
@@ -17,15 +21,85 @@ class SchoolSemester {
   static const subjectsKey = "subjects";
   static const yearKey = "year";
   static const semesterKey = "semester";
+  static const uniqueKeyKey = "uniqueKey";
+  static const connectedTimetableNameKey = "timetable";
 
   static const maxNameLength = 25;
 
   int? _year;
-  //wird nur gesetzt wenn year > 10 ist
+  //wird nur gesetzt wenn year > 10 - 1 ist
   int? _semester; //1 = 1. Semester, 2 = 2. Semester
+  late final int uniqueKey; //unique key for saving
   String? _name;
 
-  String get name => _name ?? "$_year.$_semester";
+  String? _connectedTimetableName;
+  String? get connectedTimetableName => _connectedTimetableName;
+  set connectedTimetableName(String? name) {
+    _connectedTimetableName = name;
+    _connectedTimetable =
+        TimetableManager().timetables.cast<Timetable?>().firstWhere(
+              (element) => element?.name == name,
+              orElse: () => null,
+            );
+
+    updateSubjectColors();
+  }
+
+  void updateSubjectColors() {
+    final tt = _connectedTimetable;
+
+    if (tt == null) {
+      for (var subject in _subjects) {
+        subject.color = null;
+      }
+      return;
+    }
+
+    for (var prefab in tt.lessonPrefabs) {
+      final subject = _subjects.cast<SchoolGradeSubject?>().firstWhere(
+            (element) => element?.name == prefab.name,
+            orElse: () => null,
+          );
+
+      if (subject != null) {
+        subject.color = prefab.color;
+      } else {
+        _subjects.add(
+          SchoolGradeSubject(
+            name: prefab.name,
+            gradeGroups: TimetableManager()
+                .settings
+                .getVar<List<GradeGroup>>(Settings.defaultGradeGroupsKey),
+            color: prefab.color,
+            weight: 1,
+          ),
+        );
+      }
+    }
+
+    for (var subject in _subjects) {
+      final timetableSubject =
+          tt.lessonPrefabs.cast<SchoolLessonPrefab?>().firstWhere(
+                (element) => element?.name == subject.name,
+                orElse: () => null,
+              );
+
+      if (timetableSubject != null) {
+        subject.color = timetableSubject.color;
+      }
+    }
+  }
+
+  Timetable? _connectedTimetable;
+
+  String get name =>
+      _name ??
+      AppLocalizationsManager.localizations.strClassNameText(
+        (_year ?? 0) < 10 ? "true" : "false",
+        (_year ?? 0) + 1,
+        (_semester ?? 0) + 1,
+      );
+
   void setName(String? newName) {
     if (newName == null && _year == null) {
       return;
@@ -105,11 +179,17 @@ class SchoolSemester {
     required int? year,
     required int? semester,
     required String? name,
+    required String? connectedTimetableName,
     required List<SchoolGradeSubject> subjects,
+    required int? uniqueKey,
   })  : _year = year,
         _semester = semester,
         _subjects = subjects,
-        _name = name;
+        _name = name {
+    this.uniqueKey = uniqueKey ?? UniqueIdGenerator.createUniqueId();
+    if (connectedTimetableName == null) return;
+    this.connectedTimetableName = connectedTimetableName;
+  }
 
   double getGradeAverage() {
     double average = 0;
@@ -174,8 +254,10 @@ class SchoolSemester {
 
   Map<String, dynamic> toJson() {
     return {
-      nameKey: name,
+      nameKey: _name,
       yearKey: _year,
+      connectedTimetableNameKey: connectedTimetableName,
+      uniqueKeyKey: uniqueKey,
       semesterKey: _semester,
       subjectsKey: List.generate(
         _subjects.length,
@@ -188,8 +270,10 @@ class SchoolSemester {
     SchoolSemester? schoolSemester;
     try {
       String? name = json[nameKey];
+      String? connectedTimetableName = json[connectedTimetableNameKey];
       int? year = json[yearKey];
       int? semester = json[semesterKey];
+      int? uniqueKey = json[uniqueKeyKey];
 
       List<Map<String, dynamic>> subjectJsons =
           (json[subjectsKey] as List).cast();
@@ -197,11 +281,15 @@ class SchoolSemester {
       schoolSemester = SchoolSemester(
         name: name,
         year: year,
+        connectedTimetableName: connectedTimetableName,
         semester: semester,
         subjects: List.generate(
           subjectJsons.length,
-          (index) => SchoolGradeSubject.fromJson(subjectJsons[index]),
+          (index) => SchoolGradeSubject.fromJson(
+            subjectJsons[index],
+          ),
         ),
+        uniqueKey: uniqueKey,
       );
     } catch (e) {
       debugPrint(e.toString());
@@ -266,6 +354,8 @@ class SchoolSemester {
     _name = semester.name;
     _year = semester.year;
     _semester = semester.semester;
+    uniqueKey = semester.uniqueKey;
+    connectedTimetableName = semester.connectedTimetableName;
     _subjects.clear();
     _subjects.addAll(semester.subjects);
   }

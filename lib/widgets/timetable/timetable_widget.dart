@@ -941,6 +941,7 @@ class _CustomPopUpShowLessonState extends State<CustomPopUpShowLesson> {
         selectedSemester!.subjects.add(
           SchoolGradeSubject(
             name: lesson.name,
+            color: lesson.color,
             gradeGroups: TimetableManager().settings.getVar(
                   Settings.defaultGradeGroupsKey,
                 ),

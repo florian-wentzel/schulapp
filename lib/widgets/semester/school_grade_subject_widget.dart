@@ -44,7 +44,7 @@ class SchoolGradeSubjectWidget extends StatelessWidget {
             child: Row(
               children: [
                 Visibility(
-                  visible: showName,
+                  visible: showName && subject.color != null,
                   child: Container(
                     width: 10,
                     margin: const EdgeInsets.fromLTRB(
@@ -55,7 +55,7 @@ class SchoolGradeSubjectWidget extends StatelessWidget {
                     ),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(4),
-                      color: Colors.blue,
+                      color: subject.color,
                     ),
                   ),
                 ),

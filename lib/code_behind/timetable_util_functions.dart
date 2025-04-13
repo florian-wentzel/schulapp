@@ -25,110 +25,233 @@ Future<SchoolSemester?> createNewSemester(BuildContext context) async {
 
 Future<SchoolSemester?> showCreateSemesterSheet(
   BuildContext context, {
-  String? headingText,
-  String? initalNameValue,
+  SchoolSemester? initalSemester,
 }) async {
   const maxNameLength = SchoolSemester.maxNameLength;
 
-  headingText ??= AppLocalizationsManager.localizations.strCreateSemester;
+  String headingText = initalSemester == null
+      ? AppLocalizationsManager.localizations.strCreateSemester
+      : AppLocalizationsManager.localizations.strEditSemester(
+          initalSemester.name,
+        );
+
+  String buttonText = initalSemester == null
+      ? AppLocalizationsManager.localizations.strCreate
+      : AppLocalizationsManager.localizations.strEdit;
 
   final textColor =
       Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white;
 
   TextEditingController nameController = TextEditingController();
-  if (initalNameValue != null) {
-    nameController.text = initalNameValue;
-  }
 
   bool createPressed = false;
-  Set<int> yearSelection = {0};
-  Set<int> semesterSelection = {0};
+  String? connectedTimetableName;
+  int yearSelection = 0;
+  int semesterSelection = 0;
+
+  String getNameControllerText() {
+    return AppLocalizationsManager.localizations.strClassNameText(
+      yearSelection < 10 ? "true" : "false",
+      yearSelection + 1,
+      semesterSelection + 1,
+    );
+  }
+
+  void setNameControllerText() {
+    nameController.text = getNameControllerText();
+  }
+
+  if (initalSemester != null) {
+    nameController.text = initalSemester.name;
+    yearSelection = initalSemester.year ?? 0;
+    semesterSelection = initalSemester.semester ?? 0;
+    connectedTimetableName = initalSemester.connectedTimetableName;
+  } else {
+    setNameControllerText();
+  }
 
   await showModalBottomSheet(
     context: context,
+    isScrollControlled: true,
+    scrollControlDisabledMaxHeightRatio: 0.6,
     builder: (context) {
-      return StatefulBuilder(builder: (context, setState) {
-        return Container(
-          margin: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              Text(
-                headingText!,
-                style: TextStyle(
-                  color: textColor,
-                  fontSize: 24.0,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(
-                height: 12,
-              ),
-              TextField(
-                decoration: InputDecoration(
-                  hintText: AppLocalizationsManager.localizations.strName,
-                ),
-                autofocus: true,
-                maxLines: 1,
-                maxLength: maxNameLength,
-                textAlign: TextAlign.center,
-                controller: nameController,
-              ),
-              SegmentedButton(
-                segments: List.generate(
-                  13,
-                  (index) => ButtonSegment(
-                    value: index,
-                    label: Text("${index + 1}"),
+      return SingleChildScrollView(
+        child: StatefulBuilder(
+          builder: (context, setState) {
+            return Container(
+              margin: const EdgeInsets.all(8),
+              child: Column(
+                children: [
+                  Text(
+                    headingText,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: textColor,
+                      fontSize: 24.0,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                selected: yearSelection,
-                onSelectionChanged: (Set<int> newSelection) {
-                  setState(() {
-                    yearSelection = newSelection;
-                  });
-                },
-                emptySelectionAllowed: false,
-                multiSelectionEnabled: false,
-                showSelectedIcon: false,
-              ),
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 300),
-                child: yearSelection.first > 9 // weil 10 - 1
-                    ? SegmentedButton(
-                        key: const ValueKey("button"),
-                        segments: List.generate(
-                          2,
-                          (index) => ButtonSegment(
-                            value: index,
-                            label: Text("${index + 1}"),
+                  const SizedBox(
+                    height: 12,
+                  ),
+                  TextField(
+                    decoration: InputDecoration(
+                      hintText: AppLocalizationsManager.localizations.strName,
+                    ),
+                    maxLines: 1,
+                    maxLength: maxNameLength,
+                    textAlign: TextAlign.center,
+                    controller: nameController,
+                  ),
+                  Container(
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).cardColor,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      spacing: 4,
+                      children: [
+                        Text(
+                          AppLocalizationsManager.localizations.strYearGrade,
+                          style: Theme.of(context).textTheme.bodyLarge,
+                        ),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          alignment: WrapAlignment.center,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          children: List.generate(
+                            13,
+                            (index) {
+                              final isSelected = yearSelection == index;
+
+                              return ChoiceChip(
+                                showCheckmark: false,
+                                label: Text("${index + 1}"),
+                                selected: isSelected,
+                                onSelected: (value) {
+                                  setState(
+                                    () {
+                                      yearSelection = index;
+                                      setNameControllerText();
+                                    },
+                                  );
+                                },
+                              );
+                            },
                           ),
                         ),
-                        onSelectionChanged: (p0) {
-                          setState(() {
-                            semesterSelection = p0;
-                          });
-                        },
-                        selected: semesterSelection,
-                        emptySelectionAllowed: false,
-                        showSelectedIcon: false,
-                        multiSelectionEnabled: false,
-                      )
-                    : const SizedBox.shrink(
-                        key: ValueKey("empty"),
-                      ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).cardColor,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Column(
+                      key: const ValueKey("semester"),
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      spacing: 4,
+                      children: [
+                        Text(
+                          AppLocalizationsManager.localizations.strSemester,
+                          style: Theme.of(context).textTheme.bodyLarge,
+                        ),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          alignment: WrapAlignment.center,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          children: List.generate(
+                            2,
+                            (index) {
+                              final isSelected = semesterSelection == index &&
+                                  yearSelection > 9;
+
+                              return AnimatedOpacity(
+                                duration: const Duration(milliseconds: 300),
+                                opacity: yearSelection < 10 ? 0.5 : 1.0,
+                                child: ChoiceChip(
+                                  showCheckmark: false,
+                                  label: Text("${index + 1}"),
+                                  selected: isSelected,
+                                  onSelected: yearSelection < 10
+                                      ? null
+                                      : (value) {
+                                          setState(
+                                            () {
+                                              semesterSelection = index;
+                                              setNameControllerText();
+                                            },
+                                          );
+                                        },
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).cardColor,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Column(
+                      key: const ValueKey("semester"),
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      spacing: 4,
+                      children: [
+                        Text(
+                          AppLocalizationsManager
+                              .localizations.strConnectTimetable,
+                          style: Theme.of(context).textTheme.bodyLarge,
+                        ),
+                        ElevatedButton(
+                          onPressed: () async {
+                            Timetable? timetable =
+                                await Utils.showSelectTimetableSheet(
+                              context,
+                              title:
+                                  "${AppLocalizationsManager.localizations.strConnectTimetable}:",
+                            );
+
+                            setState(
+                              () {
+                                connectedTimetableName = timetable?.name;
+                              },
+                            );
+                          },
+                          child: Text(
+                              "${AppLocalizationsManager.localizations.strConnectTimetable}: ${connectedTimetableName ?? ""}"),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 32,
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      createPressed = true;
+                      Navigator.of(context).pop();
+                    },
+                    child: Text(buttonText),
+                  ),
+                ],
               ),
-              const Spacer(),
-              ElevatedButton(
-                onPressed: () {
-                  createPressed = true;
-                  Navigator.of(context).pop();
-                },
-                child: Text(AppLocalizationsManager.localizations.strCreate),
-              ),
-            ],
-          ),
-        );
-      });
+            );
+          },
+        ),
+      );
     },
   );
 
@@ -146,11 +269,17 @@ Future<SchoolSemester?> showCreateSemesterSheet(
     return null;
   }
 
+  final subjects = initalSemester?.subjects.map((e) => e).toList() ?? [];
+
   return SchoolSemester(
-    semester: null,
-    year: yearSelection.first,
-    name: nameController.text.trim(),
-    subjects: [],
+    semester: yearSelection < 10 ? null : semesterSelection,
+    year: yearSelection,
+    connectedTimetableName: connectedTimetableName,
+    name: getNameControllerText() != nameController.text.trim()
+        ? nameController.text.trim()
+        : null,
+    subjects: subjects,
+    uniqueKey: initalSemester?.uniqueKey,
   );
 }
 
@@ -376,11 +505,10 @@ Future<Timetable?> showSelectTimetableSheet(
   return selectedTimetable;
 }
 
-// ignore: must_be_immutable
 class CreateTimetableBottomSheet extends StatefulWidget {
-  bool onlySchoolTimes;
+  final bool onlySchoolTimes;
 
-  CreateTimetableBottomSheet({
+  const CreateTimetableBottomSheet({
     super.key,
     this.onlySchoolTimes = false,
   });
@@ -440,6 +568,9 @@ class _CreateTimetableBottomSheetState
   int _currPageIndex = 0;
   int _lessonLength = 45;
   int _timeBetweenLessons = 10;
+
+  int _semesterSelection = 0;
+  int _yearSelection = 0;
 
   @override
   void initState() {
@@ -653,34 +784,141 @@ class _CreateTimetableBottomSheetState
   }
 
   Widget _page1() {
-    return Column(
-      children: [
-        Text(
-          AppLocalizationsManager.localizations.strCreateTimetable,
-          style: Theme.of(context).textTheme.headlineMedium,
-        ),
-        const SizedBox(
-          height: 12,
-        ),
-        TextFormField(
-          validator: (value) {
-            if (value == null || value.trim().isEmpty) {
-              return AppLocalizationsManager.localizations.strNameCanNotBeEmpty;
-            }
+    void setNameControllerText() {
+      _nameController.text =
+          AppLocalizationsManager.localizations.strClassNameText(
+        _yearSelection < 10 ? "true" : "false",
+        _yearSelection + 1,
+        _semesterSelection + 1,
+      );
+    }
 
-            return null;
-          },
-          decoration: InputDecoration(
-            hintText: AppLocalizationsManager.localizations.strName,
+    setNameControllerText();
+
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          Text(
+            AppLocalizationsManager.localizations.strCreateTimetable,
+            style: Theme.of(context).textTheme.headlineMedium,
           ),
-          autofocus: true,
-          maxLines: 1,
-          maxLength: _maxNameLength,
-          textAlign: TextAlign.center,
-          controller: _nameController,
-        ),
-        const Spacer(),
-      ],
+          const SizedBox(
+            height: 12,
+          ),
+          TextFormField(
+            validator: (value) {
+              if (value == null || value.trim().isEmpty) {
+                return AppLocalizationsManager
+                    .localizations.strNameCanNotBeEmpty;
+              }
+
+              return null;
+            },
+            decoration: InputDecoration(
+              hintText: AppLocalizationsManager.localizations.strName,
+            ),
+            maxLines: 1,
+            maxLength: _maxNameLength,
+            textAlign: TextAlign.center,
+            controller: _nameController,
+          ),
+          Container(
+            margin: const EdgeInsets.symmetric(vertical: 8),
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              spacing: 4,
+              children: [
+                Text(
+                  AppLocalizationsManager.localizations.strYearGrade,
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  alignment: WrapAlignment.center,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: List.generate(
+                    13,
+                    (index) {
+                      final isSelected = _yearSelection == index;
+
+                      return ChoiceChip(
+                        showCheckmark: false,
+                        label: Text("${index + 1}"),
+                        selected: isSelected,
+                        onSelected: (value) {
+                          setState(
+                            () {
+                              _yearSelection = index;
+                              setNameControllerText();
+                            },
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Column(
+              key: const ValueKey("semester"),
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              spacing: 4,
+              children: [
+                Text(
+                  AppLocalizationsManager.localizations.strSemester,
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  alignment: WrapAlignment.center,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: List.generate(
+                    2,
+                    (index) {
+                      final isSelected =
+                          _semesterSelection == index && _yearSelection > 9;
+
+                      return AnimatedOpacity(
+                        duration: const Duration(milliseconds: 300),
+                        opacity: _yearSelection < 10 ? 0.5 : 1.0,
+                        child: ChoiceChip(
+                          showCheckmark: false,
+                          label: Text("${index + 1}"),
+                          selected: isSelected,
+                          onSelected: _yearSelection < 10
+                              ? null
+                              : (value) {
+                                  setState(
+                                    () {
+                                      _semesterSelection = index;
+                                      setNameControllerText();
+                                    },
+                                  );
+                                },
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -738,9 +976,27 @@ class _CreateTimetableBottomSheetState
                       setState(() {});
                     },
                   ),
-                  Text(
-                    AppLocalizationsManager.localizations
-                        .strXMinutes(_lessonLength),
+                  InkWell(
+                    onTap: () async {
+                      int? length = await Utils.showIntInputDialog(
+                        context,
+                        hintText: AppLocalizationsManager
+                            .localizations.strLengthOfSchoolHours,
+                      );
+
+                      if (length == null) return;
+
+                      if (length < 30 || length > 90) {
+                        return;
+                      }
+
+                      _lessonLength = length;
+                      setState(() {});
+                    },
+                    child: Text(
+                      AppLocalizationsManager.localizations
+                          .strXMinutes(_lessonLength),
+                    ),
                   ),
                 ],
               ),
@@ -782,7 +1038,7 @@ class _CreateTimetableBottomSheetState
                   hintText:
                       AppLocalizationsManager.localizations.strLessonCount,
                 ),
-                autofocus: false,
+                autofocus: true,
                 maxLines: 1,
                 textAlign: TextAlign.center,
                 keyboardType: TextInputType.number,
@@ -812,9 +1068,27 @@ class _CreateTimetableBottomSheetState
                     setState(() {});
                   },
                 ),
-                Text(
-                  AppLocalizationsManager.localizations
-                      .strXMinutes(_timeBetweenLessons),
+                InkWell(
+                  onTap: () async {
+                    int? length = await Utils.showIntInputDialog(
+                      context,
+                      hintText: AppLocalizationsManager
+                          .localizations.strBreaksBetweenLessons,
+                    );
+
+                    if (length == null) return;
+
+                    if (length < 0 || length > 45) {
+                      return;
+                    }
+
+                    _timeBetweenLessons = length;
+                    setState(() {});
+                  },
+                  child: Text(
+                    AppLocalizationsManager.localizations
+                        .strXMinutes(_timeBetweenLessons),
+                  ),
                 ),
               ],
             ),
@@ -993,7 +1267,7 @@ class _SetTimetableBreaksWidgetState extends State<SetTimetableBreaksWidget> {
                           .localizations.strSelectBreakLength,
                       textAfterValue:
                           AppLocalizationsManager.localizations.strMinutes,
-                      minValue: 1,
+                      minValue: 0,
                       maxValue: 90,
                       startValue: 20,
                       onlyIntegers: true,
@@ -1041,7 +1315,7 @@ class _SetTimetableBreaksWidgetState extends State<SetTimetableBreaksWidget> {
               context,
               title: AppLocalizationsManager.localizations.strSelectBreakLength,
               textAfterValue: AppLocalizationsManager.localizations.strMinutes,
-              minValue: 1,
+              minValue: 0,
               maxValue: 90,
               startValue: 20,
               onlyIntegers: true,

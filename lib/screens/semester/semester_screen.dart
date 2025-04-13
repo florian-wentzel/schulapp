@@ -6,10 +6,8 @@ import 'package:schulapp/code_behind/grade_group.dart';
 import 'package:schulapp/code_behind/grading_system_manager.dart';
 import 'package:schulapp/code_behind/save_manager.dart';
 import 'package:schulapp/code_behind/school_grade_subject.dart';
-import 'package:schulapp/code_behind/school_lesson_prefab.dart';
 import 'package:schulapp/code_behind/school_semester.dart';
 import 'package:schulapp/code_behind/settings.dart';
-import 'package:schulapp/code_behind/timetable.dart';
 import 'package:schulapp/code_behind/timetable_manager.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
@@ -94,14 +92,15 @@ class _SemesterScreenState extends State<SemesterScreen> {
             child: const Icon(Icons.import_export),
             backgroundColor: Colors.blueAccent,
             foregroundColor: Colors.white,
-            label: AppLocalizationsManager
-                .localizations.strImportSubjectsFromTimetable,
+            label: AppLocalizationsManager.localizations.strConnectTimetable,
             onTap: () async {
-              final subjects = await _showImportSubjectsSheet(context);
+              final tt = await Utils.showSelectTimetableSheet(
+                context,
+                title:
+                    "${AppLocalizationsManager.localizations.strConnectTimetable}:",
+              );
 
-              if (subjects == null) return;
-
-              widget.semester.subjects.addAll(subjects);
+              widget.semester.connectedTimetableName = tt?.name;
 
               setState(() {});
 
@@ -173,19 +172,20 @@ class _SemesterScreenState extends State<SemesterScreen> {
                 ),
                 TextButton(
                   onPressed: () async {
-                    final subjects = await _showImportSubjectsSheet(context);
+                    final tt = await Utils.showSelectTimetableSheet(
+                      context,
+                      title:
+                          "${AppLocalizationsManager.localizations.strConnectTimetable}:",
+                    );
 
-                    if (subjects == null) return;
-
-                    semester.subjects.addAll(subjects);
+                    semester.connectedTimetableName = tt?.name;
 
                     setState(() {});
 
                     SaveManager().saveSemester(semester);
                   },
                   child: Text(
-                    AppLocalizationsManager
-                        .localizations.strImportSubjectsFromTimetable,
+                    AppLocalizationsManager.localizations.strConnectTimetable,
                   ),
                 ),
               ],
@@ -308,62 +308,11 @@ class _SemesterScreenState extends State<SemesterScreen> {
 
     return SchoolGradeSubject(
       name: name,
+      color: null,
       gradeGroups: TimetableManager().settings.getVar(
             Settings.defaultGradeGroupsKey,
           ),
     );
-  }
-
-  Future<List<SchoolGradeSubject>?> _showImportSubjectsSheet(
-      BuildContext context) async {
-    Timetable? timetable;
-
-    await Utils.showListSelectionBottomSheet(
-      context,
-      title:
-          "${AppLocalizationsManager.localizations.strImportSubjectsFromTimetable}:",
-      items: TimetableManager().timetables,
-      itemBuilder: (context, index) {
-        final tt = TimetableManager().timetables[index];
-
-        return ListTile(
-          onTap: () {
-            timetable = tt;
-            Navigator.of(context).pop();
-          },
-          title: Text(tt.name),
-        );
-      },
-    );
-
-    if (timetable == null) return null;
-
-    Map<String, SchoolLessonPrefab> prefabs = {};
-
-    for (var p in timetable!.lessonPrefabs) {
-      prefabs[p.name] = p;
-    }
-
-    for (var tt in timetable!.weekTimetables) {
-      for (var p in tt.lessonPrefabs) {
-        prefabs[p.name] = p;
-      }
-    }
-    List<SchoolLessonPrefab> lessonPrefabs = prefabs.values.toList();
-
-    List<SchoolGradeSubject> subjects = List.generate(
-      lessonPrefabs.length,
-      (index) {
-        return SchoolGradeSubject(
-          name: lessonPrefabs[index].name,
-          gradeGroups: TimetableManager().settings.getVar(
-                Settings.defaultGradeGroupsKey,
-              ),
-        );
-      },
-    );
-
-    return subjects;
   }
 
   Future<void> _showSettingsPressed() async {
@@ -427,7 +376,9 @@ class _SemesterScreenState extends State<SemesterScreen> {
     SchoolSemester calcSemester = SchoolSemester(
       name: "calcSemester",
       year: null,
+      connectedTimetableName: null,
       semester: null,
+      uniqueKey: null,
       subjects: List.generate(
         widget.semester.subjects.length,
         (subjectIndex) {
@@ -435,6 +386,7 @@ class _SemesterScreenState extends State<SemesterScreen> {
 
           return SchoolGradeSubject(
             name: subject.name,
+            color: null,
             gradeGroups: List.generate(
               subject.gradeGroups.length,
               (gradeGroupIndex) {

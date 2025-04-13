@@ -395,6 +395,7 @@ class _SchoolGradeSubjectScreenState extends State<SchoolGradeSubjectScreen> {
 
     SchoolGradeSubject calcSubject = SchoolGradeSubject(
       name: "calcSubject",
+      color: null,
       gradeGroups: List.generate(
         widget.subject.gradeGroups.length,
         (index) => GradeGroup(

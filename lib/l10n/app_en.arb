@@ -2,6 +2,8 @@
   "@@locale": "en",
   "language_name": "Englisch",
   "@language_name": {},
+  "version_0_9_1": "Improved grades and tasks UI, and enhanced timetable and semester creation",
+  "@version_0_9_1": {},
   "version_0_9_0": "Added A-level calculator",
   "@version_0_9_0": {},
   "version_0_8_7": "Substitute lessons can now be marked",
@@ -309,7 +311,7 @@
   },
   "strGrades": "Grades",
   "@strGrades": {},
-  "strEditSemester": "Edit Semester: {semesterName}",
+  "strEditSemester": "Edit Semester:\n{semesterName}",
   "@strEditSemester": {
     "placeholders": {
       "semesterName": {
@@ -932,6 +934,8 @@
   "@strByClickingOnTheDayNameYouReturnToToday": {},
   "strDisplayOfTheRemainingTime": "This displays the remaining time until the next class or break.",
   "@strDisplayOfTheRemainingTime": {},
+  "strTapHereToSwitchTimetablesEtc": "Tap here to switch timetables, export them, or create tasks.",
+  "@strTapHereToSwitchTimetablesEtc": {},
   "strDoYouWantToOverrideAllSubjects": "Do you want to overwrite all existing lessons?",
   "@strDoYouWantToOverrideAllSubjects": {},
   "strDoYouWantToOverrideSemesterX": "Do you really want to overwrite the timetable \"{semesterName}\"?",
@@ -1098,5 +1102,28 @@
   "strDoYouWantToDeleteTheExam": "Do you want to delete the exam?",
   "@strDoYouWantToDeleteTheExam": {},
   "strAddExam": "Add Exam",
-  "@strAddExam": {}
+  "@strAddExam": {},
+  "strClassNameText": "{lowerThan11, select, true{Grade {classNumber}} false{Grade {classNumber}, Semester {semesterNumber}} other{Grade {classNumber}}}",
+  "@strClassNameText": {
+    "description": "Klassentext je nach Jahrgangsstufe: unter 11 ohne Semester, ab 11 mit.",
+    "placeholders": {
+      "lowerThan11": {
+        "type": "String"
+      },
+      "classNumber": {
+        "type": "int"
+      },
+      "semesterNumber": {
+        "type": "int"
+      }
+    }
+  },
+  "strConnectTimetable": "Connect Timetable",
+  "@strConnectTimetable": {},
+  "strYearGrade": "Grade",
+  "@strYearGrade": {
+    "description": "Jahrgangsstufe"
+  },
+  "strSemester": "Semester",
+  "@strSemester": {}
 }

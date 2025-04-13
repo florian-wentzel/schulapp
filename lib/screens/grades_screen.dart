@@ -199,22 +199,13 @@ class _GradesScreenState extends State<GradesScreen> {
               onPressed: () async {
                 SchoolSemester? editedSemester = await showCreateSemesterSheet(
                   context,
-                  headingText:
-                      AppLocalizationsManager.localizations.strEditSemester(
-                    semester.name,
-                  ),
-                  initalNameValue: semester.name,
+                  initalSemester: semester,
                 );
+
                 if (editedSemester == null) return;
 
                 String originalName =
                     String.fromCharCodes(semester.name.codeUnits);
-
-                String changedName =
-                    String.fromCharCodes(editedSemester.name.codeUnits);
-
-                editedSemester.setValuesFrom(semester);
-                editedSemester.setName(changedName);
 
                 await TimetableManager().addOrChangeSemester(
                   editedSemester,

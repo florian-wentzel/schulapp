@@ -1,8 +1,8 @@
 import 'dart:io';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:schulapp/code_behind/school_lesson.dart';
 import 'package:schulapp/code_behind/school_lesson_prefab.dart';
@@ -255,8 +255,27 @@ class Utils {
                       },
                     ),
                   ),
-                  Text(
-                    "${currValue.toStringAsFixed(precision)} $textAfterValue",
+                  InkWell(
+                    onTap: () async {
+                      int? length = await Utils.showIntInputDialog(
+                        context,
+                        hintText: title ?? "",
+                        autofocus: true,
+                      );
+
+                      if (length == null) return;
+
+                      if (length < 30 || length > 90) {
+                        return;
+                      }
+
+                      snapshot.call(() {
+                        currValue = length.toDouble();
+                      });
+                    },
+                    child: Text(
+                      "${currValue.toStringAsFixed(precision)} $textAfterValue",
+                    ),
                   ),
                 ],
               );
@@ -333,6 +352,53 @@ class Utils {
             TextButton(
               onPressed: () {
                 Navigator.pop(context, textController.text);
+              },
+              child: Text(AppLocalizationsManager.localizations.strOK),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text(AppLocalizationsManager.localizations.strCancel),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  static Future<int?> showIntInputDialog(
+    BuildContext context, {
+    required String hintText,
+    bool autofocus = true,
+    String? title,
+    String? initText,
+    int maxInputLength = 20,
+  }) async {
+    TextEditingController textController = TextEditingController();
+    textController.text = initText ?? "";
+
+    return showDialog<int>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: title == null ? null : Text(title),
+          content: TextField(
+            maxLength: maxInputLength,
+            autofocus: autofocus,
+            controller: textController,
+            keyboardType: TextInputType.number,
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly,
+            ],
+            decoration: InputDecoration(
+              hintText: hintText,
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context, int.tryParse(textController.text));
               },
               child: Text(AppLocalizationsManager.localizations.strOK),
             ),
@@ -473,6 +539,30 @@ class Utils {
 
     // return TimetableManager().semesters.first;
     return null;
+  }
+
+  static Future<Timetable?> showSelectTimetableSheet(BuildContext context,
+      {required String title}) async {
+    Timetable? timetable;
+
+    await Utils.showListSelectionBottomSheet(
+      context,
+      title: title,
+      items: TimetableManager().timetables,
+      itemBuilder: (context, index) {
+        final tt = TimetableManager().timetables[index];
+
+        return ListTile(
+          onTap: () {
+            timetable = tt;
+            Navigator.of(context).pop();
+          },
+          title: Text(tt.name),
+        );
+      },
+    );
+
+    return timetable;
   }
 
   static Timetable? getHomescreenTimetable() {

@@ -28,6 +28,8 @@ class AbiCalculator {
       year: null,
       semester: null,
       subjects: [],
+      connectedTimetableName: null,
+      uniqueKey: null,
     ),
     growable: false,
   );
@@ -110,6 +112,7 @@ class AbiCalculator {
         name: subjectName,
         gradeGroups: [],
         weight: weight,
+        color: null,
       );
 
       semester.subjects.add(newSubject);
@@ -144,6 +147,7 @@ class AbiCalculator {
         name: subjectName,
         gradeGroups: [],
         endSetGrade: grade,
+        color: null,
       );
 
       semester.subjects.add(newSubject);

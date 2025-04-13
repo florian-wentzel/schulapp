@@ -1,6 +1,7 @@
 {
   "@@locale": "de",
   "language_name": "Deutsch",
+  "version_0_9_1": "Noten- und Aufgaben-UI überarbeitet, sowie Stundenplan- und Semestererstellung verbessert.",
   "version_0_9_0": "Abitur-Rechner hinzugefügt",
   "version_0_8_7": "Vertretungsstunden können jetzt markiert werden",
   "version_0_8_6": "Feedback-Funktion in den Einstellungen hinzugefügt",
@@ -102,7 +103,7 @@
   "strSuccessfullyRemoved": "{name} erfolgreich gelöscht!",
   "strCouldNotBeRemoved": "{name} konnte nicht gelöscht werden!",
   "strGrades": "Noten",
-  "strEditSemester": "Semester bearbeiten: {semesterName}",
+  "strEditSemester": "Semester bearbeiten:\n{semesterName}",
   "strHolidaysInfoText": "Alle Datumsangaben werden ohne Gewähr bereitgestellt. Ich übernehme keine Verantwortung für die Genauigkeit der Daten, noch akzeptiere ich Haftung für etwaige wirtschaftliche Schäden, die aus der Verwendung dieser Daten entstehen können.",
   "strHolidaysThanksText": "Vielen Dank an https://ferien-api.de/ für die kostenlose Bereitstellung der Ferientermine-API.\nVielen Dank an https://www.api-feiertage.de/ für die kostenlose Bereitstellung der Feiertags-API.",
   "strHolidaysWithStateName": "Ferien {federalStateName}",
@@ -327,6 +328,7 @@
   "strByClickingOnSubjectsYouCanAddHomework": "Durch das Klicken auf Fächer kannst du Hausaufgaben und Noten hinzufügen. Um es als ausgefallen zu markieren, lange drücken.",
   "strByClickingOnTheDayNameYouReturnToToday": "Durch das Klicken auf den Tagesnamen gelangst du zum heutigen Datum zurück. Langes Drücken markiert den ganzen Tag als ausgefallen.",
   "strDisplayOfTheRemainingTime": "Hier wird dir die verbleibende Zeit bis zur nächsten Stunde oder Pause angezeigt.",
+  "strTapHereToSwitchTimetablesEtc": "Klicke hier, um einen anderen Stundenplan anzuzeigen, Stundenpläne zu exportieren oder Aufgaben zu erstellen",
   "strDoYouWantToOverrideAllSubjects": "Möchtest Du alle bereits vorhandenen Unterrichtseinheiten überschreiben?",
   "strDoYouWantToOverrideSemesterX": "Möchtest du das Semester \"{semesterName}\" wirklich überschreiben?",
   "strCopiedToClipboard": "In die Zwischenablage kopiert",
@@ -377,5 +379,9 @@
   "strYouHaveToSelectAGrade": "Du musst eine Note auswählen!",
   "strSelectExamType": "Prüfungsart auswählen",
   "strDoYouWantToDeleteTheExam": "Möchtest Du die Prüfung löschen?",
-  "strAddExam": "Prüfung hinzufügen"
+  "strAddExam": "Prüfung hinzufügen",
+  "strClassNameText": "{lowerThan11, select, true{{classNumber}. Klasse} false{{classNumber}. Klasse, HJ {semesterNumber}} other{{classNumber}. Klasse}}",
+  "strConnectTimetable": "Strundenplan verbinden",
+  "strYearGrade": "Klasse",
+  "strSemester": "Semester"
 }

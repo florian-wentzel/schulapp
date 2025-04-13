@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:schulapp/code_behind/grading_system_manager.dart';
 
 import 'grade.dart';
@@ -12,6 +14,7 @@ class SchoolGradeSubject {
   static const int maxNameLength = 15;
 
   String name;
+  Color? color;
 
   List<GradeGroup> gradeGroups; //Schriftliche und Mündliche Noten etc.
 
@@ -22,6 +25,7 @@ class SchoolGradeSubject {
   SchoolGradeSubject({
     required this.name,
     required this.gradeGroups,
+    required this.color,
     this.weight = 1,
     this.endSetGrade,
   });
@@ -94,6 +98,7 @@ class SchoolGradeSubject {
       weight: weight,
       endSetGrade: endSetGrade,
       gradeGroups: gradeGroups,
+      color: null,
     );
   }
 

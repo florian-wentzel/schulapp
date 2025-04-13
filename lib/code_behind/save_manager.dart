@@ -638,7 +638,7 @@ class SaveManager {
 
     Directory targetDir = Directory(
       join(
-        getTimetablesDir().path,
+        getSemestersDir().path,
         semester.name,
       ),
     );
@@ -687,7 +687,7 @@ class SaveManager {
   }
 
   List<SchoolSemester> loadSemesters(List<String> names) {
-    List<SchoolSemester> semesters = [];
+    Map<String, SchoolSemester> semestersMap = {};
     int errorCount = 0;
 
     for (var name in names) {
@@ -697,7 +697,23 @@ class SaveManager {
           errorCount++;
           continue;
         }
-        semesters.add(semester);
+
+        //damit altes speichern nichts kaputt macht
+        if (!RegExp(r'^\d+$').hasMatch(name)) {
+          String semestersDirPath = join(getSemestersDir().path, name);
+
+          Directory(semestersDirPath).deleteSync(recursive: true);
+          saveSemester(semester);
+        }
+
+        if (semestersMap.containsKey(semester.name)) {
+          String semestersDirPath = join(getSemestersDir().path, name);
+
+          Directory(semestersDirPath).deleteSync(recursive: true);
+          continue;
+        }
+
+        semestersMap[semester.name] = semester;
       } catch (e) {
         debugPrint('Error reading or parsing the JSON file: $e');
       }
@@ -706,6 +722,8 @@ class SaveManager {
     if (errorCount != 0) {
       debugPrint("Errorcount while loading: $errorCount");
     }
+
+    final semesters = semestersMap.values.toList();
 
     semesters.sort(
       (a, b) => a.name.compareTo(b.name),
@@ -731,17 +749,20 @@ class SaveManager {
   }
 
   bool saveSemester(SchoolSemester semester) {
-    String semestersDirPath = join(getSemestersDir().path, semester.name);
+    String semestersDirPath = join(
+      getSemestersDir().path,
+      semester.uniqueKey.toString(),
+    );
 
-    Directory timetableDir = Directory(semestersDirPath);
-    timetableDir.createSync();
+    Directory semesterDir = Directory(semestersDirPath);
+    semesterDir.createSync();
 
     File semesterFile = File(join(semestersDirPath, semesterFileName));
 
-    if (!timetableDir.existsSync()) {
+    if (!semesterDir.existsSync()) {
       throw Exception(
         AppLocalizationsManager.localizations.strTimetableDirNotCreated(
-          timetableDir.path,
+          semesterDir.path,
         ),
       );
     }
@@ -754,7 +775,8 @@ class SaveManager {
 
   bool deleteSemester(SchoolSemester semester) {
     try {
-      String semestersDirPath = join(getSemestersDir().path, semester.name);
+      String semestersDirPath =
+          join(getSemestersDir().path, semester.uniqueKey.toString());
 
       Directory semesterDir = Directory(semestersDirPath);
 
