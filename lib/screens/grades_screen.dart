@@ -46,7 +46,9 @@ class _GradesScreenState extends State<GradesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: NavigationBarDrawer(selectedRoute: GradesScreen.route),
+      drawer: const NavigationBarDrawer(
+        selectedRoute: GradesScreen.route,
+      ),
       appBar: AppBar(
         title: Text(
           AppLocalizationsManager.localizations.strGrades,
@@ -212,7 +214,7 @@ class _GradesScreenState extends State<GradesScreen> {
                     String.fromCharCodes(editedSemester.name.codeUnits);
 
                 editedSemester.setValuesFrom(semester);
-                editedSemester.name = changedName;
+                editedSemester.setName(changedName);
 
                 await TimetableManager().addOrChangeSemester(
                   editedSemester,

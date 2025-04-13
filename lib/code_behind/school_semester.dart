@@ -15,10 +15,27 @@ class SchoolSemester {
 
   static const nameKey = "name";
   static const subjectsKey = "subjects";
+  static const yearKey = "year";
+  static const semesterKey = "semester";
 
   static const maxNameLength = 25;
 
-  String name;
+  int? _year;
+  //wird nur gesetzt wenn year > 10 ist
+  int? _semester; //1 = 1. Semester, 2 = 2. Semester
+  String? _name;
+
+  String get name => _name ?? "$_year.$_semester";
+  void setName(String? newName) {
+    if (newName == null && _year == null) {
+      return;
+    }
+    _name = newName;
+  }
+
+  int? get year => _year;
+  int? get semester => _semester;
+
   List<SchoolGradeSubject> _subjects; //Deutsch Mathe Englisch
 
   List<SchoolGradeSubject> get subjects {
@@ -34,7 +51,7 @@ class SchoolSemester {
           Settings.pinWeightedSubjectsAtTopKey,
         );
 
-    //vielleicht sollte man eine kopie von der Liste machen und diese Kopieren, sortieren und zurückgeben
+    //vielleicht sollte man eine kopie von der Liste machen und diese sortieren und zurückgeben
 
     if (sortBy == sortByGradeValue) {
       _subjects.sort(
@@ -85,9 +102,14 @@ class SchoolSemester {
   }
 
   SchoolSemester({
-    required this.name,
+    required int? year,
+    required int? semester,
+    required String? name,
     required List<SchoolGradeSubject> subjects,
-  }) : _subjects = subjects;
+  })  : _year = year,
+        _semester = semester,
+        _subjects = subjects,
+        _name = name;
 
   double getGradeAverage() {
     double average = 0;
@@ -153,6 +175,8 @@ class SchoolSemester {
   Map<String, dynamic> toJson() {
     return {
       nameKey: name,
+      yearKey: _year,
+      semesterKey: _semester,
       subjectsKey: List.generate(
         _subjects.length,
         (index) => _subjects[index].toJson(),
@@ -161,14 +185,19 @@ class SchoolSemester {
   }
 
   static SchoolSemester? fromJson(Map<String, dynamic> json) {
-    SchoolSemester? semester;
+    SchoolSemester? schoolSemester;
     try {
-      String name = json[nameKey];
+      String? name = json[nameKey];
+      int? year = json[yearKey];
+      int? semester = json[semesterKey];
+
       List<Map<String, dynamic>> subjectJsons =
           (json[subjectsKey] as List).cast();
 
-      semester = SchoolSemester(
+      schoolSemester = SchoolSemester(
         name: name,
+        year: year,
+        semester: semester,
         subjects: List.generate(
           subjectJsons.length,
           (index) => SchoolGradeSubject.fromJson(subjectJsons[index]),
@@ -178,7 +207,7 @@ class SchoolSemester {
       debugPrint(e.toString());
     }
 
-    return semester;
+    return schoolSemester;
   }
 
   bool removeSubject(SchoolGradeSubject subject) {
@@ -234,7 +263,9 @@ class SchoolSemester {
   }
 
   void setValuesFrom(SchoolSemester semester) {
-    name = semester.name;
+    _name = semester.name;
+    _year = semester.year;
+    _semester = semester.semester;
     _subjects.clear();
     _subjects.addAll(semester.subjects);
   }

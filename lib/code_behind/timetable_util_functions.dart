@@ -41,46 +41,94 @@ Future<SchoolSemester?> showCreateSemesterSheet(
   }
 
   bool createPressed = false;
+  Set<int> yearSelection = {0};
+  Set<int> semesterSelection = {0};
 
   await showModalBottomSheet(
     context: context,
     builder: (context) {
-      return Container(
-        margin: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            Text(
-              headingText!,
-              style: TextStyle(
-                color: textColor,
-                fontSize: 24.0,
-                fontWeight: FontWeight.bold,
+      return StatefulBuilder(builder: (context, setState) {
+        return Container(
+          margin: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              Text(
+                headingText!,
+                style: TextStyle(
+                  color: textColor,
+                  fontSize: 24.0,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            const SizedBox(
-              height: 12,
-            ),
-            TextField(
-              decoration: InputDecoration(
-                hintText: AppLocalizationsManager.localizations.strName,
+              const SizedBox(
+                height: 12,
               ),
-              autofocus: true,
-              maxLines: 1,
-              maxLength: maxNameLength,
-              textAlign: TextAlign.center,
-              controller: nameController,
-            ),
-            const Spacer(),
-            ElevatedButton(
-              onPressed: () {
-                createPressed = true;
-                Navigator.of(context).pop();
-              },
-              child: Text(AppLocalizationsManager.localizations.strCreate),
-            ),
-          ],
-        ),
-      );
+              TextField(
+                decoration: InputDecoration(
+                  hintText: AppLocalizationsManager.localizations.strName,
+                ),
+                autofocus: true,
+                maxLines: 1,
+                maxLength: maxNameLength,
+                textAlign: TextAlign.center,
+                controller: nameController,
+              ),
+              SegmentedButton(
+                segments: List.generate(
+                  13,
+                  (index) => ButtonSegment(
+                    value: index,
+                    label: Text("${index + 1}"),
+                  ),
+                ),
+                selected: yearSelection,
+                onSelectionChanged: (Set<int> newSelection) {
+                  setState(() {
+                    yearSelection = newSelection;
+                  });
+                },
+                emptySelectionAllowed: false,
+                multiSelectionEnabled: false,
+                showSelectedIcon: false,
+              ),
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                child: yearSelection.first > 9 // weil 10 - 1
+                    ? SegmentedButton(
+                        key: const ValueKey("button"),
+                        segments: List.generate(
+                          2,
+                          (index) => ButtonSegment(
+                            value: index,
+                            label: Text("${index + 1}"),
+                          ),
+                        ),
+                        onSelectionChanged: (p0) {
+                          setState(() {
+                            semesterSelection = p0;
+                          });
+                        },
+                        selected: semesterSelection,
+                        emptySelectionAllowed: false,
+                        showSelectedIcon: false,
+                        multiSelectionEnabled: false,
+                      )
+                    : const SizedBox.shrink(
+                        key: ValueKey("empty"),
+                      ),
+              ),
+              const Spacer(),
+              ElevatedButton(
+                onPressed: () {
+                  createPressed = true;
+                  Navigator.of(context).pop();
+                },
+                child: Text(AppLocalizationsManager.localizations.strCreate),
+              ),
+            ],
+          ),
+        );
+      });
     },
   );
 
@@ -99,6 +147,8 @@ Future<SchoolSemester?> showCreateSemesterSheet(
   }
 
   return SchoolSemester(
+    semester: null,
+    year: yearSelection.first,
     name: nameController.text.trim(),
     subjects: [],
   );

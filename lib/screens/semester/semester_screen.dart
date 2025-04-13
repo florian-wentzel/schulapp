@@ -426,6 +426,8 @@ class _SemesterScreenState extends State<SemesterScreen> {
 
     SchoolSemester calcSemester = SchoolSemester(
       name: "calcSemester",
+      year: null,
+      semester: null,
       subjects: List.generate(
         widget.semester.subjects.length,
         (subjectIndex) {

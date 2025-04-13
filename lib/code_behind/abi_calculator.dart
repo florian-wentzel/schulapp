@@ -25,6 +25,8 @@ class AbiCalculator {
     4,
     (index) => SchoolSemester(
       name: index.toString() + nullchar,
+      year: null,
+      semester: null,
       subjects: [],
     ),
     growable: false,
