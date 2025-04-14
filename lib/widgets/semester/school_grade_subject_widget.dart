@@ -33,7 +33,7 @@ class SchoolGradeSubjectWidget extends StatelessWidget {
       ),
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
+        color: Theme.of(context).cardColor.withAlpha(255),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -43,6 +43,22 @@ class SchoolGradeSubjectWidget extends StatelessWidget {
           Flexible(
             child: Row(
               children: [
+                Visibility(
+                  visible: showName && subject.color != null,
+                  child: Container(
+                    width: 10,
+                    margin: const EdgeInsets.fromLTRB(
+                      4,
+                      12,
+                      12,
+                      12,
+                    ),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(4),
+                      color: subject.color,
+                    ),
+                  ),
+                ),
                 Visibility(
                   visible: showName,
                   child: Align(

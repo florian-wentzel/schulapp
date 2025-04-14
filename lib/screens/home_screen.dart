@@ -62,6 +62,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final _timetableController = TimetableController();
   final _timetableKey = GlobalKey();
+  final _floatingActionButtonKey = GlobalKey();
 
   final _verticalPageViewController = PageController();
 
@@ -186,6 +187,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (_currPageIndex != 0) return null;
 
     return SpeedDial(
+      key: _floatingActionButtonKey,
       icon: Icons.more_horiz_outlined,
       activeIcon: Icons.close,
       spacing: 3,
@@ -858,6 +860,13 @@ class _HomeScreenState extends State<HomeScreen> {
           highlightKey: _timetableController.timeLeftKey,
           tutorialWidget: Text(
             AppLocalizationsManager.localizations.strDisplayOfTheRemainingTime,
+          ),
+        ),
+        TutorialStep(
+          highlightKey: _floatingActionButtonKey,
+          tutorialWidget: Text(
+            AppLocalizationsManager
+                .localizations.strTapHereToSwitchTimetablesEtc,
           ),
         ),
       ],

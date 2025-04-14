@@ -158,7 +158,7 @@ class Timetable {
     ],
   );
 
-  static const maxNameLength = 15;
+  static const maxNameLength = 25;
   static const minMaxLessonCount = 5;
   static const maxMaxLessonCount = 12;
 

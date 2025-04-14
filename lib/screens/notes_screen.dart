@@ -18,7 +18,7 @@ class _NotesScreenState extends State<NotesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: NavigationBarDrawer(selectedRoute: NotesScreen.route),
+      drawer: const NavigationBarDrawer(selectedRoute: NotesScreen.route),
       appBar: AppBar(
         title: Text(
           AppLocalizationsManager.localizations.strNotes,
