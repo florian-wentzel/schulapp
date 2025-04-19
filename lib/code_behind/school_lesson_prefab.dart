@@ -12,38 +12,34 @@ class SchoolLessonPrefab {
   static const String _colorKey = "color";
 
   final String _name;
-  final String _room;
+  String room;
   final String _teacher;
-  final Color _color;
+  Color color;
 
   String get name => _name;
-  String get room => _room;
   String get teacher => _teacher;
-  Color get color => _color;
 
   SchoolLessonPrefab.fromSchoolLesson({
     required SchoolLesson lesson,
   })  : _name = lesson.name,
-        _room = lesson.room,
+        room = lesson.room,
         _teacher = lesson.teacher,
-        _color = lesson.color;
+        color = lesson.color;
 
   SchoolLessonPrefab({
     required String name,
-    required String room,
-    required String teacher,
-    required Color color,
+    this.room = "",
+    String teacher = "",
+    required this.color,
   })  : _name = name,
-        _room = room,
-        _teacher = teacher,
-        _color = color;
+        _teacher = teacher;
 
   Map<String, dynamic> toJson() {
     return {
       _nameKey: _name,
-      _roomKey: _room,
+      _roomKey: room,
       _teacherKey: _teacher,
-      _colorKey: _color.toJson(),
+      _colorKey: color.toJson(),
     };
   }
 
@@ -63,9 +59,9 @@ class SchoolLessonPrefab {
   SchoolLessonPrefab copy() {
     return SchoolLessonPrefab(
       name: _name,
-      room: _room,
+      room: room,
       teacher: _teacher,
-      color: _color.withValues(),
+      color: color.withValues(),
     );
   }
 

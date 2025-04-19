@@ -265,12 +265,8 @@ class Utils {
 
                       if (length == null) return;
 
-                      if (length < 30 || length > 90) {
-                        return;
-                      }
-
                       snapshot.call(() {
-                        currValue = length.toDouble();
+                        currValue = length.toDouble().clamp(minValue, maxValue);
                       });
                     },
                     child: Text(

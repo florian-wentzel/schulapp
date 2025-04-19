@@ -1125,5 +1125,7 @@
     "description": "Jahrgangsstufe"
   },
   "strSemester": "Semester",
-  "@strSemester": {}
+  "@strSemester": {},
+  "strSearch": "Search",
+  "@strSearch": {}
 }

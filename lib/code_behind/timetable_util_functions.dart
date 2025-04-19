@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:schulapp/code_behind/all_default_lessons.dart';
 import 'package:schulapp/code_behind/school_day.dart';
 import 'package:schulapp/code_behind/school_lesson.dart';
 import 'package:schulapp/code_behind/school_lesson_prefab.dart';
@@ -1038,7 +1039,7 @@ class _CreateTimetableBottomSheetState
                   hintText:
                       AppLocalizationsManager.localizations.strLessonCount,
                 ),
-                autofocus: true,
+                autofocus: false,
                 maxLines: 1,
                 textAlign: TextAlign.center,
                 keyboardType: TextInputType.number,
@@ -1342,6 +1343,308 @@ class _SetTimetableBreaksWidgetState extends State<SetTimetableBreaksWidget> {
           child: Text(AppLocalizationsManager.localizations.strAddBreak),
         ),
       ],
+    );
+  }
+}
+
+class SelectLessonPrefabsSheet extends StatefulWidget {
+  const SelectLessonPrefabsSheet({super.key});
+
+  @override
+  State<SelectLessonPrefabsSheet> createState() =>
+      _SelectLessonPrefabsSheetState();
+
+  static Future<List<SchoolLessonPrefab>?> show(BuildContext context) async {
+    return await showModalBottomSheet<List<SchoolLessonPrefab>>(
+      context: context,
+      scrollControlDisabledMaxHeightRatio: 0.7,
+      builder: (context) {
+        return const SelectLessonPrefabsSheet();
+      },
+    );
+  }
+}
+
+class _SelectLessonPrefabsSheetState extends State<SelectLessonPrefabsSheet> {
+  final List<SchoolLessonPrefab> allDefaultLessonSelections = [];
+
+  bool _searching = false;
+  final _searchController = TextEditingController();
+  final _fnSearch = FocusNode();
+
+  void _onSearch(String searchQuery) {
+    if (searchQuery.isEmpty) {
+      allDefaultLessonSelections.clear();
+      allDefaultLessonSelections.addAll(allDefaultLessons);
+    } else {
+      allDefaultLessonSelections.clear();
+      allDefaultLessonSelections.addAll(
+        allDefaultLessons.where(
+          (element) => element.name.toLowerCase().contains(
+                searchQuery.toLowerCase(),
+              ),
+        ),
+      );
+    }
+    setState(() {});
+  }
+
+  @override
+  void initState() {
+    allDefaultLessonSelections.addAll(
+      allDefaultLessons,
+    );
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    for (int i = 0; i < allDefaultLessons.length; i++) {
+      allDefaultLessons[i].room = "";
+    }
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  transitionBuilder:
+                      (Widget child, Animation<double> animation) {
+                    final inAnimation = Tween<Offset>(
+                      begin: const Offset(1.0, 0.0),
+                      end: const Offset(0.0, 0.0),
+                    ).animate(animation);
+                    final outAnimation = Tween<Offset>(
+                      begin: const Offset(-1.0, 0.0),
+                      end: const Offset(0.0, 0.0),
+                    ).animate(animation);
+
+                    return ClipRect(
+                      child: SlideTransition(
+                        position: child.key == const ValueKey('textF')
+                            ? inAnimation
+                            : outAnimation,
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: _searching
+                      ? Container(
+                          key: const ValueKey('textF'),
+                          margin: const EdgeInsets.symmetric(horizontal: 16),
+                          height: 60,
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: TextFormField(
+                              focusNode: _fnSearch,
+                              controller: _searchController,
+                              autofocus: true,
+                              keyboardType: TextInputType.text,
+                              textInputAction: TextInputAction.search,
+                              textAlign: TextAlign.start,
+                              minLines: 1,
+                              cursorColor: ThemeData().primaryColor,
+                              textAlignVertical: TextAlignVertical.center,
+                              decoration: InputDecoration(
+                                labelText: AppLocalizationsManager
+                                    .localizations.strSearch,
+                                alignLabelWithHint: true,
+                                contentPadding: const EdgeInsets.symmetric(
+                                  vertical: 8,
+                                  horizontal: 8,
+                                ),
+                                border: const UnderlineInputBorder(
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(4),
+                                  ),
+                                ),
+                              ),
+                              onChanged: _onSearch,
+                              onFieldSubmitted: _onSearch,
+                            ),
+                          ),
+                        )
+                      : SizedBox(
+                          key: const ValueKey('align'),
+                          height: 60,
+                          child: Align(
+                            alignment: Alignment.center,
+                            child: Text(
+                              "Wähle deine Fächer",
+                              style: Theme.of(context).textTheme.headlineMedium,
+                              textAlign: TextAlign.center, //start
+                            ),
+                          ),
+                        ),
+                ),
+              ),
+              IconButton(
+                icon: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 350),
+                  transitionBuilder:
+                      (Widget child, Animation<double> animation) {
+                    final inAnimation = Tween<Offset>(
+                      begin: const Offset(0.0, 1.0),
+                      end: const Offset(0.0, 0.0),
+                    ).animate(animation);
+                    final outAnimation = Tween<Offset>(
+                      begin: const Offset(0.0, -1.0),
+                      end: const Offset(0.0, 0.0),
+                    ).animate(animation);
+
+                    return ClipRect(
+                      child: SlideTransition(
+                        position: child.key == const ValueKey('close')
+                            ? inAnimation
+                            : outAnimation,
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: _searching
+                      ? const Icon(
+                          Icons.close,
+                          key: ValueKey('close'),
+                        )
+                      : const Icon(
+                          Icons.search,
+                          key: ValueKey('search'),
+                        ),
+                ),
+                onPressed: () {
+                  if (_searching && _searchController.text.isNotEmpty) {
+                    _searchController.clear();
+                  } else {
+                    _searching = !_searching;
+                    if (_searching) _fnSearch.requestFocus();
+                  }
+                  _onSearch("");
+                  setState(() {});
+                },
+              ),
+            ],
+          ),
+          Expanded(
+            child: Container(
+              margin: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: ListView.builder(
+                itemCount: allDefaultLessonSelections.length + 1,
+                itemBuilder: (context, index) {
+                  final lessonIndex = index;
+                  if (index == allDefaultLessonSelections.length) {
+                    return ListTile(
+                      onTap: () async {
+                        String initText = "";
+                        if (allDefaultLessonSelections.isEmpty) {
+                          initText = _searchController.text.trim();
+                        }
+                        final name = await Utils.showStringInputDialog(
+                          context,
+                          hintText: AppLocalizationsManager
+                              .localizations.strSubjectName,
+                          initText: initText,
+                        );
+
+                        if (name == null) return;
+
+                        allDefaultLessons.add(
+                          SchoolLessonPrefab(
+                            name: name,
+                            color: Colors.blue,
+                            room: "selected",
+                          ),
+                        );
+
+                        _onSearch("");
+                      },
+                      leading: const Icon(
+                        Icons.add,
+                      ),
+                      title: Text(
+                        AppLocalizationsManager
+                            .localizations.strCreateNewSubject,
+                      ),
+                    );
+                  }
+                  return ListTile(
+                    title: Text(allDefaultLessonSelections[lessonIndex].name),
+                    leading: InkWell(
+                      onTap: () async {
+                        final color = await Utils.showColorInputDialog(
+                          context,
+                          pickerColor:
+                              allDefaultLessonSelections[lessonIndex].color,
+                        );
+
+                        if (color == null) return;
+
+                        allDefaultLessonSelections[lessonIndex].color = color;
+                        setState(() {});
+                      },
+                      child: Container(
+                        width: 10,
+                        height: 20,
+                        decoration: BoxDecoration(
+                          color: allDefaultLessonSelections[lessonIndex].color,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    ),
+                    trailing: Checkbox(
+                      value: allDefaultLessonSelections[lessonIndex]
+                          .room
+                          .isNotEmpty,
+                      onChanged: (value) {
+                        allDefaultLessonSelections[lessonIndex].room =
+                            (value ?? false) ? "selected" : "";
+                        setState(() {});
+                      },
+                    ),
+                    onTap: () {
+                      final value = allDefaultLessonSelections[lessonIndex]
+                          .room
+                          .isNotEmpty;
+                      allDefaultLessonSelections[lessonIndex].room =
+                          !value ? "selected" : "";
+                      setState(() {});
+                    },
+                  );
+                },
+              ),
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: ElevatedButton(
+              onPressed: () {
+                List<SchoolLessonPrefab> selectedLessons = [];
+                for (int i = 0; i < allDefaultLessons.length; i++) {
+                  if (allDefaultLessons[i].room.isNotEmpty) {
+                    allDefaultLessons[i].room = "";
+                    selectedLessons.add(allDefaultLessons[i]);
+                  }
+                }
+                Navigator.of(context).pop(selectedLessons);
+              },
+              child: Text(AppLocalizationsManager.localizations.strFinished),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

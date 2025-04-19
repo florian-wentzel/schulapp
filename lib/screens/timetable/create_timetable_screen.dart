@@ -826,6 +826,15 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
   }
 
   Future<void> _createNewPrefab() async {
+    List<SchoolLessonPrefab>? selectedPrefabs =
+        await SelectLessonPrefabsSheet.show(context);
+
+    if (selectedPrefabs == null) return;
+    _lessonPrefabs.addAll(selectedPrefabs);
+
+    _sortLessonPrefabs();
+    setState(() {});
+
     //prefab, delete
     (SchoolLessonPrefab, bool)? prefab =
         await _showCreateNewPrefabBottomSheet();

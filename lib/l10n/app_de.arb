@@ -383,5 +383,6 @@
   "strClassNameText": "{lowerThan11, select, true{{classNumber}. Klasse} false{{classNumber}. Klasse, HJ {semesterNumber}} other{{classNumber}. Klasse}}",
   "strConnectTimetable": "Strundenplan verbinden",
   "strYearGrade": "Klasse",
-  "strSemester": "Semester"
+  "strSemester": "Semester",
+  "strSearch": "Suchen"
 }
