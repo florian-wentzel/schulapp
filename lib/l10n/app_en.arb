@@ -476,8 +476,6 @@
   "@strDoYouWantToUpdateAllLessons": {},
   "strRoomsWontChange": "(rooms wont change)",
   "@strRoomsWontChange": {},
-  "strCreateSchoolLesson": "Create School Lesson",
-  "@strCreateSchoolLesson": {},
   "strTeacher": "Teacher",
   "@strTeacher": {},
   "strRoom": "Room",
@@ -1127,5 +1125,11 @@
   "strSemester": "Semester",
   "@strSemester": {},
   "strSearch": "Search",
-  "@strSearch": {}
+  "@strSearch": {},
+  "strYouHavntSetTheRoom": "You haven't set the room!\nDo you want to set it?",
+  "@strYouHavntSetTheRoom": {},
+  "strSetRoom": "Set room",
+  "@strSetRoom": {},
+  "strToSetTheRoomDrag": "To set the room, drag it onto the lesson again.",
+  "@strToSetTheRoomDrag": {}
 }

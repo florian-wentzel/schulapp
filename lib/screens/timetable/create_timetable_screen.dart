@@ -569,6 +569,40 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
             return InkWell(
               onTap: () => _editPrefab(index),
               child: Draggable(
+                onDragEnd: (DraggableDetails details) {
+                  if (prefab.room.isEmpty) {
+                    Utils.showInfo(
+                      context,
+                      msg: AppLocalizationsManager
+                          .localizations.strYouHavntSetTheRoom,
+                      actionWidget: SnackBarAction(
+                        label: AppLocalizationsManager.localizations.strSetRoom,
+                        onPressed: () async {
+                          Utils.hideCurrInfo(context);
+
+                          await _editPrefab(index);
+
+                          if (!mounted) return;
+
+                          Utils.showInfo(
+                            context,
+                            msg: AppLocalizationsManager
+                                .localizations.strToSetTheRoomDrag,
+                            type: InfoType.info,
+                            actionWidget: SnackBarAction(
+                              label:
+                                  AppLocalizationsManager.localizations.strOK,
+                              onPressed: () {
+                                Utils.hideCurrInfo(context);
+                              },
+                            ),
+                          );
+                        },
+                      ),
+                      type: InfoType.info,
+                    );
+                  }
+                },
                 affinity: Axis.vertical, // damit man nicht ausversehen scrollt
                 data: prefab,
                 feedback: Container(
@@ -661,7 +695,7 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
     String title;
 
     if (prefab == null) {
-      title = AppLocalizationsManager.localizations.strCreateSchoolLesson;
+      title = AppLocalizationsManager.localizations.strCreateNewSubject;
     } else {
       title = AppLocalizationsManager.localizations.strChangeSchoolLesson;
     }
@@ -762,7 +796,7 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
                   child: Text(
                     prefab == null
                         ? AppLocalizationsManager.localizations.strCreate
-                        : AppLocalizationsManager.localizations.strEdit,
+                        : AppLocalizationsManager.localizations.strSave,
                   ),
                 ),
                 const SizedBox(
@@ -835,16 +869,16 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
     _sortLessonPrefabs();
     setState(() {});
 
-    //prefab, delete
-    (SchoolLessonPrefab, bool)? prefab =
-        await _showCreateNewPrefabBottomSheet();
+    // //prefab, delete
+    // (SchoolLessonPrefab, bool)? prefab =
+    //     await _showCreateNewPrefabBottomSheet();
 
-    if (prefab == null) return;
+    // if (prefab == null) return;
 
-    _lessonPrefabs.add(prefab.$1);
+    // _lessonPrefabs.add(prefab.$1);
 
-    _sortLessonPrefabs();
-    setState(() {});
+    // _sortLessonPrefabs();
+    // setState(() {});
   }
 
   Future<void> _editPrefab(int index) async {

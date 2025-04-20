@@ -1374,6 +1374,7 @@ class _SelectLessonPrefabsSheetState extends State<SelectLessonPrefabsSheet> {
 
   void _onSearch(String searchQuery) {
     if (searchQuery.isEmpty) {
+      _searchController.text = "";
       allDefaultLessonSelections.clear();
       allDefaultLessonSelections.addAll(allDefaultLessons);
     } else {

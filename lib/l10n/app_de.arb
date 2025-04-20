@@ -163,7 +163,6 @@
   "strChangeSchoolLesson": "Fach bearbeiten",
   "strDoYouWantToUpdateAllLessons": "Möchtest Du alle Fächer überschreiben?",
   "strRoomsWontChange": "(Räume werden nicht geändert)",
-  "strCreateSchoolLesson": "Neues Fach erstellen",
   "strTeacher": "Lehrer",
   "strRoom": "Raum",
   "strSelectTimetableToExport": "Stundenplan zum Exportieren auswählen: ",
@@ -384,5 +383,8 @@
   "strConnectTimetable": "Strundenplan verbinden",
   "strYearGrade": "Klasse",
   "strSemester": "Semester",
-  "strSearch": "Suchen"
+  "strSearch": "Suchen",
+  "strYouHavntSetTheRoom": "Du hast den Raum nicht gesetzt!\nMöchtest du ihn setzten?",
+  "strSetRoom": "Raum setzen",
+  "strToSetTheRoomDrag": "Um den Raum zu setzen ziehe ihn nochmal auf die Stunde."
 }
