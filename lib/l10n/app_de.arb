@@ -386,5 +386,7 @@
   "strSearch": "Suchen",
   "strYouHavntSetTheRoom": "Du hast den Raum nicht gesetzt!\nMöchtest du ihn setzten?",
   "strSetRoom": "Raum setzen",
-  "strToSetTheRoomDrag": "Um den Raum zu setzen ziehe ihn nochmal auf die Stunde."
+  "strToSetTheRoomDrag": "Um den Raum zu setzen ziehe ihn nochmal auf die Stunde.",
+  "strSetEndTime": "Endzeit setzen",
+  "strSetStartTime": "Startzeit setzen"
 }

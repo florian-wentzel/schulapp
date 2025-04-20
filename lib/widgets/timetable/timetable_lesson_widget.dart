@@ -108,6 +108,7 @@ class _TimetableLessonWidgetState extends State<TimetableLessonWidget> {
           schoolDayIndex: widget.dayIndex,
           schoolTimeIndex: widget.lessonIndex,
         );
+
         Utils.showStringAcionListBottomSheet(
           context,
           runActionAfterPop: true,
@@ -159,21 +160,47 @@ class _TimetableLessonWidgetState extends State<TimetableLessonWidget> {
                 () async {
                   final prefabs = widget.tt.lessonPrefabs;
 
-                  prefabs.remove(
-                    prefabs.cast<SchoolLessonPrefab?>().firstWhere(
-                          (element) => element?.name == widget.lesson.name,
-                          orElse: () => null,
-                        ),
+                  // prefabs.remove(
+                  //   prefabs.cast<SchoolLessonPrefab?>().firstWhere(
+                  //         (element) => element?.name == widget.lesson.name,
+                  //         orElse: () => null,
+                  //       ),
+                  // );
+
+                  //can not be shown to users and not inputted
+                  final nullchar = String.fromCharCode(0);
+
+                  prefabs.add(
+                    SchoolLessonPrefab(
+                      name: AppLocalizationsManager
+                              .localizations.strCustomSubject +
+                          nullchar,
+                      color: Colors.transparent,
+                    ),
                   );
 
                   if (!context.mounted) return;
 
-                  final prefab = await Utils.showSelectLessonPrefabList(
+                  SchoolLessonPrefab? prefab =
+                      await Utils.showSelectLessonPrefabList(
                     context,
                     prefabs: prefabs,
                   );
 
                   if (prefab == null) return;
+
+                  if (prefab.name.contains(nullchar)) {
+                    if (!context.mounted) {
+                      return;
+                    }
+
+                    final lessonTuple =
+                        await showCreateNewPrefabBottomSheet(context);
+
+                    if (lessonTuple == null) return;
+
+                    prefab = lessonTuple.$1;
+                  }
 
                   widget.tt.setSpecialLesson(
                     weekIndex: widget.currWeekIndex,

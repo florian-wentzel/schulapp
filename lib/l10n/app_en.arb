@@ -1131,5 +1131,9 @@
   "strSetRoom": "Set room",
   "@strSetRoom": {},
   "strToSetTheRoomDrag": "To set the room, drag it onto the lesson again.",
-  "@strToSetTheRoomDrag": {}
+  "@strToSetTheRoomDrag": {},
+  "strSetEndTime": "Set end time",
+  "@strSetEndTime": {},
+  "strSetStartTime": "Set start time",
+  "@strSetStartTime": {}  
 }

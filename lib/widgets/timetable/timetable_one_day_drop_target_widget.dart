@@ -1,9 +1,12 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/school_lesson.dart';
 import 'package:schulapp/code_behind/school_lesson_prefab.dart';
 import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/timetable.dart';
 import 'package:schulapp/code_behind/timetable_manager.dart';
+import 'package:schulapp/code_behind/timetable_util_functions.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/screens/timetable/timetable_droptarget_helper.dart';
@@ -216,13 +219,30 @@ class _TimetableOneDayDropTargetWidgetState
     List<Widget> timeWidgets = [];
 
     timeWidgets.add(
-      SizedBox(
-        width: lessonWidth,
-        height: lessonHeight,
-        child: Center(
-          child: Text(
-            AppLocalizationsManager.localizations.strTimes,
-            textAlign: TextAlign.center,
+      InkWell(
+        onTap: () async {
+          final times = (await showCreateTimetableSheet(
+            context,
+            onlySchoolTimes: true,
+          ))
+              ?.schoolTimes;
+
+          if (times == null) return;
+
+          int length = min(tt.schoolTimes.length, times.length);
+
+          for (int i = 0; i < length; i++) {
+            tt.schoolTimes[i] = times[i];
+          }
+        },
+        child: SizedBox(
+          width: lessonWidth,
+          height: lessonHeight,
+          child: Center(
+            child: Text(
+              AppLocalizationsManager.localizations.strTimes,
+              textAlign: TextAlign.center,
+            ),
           ),
         ),
       ),
@@ -234,32 +254,100 @@ class _TimetableOneDayDropTargetWidgetState
       final schoolTime = tt.schoolTimes[lessonIndex];
       String startString = schoolTime.getStartString();
       String endString = schoolTime.getEndString();
+      final prevSchoolTime =
+          lessonIndex > 0 ? tt.schoolTimes[lessonIndex - 1] : null;
+      final nextSchoolTime = lessonIndex < tt.schoolTimes.length - 1
+          ? tt.schoolTimes[lessonIndex + 1]
+          : null;
 
       Widget timeWidget = Hero(
         tag: schoolTime,
         child: InkWell(
           onTap: () async {
-            await Utils.showCustomPopUp(
-              context: context,
-              heroObject: schoolTime,
-              flightShuttleBuilder: (p0, animation, p2, p3, p4) {
-                return AnimatedBuilder(
-                  animation: animation,
-                  builder: (context, child) {
-                    return Container(
-                      color: ColorTween(
-                        begin: Colors.transparent,
-                        end: Theme.of(context).cardColor.withAlpha(220),
-                      ).lerp(animation.value),
-                    );
-                  },
-                );
-              },
-              body: CustomPopUpChangeSubjectTime(
-                schoolTime: schoolTime,
+            List<(String, Future<void> Function()?)> items = [
+              (
+                AppLocalizationsManager.localizations.strSetStartTime,
+                () async {
+                  await Future.delayed(
+                    const Duration(milliseconds: 300),
+                  );
+
+                  if (!mounted) return;
+
+                  final newStartTime = await showTimePicker(
+                    context: context,
+                    initialTime: schoolTime.start,
+                  );
+
+                  if (newStartTime == null) {
+                    return;
+                  }
+
+                  if (newStartTime.isAfter(schoolTime.end) ||
+                      newStartTime.isBefore(
+                        prevSchoolTime?.end ?? newStartTime,
+                      )) {
+                    if (mounted) {
+                      Utils.showInfo(
+                        context,
+                        msg: AppLocalizationsManager
+                            .localizations.strTimeNotValid,
+                        type: InfoType.error,
+                      );
+                    }
+                    return;
+                  }
+
+                  schoolTime.start = newStartTime;
+
+                  setState(() {});
+                },
               ),
+              (
+                AppLocalizationsManager.localizations.strSetEndTime,
+                () async {
+                  await Future.delayed(
+                    const Duration(milliseconds: 300),
+                  );
+
+                  if (!mounted) return;
+
+                  final newEndTime = await showTimePicker(
+                    context: context,
+                    initialTime: schoolTime.end,
+                  );
+
+                  if (newEndTime == null) {
+                    return;
+                  }
+
+                  if (newEndTime.isBefore(schoolTime.start) ||
+                      newEndTime.isAfter(
+                        nextSchoolTime?.start ?? newEndTime,
+                      )) {
+                    if (mounted) {
+                      Utils.showInfo(
+                        context,
+                        msg: AppLocalizationsManager
+                            .localizations.strTimeNotValid,
+                        type: InfoType.error,
+                      );
+                    }
+                    return;
+                  }
+
+                  schoolTime.end = newEndTime;
+
+                  setState(() {});
+                },
+              )
+            ];
+
+            await Utils.showStringAcionListBottomSheet(
+              context,
+              items: items,
+              runActionAfterPop: true,
             );
-            setState(() {});
           },
           child: SizedBox(
             width: lessonWidth,

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:schulapp/app.dart';
 import 'package:schulapp/code_behind/school_lesson_prefab.dart';
 import 'package:schulapp/code_behind/settings.dart';
@@ -687,178 +686,6 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
     );
   }
 
-  Future<(SchoolLessonPrefab schoolLessonPrefab, bool delete)?>
-      _showCreateNewPrefabBottomSheet({
-    SchoolLessonPrefab? prefab,
-  }) async {
-    const maxNameLength = 20;
-    String title;
-
-    if (prefab == null) {
-      title = AppLocalizationsManager.localizations.strCreateNewSubject;
-    } else {
-      title = AppLocalizationsManager.localizations.strChangeSchoolLesson;
-    }
-
-    TextEditingController nameController = TextEditingController();
-    TextEditingController teacherController = TextEditingController();
-    TextEditingController roomController = TextEditingController();
-
-    Color color = prefab?.color ?? Colors.white;
-    String name = prefab?.name ?? "";
-    String teacher = prefab?.teacher ?? "";
-    String room = prefab?.room ?? "";
-
-    nameController.text = name;
-    teacherController.text = teacher;
-    roomController.text = room;
-
-    bool createPressed = false;
-
-    bool? delete = await showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) {
-        return Container(
-          margin: const EdgeInsets.all(16),
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 24.0,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(
-                  height: 12,
-                ),
-                TextField(
-                  decoration: InputDecoration(
-                    hintText: AppLocalizationsManager.localizations.strName,
-                  ),
-                  autofocus: true,
-                  maxLines: 1,
-                  maxLength: maxNameLength,
-                  textAlign: TextAlign.center,
-                  controller: nameController,
-                ),
-                const SizedBox(
-                  height: 12,
-                ),
-                TextField(
-                  decoration: InputDecoration(
-                    hintText: AppLocalizationsManager.localizations.strTeacher,
-                  ),
-                  autofocus: false,
-                  maxLines: 1,
-                  textAlign: TextAlign.center,
-                  controller: teacherController,
-                ),
-                const SizedBox(
-                  height: 12,
-                ),
-                TextField(
-                  decoration: InputDecoration(
-                    hintText: AppLocalizationsManager.localizations.strRoom,
-                  ),
-                  autofocus: false,
-                  maxLines: 1,
-                  textAlign: TextAlign.center,
-                  controller: roomController,
-                ),
-                const SizedBox(
-                  height: 12,
-                ),
-                SizedBox(
-                  height: 200,
-                  child: MaterialPicker(
-                    pickerColor: color,
-                    onColorChanged: (value) {
-                      color = value;
-                    },
-                  ),
-                ),
-                const SizedBox(
-                  height: 16,
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    name = nameController.text.trim();
-                    teacher = teacherController.text.trim();
-                    room = roomController.text.trim();
-                    createPressed = true;
-                    Navigator.of(context).pop(false);
-                  },
-                  child: Text(
-                    prefab == null
-                        ? AppLocalizationsManager.localizations.strCreate
-                        : AppLocalizationsManager.localizations.strSave,
-                  ),
-                ),
-                const SizedBox(
-                  height: 16,
-                ),
-                Visibility(
-                  visible: prefab != null,
-                  replacement: ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: Text(
-                      AppLocalizationsManager.localizations.strCancel,
-                    ),
-                  ),
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(context).pop(true);
-                    },
-                    child: const Icon(
-                      Icons.delete,
-                      color: Colors.red,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-
-    if (!createPressed && delete == null) {
-      return null;
-    }
-
-    if (delete == null) {
-      return null;
-    }
-
-    if (name.isEmpty && !delete) {
-      if (mounted) {
-        Utils.showInfo(
-          context,
-          msg: AppLocalizationsManager.localizations.strNameCanNotBeEmpty,
-          type: InfoType.error,
-        );
-      }
-      return null;
-    }
-
-    return (
-      SchoolLessonPrefab(
-        name: name,
-        room: room,
-        teacher: teacher,
-        color: color,
-      ),
-      delete,
-    );
-  }
-
   Future<void> _createNewPrefab() async {
     List<SchoolLessonPrefab>? selectedPrefabs =
         await SelectLessonPrefabsSheet.show(context);
@@ -885,7 +712,8 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
     SchoolLessonPrefab prefab = _lessonPrefabs[index];
 
     (SchoolLessonPrefab, bool)? newPrefab =
-        await _showCreateNewPrefabBottomSheet(
+        await showCreateNewPrefabBottomSheet(
+      context,
       prefab: prefab,
     );
 
