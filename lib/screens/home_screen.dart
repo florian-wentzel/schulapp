@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:go_router/go_router.dart';
+import 'package:in_app_review/in_app_review.dart';
 import 'package:schulapp/app.dart';
 import 'package:schulapp/code_behind/grading_system_manager.dart';
 import 'package:schulapp/code_behind/holidays.dart';
@@ -84,6 +85,7 @@ class _HomeScreenState extends State<HomeScreen> {
     WidgetsBinding.instance.addPostFrameCallback(
       _postFrameCallback,
     );
+
     _fetchHolidays();
 
     // _initReceiveSharingIntent();
@@ -898,8 +900,41 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  void _askForFeedBack() {
+    DateTime creationTime = TimetableManager().settings.getVar<DateTime>(
+          Settings.creationTimeKey,
+        );
+
+    // if (askForFeedback.is) return;
+
+    TimetableManager().settings.setVar<DateTime>(
+          Settings.creationTimeKey,
+          DateTime.now(),
+        );
+
+    Utils.showInfo(
+      context,
+      msg: "AppLocalizationsManager.localizations.strAskForFeedback",
+      type: InfoType.info,
+      duration: const Duration(seconds: 8),
+      actionWidget: SnackBarAction(
+        label: AppLocalizationsManager.localizations.strYes,
+        onPressed: () async {
+          Utils.hideCurrInfo(context);
+          final InAppReview inAppReview = InAppReview.instance;
+
+          if (await inAppReview.isAvailable()) {
+            inAppReview.requestReview();
+          }
+        },
+      ),
+    );
+  }
+
   void _postFrameCallback(Duration _) async {
     _showTutorial();
+
+    _askForFeedBack();
 
     final currVersion = await VersionManager().getVersionString();
 
@@ -917,8 +952,6 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     final fistTimeOpening = VersionManager().isFirstTimeOpening();
-
-    if (!mounted) return;
 
     if (fistTimeOpening) {
       context.go(HelloScreen.route);

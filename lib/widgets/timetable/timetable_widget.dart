@@ -640,6 +640,8 @@ class CustomPopUpShowLesson extends StatefulWidget {
   final SchoolTime schoolTime;
   final String heroString;
   final TodoEvent? event;
+  final bool showDeleteButton;
+  final VoidCallback? onDeleteButtonPressed;
 
   const CustomPopUpShowLesson({
     super.key,
@@ -647,6 +649,8 @@ class CustomPopUpShowLesson extends StatefulWidget {
     required this.day,
     required this.lesson,
     required this.schoolTime,
+    required this.showDeleteButton,
+    this.onDeleteButtonPressed,
     this.event,
   });
 
@@ -685,16 +689,35 @@ class _CustomPopUpShowLessonState extends State<CustomPopUpShowLesson> {
                 color: widget.lesson.color,
               ),
             ),
-            Text(
-              widget.lesson.name,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Theme.of(context).textTheme.titleLarge?.color ??
-                    Colors.white,
-                // decoration: TextDecoration.underline,
-                fontSize: 42.0,
-                fontWeight: FontWeight.bold,
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const SizedBox.shrink(),
+                Text(
+                  widget.lesson.name,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Theme.of(context).textTheme.titleLarge?.color ??
+                        Colors.white,
+                    // decoration: TextDecoration.underline,
+                    fontSize: 42.0,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                widget.showDeleteButton
+                    ? IconButton(
+                        padding: const EdgeInsets.all(18),
+                        onPressed: () {
+                          widget.onDeleteButtonPressed?.call();
+                          Navigator.of(context).pop();
+                        },
+                        icon: const Icon(
+                          Icons.delete,
+                          color: Colors.red,
+                        ),
+                      )
+                    : const SizedBox.shrink(),
+              ],
             ),
           ],
         ),

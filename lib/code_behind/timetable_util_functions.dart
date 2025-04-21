@@ -323,6 +323,8 @@ Future<bool?> showSchoolLessonHomePopUp(
   SchoolTime schoolTime,
   TodoEvent? event,
   String heroString,
+  bool showDeleteButton,
+  VoidCallback? onDeleteButtonPressed,
 ) async {
   return Navigator.push<bool>(
     context,
@@ -334,6 +336,8 @@ Future<bool?> showSchoolLessonHomePopUp(
         day: day,
         schoolTime: schoolTime,
         event: event,
+        showDeleteButton: showDeleteButton,
+        onDeleteButtonPressed: onDeleteButtonPressed,
       ),
       barrierDismissible: true,
       fullscreenDialog: true,
@@ -464,110 +468,112 @@ Future<(SchoolLessonPrefab schoolLessonPrefab, bool delete)?>
     context: context,
     isScrollControlled: true,
     builder: (context) {
-      return Container(
-        margin: const EdgeInsets.all(16),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 24.0,
-                  fontWeight: FontWeight.bold,
+      return SafeArea(
+        child: Container(
+          margin: const EdgeInsets.all(16),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 24.0,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(
-                height: 12,
-              ),
-              TextField(
-                decoration: InputDecoration(
-                  hintText: AppLocalizationsManager.localizations.strName,
+                const SizedBox(
+                  height: 12,
                 ),
-                autofocus: true,
-                maxLines: 1,
-                maxLength: maxNameLength,
-                textAlign: TextAlign.center,
-                controller: nameController,
-              ),
-              const SizedBox(
-                height: 12,
-              ),
-              TextField(
-                decoration: InputDecoration(
-                  hintText: AppLocalizationsManager.localizations.strTeacher,
+                TextField(
+                  decoration: InputDecoration(
+                    hintText: AppLocalizationsManager.localizations.strName,
+                  ),
+                  // autofocus: true,
+                  maxLines: 1,
+                  maxLength: maxNameLength,
+                  textAlign: TextAlign.center,
+                  controller: nameController,
                 ),
-                autofocus: false,
-                maxLines: 1,
-                textAlign: TextAlign.center,
-                controller: teacherController,
-              ),
-              const SizedBox(
-                height: 12,
-              ),
-              TextField(
-                decoration: InputDecoration(
-                  hintText: AppLocalizationsManager.localizations.strRoom,
+                const SizedBox(
+                  height: 12,
                 ),
-                autofocus: false,
-                maxLines: 1,
-                textAlign: TextAlign.center,
-                controller: roomController,
-              ),
-              const SizedBox(
-                height: 12,
-              ),
-              SizedBox(
-                height: 200,
-                child: MaterialPicker(
-                  pickerColor: color,
-                  onColorChanged: (value) {
-                    color = value;
-                  },
+                TextField(
+                  decoration: InputDecoration(
+                    hintText: AppLocalizationsManager.localizations.strTeacher,
+                  ),
+                  autofocus: false,
+                  maxLines: 1,
+                  textAlign: TextAlign.center,
+                  controller: teacherController,
                 ),
-              ),
-              const SizedBox(
-                height: 16,
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  name = nameController.text.trim();
-                  teacher = teacherController.text.trim();
-                  room = roomController.text.trim();
-                  createPressed = true;
-                  Navigator.of(context).pop(false);
-                },
-                child: Text(
-                  prefab == null
-                      ? AppLocalizationsManager.localizations.strCreate
-                      : AppLocalizationsManager.localizations.strSave,
+                const SizedBox(
+                  height: 12,
                 ),
-              ),
-              const SizedBox(
-                height: 16,
-              ),
-              Visibility(
-                visible: prefab != null,
-                replacement: ElevatedButton(
+                TextField(
+                  decoration: InputDecoration(
+                    hintText: AppLocalizationsManager.localizations.strRoom,
+                  ),
+                  autofocus: false,
+                  maxLines: 1,
+                  textAlign: TextAlign.center,
+                  controller: roomController,
+                ),
+                const SizedBox(
+                  height: 12,
+                ),
+                SizedBox(
+                  height: 200,
+                  child: MaterialPicker(
+                    pickerColor: color,
+                    onColorChanged: (value) {
+                      color = value;
+                    },
+                  ),
+                ),
+                const SizedBox(
+                  height: 16,
+                ),
+                ElevatedButton(
                   onPressed: () {
-                    Navigator.of(context).pop();
+                    name = nameController.text.trim();
+                    teacher = teacherController.text.trim();
+                    room = roomController.text.trim();
+                    createPressed = true;
+                    Navigator.of(context).pop(false);
                   },
                   child: Text(
-                    AppLocalizationsManager.localizations.strCancel,
+                    prefab == null
+                        ? AppLocalizationsManager.localizations.strCreate
+                        : AppLocalizationsManager.localizations.strSave,
                   ),
                 ),
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).pop(true);
-                  },
-                  child: const Icon(
-                    Icons.delete,
-                    color: Colors.red,
+                const SizedBox(
+                  height: 16,
+                ),
+                Visibility(
+                  visible: prefab != null,
+                  replacement: ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: Text(
+                      AppLocalizationsManager.localizations.strCancel,
+                    ),
+                  ),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(true);
+                    },
+                    child: const Icon(
+                      Icons.delete,
+                      color: Colors.red,
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       );

@@ -109,6 +109,7 @@ class Settings {
   static const showTutorialOnHomeScreenKey = "showTutorialInHomeScreen";
   static const termsOfServiceGoFileIoAllowed =
       "termsOfServiceGoFileIoAllowedKey";
+  static const creationTimeKey = "creationTime";
 
   static final key = encrypt.Key.fromUtf8("a/wdkaw1ln=921jt48wadan249Bamd=#");
   static final _iv = encrypt.IV.fromUtf8("a2lA.8_n&dXa0?.e");
@@ -377,6 +378,21 @@ class Settings {
     SettingsVar<bool>(
       key: termsOfServiceGoFileIoAllowed,
       defaultValue: () => false,
+    ),
+    SettingsVar<DateTime>(
+      key: creationTimeKey,
+      defaultValue: () => DateTime.now(),
+      loadCustomType: (value) {
+        if (value == null) return null;
+
+        int? millieseconds = int.tryParse(value);
+        if (millieseconds == null) return null;
+
+        return DateTime.fromMillisecondsSinceEpoch(millieseconds);
+      },
+      saveCustomType: (type) {
+        return type.millisecondsSinceEpoch.toString();
+      },
     ),
   ];
 

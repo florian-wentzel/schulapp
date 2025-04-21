@@ -100,6 +100,7 @@ class _TimetableLessonWidgetState extends State<TimetableLessonWidget> {
                 currEvent: widget.currEvent,
                 eventEndTime: widget.currLessonDateTime,
                 lesson: lessonPrefab,
+                showDeleteButton: specialLesson is SubstituteSpecialLesson,
               ),
       onLongPress: () {
         final specialLesson = widget.tt.getSpecialLesson(
@@ -373,6 +374,7 @@ class _TimetableLessonWidgetState extends State<TimetableLessonWidget> {
     required String heroString,
     required DateTime eventEndTime,
     required SchoolLessonPrefab lesson,
+    required bool showDeleteButton,
     TodoEvent? currEvent,
   }) async {
     final day = widget.tt.schoolDays[dayIndex];
@@ -385,6 +387,15 @@ class _TimetableLessonWidgetState extends State<TimetableLessonWidget> {
       schoolTime,
       currEvent,
       heroString,
+      showDeleteButton,
+      () {
+        widget.tt.removeSpecialLesson(
+          weekIndex: widget.currWeekIndex,
+          year: widget.currYear,
+          dayIndex: widget.dayIndex,
+          timeIndex: widget.lessonIndex,
+        );
+      },
     );
 
     if (!mounted) return;

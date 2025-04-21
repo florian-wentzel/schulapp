@@ -9,7 +9,6 @@ import 'package:schulapp/code_behind/timetable_manager.dart';
 import 'package:schulapp/code_behind/timetable_util_functions.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
-import 'package:schulapp/screens/timetable/timetable_droptarget_helper.dart';
 import 'package:schulapp/widgets/high_contrast_text.dart';
 
 class TimetableOneDayDropTargetWidget extends StatefulWidget {
@@ -93,7 +92,6 @@ class _TimetableOneDayDropTargetWidgetState
         );
 
     for (int lessonIndex = 0; lessonIndex < day.lessons.length; lessonIndex++) {
-      final currSchoolTime = tt.schoolTimes[lessonIndex];
       final lesson = day.lessons[lessonIndex];
       final heroString = "$lessonIndex:$dayIndex";
 
@@ -111,17 +109,26 @@ class _TimetableOneDayDropTargetWidgetState
           return InkWell(
             onTap: SchoolLesson.isEmptyLesson(lesson)
                 ? null
-                : () => onLessonWidgetTap(
+                : () async {
+                    final prefabTuble = await showCreateNewPrefabBottomSheet(
                       context,
-                      timetable: tt,
-                      day: day,
-                      heroString: heroString,
-                      lesson: lesson,
-                      schoolTime: currSchoolTime,
-                      setState: () {
-                        setState(() {});
-                      },
-                    ),
+                      prefab:
+                          SchoolLessonPrefab.fromSchoolLesson(lesson: lesson),
+                    );
+
+                    if (prefabTuble == null) return;
+
+                    final prefab = prefabTuble.$1;
+                    final delete = prefabTuble.$2;
+
+                    if (delete) {
+                      day.setLessonFromPrefab(lessonIndex, null);
+                    } else {
+                      day.setLessonFromPrefab(lessonIndex, prefab);
+                    }
+
+                    setState(() {});
+                  },
             child: SizedBox(
               width: lessonWidth,
               height: lessonHeight,
