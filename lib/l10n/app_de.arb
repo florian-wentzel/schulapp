@@ -1,7 +1,8 @@
 {
   "@@locale": "de",
   "language_name": "Deutsch",
-  "version_0_9_1": "Noten- und Aufgaben-UI überarbeitet, sowie Stundenplan- und Semestererstellung verbessert.",
+  "version_0_9_2": "Weitere UI-Verbesserungen und kleinere Erweiterungen, z. B. für Vertretungsstunden oder bei der Erstellung des Stundenplans",
+  "version_0_9_1": "Noten- und Aufgaben-UI überarbeitet, sowie Stundenplan- und Semestererstellung verbessert",
   "version_0_9_0": "Abitur-Rechner hinzugefügt",
   "version_0_8_7": "Vertretungsstunden können jetzt markiert werden",
   "version_0_8_6": "Feedback-Funktion in den Einstellungen hinzugefügt",
@@ -272,7 +273,7 @@
   "strNotLoggedIn": "nicht angemeldet",
   "strLogindataSuccessfullySaved": "Anmeldedaten erfolgreich gespeichert",
   "strSuccessfullySaved": "Erfolgreich gespeichert",
-  "strSubstitutionPlan": "Vertretungsplan Öffnen",
+  "strSubstitutionPlan": "Vertretungsplan öffnen",
   "strHighContrastOnHomeScreen": "Textkontrast auf der Startseite erhöhen",
   "strReducedClassHours": "Verkürzter Unterricht",
   "strYouDontHaveAnyReducedTimesSetUpYet": "Du hast noch keine verkürzten Zeiten eingerichtet.",
@@ -388,5 +389,7 @@
   "strSetRoom": "Raum setzen",
   "strToSetTheRoomDrag": "Um den Raum zu setzen ziehe ihn nochmal auf die Stunde.",
   "strSetEndTime": "Endzeit setzen",
-  "strSetStartTime": "Startzeit setzen"
+  "strSetStartTime": "Startzeit setzen",
+  "strAskForFeedback": "Möchtest Du uns Feedback geben?\nWir würden uns sehr freuen, schließlich machen wir es kostenlos für euch :)",
+  "strOpenExtraTimetable": "zusätzlichen Stundenplan öffnen"
 }

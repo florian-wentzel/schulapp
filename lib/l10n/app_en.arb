@@ -2,6 +2,8 @@
   "@@locale": "en",
   "language_name": "Englisch",
   "@language_name": {},
+  "version_0_9_2": "Further UI improvements and minor extensions, e.g., for substitute lessons or timetable creation",
+  "@version_0_9_2": {},
   "version_0_9_1": "Improved grades and tasks UI, and enhanced timetable and semester creation",
   "@version_0_9_1": {},
   "version_0_9_0": "Added A-level calculator",
@@ -1135,5 +1137,9 @@
   "strSetEndTime": "Set end time",
   "@strSetEndTime": {},
   "strSetStartTime": "Set start time",
-  "@strSetStartTime": {}  
+  "@strSetStartTime": {},
+  "strAskForFeedback": "Would you like to give us feedback?\nWe would greatly appreciate it, after all, we are doing it for free for you :)",
+  "@strAskForFeedback": {},
+  "strOpenExtraTimetable": "open extra timetable",
+  "@strOpenExtraTimetable": {}
 }

@@ -26,6 +26,9 @@ class SettingsVar<T> {
   final bool _alwaysReturnDefaultValue;
   final T Function(T? value)? _onlyReturnCopy;
 
+  //sollte man setzen wenn der default wert nicht null zurück gibt
+  final T Function()? _canBeNull;
+
   final void Function(T value)? _onSetterCalled;
 
   SettingsVar({
@@ -37,10 +40,12 @@ class SettingsVar<T> {
     T Function(T? value)? onlyReturnCopy,
     void Function(T value)? onSetterCalled,
     bool alwaysReturnDefaultValue = false,
+    T Function()? canBeNull,
   })  : _value = value,
         _alwaysReturnDefaultValue = alwaysReturnDefaultValue,
         _onSetterCalled = onSetterCalled,
-        _onlyReturnCopy = onlyReturnCopy;
+        _onlyReturnCopy = onlyReturnCopy,
+        _canBeNull = canBeNull;
 
   T get value {
     if (_alwaysReturnDefaultValue) {
@@ -49,6 +54,9 @@ class SettingsVar<T> {
     if (_onlyReturnCopy != null) {
       return _onlyReturnCopy.call(_value);
     }
+    if (_canBeNull != null && _value == null) {
+      return _canBeNull.call();
+    }
 
     return _value ?? defaultValue.call();
   }
@@ -56,12 +64,18 @@ class SettingsVar<T> {
   set value(T value) {
     _onSetterCalled?.call(value);
 
-    _value = value ?? defaultValue.call();
+    _value = value; // ?? defaultValue.call();
   }
 
   dynamic toNormalType() {
     try {
-      return saveCustomType?.call(value) ?? value;
+      final sct = saveCustomType;
+
+      if (sct == null) {
+        return value;
+      }
+
+      return sct.call(value);
     } catch (e) {
       return value;
     }
@@ -69,7 +83,20 @@ class SettingsVar<T> {
 
   void fromNormalType(dynamic type) {
     try {
-      value = loadCustomType?.call(type) ?? type ?? defaultValue;
+      final lct = loadCustomType;
+
+      if (lct != null) {
+        _value = lct.call(type);
+      } else {
+        _value = type;
+      }
+
+      if (_value == null && _canBeNull != null) {
+        _value = _canBeNull.call();
+        return;
+      }
+
+      _value ??= defaultValue.call();
     } catch (e) {
       value = defaultValue.call();
     }
@@ -109,7 +136,9 @@ class Settings {
   static const showTutorialOnHomeScreenKey = "showTutorialInHomeScreen";
   static const termsOfServiceGoFileIoAllowed =
       "termsOfServiceGoFileIoAllowedKey";
-  static const creationTimeKey = "creationTime";
+  static const lastAskForReviewDateKey = "lastAskForReviewDate";
+
+  static const waitBetweenAskForReviewDuration = Duration(days: 3);
 
   static final key = encrypt.Key.fromUtf8("a/wdkaw1ln=921jt48wadan249Bamd=#");
   static final _iv = encrypt.IV.fromUtf8("a2lA.8_n&dXa0?.e");
@@ -123,15 +152,18 @@ class Settings {
     ///if [null] firstTimetable shown
     SettingsVar<String?>(
       key: mainTimetableNameKey,
+      canBeNull: () => null,
       defaultValue: () => null,
     ),
     SettingsVar<String?>(
       key: selectedFederalStateCodeKey,
+      canBeNull: () => null,
       defaultValue: () => null,
     ),
     SettingsVar<String?>(
       key: mainSemesterNameKey,
       defaultValue: () => null,
+      canBeNull: () => null,
     ),
     SettingsVar<String>(
       key: customHolidaysKey,
@@ -183,6 +215,7 @@ class Settings {
     SettingsVar<String?>(
       key: languageCodeKey,
       defaultValue: () => null,
+      canBeNull: () => null,
     ),
     SettingsVar<String>(
       key: sortSubjectsByKey,
@@ -199,6 +232,7 @@ class Settings {
     SettingsVar<List<SchoolTime>?>(
       key: reducedClassHoursKey,
       defaultValue: () => null,
+      canBeNull: () => null,
       onlyReturnCopy: (value) {
         if (value == null) {
           return null;
@@ -237,6 +271,7 @@ class Settings {
     ),
     SettingsVar<String?>(
       key: lastUsedVersionKey,
+      canBeNull: () => null,
       defaultValue: () => null,
     ),
     SettingsVar<bool>(
@@ -266,11 +301,13 @@ class Settings {
     ),
     SettingsVar<String?>(
       key: usernameKey,
+      canBeNull: () => null,
       defaultValue: () => null,
     ),
     SettingsVar<String?>(
       key: securePasswordKey,
       defaultValue: () => null,
+      canBeNull: () => null,
       loadCustomType: (value) {
         if (value == null) {
           return null;
@@ -296,6 +333,7 @@ class Settings {
     SettingsVar<Uint8List?>(
       key: paulDessauPdfBytesKey,
       defaultValue: () => null,
+      canBeNull: () => null,
       saveCustomType: (type) {
         if (type == null) return null;
 
@@ -310,6 +348,7 @@ class Settings {
     SettingsVar<DateTime?>(
       key: paulDessauPdfBytesSavedDateKey,
       defaultValue: () => null,
+      canBeNull: () => null,
       loadCustomType: (value) {
         if (value == null) return null;
         int? millieseconds = int.tryParse(value);
@@ -366,6 +405,7 @@ class Settings {
     SettingsVar<String?>(
       key: extraTimetableOnHomeScreenKey,
       defaultValue: () => null,
+      canBeNull: () => null,
     ),
     SettingsVar<bool>(
       key: showTutorialInCreateTimetableScreenKey,
@@ -379,9 +419,13 @@ class Settings {
       key: termsOfServiceGoFileIoAllowed,
       defaultValue: () => false,
     ),
-    SettingsVar<DateTime>(
-      key: creationTimeKey,
-      defaultValue: () => DateTime.now(),
+    //wenn null dann wird nicht mehr angezeigt
+    SettingsVar<DateTime?>(
+      key: lastAskForReviewDateKey,
+      canBeNull: () => null,
+      defaultValue: () => DateTime.now().add(
+        const Duration(days: 7) - waitBetweenAskForReviewDuration,
+      ),
       loadCustomType: (value) {
         if (value == null) return null;
 
@@ -391,7 +435,7 @@ class Settings {
         return DateTime.fromMillisecondsSinceEpoch(millieseconds);
       },
       saveCustomType: (type) {
-        return type.millisecondsSinceEpoch.toString();
+        return type?.millisecondsSinceEpoch.toString();
       },
     ),
   ];
@@ -415,6 +459,14 @@ class Settings {
 
   Settings() {
     _initVariables();
+
+    for (String key in _variables.keys) {
+      final settingsVar = _variables[key];
+
+      if (settingsVar == null) continue;
+
+      settingsVar.value = settingsVar.defaultValue.call();
+    }
   }
 
   Settings.fromJson(Map<String, dynamic> json) {
@@ -425,7 +477,11 @@ class Settings {
 
       if (settingsVar == null) continue;
 
-      if (!json.containsKey(key)) continue;
+      if (!json.containsKey(key)) {
+        //if the key is not in the json, we set it to the default value
+        settingsVar.value = settingsVar.defaultValue.call();
+        continue;
+      }
 
       settingsVar.fromNormalType(json[key]);
     }

@@ -130,6 +130,8 @@ class _HomeScreenState extends State<HomeScreen> {
           Visibility(
             visible: extraTimetable != null && widget.isHomeScreen,
             child: IconButton(
+              tooltip:
+                  AppLocalizationsManager.localizations.strOpenExtraTimetable,
               onPressed: () async {
                 final ett = extraTimetable;
 
@@ -149,7 +151,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 setState(() {});
               },
-              icon: const Icon(Icons.event),
+              // icon: const Icon(Icons.event),
+              icon: const Icon(Icons.dataset_linked_outlined),
             ),
           ),
           Visibility(
@@ -901,20 +904,27 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _askForFeedBack() {
-    DateTime creationTime = TimetableManager().settings.getVar<DateTime>(
-          Settings.creationTimeKey,
-        );
+    DateTime? lastAskForReviewDate =
+        TimetableManager().settings.getVar<DateTime?>(
+              Settings.lastAskForReviewDateKey,
+            );
 
-    // if (askForFeedback.is) return;
+    if (lastAskForReviewDate == null) return;
 
-    TimetableManager().settings.setVar<DateTime>(
-          Settings.creationTimeKey,
+    if (lastAskForReviewDate
+        .add(Settings.waitBetweenAskForReviewDuration)
+        .isAfter(DateTime.now())) {
+      return;
+    }
+
+    TimetableManager().settings.setVar<DateTime?>(
+          Settings.lastAskForReviewDateKey,
           DateTime.now(),
         );
 
     Utils.showInfo(
       context,
-      msg: "AppLocalizationsManager.localizations.strAskForFeedback",
+      msg: AppLocalizationsManager.localizations.strAskForFeedback,
       type: InfoType.info,
       duration: const Duration(seconds: 8),
       actionWidget: SnackBarAction(
@@ -922,9 +932,23 @@ class _HomeScreenState extends State<HomeScreen> {
         onPressed: () async {
           Utils.hideCurrInfo(context);
           final InAppReview inAppReview = InAppReview.instance;
+          try {
+            if (await inAppReview.isAvailable()) {
+              await inAppReview.requestReview();
+            }
 
-          if (await inAppReview.isAvailable()) {
-            inAppReview.requestReview();
+            TimetableManager().settings.setVar<DateTime?>(
+                  Settings.lastAskForReviewDateKey,
+                  null, //never ask again
+                );
+          } catch (e) {
+            if (!mounted) return;
+
+            Utils.showInfo(
+              context,
+              msg: AppLocalizationsManager.localizations.strThereWasAnError,
+              type: InfoType.error,
+            );
           }
         },
       ),

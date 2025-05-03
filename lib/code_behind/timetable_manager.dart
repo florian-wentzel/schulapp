@@ -245,13 +245,33 @@ class TimetableManager {
             removeSemester(s);
           }
 
+          final setAsDefault = semesters.isEmpty;
+
           _semesters?.add(semester);
+
+          if (setAsDefault) {
+            TimetableManager().settings.setVar(
+                  Settings.mainSemesterNameKey,
+                  semester.name,
+                );
+          }
           SaveManager().saveSemester(semester);
 
           return true;
         }
         //muss erstellt werden
+
+        final setAsDefault = semesters.isEmpty;
+
         _semesters?.add(semester);
+
+        if (setAsDefault) {
+          TimetableManager().settings.setVar(
+                Settings.mainSemesterNameKey,
+                semester.name,
+              );
+        }
+
         SaveManager().saveSemester(semester);
         return true;
       }
