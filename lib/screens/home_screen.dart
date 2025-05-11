@@ -34,6 +34,7 @@ import 'package:schulapp/screens/todo_events_screen.dart';
 import 'package:schulapp/screens/timetable/create_timetable_screen.dart';
 import 'package:schulapp/screens/timetable/import_export_timetable_screen.dart';
 import 'package:schulapp/screens/vertretungsplan_paul_dessau_screen.dart';
+import 'package:schulapp/widgets/drag_down_container.dart';
 import 'package:schulapp/widgets/timetable/timetable_widget.dart';
 import 'package:schulapp/code_behind/timetable_util_functions.dart';
 import 'package:schulapp/widgets/navigation_bar_drawer.dart';
@@ -41,6 +42,7 @@ import 'package:schulapp/widgets/timetable/timetable_one_day_widget.dart';
 import 'package:schulapp/widgets/task/todo_event_list_item_widget.dart';
 import 'package:schulapp/code_behind/todo_event_util_functions.dart';
 import 'package:schulapp/widgets/tutorial_overlay.dart';
+import 'package:table_calendar/table_calendar.dart';
 
 class HomeScreen extends StatefulWidget {
   static const String route = "/";
@@ -61,6 +63,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final _dragCalendarDownController = DragDownContainerController();
   final _timetableController = TimetableController();
   final _timetableKey = GlobalKey();
   final _floatingActionButtonKey = GlobalKey();
@@ -127,6 +130,18 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: Text(widget.title),
         actions: [
+          IconButton(
+            // tooltip:
+            //     AppLocalizationsManager.localizations.strOpenExtraTimetable,
+            onPressed: () async {
+              if (_dragCalendarDownController.isOpen) {
+                _dragCalendarDownController.close();
+              } else {
+                _dragCalendarDownController.open();
+              }
+            },
+            icon: const Icon(Icons.event),
+          ),
           Visibility(
             visible: extraTimetable != null && widget.isHomeScreen,
             child: IconButton(
@@ -415,94 +430,132 @@ class _HomeScreenState extends State<HomeScreen> {
     required double width,
     required double height,
   }) {
-    return PageView(
-      scrollDirection: Axis.vertical,
-      controller: _verticalPageViewController,
-      onPageChanged: (value) {
-        _currPageIndex = value;
-        const statsPageIndex = 1;
-        if (value == statsPageIndex) {
-          _startDayProgressTimer();
-        } else {
-          _cancelDayProgressTimer();
-        }
-        setState(() {});
-      },
-      children: [
-        SizedBox(
-          width: width,
-          height: height,
-          child: Stack(
-            children: [
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: FractionallySizedBox(
-                  heightFactor: 0.1,
-                  widthFactor: 1.0,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        stops: const [0, 1],
-                        colors: [
-                          Theme.of(context).scaffoldBackgroundColor,
-                          Theme.of(context).cardColor,
-                        ],
+    return DragDownContainer(
+      controller: _dragCalendarDownController,
+      maxContainerHeight: height,
+      containerChild: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        child: TableCalendar(
+          locale: AppLocalizationsManager.localizations.localeName,
+          firstDay: DateTime.utc(2020, 1, 1),
+          lastDay: DateTime.utc(2030, 12, 31),
+          focusedDay: DateTime.now(),
+          calendarStyle: CalendarStyle(
+            defaultDecoration: BoxDecoration(
+              color: Theme.of(context).scaffoldBackgroundColor,
+            ),
+            rowDecoration: BoxDecoration(
+              color: Theme.of(context).scaffoldBackgroundColor,
+            ),
+            weekendDecoration: BoxDecoration(
+              color: Theme.of(context).scaffoldBackgroundColor,
+            ),
+          ),
+          headerStyle: HeaderStyle(
+            decoration: BoxDecoration(
+              color: Theme.of(context).scaffoldBackgroundColor,
+            ),
+
+            titleCentered: true,
+            // titleTextStyle: TextStyle(color: Colors.blueAccent, fontSize: 20),
+          ),
+          daysOfWeekStyle: DaysOfWeekStyle(
+            decoration: BoxDecoration(
+              color: Theme.of(context).scaffoldBackgroundColor,
+            ),
+          ),
+        ),
+      ),
+      canBeOpened: () => _currPageIndex == 0,
+      child: PageView(
+        scrollDirection: Axis.vertical,
+        controller: _verticalPageViewController,
+        onPageChanged: (value) {
+          _currPageIndex = value;
+          const statsPageIndex = 1;
+          if (value == statsPageIndex) {
+            _startDayProgressTimer();
+          } else {
+            _cancelDayProgressTimer();
+          }
+          setState(() {});
+        },
+        children: [
+          SizedBox(
+            width: width,
+            height: height,
+            child: Stack(
+              children: [
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: FractionallySizedBox(
+                    heightFactor: 0.1,
+                    widthFactor: 1.0,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          stops: const [0, 1],
+                          colors: [
+                            Theme.of(context).scaffoldBackgroundColor,
+                            Theme.of(context).cardColor,
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-              SingleChildScrollView(
-                physics: const NeverScrollableScrollPhysics(),
-                scrollDirection: Axis.vertical,
-                primary: false,
-                child: Center(
-                  child: child,
+                SingleChildScrollView(
+                  physics: const NeverScrollableScrollPhysics(),
+                  scrollDirection: Axis.vertical,
+                  primary: false,
+                  child: Center(
+                    child: child,
+                  ),
                 ),
-              ),
-              // Align(
-              //   alignment: Alignment.bottomCenter,
-              //   child: Container(
-              //     color: Colors.transparent,
-              //     width: width,
-              //     height: height / 3,
-              //   ),
-              // ),
-              // Align(
-              //   alignment: Alignment.bottomCenter,
-              //   child: InkWell(
-              //     onTap: () {
-              //       _verticalPageViewController.animateToPage(
-              //         1,
-              //         duration: const Duration(
-              //           milliseconds: 500,
-              //         ),
-              //         curve: Curves.easeInOutCirc,
-              //       );
-              //     },
-              //     child: Container(
-              //       width: width,
-              //       height: 30,
-              //       decoration: BoxDecoration(
-              //         color: Theme.of(context).cardColor,
-              //         borderRadius: const BorderRadius.only(
-              //           topLeft: Radius.circular(64),
-              //           topRight: Radius.circular(64),
-              //         ),
-              //       ),
-              //     ),
-              //   ),
-              // ),
-            ],
+                // Align(
+                //   alignment: Alignment.bottomCenter,
+                //   child: Container(
+                //     color: Colors.transparent,
+                //     width: width,
+                //     height: height / 3,
+                //   ),
+                // ),
+                // Align(
+                //   alignment: Alignment.bottomCenter,
+                //   child: InkWell(
+                //     onTap: () {
+                //       _verticalPageViewController.animateToPage(
+                //         1,
+                //         duration: const Duration(
+                //           milliseconds: 500,
+                //         ),
+                //         curve: Curves.easeInOutCirc,
+                //       );
+                //     },
+                //     child: Container(
+                //       width: width,
+                //       height: 30,
+                //       decoration: BoxDecoration(
+                //         color: Theme.of(context).cardColor,
+                //         borderRadius: const BorderRadius.only(
+                //           topLeft: Radius.circular(64),
+                //           topRight: Radius.circular(64),
+                //         ),
+                //       ),
+                //     ),
+                //   ),
+                // ),
+              ],
+            ),
           ),
-        ),
-        _statsPage(
-          width: width,
-          height: height,
-        ),
-      ],
+          _statsPage(
+            width: width,
+            height: height,
+          ),
+        ],
+      ),
     );
   }
 
