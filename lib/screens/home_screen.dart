@@ -35,10 +35,8 @@ import 'package:schulapp/screens/timetable/create_timetable_screen.dart';
 import 'package:schulapp/screens/timetable/import_export_timetable_screen.dart';
 import 'package:schulapp/screens/vertretungsplan_paul_dessau_screen.dart';
 import 'package:schulapp/widgets/drag_down_container.dart';
-import 'package:schulapp/widgets/timetable/timetable_widget.dart';
 import 'package:schulapp/code_behind/timetable_util_functions.dart';
 import 'package:schulapp/widgets/navigation_bar_drawer.dart';
-import 'package:schulapp/widgets/timetable/timetable_one_day_widget.dart';
 import 'package:schulapp/widgets/task/todo_event_list_item_widget.dart';
 import 'package:schulapp/code_behind/todo_event_util_functions.dart';
 import 'package:schulapp/widgets/tutorial_overlay.dart';
@@ -130,18 +128,47 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: Text(widget.title),
         actions: [
-          IconButton(
-            // tooltip:
-            //     AppLocalizationsManager.localizations.strOpenExtraTimetable,
-            onPressed: () async {
-              if (_dragCalendarDownController.isOpen) {
-                _dragCalendarDownController.close();
-              } else {
-                _dragCalendarDownController.open();
-              }
-            },
-            icon: const Icon(Icons.event),
-          ),
+          ListenableBuilder(
+              listenable: _dragCalendarDownController,
+              builder: (context, child) {
+                return AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 500),
+                  transitionBuilder: (child, animation) {
+                    final rotationAnimation = Tween<double>(
+                      begin: 0.2,
+                      end: _dragCalendarDownController.isOpen ? 0.1 : 0.0,
+                    ).animate(animation);
+
+                    return RotationTransition(
+                      turns: rotationAnimation,
+                      child: FadeTransition(
+                        opacity: animation,
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: IconButton(
+                    key: ValueKey(_dragCalendarDownController.isOpen),
+                    tooltip: _dragCalendarDownController.isOpen
+                        ? AppLocalizationsManager.localizations.strCloseCalendar
+                        : AppLocalizationsManager.localizations.strOpenCalendar,
+                    onPressed: () async {
+                      if (_dragCalendarDownController.isOpen) {
+                        _dragCalendarDownController.close();
+                      } else {
+                        _dragCalendarDownController.open();
+                      }
+
+                      setState(() {});
+                    },
+                    icon: Icon(
+                      _dragCalendarDownController.isOpen
+                          ? Icons.event_busy
+                          : Icons.event,
+                    ),
+                  ),
+                );
+              }),
           Visibility(
             visible: extraTimetable != null && widget.isHomeScreen,
             child: IconButton(
@@ -433,40 +460,101 @@ class _HomeScreenState extends State<HomeScreen> {
     return DragDownContainer(
       controller: _dragCalendarDownController,
       maxContainerHeight: height,
+      dragFactor: 1.5,
       containerChild: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8),
-        child: TableCalendar(
-          locale: AppLocalizationsManager.localizations.localeName,
-          firstDay: DateTime.utc(2020, 1, 1),
-          lastDay: DateTime.utc(2030, 12, 31),
-          focusedDay: DateTime.now(),
-          calendarStyle: CalendarStyle(
-            defaultDecoration: BoxDecoration(
-              color: Theme.of(context).scaffoldBackgroundColor,
-            ),
-            rowDecoration: BoxDecoration(
-              color: Theme.of(context).scaffoldBackgroundColor,
-            ),
-            weekendDecoration: BoxDecoration(
-              color: Theme.of(context).scaffoldBackgroundColor,
-            ),
-          ),
-          headerStyle: HeaderStyle(
-            decoration: BoxDecoration(
-              color: Theme.of(context).scaffoldBackgroundColor,
-            ),
+        child: ListenableBuilder(
+          listenable: _dragCalendarDownController,
+          builder: (context, child) => TableCalendar(
+            locale: AppLocalizationsManager.localizations.localeName,
+            firstDay: _timetableController.firstDay ??
+                DateTime.now().subtract(
+                  const Duration(days: 365),
+                ),
+            lastDay: _timetableController.lastDay ??
+                DateTime.now().add(
+                  const Duration(days: 365),
+                ),
+            focusedDay: _timetableController.currDay ?? DateTime.now(),
+            currentDay: _timetableController.currDay ?? DateTime.now(),
+            onDaySelected: (selectedDay, _) {
+              if (!_timetableController.goToDay(selectedDay)) {
+                Utils.showInfo(
+                  context,
+                  msg: AppLocalizationsManager.localizations.strDateXNotFound(
+                    Utils.dateToString(selectedDay),
+                  ),
+                  type: InfoType.error,
+                );
+              } else {
+                _dragCalendarDownController.close();
+              }
+            },
+            calendarBuilders: CalendarBuilders(
+              markerBuilder: (context, day, events) {
+                final todoEvents = TimetableManager().getTodoEventsForDay(
+                  day: day,
+                );
+                if (todoEvents.isEmpty) return null;
 
-            titleCentered: true,
-            // titleTextStyle: TextStyle(color: Colors.blueAccent, fontSize: 20),
-          ),
-          daysOfWeekStyle: DaysOfWeekStyle(
-            decoration: BoxDecoration(
-              color: Theme.of(context).scaffoldBackgroundColor,
+                Widget getContainerWithColor(Color color) {
+                  return Container(
+                    width: 6,
+                    height: 6,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: color,
+                    ),
+                  );
+                }
+
+                return Positioned(
+                  bottom: 1,
+                  child: Row(
+                    children: List.generate(
+                      todoEvents.length,
+                      (index) {
+                        return Container(
+                          margin: const EdgeInsets.only(left: 2),
+                          child: getContainerWithColor(
+                            todoEvents[index].getColor(),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                );
+              },
+            ),
+            calendarStyle: CalendarStyle(
+              defaultDecoration: BoxDecoration(
+                color: Theme.of(context).scaffoldBackgroundColor,
+                shape: BoxShape.circle,
+              ),
+              rowDecoration: BoxDecoration(
+                color: Theme.of(context).scaffoldBackgroundColor,
+              ),
+              weekendDecoration: BoxDecoration(
+                color: Theme.of(context).scaffoldBackgroundColor,
+                shape: BoxShape.circle,
+              ),
+            ),
+            headerStyle: HeaderStyle(
+              decoration: BoxDecoration(
+                color: Theme.of(context).scaffoldBackgroundColor,
+              ),
+              titleCentered: true,
+              formatButtonVisible: false,
+            ),
+            daysOfWeekStyle: DaysOfWeekStyle(
+              decoration: BoxDecoration(
+                color: Theme.of(context).scaffoldBackgroundColor,
+              ),
             ),
           ),
         ),
       ),
-      canBeOpened: () => _currPageIndex == 0,
+      canBeOpened: () => _verticalPageViewController.page == 0,
       child: PageView(
         scrollDirection: Axis.vertical,
         controller: _verticalPageViewController,

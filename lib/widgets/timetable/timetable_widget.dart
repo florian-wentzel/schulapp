@@ -1,33 +1,4 @@
-import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:schulapp/code_behind/holidays_manager.dart';
-import 'package:schulapp/code_behind/save_manager.dart';
-import 'package:schulapp/code_behind/school_day.dart';
-import 'package:schulapp/code_behind/school_grade_subject.dart';
-import 'package:schulapp/code_behind/school_lesson.dart';
-import 'package:schulapp/code_behind/school_lesson_prefab.dart';
-import 'package:schulapp/code_behind/school_semester.dart';
-import 'package:schulapp/code_behind/school_time.dart';
-import 'package:schulapp/code_behind/settings.dart';
-import 'package:schulapp/code_behind/special_lesson.dart';
-import 'package:schulapp/code_behind/timetable.dart';
-import 'package:schulapp/code_behind/timetable_controller.dart';
-import 'package:schulapp/code_behind/timetable_manager.dart';
-import 'package:schulapp/code_behind/todo_event.dart';
-import 'package:schulapp/code_behind/utils.dart';
-import 'package:schulapp/extensions.dart';
-import 'package:schulapp/l10n/app_localizations_manager.dart';
-import 'package:schulapp/screens/grades_screen.dart';
-import 'package:schulapp/screens/todo_events_screen.dart';
-import 'package:schulapp/screens/semester/school_grade_subject_screen.dart';
-import 'package:schulapp/widgets/high_contrast_text.dart';
-import 'package:schulapp/widgets/semester/school_grade_subject_widget.dart';
-import 'package:schulapp/widgets/strike_through_container.dart';
-import 'package:schulapp/widgets/timetable/time_to_next_lesson_widget.dart';
-import 'package:schulapp/widgets/custom_pop_up.dart';
-import 'package:schulapp/widgets/task/todo_event_list_item_widget.dart';
-import 'package:schulapp/widgets/timetable/timetable_lesson_widget.dart';
+part of '../../code_behind/timetable_controller.dart';
 
 class TimetableWidget extends StatefulWidget {
   final TimetableController controller;
@@ -92,6 +63,71 @@ class _TimetableWidgetState extends State<TimetableWidget> {
 
   @override
   void initState() {
+    DateTime getMondayForIndex(int index) {
+      int currWeekIndex = index - initialPageIndex;
+
+      DateTime currMonday = Utils.getWeekDay(
+        DateTime.now().toUtc().copyWith(
+              hour: 0,
+              minute: 0,
+              second: 0,
+              millisecond: 0,
+              microsecond: 0,
+            ),
+        DateTime.monday,
+      ).add(
+        Duration(days: 7 * currWeekIndex),
+      );
+      return currMonday;
+    }
+
+    widget.controller._firstDay = getMondayForIndex(0);
+
+    final lastMonday = getMondayForIndex(pagesCount - 1);
+    widget.controller._lastDay = lastMonday.add(
+      Duration(
+        days: widget.timetable
+                .getWeekTimetableForDateTime(lastMonday)
+                .schoolDays
+                .length -
+            1,
+      ),
+    );
+
+    widget.controller._onGoToDay = (targetDay) {
+      int? getIndexForDate(DateTime date) {
+        for (int i = 0; i < pagesCount; i++) {
+          final currDay = getMondayForIndex(i);
+
+          if (currDay.year == date.year &&
+              currDay.month == date.month &&
+              currDay.day == date.day) {
+            return i;
+          }
+        }
+        return null;
+      }
+
+      final date = Utils.getWeekDay(
+        targetDay,
+        DateTime.monday,
+      );
+
+      int? index = getIndexForDate(date);
+
+      if (index == null) {
+        return false;
+      }
+
+      _pageController.animateToPage(
+        index,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeInOutCirc,
+      );
+
+      return true;
+    };
+
     // widget.controller.swipeToRight = () {
     //   _pageController.animateToPage(
     //     _pageController.page!.toInt() + 1,
@@ -112,6 +148,12 @@ class _TimetableWidgetState extends State<TimetableWidget> {
     _updateTtSchoolTimes(widget.timetable.getCurrWeekTimetable());
 
     setState(() {});
+  }
+
+  @override
+  void dispose() {
+    widget.controller._onGoToDay = null;
+    super.dispose();
   }
 
   void _updateTtSchoolTimes(Timetable timetable) {
@@ -228,17 +270,19 @@ class _TimetableWidgetState extends State<TimetableWidget> {
     int currWeekIndex = pageIndex - initialPageIndex;
 
     DateTime currMonday = Utils.getWeekDay(
-      DateTime.now().copyWith(
-        hour: 0,
-        minute: 0,
-        second: 0,
-        millisecond: 0,
-        microsecond: 0,
-      ),
+      DateTime.now().toUtc().copyWith(
+            hour: 0,
+            minute: 0,
+            second: 0,
+            millisecond: 0,
+            microsecond: 0,
+          ),
       DateTime.monday,
     ).add(
       Duration(days: 7 * currWeekIndex),
     );
+
+    widget.controller._currDay = currMonday;
 
     Timetable tt = widget.timetable.getWeekTimetableForDateTime(currMonday);
 
@@ -496,7 +540,8 @@ class _TimetableWidgetState extends State<TimetableWidget> {
                           child: Text(
                             Utils.dateToString(
                               currLessonDateTime,
-                              showYear: false,
+                              showYear: currLessonDateTime.year !=
+                                  DateTime.now().toUtc().year,
                             ),
                             textAlign: TextAlign.center,
                           ),
@@ -706,6 +751,8 @@ class _CustomPopUpShowLessonState extends State<CustomPopUpShowLesson> {
                 ),
                 widget.showDeleteButton
                     ? IconButton(
+                        tooltip: AppLocalizationsManager
+                            .localizations.strRemoveSubstitutionLesson,
                         padding: const EdgeInsets.all(18),
                         onPressed: () {
                           widget.onDeleteButtonPressed?.call();
@@ -802,57 +849,62 @@ class _CustomPopUpShowLessonState extends State<CustomPopUpShowLesson> {
               ),
               Visibility(
                 visible: widget.event == null,
-                replacement: ElevatedButton(
-                  onPressed: widget.event == null
-                      ? null
-                      : () async {
-                          final event = widget.event;
-                          if (event == null) return;
+                replacement: Tooltip(
+                  message: AppLocalizationsManager.localizations.strDeleteTask,
+                  child: ElevatedButton(
+                    onPressed: widget.event == null
+                        ? null
+                        : () async {
+                            final event = widget.event;
+                            if (event == null) return;
 
-                          bool removeTodoEvent =
-                              await Utils.showBoolInputDialog(
-                            context,
-                            question: AppLocalizationsManager.localizations
-                                .strDoYouWantToDeleteTaskX(
-                              event.linkedSubjectName,
-                            ),
-                            description: event.endTime == null
-                                ? AppLocalizationsManager.localizations
-                                    .strNoEndDate //kann nicht eintreten eigentlich
-                                : "(${Utils.dateToString(event.endTime!)})",
-                            showYesAndNoInsteadOfOK: true,
-                            markTrueAsRed: true,
-                          );
-                          if (!removeTodoEvent || !context.mounted) return;
-                          bool deleteNote = false;
-
-                          if (event.linkedSchoolNote != null) {
-                            final delete = await Utils.showBoolInputDialog(
+                            bool removeTodoEvent =
+                                await Utils.showBoolInputDialog(
                               context,
-                              question: AppLocalizationsManager
-                                  .localizations.strDoYouWantToDeleteLinkedNote,
+                              question: AppLocalizationsManager.localizations
+                                  .strDoYouWantToDeleteTaskX(
+                                event.linkedSubjectName,
+                              ),
+                              description: event.endTime == null
+                                  ? AppLocalizationsManager.localizations
+                                      .strNoEndDate //kann nicht eintreten eigentlich
+                                  : "(${Utils.dateToString(event.endTime!)})",
                               showYesAndNoInsteadOfOK: true,
                               markTrueAsRed: true,
                             );
-                            deleteNote = delete;
-                          }
+                            if (!removeTodoEvent || !context.mounted) return;
+                            bool deleteNote = false;
 
-                          TimetableManager().removeTodoEvent(
-                            event,
-                            deleteLinkedSchoolNote: deleteNote,
-                          );
+                            if (event.linkedSchoolNote != null) {
+                              final delete = await Utils.showBoolInputDialog(
+                                context,
+                                question: AppLocalizationsManager.localizations
+                                    .strDoYouWantToDeleteLinkedNote,
+                                showYesAndNoInsteadOfOK: true,
+                                markTrueAsRed: true,
+                              );
+                              deleteNote = delete;
+                            }
 
-                          if (!context.mounted) return;
+                            TimetableManager().removeTodoEvent(
+                              event,
+                              deleteLinkedSchoolNote: deleteNote,
+                            );
 
-                          Navigator.of(context).pop();
-                        },
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    child: const Icon(
-                      Icons.remove_circle,
-                      color: Colors.red,
-                      size: 42,
+                            if (!context.mounted) return;
+
+                            Navigator.of(context).pop();
+                          },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      child: const Icon(
+                        Icons.delete_outline,
+                        color: Colors.red,
+                        size: 42,
+                      ),
                     ),
                   ),
                 ),

@@ -389,6 +389,22 @@ class TimetableManager {
     }
   }
 
+  List<TodoEvent> getTodoEventsForDay({
+    required DateTime day,
+  }) {
+    return todoEvents.where(
+      (element) {
+        if (element.endTime == null) return false;
+        if (element.endTime!.year != day.year ||
+            element.endTime!.month != day.month ||
+            element.endTime!.day != day.day) {
+          return false;
+        }
+        return true;
+      },
+    ).toList();
+  }
+
   TodoEvent? getRunningTodoEvent({
     required String linkedSubjectName,
     required DateTime lessonDayTime,

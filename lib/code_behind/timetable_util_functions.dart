@@ -8,6 +8,7 @@ import 'package:schulapp/code_behind/school_lesson_prefab.dart';
 import 'package:schulapp/code_behind/school_semester.dart';
 import 'package:schulapp/code_behind/school_time.dart';
 import 'package:schulapp/code_behind/timetable.dart';
+import 'package:schulapp/code_behind/timetable_controller.dart';
 import 'package:schulapp/code_behind/timetable_manager.dart';
 import 'package:schulapp/code_behind/todo_event.dart';
 import 'package:schulapp/code_behind/utils.dart';
@@ -17,7 +18,6 @@ import 'package:schulapp/screens/timetable/create_timetable_screen.dart';
 import 'package:schulapp/screens/home_screen.dart';
 import 'package:schulapp/widgets/date_selection_button.dart';
 import 'package:schulapp/widgets/time_selection_button.dart';
-import 'package:schulapp/widgets/timetable/timetable_widget.dart';
 
 Future<SchoolSemester?> createNewSemester(BuildContext context) async {
   SchoolSemester? schoolSemester = await showCreateSemesterSheet(context);

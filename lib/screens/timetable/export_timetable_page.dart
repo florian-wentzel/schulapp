@@ -14,7 +14,6 @@ import 'package:schulapp/code_behind/timetable_manager.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/screens/home_screen.dart';
-import 'package:schulapp/widgets/timetable/timetable_widget.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -592,10 +591,10 @@ class _ShareTimetableBottomSheetState extends State<ShareTimetableBottomSheet> {
               return ElevatedButton(
                 onPressed: () {
                   final box = context.findRenderObject() as RenderBox?;
-              
+
                   Rect sharePositionOrigin =
                       box!.localToGlobal(Offset.zero) & box.size;
-              
+
                   Navigator.of(context).pop();
                   Share.share(
                     widget.headingText,
@@ -608,7 +607,7 @@ class _ShareTimetableBottomSheetState extends State<ShareTimetableBottomSheet> {
                   AppLocalizationsManager.localizations.strShareYourTimetable,
                 ),
               );
-            }
+            },
           ),
         ],
       ),

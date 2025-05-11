@@ -1,6 +1,7 @@
 {
   "@@locale": "de",
   "language_name": "Deutsch",
+  "version_0_9_3": "Kalender zum Startbildschirm hinzugefügt",
   "version_0_9_2": "Weitere UI-Verbesserungen und kleinere Erweiterungen, z. B. für Vertretungsstunden oder bei der Erstellung des Stundenplans",
   "version_0_9_1": "Noten- und Aufgaben-UI überarbeitet, sowie Stundenplan- und Semestererstellung verbessert",
   "version_0_9_0": "Abitur-Rechner hinzugefügt",
@@ -391,5 +392,10 @@
   "strSetEndTime": "Endzeit setzen",
   "strSetStartTime": "Startzeit setzen",
   "strAskForFeedback": "Möchtest Du uns Feedback geben?\nWir würden uns sehr freuen, schließlich machen wir es kostenlos für euch :)",
-  "strOpenExtraTimetable": "zusätzlichen Stundenplan öffnen"
+  "strOpenExtraTimetable": "zusätzlichen Stundenplan öffnen",
+  "strOpenCalendar": "Kalender öffnen",
+  "strCloseCalendar": "Kalender schließen",
+  "strDateXNotFound": "Das angegebene Datum konnte nicht gefunden werden: {date}",
+  "strRemoveSubstitutionLesson": "Vertretungsstunde entfernen",
+  "strDeleteTask": "Aufgabe löschen"
 }

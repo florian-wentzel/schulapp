@@ -1,20 +1,4 @@
-import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:schulapp/code_behind/holidays_manager.dart';
-import 'package:schulapp/code_behind/school_lesson.dart';
-import 'package:schulapp/code_behind/school_time.dart';
-import 'package:schulapp/code_behind/settings.dart';
-import 'package:schulapp/code_behind/special_lesson.dart';
-import 'package:schulapp/code_behind/timetable.dart';
-import 'package:schulapp/code_behind/timetable_controller.dart';
-import 'package:schulapp/code_behind/timetable_manager.dart';
-import 'package:schulapp/code_behind/todo_event.dart';
-import 'package:schulapp/code_behind/utils.dart';
-import 'package:schulapp/extensions.dart';
-import 'package:schulapp/l10n/app_localizations_manager.dart';
-import 'package:schulapp/widgets/strike_through_container.dart';
-import 'package:schulapp/widgets/timetable/time_to_next_lesson_widget.dart';
-import 'package:schulapp/widgets/timetable/timetable_lesson_widget.dart';
+part of '../../code_behind/timetable_controller.dart';
 
 class TimetableOneDayWidget extends StatefulWidget {
   final TimetableController controller;
@@ -61,6 +45,70 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
 
   @override
   void initState() {
+    DateTime getDateForIndex(int index) {
+      final correctedPageIndex = index - initialMondayPageIndex;
+      Timetable tt = widget.timetable;
+
+      int currDayIndex = correctedPageIndex % tt.schoolDays.length;
+      int currWeekIndex;
+
+      if (correctedPageIndex < 0) {
+        currWeekIndex =
+            (correctedPageIndex - currDayIndex) ~/ tt.schoolDays.length;
+      } else {
+        currWeekIndex = correctedPageIndex ~/ tt.schoolDays.length;
+      }
+
+      DateTime currMonday = Utils.getWeekDay(
+        DateTime.now().toUtc().copyWith(
+              hour: 0,
+              minute: 0,
+              second: 0,
+              millisecond: 0,
+              microsecond: 0,
+            ),
+        DateTime.monday,
+      );
+
+      currMonday = currMonday.add(
+        Duration(days: 7 * currWeekIndex),
+      );
+
+      return currMonday.add(Duration(days: currDayIndex));
+    }
+
+    widget.controller._firstDay = getDateForIndex(0);
+    widget.controller._lastDay = getDateForIndex(pagesCount - 1);
+
+    widget.controller._onGoToDay = (targetDay) {
+      int? getIndexForDate(DateTime date) {
+        for (int i = 0; i < pagesCount; i++) {
+          final currDay = getDateForIndex(i);
+
+          if (currDay.year == date.year &&
+              currDay.month == date.month &&
+              currDay.day == date.day) {
+            return i;
+          }
+        }
+        return null;
+      }
+
+      int? index = getIndexForDate(targetDay);
+
+      if (index == null) {
+        return false;
+      }
+
+      _pageController.animateToPage(
+        index,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeInOutCirc,
+      );
+
+      return true;
+    };
+
     // widget.controller.swipeToRight = () {
     //   _pageController.animateToPage(
     //     _pageController.page!.toInt() + 1,
@@ -94,6 +142,12 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
     _updateTtSchoolTimes(currWeekTimetable);
 
     setState(() {});
+  }
+
+  @override
+  void dispose() {
+    widget.controller._onGoToDay = null;
+    super.dispose();
   }
 
   void _updateTtSchoolTimes(Timetable timetable) {
@@ -234,19 +288,22 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
           }
 
           DateTime currMonday = Utils.getWeekDay(
-            DateTime.now().copyWith(
-              hour: 0,
-              minute: 0,
-              second: 0,
-              millisecond: 0,
-              microsecond: 0,
-            ),
+            DateTime.now().toUtc().copyWith(
+                  hour: 0,
+                  minute: 0,
+                  second: 0,
+                  millisecond: 0,
+                  microsecond: 0,
+                ),
             DateTime.monday,
           );
 
           currMonday = currMonday.add(
             Duration(days: 7 * currWeekIndex),
           );
+
+          widget.controller._currDay =
+              currMonday.add(Duration(days: currDayIndex));
 
           this.currWeekIndex = Utils.getWeekIndex(currMonday);
           currYear = currMonday.year;
@@ -475,7 +532,8 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
                         Text(
                           Utils.dateToString(
                             currLessonDateTime,
-                            showYear: false,
+                            showYear:
+                                DateTime.now().year != currLessonDateTime.year,
                           ),
                           textAlign: TextAlign.center,
                         ),

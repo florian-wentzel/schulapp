@@ -1,7 +1,4 @@
 import 'dart:math';
-import 'dart:ui';
-
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 class DragDownContainerController with ChangeNotifier {
@@ -12,6 +9,7 @@ class DragDownContainerController with ChangeNotifier {
   double get containerHeight => _containerHeight;
 
   bool get isOpen => containerHeight >= _maxContainerHeight * 0.90;
+  bool get isClosed => containerHeight <= _maxContainerHeight * 0.10;
 
   DragDownContainerController({
     double maxContainerHeight = double.infinity,
@@ -26,6 +24,11 @@ class DragDownContainerController with ChangeNotifier {
     _containerHeight = 0;
     notifyListeners();
   }
+
+  //wird aufgerufen, wenn der Benutzer los lässt
+  void _notify() {
+    notifyListeners();
+  }
 }
 
 class DragDownContainer extends StatefulWidget {
@@ -34,12 +37,15 @@ class DragDownContainer extends StatefulWidget {
   final double maxContainerHeight;
   final bool Function()? canBeOpened;
   final DragDownContainerController? controller;
+  // Adjust this value to control the drag sensitivity
+  final double dragFactor;
 
   const DragDownContainer({
     super.key,
     required this.child,
     required this.containerChild,
     this.maxContainerHeight = 300.0,
+    this.dragFactor = 1,
     this.controller,
     this.canBeOpened,
   });
@@ -54,6 +60,7 @@ class _DragDownContainerState extends State<DragDownContainer> {
   double _xDragDistance = 0;
   double _yDragDistance = 0;
   bool _isDragging = false;
+  bool _wasOpenOnPressStart = false;
 
   void _controllerListener() {
     setState(() {});
@@ -84,9 +91,17 @@ class _DragDownContainerState extends State<DragDownContainer> {
         _xDragDistance = 0;
         _yDragDistance = 0;
         _isDragging = widget.canBeOpened?.call() ?? true;
+        _wasOpenOnPressStart = controller.isOpen;
       },
       onPointerMove: (details) {
-        if (!_isDragging) return;
+        _isDragging = widget.canBeOpened?.call() ?? true;
+        if (!_isDragging) {
+          setState(() {
+            controller._containerHeight = 0;
+          });
+          return;
+        }
+
         Offset dragOffset = details.position - _lastDragPos;
         _lastDragPos = details.position;
 
@@ -109,7 +124,7 @@ class _DragDownContainerState extends State<DragDownContainer> {
 
         setState(() {
           controller._containerHeight =
-              (controller._containerHeight + dragOffset.dy)
+              (controller._containerHeight + dragOffset.dy * widget.dragFactor)
                   .clamp(0, widget.maxContainerHeight);
         });
       },
@@ -119,10 +134,16 @@ class _DragDownContainerState extends State<DragDownContainer> {
         if (controller._containerHeight > widget.maxContainerHeight / 2) {
           setState(() {
             controller._containerHeight = widget.maxContainerHeight;
+            if (!_wasOpenOnPressStart) {
+              controller._notify();
+            }
           });
         } else {
           setState(() {
             controller._containerHeight = 0;
+            if (_wasOpenOnPressStart) {
+              controller._notify();
+            }
           });
         }
       },
@@ -131,7 +152,7 @@ class _DragDownContainerState extends State<DragDownContainer> {
           Container(
             color: Colors.transparent,
             child: IgnorePointer(
-              ignoring: controller.isOpen,
+              ignoring: !controller.isClosed,
               child: widget.child,
             ),
           ),
@@ -141,7 +162,7 @@ class _DragDownContainerState extends State<DragDownContainer> {
                 controller._containerHeight.clamp(0, widget.maxContainerHeight),
             width: double.infinity,
             color: Colors.transparent,
-            alignment: Alignment.center,
+            alignment: Alignment.topCenter,
             child: ClipRect(
               child: OverflowBox(
                 maxHeight: widget.maxContainerHeight,
