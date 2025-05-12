@@ -468,7 +468,9 @@ class _HomeScreenState extends State<HomeScreen> {
         child: ListenableBuilder(
           listenable: _dragCalendarDownController,
           builder: (context, child) => TableCalendar(
+            rowHeight: 56,
             locale: AppLocalizationsManager.localizations.localeName,
+            shouldFillViewport: false,
             firstDay: _timetableController.firstDay ??
                 DateTime.now().subtract(
                   const Duration(days: 365),
@@ -632,6 +634,16 @@ class _HomeScreenState extends State<HomeScreen> {
             daysOfWeekStyle: DaysOfWeekStyle(
               decoration: BoxDecoration(
                 color: Theme.of(context).scaffoldBackgroundColor,
+              ),
+              weekdayStyle: const TextStyle(
+                fontSize: 14,
+                height: 0,
+                color: Color(0xFF4F4F4F),
+              ),
+              weekendStyle: const TextStyle(
+                fontSize: 14,
+                height: 0,
+                color: Color(0xFF4F4F4F),
               ),
             ),
           ),
