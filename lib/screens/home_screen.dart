@@ -7,10 +7,12 @@ import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:go_router/go_router.dart';
 import 'package:in_app_review/in_app_review.dart';
 import 'package:schulapp/app.dart';
+import 'package:schulapp/code_behind/calendar_todo_event_style.dart';
 import 'package:schulapp/code_behind/grading_system_manager.dart';
 import 'package:schulapp/code_behind/holidays.dart';
 import 'package:schulapp/code_behind/holidays_manager.dart';
 import 'package:schulapp/code_behind/school_lesson.dart';
+import 'package:schulapp/code_behind/school_lesson_prefab.dart';
 import 'package:schulapp/code_behind/school_semester.dart';
 import 'package:schulapp/code_behind/school_time.dart';
 import 'package:schulapp/code_behind/settings.dart';
@@ -475,8 +477,18 @@ class _HomeScreenState extends State<HomeScreen> {
                 DateTime.now().add(
                   const Duration(days: 365),
                 ),
-            focusedDay: _timetableController.currDay ?? DateTime.now(),
-            currentDay: _timetableController.currDay ?? DateTime.now(),
+            focusedDay: _timetableController.currDay ??
+                DateTime.now().add(
+                  const Duration(
+                    days: 1,
+                  ),
+                ),
+            currentDay: _timetableController.currDay ??
+                DateTime.now().add(
+                  const Duration(
+                    days: 1,
+                  ),
+                ),
             onDaySelected: (selectedDay, _) {
               if (!_timetableController.goToDay(selectedDay)) {
                 Utils.showInfo(
@@ -492,10 +504,38 @@ class _HomeScreenState extends State<HomeScreen> {
             },
             calendarBuilders: CalendarBuilders(
               markerBuilder: (context, day, events) {
+                final showTodoEventColor =
+                    TimetableManager().settings.getVar<CalendarTodoEventStyle>(
+                          Settings.calendarShowTodoEventColorKey,
+                        );
+
+                if (showTodoEventColor == CalendarTodoEventStyle.hide) {
+                  return null;
+                }
+
                 final todoEvents = TimetableManager().getTodoEventsForDay(
                   day: day,
                 );
+
                 if (todoEvents.isEmpty) return null;
+
+                todoEvents.sort(
+                  (a, b) {
+                    Map<TodoType, int> todoTypePriority = {
+                      TodoType.exam: 4,
+                      TodoType.presentation: 2,
+                      TodoType.test: 2,
+                      TodoType.homework: 0,
+                    };
+
+                    if (a.finished && !b.finished) return 1;
+                    if (!a.finished && b.finished) return -1;
+
+                    final aInt = todoTypePriority[a.type] ?? 0;
+                    final bInt = todoTypePriority[b.type] ?? 0;
+                    return aInt - bInt;
+                  },
+                );
 
                 Widget getContainerWithColor(Color color) {
                   return Container(
@@ -508,6 +548,47 @@ class _HomeScreenState extends State<HomeScreen> {
                   );
                 }
 
+                Color getColorFromTodoEvent(TodoEvent event) {
+                  final showTodoEventColor = TimetableManager()
+                      .settings
+                      .getVar<CalendarTodoEventStyle>(
+                        Settings.calendarShowTodoEventColorKey,
+                      );
+
+                  if (showTodoEventColor ==
+                      CalendarTodoEventStyle.colorFromTodoEvent) {
+                    return event.getColor();
+                  }
+
+                  if (showTodoEventColor ==
+                      CalendarTodoEventStyle.colorFromLesson) {
+                    final lesson = widget.timetable
+                        ?.getWeekTimetableForDateTime(
+                          event.endTime ?? DateTime.now(),
+                        )
+                        .lessonPrefabs
+                        .cast<SchoolLessonPrefab?>()
+                        .firstWhere(
+                          (element) => element?.name == event.linkedSubjectName,
+                          orElse: () => null,
+                        );
+
+                    if (lesson == null) {
+                      return Colors.grey;
+                    }
+                    return lesson.color;
+                  }
+
+                  if (showTodoEventColor ==
+                      CalendarTodoEventStyle.blackAndWhite) {
+                    final color = event.getColor();
+                    final b = ((color.r + color.g + color.b) / 3 * 255).toInt();
+
+                    return Color.fromARGB(255, b, b, b);
+                  }
+                  return Colors.grey;
+                }
+
                 return Positioned(
                   bottom: 1,
                   child: Row(
@@ -517,7 +598,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         return Container(
                           margin: const EdgeInsets.only(left: 2),
                           child: getContainerWithColor(
-                            todoEvents[index].getColor(),
+                            getColorFromTodoEvent(
+                              todoEvents[index],
+                            ),
                           ),
                         );
                       },
@@ -529,14 +612,14 @@ class _HomeScreenState extends State<HomeScreen> {
             calendarStyle: CalendarStyle(
               defaultDecoration: BoxDecoration(
                 color: Theme.of(context).scaffoldBackgroundColor,
-                shape: BoxShape.circle,
+                // shape: BoxShape.circle,
               ),
               rowDecoration: BoxDecoration(
                 color: Theme.of(context).scaffoldBackgroundColor,
               ),
               weekendDecoration: BoxDecoration(
                 color: Theme.of(context).scaffoldBackgroundColor,
-                shape: BoxShape.circle,
+                // shape: BoxShape.circle,
               ),
             ),
             headerStyle: HeaderStyle(

@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:encrypt/encrypt.dart' as encrypt;
 import 'package:flutter/material.dart';
+import 'package:schulapp/code_behind/calendar_todo_event_style.dart';
 import 'package:schulapp/code_behind/grading_system_manager.dart';
 import 'package:schulapp/code_behind/notification_schedule.dart';
 import 'package:schulapp/code_behind/save_manager.dart';
@@ -137,6 +138,7 @@ class Settings {
   static const termsOfServiceGoFileIoAllowed =
       "termsOfServiceGoFileIoAllowedKey";
   static const lastAskForReviewDateKey = "lastAskForReviewDate";
+  static const calendarShowTodoEventColorKey = "calendarShowTodoEventColor";
 
   static const waitBetweenAskForReviewDuration = Duration(days: 3);
 
@@ -436,6 +438,23 @@ class Settings {
       },
       saveCustomType: (type) {
         return type?.millisecondsSinceEpoch.toString();
+      },
+    ),
+    // zeigt an, ob die App die Todo-Farbe verwenden soll oder
+    // die Farbe des Verbundenen Fachs
+    SettingsVar<CalendarTodoEventStyle>(
+      key: calendarShowTodoEventColorKey,
+      defaultValue: () => CalendarTodoEventStyle.colorFromTodoEvent,
+      saveCustomType: (type) {
+        return type.toString();
+      },
+      loadCustomType: (value) {
+        for (var item in CalendarTodoEventStyle.values) {
+          if (value == item.toString()) {
+            return item;
+          }
+        }
+        return null;
       },
     ),
   ];

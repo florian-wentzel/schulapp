@@ -397,5 +397,10 @@
   "strCloseCalendar": "Kalender schließen",
   "strDateXNotFound": "Das angegebene Datum konnte nicht gefunden werden: {date}",
   "strRemoveSubstitutionLesson": "Vertretungsstunde entfernen",
-  "strDeleteTask": "Aufgabe löschen"
+  "strDeleteTask": "Aufgabe löschen",
+  "strColorsOfTasksInTheCalendar": "Farben der Aufgaben im Kalender",
+  "strHide": "Nicht anzeigen",
+  "strBlackAndWhite": "Schwarz-Weiß",
+  "strColorOfType": "Farbe der Art",
+  "strSubjectColor": "Farbe des Fachs"
 }

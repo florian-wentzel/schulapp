@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:schulapp/app.dart';
 import 'package:schulapp/code_behind/backup_manager.dart';
+import 'package:schulapp/code_behind/calendar_todo_event_style.dart';
 import 'package:schulapp/code_behind/grading_system_manager.dart';
 import 'package:schulapp/code_behind/notification_manager.dart';
 import 'package:schulapp/code_behind/school_semester.dart';
@@ -115,6 +116,7 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   Set<ThemeMode> themeSelection = {};
   Set<GradingSystem> gradingSystemSelection = {};
+  Set<CalendarTodoEventStyle> calendarTodoEventStyleSelection = {};
 
   @override
   void initState() {
@@ -124,13 +126,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
     gradingSystemSelection = {
       TimetableManager().settings.getVar(Settings.selectedGradeSystemKey),
     };
+    calendarTodoEventStyleSelection = {
+      TimetableManager()
+          .settings
+          .getVar(Settings.calendarShowTodoEventColorKey),
+    };
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: NavigationBarDrawer(selectedRoute: SettingsScreen.route),
+      drawer: const NavigationBarDrawer(
+        selectedRoute: SettingsScreen.route,
+      ),
       appBar: AppBar(
         title: Text(
           AppLocalizationsManager.localizations.strSettings,
@@ -165,6 +174,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       children: [
         _themeSelector(),
         _gradeSystemSelector(),
+        _calendarTodoEventStyle(),
         _openMainSemesterAutomatically(),
         _showTasksOnHomeScreen(),
         _highContrastOnHomeScreen(),
@@ -272,6 +282,61 @@ class _SettingsScreenState extends State<SettingsScreen> {
             TimetableManager().settings.setVar(
                   Settings.selectedGradeSystemKey,
                   gradingSystemSelection.first,
+                );
+          },
+          showSelectedIcon: false,
+          multiSelectionEnabled: false,
+          emptySelectionAllowed: false,
+        ),
+      ],
+    );
+  }
+
+  Widget _calendarTodoEventStyle() {
+    return SettingsScreen.listItem(
+      context,
+      title:
+          AppLocalizationsManager.localizations.strColorsOfTasksInTheCalendar,
+      body: [
+        SegmentedButton<CalendarTodoEventStyle>(
+          segments: <ButtonSegment<CalendarTodoEventStyle>>[
+            ButtonSegment<CalendarTodoEventStyle>(
+              value: CalendarTodoEventStyle.hide,
+              label: Text(
+                AppLocalizationsManager.localizations.strHide,
+                textAlign: TextAlign.center,
+              ),
+            ),
+            ButtonSegment<CalendarTodoEventStyle>(
+              value: CalendarTodoEventStyle.blackAndWhite,
+              label: Text(
+                AppLocalizationsManager.localizations.strBlackAndWhite,
+                textAlign: TextAlign.center,
+              ),
+            ),
+            ButtonSegment<CalendarTodoEventStyle>(
+              value: CalendarTodoEventStyle.colorFromTodoEvent,
+              label: Text(
+                AppLocalizationsManager.localizations.strColorOfType,
+                textAlign: TextAlign.center,
+              ),
+            ),
+            ButtonSegment<CalendarTodoEventStyle>(
+              value: CalendarTodoEventStyle.colorFromLesson,
+              label: Text(
+                AppLocalizationsManager.localizations.strSubjectColor,
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ],
+          selected: calendarTodoEventStyleSelection,
+          onSelectionChanged: (Set<CalendarTodoEventStyle> newSelection) {
+            setState(() {
+              calendarTodoEventStyleSelection = newSelection;
+            });
+            TimetableManager().settings.setVar(
+                  Settings.calendarShowTodoEventColorKey,
+                  calendarTodoEventStyleSelection.first,
                 );
           },
           showSelectedIcon: false,

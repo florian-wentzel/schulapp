@@ -1160,5 +1160,15 @@
   "strRemoveSubstitutionLesson": "Remove substitution lesson",
   "@strRemoveSubstitutionLesson": {},
   "strDeleteTask": "Delete Task",
-  "@strDeleteTask": {}
+  "@strDeleteTask": {},
+  "strColorsOfTasksInTheCalendar": "Colors of tasks in the calendar",
+  "@strColorsOfTasksInTheCalendar": {},
+  "strHide": "Hide",
+  "@strHide": {},
+  "strBlackAndWhite": "Black and White",
+  "@strBlackAndWhite": {},
+  "strColorOfType": "Color of Type",
+  "@strColorOfType": {},
+  "strSubjectColor": "Subject Color",
+  "@strSubjectColor": {}
 }
