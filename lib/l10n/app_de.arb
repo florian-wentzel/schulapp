@@ -1,6 +1,8 @@
 {
   "@@locale": "de",
   "language_name": "Deutsch",
+  "version_0_9_5": "Einstellung, um automatisch den nächsten Tag anzuzeigen, hinzugefügt",
+  "version_0_9_4": "Erweiterte Funktionen durch langes Drücken auf den Tagesnamen hinzugefügt",
   "version_0_9_3": "Kalender zum Startbildschirm hinzugefügt",
   "version_0_9_2": "Weitere UI-Verbesserungen und kleinere Erweiterungen, z. B. für Vertretungsstunden oder bei der Erstellung des Stundenplans",
   "version_0_9_1": "Noten- und Aufgaben-UI überarbeitet, sowie Stundenplan- und Semestererstellung verbessert",
@@ -406,5 +408,6 @@
   "strMarkDayAsCancelled": "Tag als ausgefallen markieren",
   "strMarkDayAsNotCancelled": "Tag als nicht ausgefallen markieren",
   "strMarkDayAsSubstituted": "Tag als vertreten markieren",
-  "strMarkDayAsNotSubstituted": "Tag als nicht vertreten markieren"
+  "strMarkDayAsNotSubstituted": "Tag als nicht vertreten markieren",
+  "strShowNextDayAfterSchoolEnd": "Nach Schulschluss nächsten Tag anzeigen"
 }

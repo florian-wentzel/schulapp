@@ -2,6 +2,10 @@
   "@@locale": "en",
   "language_name": "Englisch",
   "@language_name": {},
+  "version_0_9_5": "Added setting to automatically display the next day",
+  "@version_0_9_5": {},
+  "version_0_9_4": "Added extended functionality by long-pressing the day name",
+  "@version_0_9_4": {},
   "version_0_9_3": "Added calendar to the home screen",
   "@version_0_9_3": {},
   "version_0_9_2": "Further UI improvements and minor extensions, e.g., for substitute lessons or timetable creation",
@@ -1178,5 +1182,7 @@
   "strMarkDayAsSubstituted": "Mark day as substituted",
   "@strMarkDayAsSubstituted": {},
   "strMarkDayAsNotSubstituted": "Mark day as not substituted",
-  "@strMarkDayAsNotSubstituted": {}
+  "@strMarkDayAsNotSubstituted": {},
+  "strShowNextDayAfterSchoolEnd": "Show next day after school ends",
+  "@strShowNextDayAfterSchoolEnd": {}
 }

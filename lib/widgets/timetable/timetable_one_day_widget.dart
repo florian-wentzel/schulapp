@@ -133,13 +133,30 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
       _showNextWeek = currWeekTimetable.schoolDays.length;
     }
 
+    _updateTtSchoolTimes(currWeekTimetable);
+
+    final lastLesson = _getEndTime(currWeekTimetable);
+    final currTime = TimeOfDay.now();
+
+    int showNextDay = 0;
+
+    final showNextDayAfterDayEnd = TimetableManager().settings.getVar(
+          Settings.showNextDayAfterDayEndKey,
+        );
+
+    if (showNextDayAfterDayEnd &&
+        _showNextWeek == 0 &&
+        lastLesson != null &&
+        currTime.isAfter(lastLesson.end)) {
+      _showNextWeek = 1;
+    }
+
     _pageController = PageController(
       initialPage: initialMondayPageIndex +
           Utils.getCurrentWeekDayIndex() +
-          _showNextWeek,
+          _showNextWeek +
+          showNextDay,
     );
-
-    _updateTtSchoolTimes(currWeekTimetable);
 
     setState(() {});
   }
@@ -923,5 +940,45 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
       height: _breakLightHeight,
       width: lessonWidth,
     );
+  }
+
+  //von home_screen.dart kopiert :>
+  //könnte man vielleicht auch in timetable.dart machen?
+  SchoolTime? _getEndTime(Timetable tt) {
+    final schoolTimes = ttSchoolTimes;
+
+    //index welcher angibt was wir als ende ansehen
+    int endIndex = schoolTimes.length - 1;
+
+    final dayIndex = Utils.getCurrentWeekDayIndex();
+    final schoolDay = tt.getCurrWeekTimetable().schoolDays[dayIndex];
+    final now = DateTime.now();
+    final weekIndex =
+        Utils.getWeekIndex(Utils.getWeekDay(now, DateTime.monday));
+    final year = now.year;
+
+    for (int i = endIndex; i >= 0; i--) {
+      final specialLesson = TimetableManager().getSpecialLesson(
+        timetable: tt,
+        schoolTimeIndex: i,
+        schoolDayIndex: dayIndex,
+        weekIndex: weekIndex,
+        year: year,
+      );
+
+      if ((SchoolLesson.isEmptyLesson(schoolDay.lessons[i]) &&
+              specialLesson is! SubstituteSpecialLesson) ||
+          specialLesson is CancelledSpecialLesson) {
+        endIndex--;
+      } else {
+        break;
+      }
+    }
+
+    if (endIndex < 0) {
+      return null;
+    }
+
+    return schoolTimes[endIndex];
   }
 }

@@ -1536,7 +1536,7 @@ class _HomeScreenState extends State<HomeScreen> {
     int endIndex = schoolTimes.length - 1;
 
     final dayIndex = Utils.getCurrentWeekDayIndex();
-    final schoolDay = tt.schoolDays[dayIndex];
+    final schoolDay = tt.getCurrWeekTimetable().schoolDays[dayIndex];
     final now = DateTime.now();
     final weekIndex =
         Utils.getWeekIndex(Utils.getWeekDay(now, DateTime.monday));

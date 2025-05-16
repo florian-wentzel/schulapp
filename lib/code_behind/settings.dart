@@ -139,6 +139,7 @@ class Settings {
       "termsOfServiceGoFileIoAllowedKey";
   static const lastAskForReviewDateKey = "lastAskForReviewDate";
   static const calendarShowTodoEventColorKey = "calendarShowTodoEventColor";
+  static const showNextDayAfterDayEndKey = "showNextDayAfterDayEnd";
 
   static const waitBetweenAskForReviewDuration = Duration(days: 3);
 
@@ -456,6 +457,10 @@ class Settings {
         }
         return null;
       },
+    ),
+    SettingsVar<bool>(
+      key: showNextDayAfterDayEndKey,
+      defaultValue: () => false,
     ),
   ];
 

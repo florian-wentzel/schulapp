@@ -177,6 +177,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _calendarTodoEventStyle(),
         _openMainSemesterAutomatically(),
         _showTasksOnHomeScreen(),
+        _showNextDayIfDayEnds(),
         _highContrastOnHomeScreen(),
         _reducedClassHoursEnabled(),
         _reducedClassHours(),
@@ -510,6 +511,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
           onChanged: (value) {
             TimetableManager().settings.setVar(
                   Settings.showTasksOnHomeScreenKey,
+                  value,
+                );
+            setState(() {});
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _showNextDayIfDayEnds() {
+    return SettingsScreen.listItem(
+      context,
+      title: AppLocalizationsManager.localizations.strShowNextDayAfterSchoolEnd,
+      afterTitle: [
+        Switch.adaptive(
+          value: TimetableManager().settings.getVar(
+                Settings.showNextDayAfterDayEndKey,
+              ),
+          onChanged: (value) {
+            TimetableManager().settings.setVar(
+                  Settings.showNextDayAfterDayEndKey,
                   value,
                 );
             setState(() {});
