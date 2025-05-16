@@ -1,5 +1,7 @@
 library timetable_controller;
 
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:schulapp/code_behind/holidays_manager.dart';
@@ -9,6 +11,7 @@ import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/special_lesson.dart';
 import 'package:schulapp/code_behind/timetable.dart';
 import 'package:schulapp/code_behind/timetable_manager.dart';
+import 'package:schulapp/code_behind/timetable_util_functions.dart';
 import 'package:schulapp/code_behind/todo_event.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/extensions.dart';
@@ -55,10 +58,4 @@ class TimetableController {
   bool goToDay(DateTime day) {
     return _onGoToDay?.call(day) ?? false;
   }
-
-  //TODO
-  // VoidCallback? swipeToRight;
-  // VoidCallback? swipeToLeft;
-  // VoidCallback? markSpecialLesson;
-  // VoidCallback? removeSpecialLessonMark;
 }

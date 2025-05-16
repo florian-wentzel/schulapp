@@ -1170,5 +1170,13 @@
   "strColorOfType": "Color of Type",
   "@strColorOfType": {},
   "strSubjectColor": "Subject Color",
-  "@strSubjectColor": {}
+  "@strSubjectColor": {},
+  "strMarkDayAsCancelled": "Mark day as cancelled",
+  "@strMarkDayAsCancelled": {},
+  "strMarkDayAsNotCancelled": "Mark day as not cancelled",
+  "@strMarkDayAsNotCancelled": {},
+  "strMarkDayAsSubstituted": "Mark day as substituted",
+  "@strMarkDayAsSubstituted": {},
+  "strMarkDayAsNotSubstituted": "Mark day as not substituted",
+  "@strMarkDayAsNotSubstituted": {}
 }

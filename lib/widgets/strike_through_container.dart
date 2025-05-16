@@ -64,6 +64,7 @@ class _StrikeThroughContainerState extends State<StrikeThroughContainer>
 
   @override
   void dispose() {
+    widget.controller.onStrikeThroughChanged = null;
     _controller.dispose();
     super.dispose();
   }

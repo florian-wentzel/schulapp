@@ -402,5 +402,9 @@
   "strHide": "Nicht anzeigen",
   "strBlackAndWhite": "Schwarz-Weiß",
   "strColorOfType": "Farbe der Art",
-  "strSubjectColor": "Farbe des Fachs"
+  "strSubjectColor": "Farbe des Fachs",
+  "strMarkDayAsCancelled": "Tag als ausgefallen markieren",
+  "strMarkDayAsNotCancelled": "Tag als nicht ausgefallen markieren",
+  "strMarkDayAsSubstituted": "Tag als vertreten markieren",
+  "strMarkDayAsNotSubstituted": "Tag als nicht vertreten markieren"
 }

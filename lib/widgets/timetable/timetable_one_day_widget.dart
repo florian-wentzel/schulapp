@@ -402,6 +402,9 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
     );
   }
 
+  //nicht mehr in der funktion damit sie auch noch gültig sind nachdem setState gecalled wurde
+  final List<StrikeThroughContainerController> dayContainerControllers = [];
+
   Widget _createDay({
     required int currDay,
     required DateTime currMonday,
@@ -425,7 +428,7 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
           Settings.showTasksOnHomeScreenKey,
         );
 
-    final List<StrikeThroughContainerController> dayContainerControllers = [];
+    dayContainerControllers.clear();
 
     lessonWidgets.add(
       InkWell(
@@ -446,46 +449,256 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
                   curve: Curves.easeInOutCirc,
                 );
               },
-        onLongPress: () async {
-          final value = tt.getSpecialLesson(
-            year: currYear,
-            weekIndex: currWeekIndex,
-            schoolDayIndex: dayIndex,
-            schoolTimeIndex: 0,
-          ) is CancelledSpecialLesson;
+        onLongPress: () {
+          final lessons = tt.schoolDays[dayIndex].lessons;
 
-          for (int timeIndex = 0;
-              timeIndex < dayContainerControllers.length;
-              timeIndex++) {
-            final containerController = dayContainerControllers[timeIndex];
-            if (SchoolLesson.isEmptyLesson(day.lessons[timeIndex])) {
+          int totalCancelledLessonsCount = 0;
+          int totalSubstituteLessonsCount = 0;
+          int totalLessonCount = 0;
+
+          for (int i = 0;
+              i < min(lessons.length, dayContainerControllers.length);
+              i++) {
+            if (SchoolLesson.isEmptyLesson(lessons[i])) {
               continue;
             }
-            containerController.strikeThrough = value;
 
-            if (value) {
-              tt.setSpecialLesson(
-                weekIndex: currWeekIndex,
-                year: currYear,
-                specialLesson: CancelledSpecialLesson(
-                  dayIndex: dayIndex,
-                  timeIndex: timeIndex,
-                ),
-              );
-            } else {
-              tt.removeSpecialLesson(
-                year: currYear,
-                weekIndex: currWeekIndex,
-                dayIndex: dayIndex,
-                timeIndex: timeIndex,
-              );
-            }
-            await Future.delayed(
-              const Duration(
-                milliseconds: 100,
-              ),
+            final specialLesson = tt.getSpecialLesson(
+              year: currYear,
+              weekIndex: currWeekIndex,
+              schoolDayIndex: dayIndex,
+              schoolTimeIndex: i,
             );
+
+            if (specialLesson is CancelledSpecialLesson) {
+              totalCancelledLessonsCount++;
+            }
+            if (specialLesson is SubstituteSpecialLesson) {
+              totalSubstituteLessonsCount++;
+            }
+
+            totalLessonCount++;
           }
+
+          final dayIsCancelled =
+              totalCancelledLessonsCount > totalLessonCount / 2;
+          final dayIsSubstituted =
+              totalSubstituteLessonsCount > totalLessonCount / 2;
+
+          Utils.showStringAcionListBottomSheet(
+            context,
+            runActionAfterPop: true,
+            items: [
+              if (!dayIsCancelled)
+                (
+                  AppLocalizationsManager.localizations.strMarkDayAsCancelled,
+                  dayIsSubstituted
+                      ? null
+                      : () async {
+                          await Future.delayed(
+                            const Duration(milliseconds: 50),
+                          );
+
+                          for (int i = 0;
+                              i <
+                                  min(lessons.length,
+                                      dayContainerControllers.length);
+                              i++) {
+                            if (SchoolLesson.isEmptyLesson(lessons[i])) {
+                              tt.removeSpecialLesson(
+                                year: currYear,
+                                weekIndex: currWeekIndex,
+                                dayIndex: dayIndex,
+                                timeIndex: i,
+                              );
+                              continue;
+                            }
+
+                            await Future.delayed(
+                              const Duration(milliseconds: 50),
+                            );
+
+                            dayContainerControllers[i].strikeThrough = true;
+
+                            //falls es schon ausgefallen ist
+                            tt.removeSpecialLesson(
+                              year: currYear,
+                              weekIndex: currWeekIndex,
+                              dayIndex: dayIndex,
+                              timeIndex: i,
+                            );
+
+                            tt.setSpecialLesson(
+                              weekIndex: currWeekIndex,
+                              year: currYear,
+                              specialLesson: CancelledSpecialLesson(
+                                dayIndex: dayIndex,
+                                timeIndex: i,
+                              ),
+                            );
+                          }
+
+                          //falls vertretungsstunden dabei waren damit sie nach der animation berichtigt werden
+                          await Future.delayed(
+                            const Duration(milliseconds: 500),
+                          );
+
+                          if (mounted) {
+                            setState(() {});
+                          }
+                        },
+                ),
+              if (dayIsCancelled)
+                (
+                  AppLocalizationsManager
+                      .localizations.strMarkDayAsNotCancelled,
+                  dayIsSubstituted
+                      ? null
+                      : () async {
+                          await Future.delayed(
+                            const Duration(milliseconds: 50),
+                          );
+
+                          for (int i = 0;
+                              i <
+                                  min(lessons.length,
+                                      dayContainerControllers.length);
+                              i++) {
+                            await Future.delayed(
+                              const Duration(milliseconds: 50),
+                            );
+
+                            dayContainerControllers[i].strikeThrough = false;
+
+                            //falls es schon ausgefallen ist
+                            tt.removeSpecialLesson(
+                              year: currYear,
+                              weekIndex: currWeekIndex,
+                              dayIndex: dayIndex,
+                              timeIndex: i,
+                            );
+                          }
+
+                          //falls vertretungsstunden dabei waren damit sie nach der animation berichtigt werden
+                          await Future.delayed(
+                            const Duration(milliseconds: 500),
+                          );
+
+                          if (mounted) {
+                            setState(() {});
+                          }
+                        },
+                ),
+              if (!dayIsSubstituted)
+                (
+                  AppLocalizationsManager.localizations.strMarkDayAsSubstituted,
+                  dayIsCancelled
+                      ? null
+                      : () async {
+                          final prefabs = tt.lessonPrefabs;
+
+                          //can not be shown to users and not inputted
+                          final nullchar = String.fromCharCode(0);
+
+                          prefabs.add(
+                            SchoolLessonPrefab(
+                              name: AppLocalizationsManager
+                                      .localizations.strCustomSubject +
+                                  nullchar,
+                              color: Colors.transparent,
+                            ),
+                          );
+
+                          SchoolLessonPrefab? prefab =
+                              await Utils.showSelectLessonPrefabList(
+                            context,
+                            prefabs: prefabs,
+                          );
+
+                          if (prefab == null) return;
+
+                          if (prefab.name.contains(nullchar)) {
+                            if (!mounted) {
+                              return;
+                            }
+
+                            final lessonTuple =
+                                await showCreateNewPrefabBottomSheet(context);
+
+                            if (lessonTuple == null) return;
+
+                            prefab = lessonTuple.$1;
+                          }
+
+                          for (int i = 0;
+                              i <
+                                  min(lessons.length,
+                                      dayContainerControllers.length);
+                              i++) {
+                            await Future.delayed(
+                              const Duration(milliseconds: 50),
+                            );
+
+                            //falls es schon ausgefallen ist
+                            tt.removeSpecialLesson(
+                              year: currYear,
+                              weekIndex: currWeekIndex,
+                              dayIndex: dayIndex,
+                              timeIndex: i,
+                            );
+
+                            dayContainerControllers[i].strikeThrough = false;
+
+                            tt.setSpecialLesson(
+                              year: currYear,
+                              weekIndex: currWeekIndex,
+                              specialLesson: SubstituteSpecialLesson(
+                                dayIndex: dayIndex,
+                                timeIndex: i,
+                                prefab: prefab,
+                              ),
+                            );
+
+                            setState(() {});
+                          }
+                        },
+                ),
+              if (dayIsSubstituted)
+                (
+                  AppLocalizationsManager
+                      .localizations.strMarkDayAsNotSubstituted,
+                  dayIsCancelled
+                      ? null
+                      : () async {
+                          await Future.delayed(
+                            const Duration(milliseconds: 50),
+                          );
+
+                          for (int i = 0;
+                              i <
+                                  min(lessons.length,
+                                      dayContainerControllers.length);
+                              i++) {
+                            await Future.delayed(
+                              const Duration(milliseconds: 50),
+                            );
+
+                            dayContainerControllers[i].strikeThrough = false;
+
+                            //falls es schon ausgefallen ist
+                            tt.removeSpecialLesson(
+                              year: currYear,
+                              weekIndex: currWeekIndex,
+                              dayIndex: dayIndex,
+                              timeIndex: i,
+                            );
+
+                            setState(() {});
+                          }
+                        },
+                ),
+            ],
+          );
         },
         child: Container(
           color: Utils.sameDay(currLessonDateTime, DateTime.now())

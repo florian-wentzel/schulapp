@@ -11,17 +11,26 @@ class DragDownContainerController with ChangeNotifier {
   bool get isOpen => containerHeight >= _maxContainerHeight * 0.90;
   bool get isClosed => containerHeight <= _maxContainerHeight * 0.10;
 
+  ValueNotifier<double> containerHeightPercentNotifier =
+      ValueNotifier<double>(0);
+
   DragDownContainerController({
     double maxContainerHeight = double.infinity,
   }) : _maxContainerHeight = maxContainerHeight;
 
+  void _setContainerHeight(double height) {
+    _containerHeight = height;
+    containerHeightPercentNotifier.value =
+        _containerHeight / _maxContainerHeight;
+  }
+
   void open() {
-    _containerHeight = _maxContainerHeight;
+    _setContainerHeight(_maxContainerHeight);
     notifyListeners();
   }
 
   void close() {
-    _containerHeight = 0;
+    _setContainerHeight(0);
     notifyListeners();
   }
 
@@ -97,7 +106,7 @@ class _DragDownContainerState extends State<DragDownContainer> {
         _isDragging = widget.canBeOpened?.call() ?? true;
         if (!_isDragging) {
           setState(() {
-            controller._containerHeight = 0;
+            controller._setContainerHeight(0);
           });
           return;
         }
@@ -117,15 +126,16 @@ class _DragDownContainerState extends State<DragDownContainer> {
             _xDragDistance > _yDragDistance &&
             !controller.isOpen) {
           setState(() {
-            controller._containerHeight = 0;
+            controller._setContainerHeight(0);
           });
           return;
         }
 
         setState(() {
-          controller._containerHeight =
-              (controller._containerHeight + dragOffset.dy * widget.dragFactor)
-                  .clamp(0, widget.maxContainerHeight);
+          controller._setContainerHeight(
+            (controller._containerHeight + dragOffset.dy * widget.dragFactor)
+                .clamp(0, widget.maxContainerHeight),
+          );
         });
       },
       onPointerUp: (_) {
@@ -133,14 +143,14 @@ class _DragDownContainerState extends State<DragDownContainer> {
         // Snap behavior
         if (controller._containerHeight > widget.maxContainerHeight / 2) {
           setState(() {
-            controller._containerHeight = widget.maxContainerHeight;
+            controller._setContainerHeight(widget.maxContainerHeight);
             if (!_wasOpenOnPressStart) {
               controller._notify();
             }
           });
         } else {
           setState(() {
-            controller._containerHeight = 0;
+            controller._setContainerHeight(0);
             if (_wasOpenOnPressStart) {
               controller._notify();
             }
