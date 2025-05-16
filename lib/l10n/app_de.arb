@@ -286,6 +286,7 @@
   "strNoTasksFinishedYet": "Keine Aufgaben bisher abgeschlossen. Bleib dran!",
   "strNotes": "Notizen",
   "strAddNote": "Notiz hinzufügen",
+  "strSelectNote": "Notiz auswählen",
   "strTaskNote": "Aufgabennotiz: {linkedSubjectName}",
   "strTitle": "Titel",
   "strEditNote": "Notiz bearbeiten",

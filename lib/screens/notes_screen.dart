@@ -54,7 +54,7 @@ class _NotesScreenState extends State<NotesScreen> {
 
     return SchoolNoteListItem(
       schoolNote: schoolNote,
-      onDelete: () {
+      onDelete: () async {
         setState(() {});
       },
     );

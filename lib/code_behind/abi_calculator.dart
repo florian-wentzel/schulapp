@@ -232,8 +232,8 @@ class AbiCalculator {
       );
   }
 
-  List<String> _advancedSubjects = [];
-  List<SchoolExamSubject> _abiExamSubjects = [];
+  final List<String> _advancedSubjects;
+  final List<SchoolExamSubject> _abiExamSubjects = [];
 
   AbiCalculator({
     List<String?>? semesterNames,

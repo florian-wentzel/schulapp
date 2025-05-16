@@ -137,7 +137,7 @@ class _HolidaysScreenState extends State<HolidaysScreen> {
     federalStateName = _getFederalStateName();
 
     return Scaffold(
-      drawer: NavigationBarDrawer(selectedRoute: HolidaysScreen.route),
+      drawer: const NavigationBarDrawer(selectedRoute: HolidaysScreen.route),
       appBar: AppBar(
         title: Text(
           AppLocalizationsManager.localizations.strHolidaysWithStateName(

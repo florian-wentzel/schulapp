@@ -96,7 +96,7 @@ class _TodoEventsScreenState extends State<TodoEventsScreen> {
     return Scaffold(
       drawer: widget.showFinishedTasks
           ? null
-          : NavigationBarDrawer(selectedRoute: TodoEventsScreen.route),
+          : const NavigationBarDrawer(selectedRoute: TodoEventsScreen.route),
       appBar: AppBar(
         title: widget.showFinishedTasks
             ? Text(

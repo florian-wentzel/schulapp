@@ -794,6 +794,8 @@
   "@strNotes": {},
   "strAddNote": "Add Note",
   "@strAddNote": {},
+  "strSelectNote": "Select Note",
+  "@strSelectNote": {},
   "strTaskNote": "Task Note: {linkedSubjectName}",
   "@strTaskNote": {
     "placeholders": {

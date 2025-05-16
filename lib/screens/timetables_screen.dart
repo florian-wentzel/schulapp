@@ -26,7 +26,7 @@ class _TimetablesScreenState extends State<TimetablesScreen> {
   Widget build(BuildContext context) {
     MainApp.changeNavBarVisibilitySecure(context, value: true);
     return Scaffold(
-      drawer: NavigationBarDrawer(selectedRoute: TimetablesScreen.route),
+      drawer: const NavigationBarDrawer(selectedRoute: TimetablesScreen.route),
       appBar: AppBar(
         title: Text(
           AppLocalizationsManager.localizations.strTimetables,

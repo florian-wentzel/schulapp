@@ -8,7 +8,8 @@ import 'package:schulapp/screens/notes/edit_note_screen.dart';
 
 class SchoolNoteListItem extends StatefulWidget {
   final SchoolNote schoolNote;
-  final VoidCallback? onDelete;
+  //gets called if the delete iconbutten gets pressed
+  final Future<void> Function()? onDelete;
   final bool showDeleteBtn;
 
   const SchoolNoteListItem({
@@ -65,6 +66,10 @@ class _SchoolNoteListItemState extends State<SchoolNoteListItem> {
                 children: <Widget>[
                   IconButton(
                     onPressed: () async {
+                      await widget.onDelete?.call();
+
+                      if (!context.mounted) return;
+
                       bool delete = await Utils.showBoolInputDialog(
                         context,
                         question: AppLocalizationsManager.localizations
@@ -80,10 +85,11 @@ class _SchoolNoteListItemState extends State<SchoolNoteListItem> {
                       bool removed = SchoolNotesManager()
                           .removeSchoolNote(widget.schoolNote);
 
-                      setState(() {});
-                      widget.onDelete?.call();
-
                       if (!context.mounted) return;
+
+                      if (mounted) {
+                        setState(() {});
+                      }
 
                       if (removed) {
                         Utils.showInfo(

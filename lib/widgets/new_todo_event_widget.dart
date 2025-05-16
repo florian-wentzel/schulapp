@@ -328,18 +328,39 @@ class _NewTodoEventWidgetState extends State<NewTodoEventWidget> {
           const SizedBox(
             height: 12,
           ),
-          ElevatedButton(
-            onPressed: _addSchoolNote,
-            child: Text(AppLocalizationsManager.localizations.strAddNote),
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: _addSchoolNote,
+                  child: Text(AppLocalizationsManager.localizations.strAddNote),
+                ),
+              ),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: _selectSchoolNote,
+                  child:
+                      Text(AppLocalizationsManager.localizations.strSelectNote),
+                ),
+              ),
+            ],
           ),
         ],
       );
     } else {
       child = SchoolNoteListItem(
         key: const ValueKey("extraInfo"),
-        onDelete: () {
+        onDelete: () async {
           linkedSchoolNote = null;
+
           setState(() {});
+
+          //damit Benutzer sieht dass die Notitz entfernt wird
+          //damit er weiß dass die folgende Frage ob er die Notitz löschen wolle
+          //nicht auf das entfernen bezogen ist
+          await Future.delayed(
+            const Duration(milliseconds: 300),
+          );
         },
         schoolNote: linkedSchoolNote!,
       );
@@ -384,6 +405,29 @@ class _NewTodoEventWidgetState extends State<NewTodoEventWidget> {
     MainApp.changeNavBarVisibility(true);
 
     linkedSchoolNote = note;
+
+    setState(() {});
+  }
+
+  Future<void> _selectSchoolNote() async {
+    final notes = SchoolNotesManager().schoolNotes;
+    SchoolNote? selectedNote;
+
+    await Utils.showStringAcionListBottomSheet(
+      context,
+      title: AppLocalizationsManager.localizations.strSelectNote,
+      items: List.generate(
+        notes.length,
+        (index) => (
+          notes[index].title,
+          () async {
+            selectedNote = notes[index];
+          },
+        ),
+      ),
+    );
+
+    linkedSchoolNote = selectedNote;
 
     setState(() {});
   }
