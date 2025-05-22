@@ -126,6 +126,10 @@ class _TimetableLessonWidgetState extends State<TimetableLessonWidget> {
                           const Duration(milliseconds: 100),
                         );
                         widget.containerController.strikeThrough = true;
+                        if (context.mounted) {
+                          widget.containerController
+                              .setStrikeColorToCancelled(context);
+                        }
                         widget.tt.setSpecialLesson(
                           weekIndex: widget.currWeekIndex,
                           year: widget.currYear,
@@ -136,9 +140,31 @@ class _TimetableLessonWidgetState extends State<TimetableLessonWidget> {
                         );
                       }
               ),
+            if (specialLesson is! SickSpecialLesson && specialLesson == null)
+              (
+                AppLocalizationsManager.localizations.strMarkAsSick,
+                SchoolLesson.isEmptyLesson(widget.lesson)
+                    ? null
+                    : () async {
+                        await Future.delayed(
+                          const Duration(milliseconds: 100),
+                        );
+                        widget.containerController.setStrikeColorToSick();
+                        widget.containerController.strikeThrough = true;
+                        widget.tt.setSpecialLesson(
+                          weekIndex: widget.currWeekIndex,
+                          year: widget.currYear,
+                          specialLesson: SickSpecialLesson(
+                            dayIndex: widget.dayIndex,
+                            timeIndex: widget.lessonIndex,
+                          ),
+                        );
+                      }
+              ),
             //weil es wenn, nur alleine steht, brauch man nichts hinschreiben,
             //weil es automatisch ausgeführt wird: autoRunOnlyPossibleOption: true
-            if (specialLesson is CancelledSpecialLesson)
+            if (specialLesson is SickSpecialLesson ||
+                specialLesson is CancelledSpecialLesson)
               (
                 "",
                 () async {
@@ -266,8 +292,9 @@ class _TimetableLessonWidgetState extends State<TimetableLessonWidget> {
               key: UniqueKey(),
               controller: widget.containerController,
               child: Container(
-                width: widget.lessonWidth * 0.8,
-                height: widget.lessonHeight * 0.8,
+                width: widget.lessonWidth,
+                height: widget.lessonHeight,
+                margin: const EdgeInsets.all(6),
                 padding: const EdgeInsets.symmetric(
                   vertical: 4,
                   horizontal: 8,

@@ -3,6 +3,18 @@ import 'package:flutter/material.dart';
 class StrikeThroughContainerController {
   bool _strikeThrough = false;
 
+  final ValueNotifier<Color> _strikeColor;
+  Color get strikeColor => _strikeColor.value;
+  set strikeColor(Color color) => _strikeColor.value = color;
+
+  StrikeThroughContainerController(
+    BuildContext context,
+  ) : _strikeColor = ValueNotifier(Theme.of(context).disabledColor);
+
+  StrikeThroughContainerController.withColor(
+    Color strikeColor,
+  ) : _strikeColor = ValueNotifier(strikeColor);
+
   bool get strikeThrough => _strikeThrough;
 
   set strikeThrough(bool strikeThrough) {
@@ -15,6 +27,14 @@ class StrikeThroughContainerController {
   void changeStrikeThrough() {
     _strikeThrough = !_strikeThrough;
     onStrikeThroughChanged?.call(_strikeThrough);
+  }
+
+  void setStrikeColorToSick() {
+    strikeColor = const Color.fromARGB(120, 255, 0, 0);
+  }
+
+  void setStrikeColorToCancelled(BuildContext context) {
+    strikeColor = Theme.of(context).disabledColor;
   }
 }
 
@@ -81,20 +101,24 @@ class _StrikeThroughContainerState extends State<StrikeThroughContainer>
       width = widget.logicalSize!.width;
       height = widget.logicalSize!.height;
     }
+
     return Stack(
       children: [
-        AnimatedBuilder(
-          animation: _animation,
-          builder: (context, child) {
-            return CustomPaint(
-              size: Size(width, height),
-              foregroundPainter: StrikeThroughPainter(
-                _animation.value,
-                context,
-              ),
-              child: widget.child,
-            );
-          },
+        ValueListenableBuilder(
+          valueListenable: widget.controller._strikeColor,
+          builder: (context, value, _) => AnimatedBuilder(
+            animation: _animation,
+            builder: (context, child) {
+              return CustomPaint(
+                size: Size(width, height),
+                foregroundPainter: StrikeThroughPainter(
+                  _animation.value,
+                  value,
+                ),
+                child: widget.child,
+              );
+            },
+          ),
         ),
       ],
     );
@@ -102,25 +126,29 @@ class _StrikeThroughContainerState extends State<StrikeThroughContainer>
 }
 
 class StrikeThroughPainter extends CustomPainter {
-  final BuildContext context;
+  final Color color;
   final double progress;
 
-  StrikeThroughPainter(this.progress, this.context);
+  StrikeThroughPainter(this.progress, this.color);
 
   @override
   void paint(Canvas canvas, Size size) {
     if (progress == 0) return;
 
     final paint = Paint()
-      ..color = Theme.of(context).disabledColor
+      ..color = color
       ..strokeWidth = 4.0
       ..strokeCap = StrokeCap.round;
 
-    const startX = 0.0;
-    final endX = size.width * progress;
+    const padding = 6.0;
 
-    final startY = size.height;
-    final endY = size.height - size.height * progress;
+    const startX = padding;
+    final endX = (size.width - padding) * progress;
+
+    final heightWithPadding = size.height - padding;
+
+    final startY = heightWithPadding;
+    final endY = heightWithPadding - heightWithPadding * progress;
 
     canvas.drawLine(Offset(startX, startY), Offset(endX, endY), paint);
   }

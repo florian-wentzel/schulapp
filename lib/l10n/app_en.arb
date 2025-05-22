@@ -1186,5 +1186,11 @@
   "strMarkDayAsNotSubstituted": "Mark day as not substituted",
   "@strMarkDayAsNotSubstituted": {},
   "strShowNextDayAfterSchoolEnd": "Show next day after school ends",
-  "@strShowNextDayAfterSchoolEnd": {}
+  "@strShowNextDayAfterSchoolEnd": {},
+  "strMarkAsSick": "Mark lesson as absent due to illness",
+  "@strMarkAsSick": {},
+  "strMarkDayAsSick": "Mark day as absent due to illness",
+  "@strMarkDayAsSick": {},
+  "strMarkDayAsNotSick": "Mark day as not sick",
+  "@strMarkDayAsNotSick": {}
 }

@@ -48,6 +48,7 @@ class _TimetableWidgetState extends State<TimetableWidget> {
 
   double lessonHeight = minLessonHeight;
   double lessonWidth = minLessonWidth;
+  double timeWidth = minLessonWidth;
 
   late Color selectedColor;
   late Color unselectedColor;
@@ -236,8 +237,15 @@ class _TimetableWidgetState extends State<TimetableWidget> {
 
     lessonWidth =
         (mediaQuerySize.width) / (currTimetableWeek.schoolDays.length + 1);
+    timeWidth = lessonWidth;
+
     if (lessonWidth < minLessonWidth) {
-      lessonWidth = minLessonWidth;
+      const timeFrac = 2 / 3;
+      //neu berechnen, damit man die halbe größe der timeWidth mit einkalkuliert
+      lessonWidth = (mediaQuerySize.width) /
+          (currTimetableWeek.schoolDays.length + timeFrac);
+      // lessonWidth = minLessonWidth;
+      timeWidth = lessonWidth * timeFrac;
     }
 
     lessonHeight = (mediaQuerySize.height -
@@ -263,7 +271,7 @@ class _TimetableWidgetState extends State<TimetableWidget> {
     }
 
     return SizedBox(
-      width: lessonWidth * (currTimetableWeek.schoolDays.length + 1),
+      width: lessonWidth * (currTimetableWeek.schoolDays.length) + timeWidth,
       height: lessonHeight * (currTimetableWeek.maxLessonCount + 1) +
           _breakLightHeight,
       child: child,
@@ -326,9 +334,12 @@ class _TimetableWidgetState extends State<TimetableWidget> {
     List<Widget> timeWidgets = [];
 
     timeWidgets.add(
-      SizedBox(
+      Container(
         key: currDayPage ? widget.controller.timeLeftKey : null,
-        width: lessonWidth,
+        padding: const EdgeInsets.only(
+          left: 4,
+        ),
+        width: timeWidth,
         height: lessonHeight,
         child: Center(
           child: TimeToNextLessonWidget(
@@ -372,8 +383,9 @@ class _TimetableWidgetState extends State<TimetableWidget> {
 
       Widget timeWidget = Container(
         color: containerColor,
-        width: lessonWidth,
+        width: timeWidth,
         height: lessonHeight,
+        padding: const EdgeInsets.only(left: 4),
         child: Center(
           child: FittedBox(
             fit: BoxFit.contain,
@@ -396,7 +408,9 @@ class _TimetableWidgetState extends State<TimetableWidget> {
       timeWidgets.add(timeWidget);
 
       if (addBreakWidget) {
-        timeWidgets.add(_createBreakHighlight());
+        timeWidgets.add(_createBreakHighlight(
+          width: timeWidth,
+        ));
       }
     }
 
@@ -405,11 +419,11 @@ class _TimetableWidgetState extends State<TimetableWidget> {
     );
   }
 
-  Widget _createBreakHighlight() {
+  Widget _createBreakHighlight({double? width}) {
     return Container(
       color: selectedColor,
       height: _breakLightHeight,
-      width: lessonWidth,
+      width: width ?? lessonWidth,
     );
   }
 
@@ -454,6 +468,7 @@ class _TimetableWidgetState extends State<TimetableWidget> {
           final lessons = tt.schoolDays[dayIndex].lessons;
 
           int totalCancelledLessonsCount = 0;
+          int totalSickLessonsCount = 0;
           int totalSubstituteLessonsCount = 0;
           int totalLessonCount = 0;
 
@@ -476,6 +491,9 @@ class _TimetableWidgetState extends State<TimetableWidget> {
             if (specialLesson is CancelledSpecialLesson) {
               totalCancelledLessonsCount++;
             }
+            if (specialLesson is SickSpecialLesson) {
+              totalSickLessonsCount++;
+            }
             if (specialLesson is SubstituteSpecialLesson) {
               totalSubstituteLessonsCount++;
             }
@@ -485,6 +503,7 @@ class _TimetableWidgetState extends State<TimetableWidget> {
 
           final dayIsCancelled =
               totalCancelledLessonsCount > totalLessonCount / 2;
+          final dayIsSick = totalSickLessonsCount > totalLessonCount / 2;
           final dayIsSubstituted =
               totalSubstituteLessonsCount > totalLessonCount / 2;
 
@@ -495,7 +514,7 @@ class _TimetableWidgetState extends State<TimetableWidget> {
               if (!dayIsCancelled)
                 (
                   AppLocalizationsManager.localizations.strMarkDayAsCancelled,
-                  dayIsSubstituted
+                  dayIsSubstituted || dayIsSick
                       ? null
                       : () async {
                           await Future.delayed(
@@ -581,6 +600,121 @@ class _TimetableWidgetState extends State<TimetableWidget> {
                             dayContainerControllers[dayIndex]?[i]
                                 .strikeThrough = false;
 
+                            if (mounted) {
+                              dayContainerControllers[dayIndex]?[i]
+                                  .setStrikeColorToCancelled(context);
+                            }
+
+                            //falls es schon ausgefallen ist
+                            tt.removeSpecialLesson(
+                              year: currYear,
+                              weekIndex: currWeekIndex,
+                              dayIndex: dayIndex,
+                              timeIndex: i,
+                            );
+                          }
+
+                          //falls vertretungsstunden dabei waren damit sie nach der animation berichtigt werden
+                          await Future.delayed(
+                            const Duration(milliseconds: 500),
+                          );
+
+                          if (mounted) {
+                            setState(() {});
+                          }
+                        },
+                ),
+              if (!dayIsSick)
+                (
+                  AppLocalizationsManager.localizations.strMarkDayAsSick,
+                  dayIsSubstituted || dayIsCancelled
+                      ? null
+                      : () async {
+                          await Future.delayed(
+                            const Duration(milliseconds: 50),
+                          );
+
+                          for (int i = 0;
+                              i <
+                                  min(
+                                      lessons.length,
+                                      dayContainerControllers[dayIndex]
+                                              ?.length ??
+                                          0);
+                              i++) {
+                            if (SchoolLesson.isEmptyLesson(lessons[i])) {
+                              tt.removeSpecialLesson(
+                                year: currYear,
+                                weekIndex: currWeekIndex,
+                                dayIndex: dayIndex,
+                                timeIndex: i,
+                              );
+                              continue;
+                            }
+
+                            await Future.delayed(
+                              const Duration(milliseconds: 50),
+                            );
+
+                            dayContainerControllers[dayIndex]?[i]
+                                .strikeThrough = true;
+
+                            dayContainerControllers[dayIndex]?[i]
+                                .setStrikeColorToSick();
+
+                            //falls es schon ausgefallen ist
+                            tt.removeSpecialLesson(
+                              year: currYear,
+                              weekIndex: currWeekIndex,
+                              dayIndex: dayIndex,
+                              timeIndex: i,
+                            );
+
+                            tt.setSpecialLesson(
+                              weekIndex: currWeekIndex,
+                              year: currYear,
+                              specialLesson: SickSpecialLesson(
+                                dayIndex: dayIndex,
+                                timeIndex: i,
+                              ),
+                            );
+                          }
+
+                          //falls vertretungsstunden dabei waren damit sie nach der animation berichtigt werden
+                          await Future.delayed(
+                            const Duration(milliseconds: 500),
+                          );
+
+                          if (mounted) {
+                            setState(() {});
+                          }
+                        },
+                ),
+              if (dayIsSick)
+                (
+                  AppLocalizationsManager.localizations.strMarkDayAsNotSick,
+                  dayIsSubstituted || dayIsCancelled
+                      ? null
+                      : () async {
+                          await Future.delayed(
+                            const Duration(milliseconds: 50),
+                          );
+
+                          for (int i = 0;
+                              i <
+                                  min(
+                                      lessons.length,
+                                      dayContainerControllers[dayIndex]
+                                              ?.length ??
+                                          0);
+                              i++) {
+                            await Future.delayed(
+                              const Duration(milliseconds: 50),
+                            );
+
+                            dayContainerControllers[dayIndex]?[i]
+                                .strikeThrough = false;
+
                             //falls es schon ausgefallen ist
                             tt.removeSpecialLesson(
                               year: currYear,
@@ -603,7 +737,7 @@ class _TimetableWidgetState extends State<TimetableWidget> {
               if (!dayIsSubstituted)
                 (
                   AppLocalizationsManager.localizations.strMarkDayAsSubstituted,
-                  dayIsCancelled
+                  dayIsCancelled || dayIsSick
                       ? null
                       : () async {
                           final prefabs = tt.lessonPrefabs;
@@ -682,7 +816,7 @@ class _TimetableWidgetState extends State<TimetableWidget> {
                 (
                   AppLocalizationsManager
                       .localizations.strMarkDayAsNotSubstituted,
-                  dayIsCancelled
+                  dayIsCancelled || dayIsSick
                       ? null
                       : () async {
                           await Future.delayed(
@@ -850,18 +984,28 @@ class _TimetableWidgetState extends State<TimetableWidget> {
             widget.highlightCurrLessonAndDay;
       }
       final StrikeThroughContainerController containerController =
-          StrikeThroughContainerController();
+          StrikeThroughContainerController(context);
 
       dayContainerControllers[dayIndex] ??= [];
       dayContainerControllers[dayIndex]?.add(containerController);
 
-      containerController.strikeThrough = tt.getSpecialLesson(
-            schoolDayIndex: dayIndex,
-            schoolTimeIndex: lessonIndex,
-            weekIndex: currWeekIndex,
-            year: currYear,
-          ) is CancelledSpecialLesson &&
-          widget.highlightCurrLessonAndDay;
+      final specialLesson = tt.getSpecialLesson(
+        schoolDayIndex: dayIndex,
+        schoolTimeIndex: lessonIndex,
+        weekIndex: currWeekIndex,
+        year: currYear,
+      );
+
+      containerController.strikeThrough =
+          (specialLesson is CancelledSpecialLesson ||
+                  specialLesson is SickSpecialLesson) &&
+              widget.highlightCurrLessonAndDay;
+
+      if (specialLesson is SickSpecialLesson) {
+        containerController.setStrikeColorToSick();
+      } else if (specialLesson is CancelledSpecialLesson) {
+        containerController.setStrikeColorToCancelled(context);
+      }
 
       // if (dayIndex == 0 && lessonIndex == 0) {
       //   widget.controller.markSpecialLesson = () {

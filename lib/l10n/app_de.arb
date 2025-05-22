@@ -410,5 +410,8 @@
   "strMarkDayAsNotCancelled": "Tag als nicht ausgefallen markieren",
   "strMarkDayAsSubstituted": "Tag als vertreten markieren",
   "strMarkDayAsNotSubstituted": "Tag als nicht vertreten markieren",
-  "strShowNextDayAfterSchoolEnd": "Nach Schulschluss nächsten Tag anzeigen"
+  "strShowNextDayAfterSchoolEnd": "Nach Schulschluss nächsten Tag anzeigen",
+  "strMarkAsSick": "Als Fehlstunde wegen Krankheit markieren",
+  "strMarkDayAsSick": "Als Fehltag wegen Krankheit markieren",
+  "strMarkDayAsNotSick": "Tag als nicht Krank markieren"
 }

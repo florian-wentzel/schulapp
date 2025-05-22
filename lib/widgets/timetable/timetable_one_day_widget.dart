@@ -470,6 +470,7 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
           final lessons = tt.schoolDays[dayIndex].lessons;
 
           int totalCancelledLessonsCount = 0;
+          int totalSickLessonsCount = 0;
           int totalSubstituteLessonsCount = 0;
           int totalLessonCount = 0;
 
@@ -490,6 +491,9 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
             if (specialLesson is CancelledSpecialLesson) {
               totalCancelledLessonsCount++;
             }
+            if (specialLesson is SickSpecialLesson) {
+              totalSickLessonsCount++;
+            }
             if (specialLesson is SubstituteSpecialLesson) {
               totalSubstituteLessonsCount++;
             }
@@ -499,6 +503,7 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
 
           final dayIsCancelled =
               totalCancelledLessonsCount > totalLessonCount / 2;
+          final dayIsSick = totalSickLessonsCount > totalLessonCount / 2;
           final dayIsSubstituted =
               totalSubstituteLessonsCount > totalLessonCount / 2;
 
@@ -509,7 +514,7 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
               if (!dayIsCancelled)
                 (
                   AppLocalizationsManager.localizations.strMarkDayAsCancelled,
-                  dayIsSubstituted
+                  dayIsSubstituted || dayIsSick
                       ? null
                       : () async {
                           await Future.delayed(
@@ -587,6 +592,112 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
 
                             dayContainerControllers[i].strikeThrough = false;
 
+                            if (mounted) {
+                              dayContainerControllers[i]
+                                  .setStrikeColorToCancelled(context);
+                            }
+
+                            //falls es schon ausgefallen ist
+                            tt.removeSpecialLesson(
+                              year: currYear,
+                              weekIndex: currWeekIndex,
+                              dayIndex: dayIndex,
+                              timeIndex: i,
+                            );
+                          }
+
+                          //falls vertretungsstunden dabei waren damit sie nach der animation berichtigt werden
+                          await Future.delayed(
+                            const Duration(milliseconds: 500),
+                          );
+
+                          if (mounted) {
+                            setState(() {});
+                          }
+                        },
+                ),
+              if (!dayIsSick)
+                (
+                  AppLocalizationsManager.localizations.strMarkDayAsSick,
+                  dayIsSubstituted || dayIsCancelled
+                      ? null
+                      : () async {
+                          await Future.delayed(
+                            const Duration(milliseconds: 50),
+                          );
+
+                          for (int i = 0;
+                              i <
+                                  min(lessons.length,
+                                      dayContainerControllers.length);
+                              i++) {
+                            if (SchoolLesson.isEmptyLesson(lessons[i])) {
+                              tt.removeSpecialLesson(
+                                year: currYear,
+                                weekIndex: currWeekIndex,
+                                dayIndex: dayIndex,
+                                timeIndex: i,
+                              );
+                              continue;
+                            }
+
+                            await Future.delayed(
+                              const Duration(milliseconds: 50),
+                            );
+
+                            dayContainerControllers[i].strikeThrough = true;
+
+                            dayContainerControllers[i].setStrikeColorToSick();
+
+                            //falls es schon ausgefallen ist
+                            tt.removeSpecialLesson(
+                              year: currYear,
+                              weekIndex: currWeekIndex,
+                              dayIndex: dayIndex,
+                              timeIndex: i,
+                            );
+
+                            tt.setSpecialLesson(
+                              weekIndex: currWeekIndex,
+                              year: currYear,
+                              specialLesson: SickSpecialLesson(
+                                dayIndex: dayIndex,
+                                timeIndex: i,
+                              ),
+                            );
+                          }
+
+                          //falls vertretungsstunden dabei waren damit sie nach der animation berichtigt werden
+                          await Future.delayed(
+                            const Duration(milliseconds: 500),
+                          );
+
+                          if (mounted) {
+                            setState(() {});
+                          }
+                        },
+                ),
+              if (dayIsSick)
+                (
+                  AppLocalizationsManager.localizations.strMarkDayAsNotSick,
+                  dayIsSubstituted || dayIsCancelled
+                      ? null
+                      : () async {
+                          await Future.delayed(
+                            const Duration(milliseconds: 50),
+                          );
+
+                          for (int i = 0;
+                              i <
+                                  min(lessons.length,
+                                      dayContainerControllers.length);
+                              i++) {
+                            await Future.delayed(
+                              const Duration(milliseconds: 50),
+                            );
+
+                            dayContainerControllers[i].strikeThrough = false;
+
                             //falls es schon ausgefallen ist
                             tt.removeSpecialLesson(
                               year: currYear,
@@ -609,7 +720,7 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
               if (!dayIsSubstituted)
                 (
                   AppLocalizationsManager.localizations.strMarkDayAsSubstituted,
-                  dayIsCancelled
+                  dayIsCancelled || dayIsSick
                       ? null
                       : () async {
                           final prefabs = tt.lessonPrefabs;
@@ -684,7 +795,7 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
                 (
                   AppLocalizationsManager
                       .localizations.strMarkDayAsNotSubstituted,
-                  dayIsCancelled
+                  dayIsCancelled || dayIsSick
                       ? null
                       : () async {
                           await Future.delayed(
@@ -865,14 +976,24 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
       }
 
       final StrikeThroughContainerController containerController =
-          StrikeThroughContainerController();
+          StrikeThroughContainerController(context);
 
-      containerController.strikeThrough = tt.getSpecialLesson(
+      final specialLesson = tt.getSpecialLesson(
         schoolDayIndex: dayIndex,
         schoolTimeIndex: lessonIndex,
         weekIndex: currWeekIndex,
         year: currYear,
-      ) is CancelledSpecialLesson;
+      );
+
+      containerController.strikeThrough =
+          specialLesson is CancelledSpecialLesson ||
+              specialLesson is SickSpecialLesson;
+
+      if (specialLesson is SickSpecialLesson) {
+        containerController.setStrikeColorToSick();
+      } else if (specialLesson is CancelledSpecialLesson) {
+        containerController.setStrikeColorToCancelled(context);
+      }
 
       dayContainerControllers.add(containerController);
 

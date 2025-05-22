@@ -140,46 +140,47 @@ class _HomeScreenState extends State<HomeScreen> {
         title: Text(widget.title),
         actions: [
           ListenableBuilder(
-              listenable: _dragCalendarDownController,
-              builder: (context, child) {
-                return AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 500),
-                  transitionBuilder: (child, animation) {
-                    final rotationAnimation = Tween<double>(
-                      begin: 0.2,
-                      end: _dragCalendarDownController.isOpen ? 0.1 : 0.0,
-                    ).animate(animation);
+            listenable: _dragCalendarDownController,
+            builder: (context, child) {
+              return AnimatedSwitcher(
+                duration: const Duration(milliseconds: 500),
+                transitionBuilder: (child, animation) {
+                  final rotationAnimation = Tween<double>(
+                    begin: 0.2,
+                    end: _dragCalendarDownController.isOpen ? 0.1 : 0.0,
+                  ).animate(animation);
 
-                    return RotationTransition(
-                      turns: rotationAnimation,
-                      child: FadeTransition(
-                        opacity: animation,
-                        child: child,
-                      ),
-                    );
-                  },
-                  child: IconButton(
-                    key: ValueKey(_dragCalendarDownController.isOpen),
-                    tooltip: _dragCalendarDownController.isOpen
-                        ? AppLocalizationsManager.localizations.strCloseCalendar
-                        : AppLocalizationsManager.localizations.strOpenCalendar,
-                    onPressed: () async {
-                      if (_dragCalendarDownController.isOpen) {
-                        _dragCalendarDownController.close();
-                      } else {
-                        _dragCalendarDownController.open();
-                      }
-
-                      setState(() {});
-                    },
-                    icon: Icon(
-                      _dragCalendarDownController.isOpen
-                          ? Icons.event_busy
-                          : Icons.event,
+                  return RotationTransition(
+                    turns: rotationAnimation,
+                    child: FadeTransition(
+                      opacity: animation,
+                      child: child,
                     ),
+                  );
+                },
+                child: IconButton(
+                  key: ValueKey(_dragCalendarDownController.isOpen),
+                  tooltip: _dragCalendarDownController.isOpen
+                      ? AppLocalizationsManager.localizations.strCloseCalendar
+                      : AppLocalizationsManager.localizations.strOpenCalendar,
+                  onPressed: () async {
+                    if (_dragCalendarDownController.isOpen) {
+                      _dragCalendarDownController.close();
+                    } else {
+                      _dragCalendarDownController.open();
+                    }
+
+                    setState(() {});
+                  },
+                  icon: Icon(
+                    _dragCalendarDownController.isOpen
+                        ? Icons.event_busy
+                        : Icons.event,
                   ),
-                );
-              }),
+                ),
+              );
+            },
+          ),
           Visibility(
             visible: extraTimetable != null && widget.isHomeScreen,
             child: IconButton(
@@ -1416,7 +1417,8 @@ class _HomeScreenState extends State<HomeScreen> {
       );
       if ((SchoolLesson.isEmptyLesson(schoolDay.lessons[i]) &&
               specialLesson is! SubstituteSpecialLesson) ||
-          specialLesson is CancelledSpecialLesson) {
+          specialLesson is CancelledSpecialLesson ||
+          specialLesson is SickSpecialLesson) {
         startIndex++;
       } else {
         break;
@@ -1553,7 +1555,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
       if ((SchoolLesson.isEmptyLesson(schoolDay.lessons[i]) &&
               specialLesson is! SubstituteSpecialLesson) ||
-          specialLesson is CancelledSpecialLesson) {
+          specialLesson is CancelledSpecialLesson ||
+          specialLesson is SickSpecialLesson) {
         endIndex--;
       } else {
         break;

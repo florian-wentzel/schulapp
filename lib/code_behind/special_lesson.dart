@@ -57,6 +57,41 @@ abstract class SpecialLesson {
   Map<String, dynamic> toJson();
 }
 
+class SickSpecialLesson extends SpecialLesson {
+  static const type = "Sick";
+
+  SickSpecialLesson({
+    required super.dayIndex,
+    required super.timeIndex,
+  }) : super(
+          name: "",
+          room: "",
+          teacher: "",
+          color: Colors.black,
+        );
+
+  @override
+  Map<String, dynamic> toJson() {
+    final map = {
+      SpecialLesson.typeKey: type,
+      SpecialLesson.dayIndexKey: _dayIndex,
+      SpecialLesson.timeIndexKey: _timeIndex,
+    };
+
+    return map;
+  }
+
+  static SpecialLesson fromJson(Map<String, dynamic> json) {
+    final dayIndex = json[SpecialLesson.dayIndexKey];
+    final timeIndex = json[SpecialLesson.timeIndexKey];
+
+    return SickSpecialLesson(
+      dayIndex: dayIndex,
+      timeIndex: timeIndex,
+    );
+  }
+}
+
 class CancelledSpecialLesson extends SpecialLesson {
   static const type = "Cancelled";
 
