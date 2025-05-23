@@ -758,6 +758,7 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
       _timetableCopy,
       prefab,
       newName: newPrefab.$1.name,
+      newShortName: newPrefab.$1.shortName,
       newTeacher: newPrefab.$1.teacher,
       newColor: newPrefab.$1.color,
     );

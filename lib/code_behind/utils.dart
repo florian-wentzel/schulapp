@@ -64,6 +64,7 @@ class Utils {
     Timetable timetable,
     SchoolLessonPrefab prefab, {
     String? newName,
+    String? newShortName,
     String? newTeacher,
     String? newRoom,
     Color? newColor,
@@ -73,6 +74,7 @@ class Utils {
         tt,
         prefab,
         newName: newName,
+        newShortName: newShortName,
         newTeacher: newTeacher,
         newRoom: newRoom,
         newColor: newColor,
@@ -93,6 +95,9 @@ class Utils {
 
         if (newName != null) {
           lesson.name = newName;
+        }
+        if (newShortName != null) {
+          lesson.shortName = newShortName;
         }
         if (newTeacher != null) {
           lesson.teacher = newTeacher;

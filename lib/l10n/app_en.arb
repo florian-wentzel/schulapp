@@ -2,6 +2,10 @@
   "@@locale": "en",
   "language_name": "Englisch",
   "@language_name": {},
+  "version_0_9_7": "Added option to display the whole week on the home screen. Abbreviations are used when space is limited. (Customizable)",
+  "@version_0_9_7": {},
+  "version_0_9_6": "Lessons can now be marked as absent due to illness (long press on lesson)",
+  "@version_0_9_6": {},
   "version_0_9_5": "Added setting to automatically display the next day",
   "@version_0_9_5": {},
   "version_0_9_4": "Added extended functionality by long-pressing the day name",
@@ -1192,5 +1196,11 @@
   "strMarkDayAsSick": "Mark day as absent due to illness",
   "@strMarkDayAsSick": {},
   "strMarkDayAsNotSick": "Mark day as not sick",
-  "@strMarkDayAsNotSick": {}
+  "@strMarkDayAsNotSick": {},
+  "strShowAlwaysWeekTimetable": "Show week instead of day on home screen",
+  "@strShowAlwaysWeekTimetable": {},
+  "strShortName": "Abbreviation",
+  "@strShortName": {},
+  "strShortNameExplanation": "The abbreviation is shown in the timetable when space is limited.",
+  "@strShortNameExplanation": {}
 }

@@ -440,7 +440,6 @@ Future<(SchoolLessonPrefab schoolLessonPrefab, bool delete)?>
   BuildContext context, {
   SchoolLessonPrefab? prefab,
 }) async {
-  const maxNameLength = 20;
   String title;
 
   if (prefab == null) {
@@ -450,6 +449,7 @@ Future<(SchoolLessonPrefab schoolLessonPrefab, bool delete)?>
   }
 
   TextEditingController nameController = TextEditingController();
+  TextEditingController shortNameController = TextEditingController();
   TextEditingController teacherController = TextEditingController();
   TextEditingController roomController = TextEditingController();
 
@@ -457,12 +457,24 @@ Future<(SchoolLessonPrefab schoolLessonPrefab, bool delete)?>
   String name = prefab?.name ?? "";
   String teacher = prefab?.teacher ?? "";
   String room = prefab?.room ?? "";
+  String shortName = prefab?.shortName ?? "";
 
   nameController.text = name;
   teacherController.text = teacher;
   roomController.text = room;
+  shortNameController.text = shortName;
 
   bool createPressed = false;
+
+  String checkShortName = "";
+  if (name.length > SchoolLesson.maxShortNameLength) {
+    checkShortName = name.substring(0, SchoolLesson.maxShortNameLength);
+  } else {
+    checkShortName = name;
+  }
+  // wenn der shortName nicht dem default entspricht,
+  // dann wurde der shortName extra gespeichert
+  bool userSetShortName = checkShortName != shortName;
 
   bool? delete = await showModalBottomSheet(
     context: context,
@@ -486,15 +498,91 @@ Future<(SchoolLessonPrefab schoolLessonPrefab, bool delete)?>
                 const SizedBox(
                   height: 12,
                 ),
-                TextField(
-                  decoration: InputDecoration(
-                    hintText: AppLocalizationsManager.localizations.strName,
-                  ),
-                  // autofocus: true,
-                  maxLines: 1,
-                  maxLength: maxNameLength,
-                  textAlign: TextAlign.center,
-                  controller: nameController,
+                Row(
+                  spacing: 8,
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: Row(
+                        children: [
+                          IconButton(
+                            tooltip: AppLocalizationsManager
+                                .localizations.strInformation,
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return AlertDialog.adaptive(
+                                    title: Text(
+                                      AppLocalizationsManager
+                                          .localizations.strInformation,
+                                    ),
+                                    content: Text(
+                                      AppLocalizationsManager.localizations
+                                          .strShortNameExplanation,
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () =>
+                                            Navigator.of(context).pop(),
+                                        child: Text(
+                                          AppLocalizationsManager
+                                              .localizations.strOK,
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            },
+                            icon: const Icon(Icons.info),
+                          ),
+                          Expanded(
+                            child: TextField(
+                              decoration: InputDecoration(
+                                hintText: AppLocalizationsManager
+                                    .localizations.strShortName,
+                              ),
+                              onChanged: (value) {
+                                userSetShortName = value.isNotEmpty;
+                              },
+                              maxLines: 1,
+                              maxLength: SchoolLesson.maxShortNameLength,
+                              textAlign: TextAlign.center,
+                              controller: shortNameController,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      flex: 3,
+                      child: TextField(
+                        decoration: InputDecoration(
+                          hintText:
+                              AppLocalizationsManager.localizations.strName,
+                        ),
+                        onChanged: (value) {
+                          if (!userSetShortName) {
+                            if (value.length >
+                                SchoolLesson.maxShortNameLength) {
+                              shortNameController.text = value.substring(
+                                0,
+                                SchoolLesson.maxShortNameLength,
+                              );
+                            } else {
+                              shortNameController.text = value;
+                            }
+                          }
+                        },
+                        // autofocus: true,
+                        maxLines: 1,
+                        maxLength: SchoolLesson.maxNameLength,
+                        textAlign: TextAlign.center,
+                        controller: nameController,
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(
                   height: 12,
@@ -505,6 +593,7 @@ Future<(SchoolLessonPrefab schoolLessonPrefab, bool delete)?>
                   ),
                   autofocus: false,
                   maxLines: 1,
+                  maxLength: SchoolLesson.maxTeacherLength,
                   textAlign: TextAlign.center,
                   controller: teacherController,
                 ),
@@ -517,6 +606,7 @@ Future<(SchoolLessonPrefab schoolLessonPrefab, bool delete)?>
                   ),
                   autofocus: false,
                   maxLines: 1,
+                  maxLength: SchoolLesson.maxRoomLength,
                   textAlign: TextAlign.center,
                   controller: roomController,
                 ),
@@ -538,6 +628,7 @@ Future<(SchoolLessonPrefab schoolLessonPrefab, bool delete)?>
                 ElevatedButton(
                   onPressed: () {
                     name = nameController.text.trim();
+                    shortName = shortNameController.text.trim();
                     teacher = teacherController.text.trim();
                     room = roomController.text.trim();
                     createPressed = true;
@@ -599,9 +690,20 @@ Future<(SchoolLessonPrefab schoolLessonPrefab, bool delete)?>
     return null;
   }
 
+  checkShortName = "";
+  if (name.length > SchoolLesson.maxShortNameLength) {
+    checkShortName = name.substring(0, SchoolLesson.maxShortNameLength);
+  } else {
+    checkShortName = name;
+  }
+
   return (
     SchoolLessonPrefab(
       name: name,
+      // wenn der gerade erstellte checkShortName nicht gleich dem eingestellten
+      // shortname ist, dann wurde nicht der default generierte genommen,
+      // also dein eigentlichen speichern
+      shortName: checkShortName != shortName ? shortName : "",
       room: room,
       teacher: teacher,
       color: color,

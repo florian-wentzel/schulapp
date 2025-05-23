@@ -57,6 +57,7 @@ class _TimetableWidgetState extends State<TimetableWidget> {
   late int currYear;
 
   bool _alreadyShowedErrorBecauseOfReducedHours = false;
+  bool _showOnlyShortNameOfLessons = false;
 
   late Size mediaQuerySize;
 
@@ -240,12 +241,15 @@ class _TimetableWidgetState extends State<TimetableWidget> {
     timeWidth = lessonWidth;
 
     if (lessonWidth < minLessonWidth) {
+      _showOnlyShortNameOfLessons = true;
       const timeFrac = 2 / 3;
       //neu berechnen, damit man die halbe größe der timeWidth mit einkalkuliert
       lessonWidth = (mediaQuerySize.width) /
           (currTimetableWeek.schoolDays.length + timeFrac);
       // lessonWidth = minLessonWidth;
       timeWidth = lessonWidth * timeFrac;
+    } else {
+      _showOnlyShortNameOfLessons = false;
     }
 
     lessonHeight = (mediaQuerySize.height -
@@ -1041,6 +1045,7 @@ class _TimetableWidgetState extends State<TimetableWidget> {
         showTaskOnHomescreen: showTaskOnHomescreen,
         tt: tt,
         showSubstituteLessons: widget.showTodoEvents,
+        showOnlyShortName: _showOnlyShortNameOfLessons,
       );
 
       lessonWidgets.add(lessonWidget);

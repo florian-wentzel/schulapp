@@ -1034,6 +1034,7 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
         lessonWidth: lessonWidth,
         showTaskOnHomescreen: showTaskOnHomescreen,
         tt: tt,
+        showOnlyShortName: false,
       );
 
       lessonWidgets.add(lessonWidget);

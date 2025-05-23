@@ -353,6 +353,7 @@ class Timetable {
 
         SchoolLessonPrefab prefab = SchoolLessonPrefab(
           name: lesson.name,
+          shortName: lesson.shortName,
           room: lesson.room,
           teacher: lesson.teacher,
           color: lesson.color,

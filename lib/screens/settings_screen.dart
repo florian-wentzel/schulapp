@@ -178,6 +178,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _openMainSemesterAutomatically(),
         _showTasksOnHomeScreen(),
         _showNextDayIfDayEnds(),
+        _showAlwaysWeekTimetableKey(),
         _highContrastOnHomeScreen(),
         _reducedClassHoursEnabled(),
         _reducedClassHours(),
@@ -532,6 +533,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
           onChanged: (value) {
             TimetableManager().settings.setVar(
                   Settings.showNextDayAfterDayEndKey,
+                  value,
+                );
+            setState(() {});
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _showAlwaysWeekTimetableKey() {
+    return SettingsScreen.listItem(
+      context,
+      title: AppLocalizationsManager.localizations.strShowAlwaysWeekTimetable,
+      afterTitle: [
+        Switch.adaptive(
+          value: TimetableManager().settings.getVar(
+                Settings.showAlwaysWeekTimetableKey,
+              ),
+          onChanged: (value) {
+            TimetableManager().settings.setVar(
+                  Settings.showAlwaysWeekTimetableKey,
                   value,
                 );
             setState(() {});

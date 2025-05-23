@@ -1,6 +1,8 @@
 {
   "@@locale": "de",
   "language_name": "Deutsch",
+  "version_0_9_7": "Option hinzugefügt, die ganze Woche auf dem Startbildschirm anzuzeigen. Bei Platzmangel werden Abkürzungen genutzt. (Anpassbar)",
+  "version_0_9_6": "Stunden können nun als Fehltag wegen Krankheit markiert werden (lange auf Stunde drücken)",
   "version_0_9_5": "Einstellung, um automatisch den nächsten Tag anzuzeigen, hinzugefügt",
   "version_0_9_4": "Erweiterte Funktionen durch langes Drücken auf den Tagesnamen hinzugefügt",
   "version_0_9_3": "Kalender zum Startbildschirm hinzugefügt",
@@ -413,5 +415,8 @@
   "strShowNextDayAfterSchoolEnd": "Nach Schulschluss nächsten Tag anzeigen",
   "strMarkAsSick": "Als Fehlstunde wegen Krankheit markieren",
   "strMarkDayAsSick": "Als Fehltag wegen Krankheit markieren",
-  "strMarkDayAsNotSick": "Tag als nicht Krank markieren"
+  "strMarkDayAsNotSick": "Tag als nicht Krank markieren",
+  "strShowAlwaysWeekTimetable": "Woche statt Tag auf Startbildschirm anzeigen",
+  "strShortName": "Abkürzung",
+  "strShortNameExplanation": "Die Abkürzung wird im Stundenplan angezeigt, wenn der Platz begrenzt ist."
 }

@@ -143,12 +143,12 @@ class StrikeThroughPainter extends CustomPainter {
     const padding = 6.0;
 
     const startX = padding;
-    final endX = (size.width - padding) * progress;
+    final endX = (size.width - padding * 2) * progress + padding;
 
     final heightWithPadding = size.height - padding;
 
     final startY = heightWithPadding;
-    final endY = heightWithPadding - heightWithPadding * progress;
+    final endY = size.height - (size.height - padding * 2) * progress - padding;
 
     canvas.drawLine(Offset(startX, startY), Offset(endX, endY), paint);
   }

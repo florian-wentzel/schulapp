@@ -428,7 +428,11 @@ class _HomeScreenState extends State<HomeScreen> {
           AppBar().preferredSize.height * 2;
     }
 
-    if (Utils.isMobileRatio(context)) {
+    final showAlwaysWeekTimetable = TimetableManager().settings.getVar(
+          Settings.showAlwaysWeekTimetableKey,
+        );
+
+    if (Utils.isMobileRatio(context) && !showAlwaysWeekTimetable) {
       height -= kBottomNavigationBarHeight * 1.5;
       height -= 2; //without you could scroll a little bit
 

@@ -36,6 +36,7 @@ class TimetableLessonWidget extends StatefulWidget {
   final int lessonIndex;
 
   final bool showSubstituteLessons;
+  final bool showOnlyShortName;
 
   const TimetableLessonWidget({
     super.key,
@@ -53,6 +54,7 @@ class TimetableLessonWidget extends StatefulWidget {
     required this.lessonHeight,
     required this.lessonWidth,
     required this.showTaskOnHomescreen,
+    required this.showOnlyShortName,
     this.showSubstituteLessons = true,
   });
 
@@ -83,6 +85,7 @@ class _TimetableLessonWidgetState extends State<TimetableLessonWidget> {
       SubstituteSpecialLesson substituteSpecialLesson = specialLesson;
       lessonPrefab = SchoolLessonPrefab(
         name: substituteSpecialLesson.name,
+        shortName: substituteSpecialLesson.shortName,
         room: substituteSpecialLesson.room,
         teacher: substituteSpecialLesson.teacher,
         color: substituteSpecialLesson.color,
@@ -275,8 +278,9 @@ class _TimetableLessonWidgetState extends State<TimetableLessonWidget> {
                 animation: animation,
                 builder: (context, _) {
                   return Container(
-                    width: widget.lessonWidth * 0.8,
-                    height: widget.lessonHeight * 0.8,
+                    width: widget.lessonWidth,
+                    height: widget.lessonHeight,
+                    margin: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
                       color: ColorTween(
                         begin: lessonPrefab.color,
@@ -313,7 +317,9 @@ class _TimetableLessonWidgetState extends State<TimetableLessonWidget> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           HighContrastText(
-                            text: lessonPrefab.name,
+                            text: widget.showOnlyShortName
+                                ? lessonPrefab.shortName
+                                : lessonPrefab.name,
                             highContrastEnabled: highContrastEnabled,
                             textStyle: Theme.of(context).textTheme.bodyLarge,
                             fontWeight: null,

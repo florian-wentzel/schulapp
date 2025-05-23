@@ -7,22 +7,27 @@ import 'package:schulapp/extensions.dart';
 class SchoolLesson {
   static const typeKey = "type";
   static const nameKey = "name";
+  static const shortNameKey = "shortName";
   static const roomKey = "room";
   static const teacherKey = "teacher";
   static const colorKey = "color";
 
-  static const maxNameLength = 10;
+  static const maxNameLength = 30;
+  static const maxShortNameLength = 2;
   static const maxRoomLength = 10;
+  static const maxTeacherLength = 15;
 
   static const String emptyLessonName = "---";
 
   String name;
+  String shortName;
   String room;
   String teacher;
   Color color;
 
   SchoolLesson({
     required this.name,
+    required this.shortName,
     required this.room,
     required this.teacher,
     required this.color,
@@ -31,6 +36,7 @@ class SchoolLesson {
   static SchoolLesson fromPrefab(SchoolLessonPrefab prefab) {
     return SchoolLesson(
       name: prefab.name,
+      shortName: prefab.shortName,
       room: prefab.room,
       teacher: prefab.teacher,
       color: prefab.color.withRed(prefab.color.red),
@@ -40,6 +46,7 @@ class SchoolLesson {
   Map<String, dynamic> toJson() {
     return {
       nameKey: name,
+      if (shortName.isNotEmpty) shortNameKey: shortName,
       roomKey: room,
       teacherKey: teacher,
       colorKey: color.toJson(),
@@ -61,6 +68,7 @@ class SchoolLesson {
     String? type = json[typeKey];
 
     String n = json[nameKey] ?? "";
+    String s = json[shortNameKey] ?? "";
     String t = json[teacherKey] ?? "";
     String r = json[roomKey] ?? "";
     Color c = ColorExtension.fromJson(json[colorKey]);
@@ -81,6 +89,7 @@ class SchoolLesson {
 
     return SchoolLesson(
       name: n,
+      shortName: s,
       teacher: t,
       room: r,
       color: c,
@@ -94,6 +103,7 @@ class SchoolLesson {
   SchoolLesson clone() {
     return SchoolLesson(
       name: name,
+      shortName: shortName,
       room: room,
       teacher: teacher,
       color: color.withRed(color.red),
@@ -109,6 +119,7 @@ class EmptySchoolLesson extends SchoolLesson {
     required this.lessonIndex,
   }) : super(
           name: "",
+          shortName: "",
           room: "",
           teacher: "",
           color: Colors.transparent,

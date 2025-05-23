@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:schulapp/code_behind/school_lesson.dart';
 import 'package:schulapp/code_behind/school_lesson_prefab.dart';
 import 'package:schulapp/extensions.dart';
 
@@ -6,6 +7,7 @@ abstract class SpecialLesson {
   static const typeKey = "type";
 
   static const nameKey = "name";
+  static const shortNameKey = "shortName";
   static const roomKey = "room";
   static const teacherKey = "teacher";
   static const colorKey = "color";
@@ -13,6 +15,7 @@ abstract class SpecialLesson {
   static const timeIndexKey = "timeIndex";
 
   final String _name;
+  final String _shortName;
   final String _room;
   final String _teacher;
   final Color _color;
@@ -22,6 +25,18 @@ abstract class SpecialLesson {
   final int _timeIndex;
 
   String get name => _name;
+  String get shortName {
+    if (_shortName.isEmpty) {
+      if (_name.length > SchoolLesson.maxShortNameLength) {
+        return _name.substring(0, SchoolLesson.maxShortNameLength);
+      } else {
+        return _name;
+      }
+    }
+
+    return _shortName;
+  }
+
   String get room => _room;
   String get teacher => _teacher;
   Color get color => _color;
@@ -31,12 +46,14 @@ abstract class SpecialLesson {
 
   SpecialLesson({
     required String name,
+    required String shortName,
     required String room,
     required String teacher,
     required Color color,
     required int dayIndex,
     required int timeIndex,
   })  : _name = name,
+        _shortName = shortName,
         _room = room,
         _teacher = teacher,
         _color = color,
@@ -65,6 +82,7 @@ class SickSpecialLesson extends SpecialLesson {
     required super.timeIndex,
   }) : super(
           name: "",
+          shortName: "",
           room: "",
           teacher: "",
           color: Colors.black,
@@ -100,6 +118,7 @@ class CancelledSpecialLesson extends SpecialLesson {
     required super.timeIndex,
   }) : super(
           name: "",
+          shortName: "",
           room: "",
           teacher: "",
           color: Colors.black,
@@ -136,6 +155,7 @@ class SubstituteSpecialLesson extends SpecialLesson {
     required SchoolLessonPrefab prefab,
   }) : super(
           name: prefab.name,
+          shortName: prefab.shortName,
           room: prefab.room,
           teacher: prefab.teacher,
           color: prefab.color,
@@ -148,6 +168,7 @@ class SubstituteSpecialLesson extends SpecialLesson {
       SpecialLesson.dayIndexKey: _dayIndex,
       SpecialLesson.timeIndexKey: _timeIndex,
       SpecialLesson.nameKey: _name,
+      SpecialLesson.shortNameKey: _shortName,
       SpecialLesson.roomKey: _room,
       SpecialLesson.teacherKey: _teacher,
       SpecialLesson.colorKey: _color.toJson(),
@@ -160,6 +181,7 @@ class SubstituteSpecialLesson extends SpecialLesson {
     final dayIndex = json[SpecialLesson.dayIndexKey];
     final timeIndex = json[SpecialLesson.timeIndexKey];
     final name = json[SpecialLesson.nameKey];
+    final shortName = json[SpecialLesson.shortNameKey] ?? "";
     final room = json[SpecialLesson.roomKey];
     final teacher = json[SpecialLesson.teacherKey];
     final color = ColorExtension.fromJson(json[SpecialLesson.colorKey]);
@@ -169,6 +191,7 @@ class SubstituteSpecialLesson extends SpecialLesson {
       timeIndex: timeIndex,
       prefab: SchoolLessonPrefab(
         name: name,
+        shortName: shortName,
         room: room,
         teacher: teacher,
         color: color,

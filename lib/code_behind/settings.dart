@@ -140,6 +140,7 @@ class Settings {
   static const lastAskForReviewDateKey = "lastAskForReviewDate";
   static const calendarShowTodoEventColorKey = "calendarShowTodoEventColor";
   static const showNextDayAfterDayEndKey = "showNextDayAfterDayEnd";
+  static const showAlwaysWeekTimetableKey = "showAlwaysWeekTimetable";
 
   static const waitBetweenAskForReviewDuration = Duration(days: 3);
 
@@ -460,6 +461,10 @@ class Settings {
     ),
     SettingsVar<bool>(
       key: showNextDayAfterDayEndKey,
+      defaultValue: () => false,
+    ),
+    SettingsVar<bool>(
+      key: showAlwaysWeekTimetableKey,
       defaultValue: () => false,
     ),
   ];
