@@ -901,7 +901,10 @@ class _TimetableWidgetState extends State<TimetableWidget> {
                                 textAlign: TextAlign.center,
                               ),
                         Text(
-                          day.name,
+                          _showOnlyShortNameOfLessons
+                              ? day.name
+                                  .substring(0, SchoolLesson.maxShortNameLength)
+                              : day.name,
                           style: Theme.of(context).textTheme.headlineSmall,
                           textAlign: TextAlign.center,
                         ),

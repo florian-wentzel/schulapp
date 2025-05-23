@@ -432,9 +432,14 @@ class _HomeScreenState extends State<HomeScreen> {
           Settings.showAlwaysWeekTimetableKey,
         );
 
-    if (Utils.isMobileRatio(context) && !showAlwaysWeekTimetable) {
+    if (Utils.isMobileRatio(context)) {
       height -= kBottomNavigationBarHeight * 1.5;
       height -= 2; //without you could scroll a little bit
+    }
+
+    if (Utils.isMobileRatio(context) && !showAlwaysWeekTimetable) {
+      // height -= kBottomNavigationBarHeight * 1.5;
+      // height -= 2; //without you could scroll a little bit
 
       return _timetableBuilder(
         width: width,
@@ -496,13 +501,13 @@ class _HomeScreenState extends State<HomeScreen> {
             focusedDay: _timetableController.currDay ??
                 DateTime.now().add(
                   const Duration(
-                    days: 1,
+                    days: 2,
                   ),
                 ),
             currentDay: _timetableController.currDay ??
                 DateTime.now().add(
                   const Duration(
-                    days: 1,
+                    days: 2,
                   ),
                 ),
             onDaySelected: (selectedDay, _) {
