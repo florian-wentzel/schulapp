@@ -3,6 +3,9 @@ How to Update:
  - Add translation at the top of l10n/app_de.arb etc.
  - Go to VersionManager.dart and add the translation to the _versions map
 
+#TODO: sign build
+How to Build Windows:
+- dart run msix:create
 
 How to change package name:
  - run the following command in console (in project dir)

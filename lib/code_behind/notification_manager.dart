@@ -3,7 +3,16 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:schulapp/app.dart';
+import 'package:schulapp/code_behind/timetable_manager.dart';
+import 'package:schulapp/code_behind/todo_event.dart';
+import 'package:schulapp/screens/todo_events_screen.dart';
 import 'package:timezone/timezone.dart';
+
+@pragma('vm:entry-point')
+void notificationTapBackground(NotificationResponse notificationResponse) {
+  NotificationManager()._pendingNotificationResponse = notificationResponse;
+}
 
 class NotificationManager {
   static final NotificationManager _instance =
@@ -28,28 +37,73 @@ class NotificationManager {
     iOS: DarwinNotificationDetails(),
   );
 
+  NotificationResponse? _pendingNotificationResponse;
+  bool get pendingNotification => _pendingNotificationResponse != null;
+
+  void handlePendingNotification() {
+    if (_pendingNotificationResponse != null) {
+      onDidReceiveNotificationResponse(_pendingNotificationResponse!);
+      _pendingNotificationResponse = null;
+    }
+  }
+
   Future<void> initNotifications() async {
     //um logo zu ändern: https://youtu.be/26TTYlwc6FM?t=146
     const initializationSettingsAndroid = AndroidInitializationSettings("icon");
 
-    final initializationSettingsIOS = DarwinInitializationSettings(
+    const initializationSettingsIOS = DarwinInitializationSettings(
       requestAlertPermission: true,
       requestBadgePermission: true,
       requestSoundPermission: true,
-      onDidReceiveLocalNotification: (id, title, body, payload) async {},
     );
 
-    var initializationSettings = InitializationSettings(
+    const initializationSettingsWindows = WindowsInitializationSettings(
+      appName: 'Schulapp',
+      appUserModelId: 'com.flologames.schulapp',
+      //TODO: icon does not work jet
+      iconPath: 'app_icon.ico',
+      // Search online for GUID generators to make your own
+      guid: '4a9f4a94-8f00-4cc5-a82d-20187c1a4240',
+    );
+
+    var initializationSettings = const InitializationSettings(
       android: initializationSettingsAndroid,
       iOS: initializationSettingsIOS,
+      windows: initializationSettingsWindows,
     );
 
     bool? success = await notificationsPlugin.initialize(
       initializationSettings,
-      onDidReceiveNotificationResponse: (details) {},
+      onDidReceiveNotificationResponse: onDidReceiveNotificationResponse,
+      onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
     );
 
     debugPrint("Notifications initialized: $success");
+  }
+
+  void onDidReceiveNotificationResponse(
+      NotificationResponse notificationResponse) async {
+    final String? payload = notificationResponse.payload;
+    if (notificationResponse.payload != null) {
+      debugPrint('notification payload: $payload');
+
+      int? key = int.tryParse(payload ?? "");
+
+      if (key == null || key > maxIdNum) return;
+
+      final todoEvent =
+          TimetableManager().todoEvents.cast<TodoEvent?>().firstWhere(
+                (element) => element?.key == key,
+                orElse: () => null,
+              );
+
+      if (todoEvent == null) return;
+
+      MainApp.router.go(
+        TodoEventsScreen.route,
+        extra: todoEvent,
+      );
+    }
   }
 
   Future<Map<Permission, PermissionStatus>?> askForPermission() async {
@@ -65,11 +119,17 @@ class NotificationManager {
 
   Future<void> showNotifications(
       {required int id, required String title, String? body}) async {
-    if (!Platform.isIOS && !Platform.isAndroid) {
+    if (!Platform.isIOS && !Platform.isAndroid && !Platform.isWindows) {
       return;
     }
     await askForPermission();
-    return notificationsPlugin.show(id, title, body, _notificationDetails);
+    return notificationsPlugin.show(
+      id,
+      title,
+      body,
+      _notificationDetails,
+      payload: "$id",
+    );
   }
 
   Future<void> scheduleNotification({
@@ -79,7 +139,7 @@ class NotificationManager {
     String? payload,
     required DateTime scheduledDateTime,
   }) async {
-    if (!Platform.isIOS && !Platform.isAndroid) {
+    if (!Platform.isIOS && !Platform.isAndroid && !Platform.isWindows) {
       return;
     }
 
@@ -93,16 +153,15 @@ class NotificationManager {
       id,
       title,
       body,
+      payload: payload ?? "$id",
       TZDateTime.from(scheduledDateTime, local),
       _notificationDetails,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
     );
   }
 
   Future<void> cancleNotification(int id) async {
-    if (!Platform.isIOS && !Platform.isAndroid) {
+    if (!Platform.isIOS && !Platform.isAndroid && !Platform.isWindows) {
       return;
     }
 

@@ -448,7 +448,10 @@ class _TodoEventsScreenState extends State<TodoEventsScreen> {
           }
           setState(() {});
         },
-        child: Text(buttons[_currentMultiSelectionButtonTextIndex].item1),
+        child: Text(
+          buttons[_currentMultiSelectionButtonTextIndex].item1,
+          textAlign: TextAlign.center,
+        ),
       ),
     );
   }

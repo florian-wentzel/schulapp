@@ -13,7 +13,8 @@ class SchoolLesson {
   static const colorKey = "color";
 
   static const maxNameLength = 30;
-  static const maxShortNameLength = 2;
+  static const maxShortNameLength = 3;
+  static const maxShortWeekNameLength = 2;
   static const maxRoomLength = 10;
   static const maxTeacherLength = 15;
 

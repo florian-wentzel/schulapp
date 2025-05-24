@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:schulapp/code_behind/notification_manager.dart';
 import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/timetable_manager.dart';
 import 'package:schulapp/code_behind/todo_event.dart';
@@ -107,6 +108,7 @@ final _router = GoRouter(
 
 class MainApp extends StatefulWidget {
   static ValueNotifier<bool> showBottomnavBar = ValueNotifier<bool>(true);
+  static GoRouter get router => _router;
 
   ///secure just means that only the current screen can update the visibility
   static void changeNavBarVisibilitySecure(
@@ -189,7 +191,12 @@ class _MainAppState extends State<MainApp> {
   }
 
   Future<void> postFrameCallback(Duration timeStamp) async {
+    if (NotificationManager().pendingNotification) {
+      NotificationManager().handlePendingNotification();
+    }
+
     await HomeWidgetManager.initialize();
+
     if (!mounted) return;
     await HomeWidgetManager.updateWithDefaultTimetable(context: context);
   }
