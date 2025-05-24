@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart';
 import 'package:schulapp/code_behind/save_manager.dart';
@@ -15,7 +16,56 @@ class GoFileIoManager {
 
   GoFileIoManager._internal();
 
-  Future<String> uploadFile(File file) async {
+  static const _safeAlphabet =
+      'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+  //convert a string to a string with chars out of the _safeAlphabet
+  String stringToSafeCode(String input) {
+    Uint8List bytes = utf8.encode(input);
+
+    int resultInt = 0;
+    for (int byte in bytes) {
+      resultInt = resultInt * 256 + byte;
+    }
+
+    String saveCode = '';
+
+    while (resultInt > 0) {
+      int index = resultInt % _safeAlphabet.length;
+      resultInt = resultInt ~/ _safeAlphabet.length;
+
+      saveCode = _safeAlphabet[index] + saveCode;
+    }
+
+    return saveCode;
+  }
+
+  //convert a string with chars out of the _safeAlphabet to a normal string
+  String stringFromSafeCode(String input) {
+    final chars = input.split('');
+    int resultInt = 0;
+
+    for (String char in chars) {
+      int index = _safeAlphabet.indexOf(char);
+      if (index == -1) {
+        throw "$char is not a valid character in the safe alphabet";
+      }
+      resultInt = resultInt * _safeAlphabet.length + index;
+    }
+
+    List<int> bytes = [];
+    while (resultInt > 0) {
+      bytes.add(resultInt % 256);
+      resultInt = resultInt ~/ 256;
+    }
+
+    return utf8.decode(bytes.reversed.toList());
+  }
+
+  Future<String> uploadFile(
+    File file, {
+    bool returnSaveCode = false,
+  }) async {
     if (!file.existsSync()) {
       throw AppLocalizationsManager.localizations.strSelectedFileDoesNotExist;
     }
@@ -34,6 +84,9 @@ class GoFileIoManager {
 
       String? downlaodLink = json?["data"]["parentFolderCode"];
       if (downlaodLink != null) {
+        if (returnSaveCode) {
+          return stringToSafeCode(downlaodLink);
+        }
         return downlaodLink;
       }
     }
@@ -43,7 +96,14 @@ class GoFileIoManager {
     );
   }
 
-  Future<String> downloadFile(String id) async {
+  Future<String> downloadFile(
+    String id, {
+    bool isSaveCode = false,
+  }) async {
+    if (isSaveCode) {
+      id = stringFromSafeCode(id);
+    }
+
     String accToken = await _getAccToken();
 
     (String link, String name) fileLinkAndName = await _getFileLinkAndName(

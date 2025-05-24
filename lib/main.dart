@@ -20,6 +20,8 @@ void main() async {
 
   await Future.wait(futures);
 
+  // debugRepaintRainbowEnabled = true;
+
   runApp(
     BetterFeedback(
       feedbackBuilder: (context, onSubmit, scrollController) =>

@@ -347,7 +347,10 @@ class SaveManager {
       SaveManager().getTempDir().path,
     );
 
-    final code = await GoFileIoManager().uploadFile(exportFile);
+    final code = await GoFileIoManager().uploadFile(
+      exportFile,
+      returnSaveCode: true,
+    );
 
     SaveManager().deleteTempDir();
 

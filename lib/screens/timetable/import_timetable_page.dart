@@ -66,7 +66,7 @@ class _ImportTimetablePageState extends State<ImportTimetablePage> {
   void _selectTimetable() async {
     FilePickerResult? result;
     try {
-      if(Theme.of(context).platform == TargetPlatform.iOS) {
+      if (Theme.of(context).platform == TargetPlatform.iOS) {
         throw Exception("");
       }
       result = await FilePicker.platform.pickFiles(
@@ -156,7 +156,7 @@ class _ImportTimetablePageState extends State<ImportTimetablePage> {
 
   void _selectViaCode() async {
     final nameController = TextEditingController();
-    const maxNameLength = 10;
+    const maxNameLength = 15;
 
     bool createPressed = false;
 
@@ -181,6 +181,10 @@ class _ImportTimetablePageState extends State<ImportTimetablePage> {
                 decoration: InputDecoration(
                   hintText: AppLocalizationsManager.localizations.strCode,
                 ),
+                onSubmitted: (value) {
+                  createPressed = true;
+                  Navigator.of(context).pop();
+                },
                 autofocus: true,
                 maxLines: 1,
                 maxLength: maxNameLength,
@@ -238,7 +242,10 @@ class _ImportTimetablePageState extends State<ImportTimetablePage> {
     String? downloadedPath;
 
     try {
-      downloadedPath = await GoFileIoManager().downloadFile(code);
+      downloadedPath = await GoFileIoManager().downloadFile(
+        code,
+        isSaveCode: true,
+      );
     } catch (e) {
       if (mounted) {
         Utils.showInfo(
