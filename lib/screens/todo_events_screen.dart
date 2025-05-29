@@ -158,7 +158,7 @@ class _TodoEventsScreenState extends State<TodoEventsScreen> {
                   onPressed: _shareAllItems,
                   tooltip: AppLocalizationsManager.localizations.strExport,
                   icon: const Icon(
-                    Icons.upload,
+                    Icons.share,
                   ),
                 ),
                 IconButton(
