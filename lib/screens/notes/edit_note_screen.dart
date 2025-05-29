@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:animated_list_plus/animated_list_plus.dart';
 import 'package:animated_list_plus/transitions.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:schulapp/app.dart';
@@ -14,10 +15,14 @@ import 'package:schulapp/l10n/app_localizations_manager.dart';
 
 class EditNoteScreen extends StatefulWidget {
   final SchoolNote schoolNote;
+  //nur true wenn es eine nicht gespeicherte
+  //Notiz ist, welche gerade importiert wird
+  final bool isImportSchoolNote;
 
   const EditNoteScreen({
     super.key,
     required this.schoolNote,
+    this.isImportSchoolNote = false,
   });
 
   @override
@@ -255,6 +260,8 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
       context,
       question: AppLocalizationsManager
           .localizations.strDoYouWantToCreateACopyOfTheFile,
+      description: AppLocalizationsManager
+          .localizations.strDoYouWantToCreateACopyOfTheFileDescription,
       showYesAndNoInsteadOfOK: true,
     );
 
@@ -302,6 +309,8 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
   }
 
   void _saveNote() {
+    if (widget.isImportSchoolNote) return;
+
     widget.schoolNote.title = _headingTextController.text.trim();
 
     SaveManager().saveSchoolNote(widget.schoolNote);
@@ -354,6 +363,16 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
                           ),
                         ),
                       ),
+                      if (kDebugMode)
+                        Expanded(
+                          child: Text(
+                            "Directory name",
+                            style: TextStyle(
+                              color:
+                                  Theme.of(context).textTheme.bodyMedium!.color,
+                            ),
+                          ),
+                        ),
                     ],
                   ),
                   Divider(
@@ -387,6 +406,16 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
                           ),
                         ),
                       ),
+                      if (kDebugMode)
+                        Expanded(
+                          child: SelectableText(
+                            widget.schoolNote.saveFileName,
+                            style: TextStyle(
+                              color:
+                                  Theme.of(context).textTheme.bodyMedium!.color,
+                            ),
+                          ),
+                        ),
                     ],
                   ),
                 ],

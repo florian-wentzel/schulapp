@@ -1,6 +1,7 @@
 {
   "@@locale": "de",
   "language_name": "Deutsch",
+  "version_0_9_8": "Aufgaben können jetzt ganz einfach geteilt werden",
   "version_0_9_7": "Option hinzugefügt, die ganze Woche auf dem Startbildschirm anzuzeigen. Bei Platzmangel werden Abkürzungen genutzt. (Anpassbar)",
   "version_0_9_6": "Stunden können nun als Fehltag wegen Krankheit markiert werden (lange auf Stunde drücken)",
   "version_0_9_5": "Einstellung, um automatisch den nächsten Tag anzuzeigen, hinzugefügt",
@@ -297,6 +298,7 @@
   "strDoYouWantToDeleteAllLinkedNote": "Möchtest du die verknüpften Notizen löschen?",
   "strImagePreviewTitle": "Bild",
   "strDoYouWantToCreateACopyOfTheFile": "Möchten Sie eine Kopie von der Datei anlegen?",
+  "strDoYouWantToCreateACopyOfTheFileDescription": "Wenn Sie keine Kopie anlegen, kann die Datei nicht geteilt werden.",
   "strLastModifiedOn": "Zuletzt bearbeitet am",
   "strCreatedOn": "Erstellt am",
   "strAddReminder": "Erinnerung hinzufügen",
@@ -341,7 +343,7 @@
   "strImportViaCode": "via online Code importieren",
   "strShareViaOnlineCode": "Teilen als Online-Code",
   "strCode": "Code",
-  "strDataSavedViaGoFile": "Die Daten werden über GoFile.io gespeichert und nach einiger Zeit gelöscht.",
+  "strDataSavedViaGoFile": "Die Daten werden auf GoFile.io gespeichert und nach 10 Tagen automatisch gelöscht, sofern nicht regelmäßig darauf zugegriffen wird.",
   "strFailedToUploadFile": "Datei-Upload fehlgeschlagen. Statuscode: {statusCode}\nAntwort: {body}",
   "strDownloadFailed": "Download fehlgeschlagen. Statuscode: ${statusCode}\nAntwort: ${body}",
   "strFailedToRetrieveAccountToken": "Fehler beim Abrufen eines Kontotokens. Statuscode: ${statusCode}\nAntwort: ${body}",
@@ -418,5 +420,10 @@
   "strMarkDayAsNotSick": "Tag als nicht Krank markieren",
   "strShowAlwaysWeekTimetable": "Woche statt Tag auf Startbildschirm anzeigen",
   "strShortName": "Abkürzung",
-  "strShortNameExplanation": "Die Abkürzung wird im Stundenplan angezeigt, wenn der Platz begrenzt ist."
+  "strShortNameExplanation": "Die Abkürzung wird im Stundenplan angezeigt, wenn der Platz begrenzt ist.",
+  "strShareTodoEventWarning": "Importiere Aufgaben nur von vertrauenswürdigen Personen!",
+  "strShareTodoEventWarningDescription": "Beim Importieren einer Aufgabe kann eine Notiz enthalten sein, die schädliche Dateien enthält. Sei also vorsichtig, bevor du eine Datei öffnest!",
+  "strDoNotShowAgain": "Nicht erneut Anzeigen",
+  "strShareYourTodoEvents": "Teile deine Aufgaben!",
+  "strWhichTodoEventsWouldYouLikeToImport": "Welche Aufgaben möchtest du importieren?"
 }

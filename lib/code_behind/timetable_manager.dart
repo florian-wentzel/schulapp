@@ -325,7 +325,13 @@ class TimetableManager {
     }
   }
 
-  void addOrChangeTodoEvent(TodoEvent event) {
+  void addOrChangeTodoEvent(
+    TodoEvent event, {
+    String? saveOnlineCode,
+  }) {
+    //damit bei änderungen nicht der gleiche onlineCode angezeigt wird
+    //man müsste es eigentlich mit hash vergleichungen lösen aber keine Zeit
+    event.saveOnlineCode = saveOnlineCode;
     final index = todoEvents.indexWhere((element) => element.key == event.key);
     if (index != -1) {
       todoEvents[index].cancleNotification().then(

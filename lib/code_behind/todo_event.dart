@@ -16,6 +16,7 @@ class TodoEvent {
   static const String _desciptionKey = "desciption";
   static const String _finishedKey = "finished";
   static const String _customEventKey = "isCustomEvent";
+  static const String _saveOnlineCodeKey = "saveOnlineCode";
 
   static const IconData homeworkIcon = Icons.assignment;
   static const IconData presentationIcon = Icons.speaker_notes;
@@ -33,6 +34,8 @@ class TodoEvent {
   ///SchoolNote.saveFileName
   final String? linkedSchoolNote;
   final bool isCustomEvent;
+
+  String? saveOnlineCode;
 
   DateTime? endTime;
   TodoType type;
@@ -52,6 +55,7 @@ class TodoEvent {
     required this.desciption,
     required this.finished,
     required this.isCustomEvent,
+    this.saveOnlineCode,
   }) {
     key ??= UniqueIdGenerator.createUniqueId();
 
@@ -101,6 +105,7 @@ class TodoEvent {
       _desciptionKey: desciption,
       _finishedKey: finished,
       _customEventKey: isCustomEvent,
+      _saveOnlineCodeKey: saveOnlineCode,
       _uniqueKeyKey: _key,
     };
   }
@@ -109,6 +114,7 @@ class TodoEvent {
     String name = json[_nameKey];
     String linkedSubjectName = json[_linkedSubjectNameKey];
     String? linkedSchoolNote = json[_linkedSchoolNoteKey];
+    String? saveOnlineCode = json[_saveOnlineCodeKey];
     int? milliSec = json[_endTimeKey];
     int? key = json[_uniqueKeyKey];
     DateTime? endTime;
@@ -132,6 +138,7 @@ class TodoEvent {
       desciption: desciption,
       isCustomEvent: customEvent,
       finished: finished,
+      saveOnlineCode: saveOnlineCode,
     );
   }
 

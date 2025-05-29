@@ -350,7 +350,7 @@ class _NewTodoEventWidgetState extends State<NewTodoEventWidget> {
     } else {
       child = SchoolNoteListItem(
         key: const ValueKey("extraInfo"),
-        onDelete: () async {
+        onDeletePressed: () async {
           linkedSchoolNote = null;
 
           setState(() {});
@@ -361,6 +361,9 @@ class _NewTodoEventWidgetState extends State<NewTodoEventWidget> {
           await Future.delayed(
             const Duration(milliseconds: 300),
           );
+        },
+        onDelete: () async {
+          setState(() {});
         },
         schoolNote: linkedSchoolNote!,
       );
@@ -419,7 +422,7 @@ class _NewTodoEventWidgetState extends State<NewTodoEventWidget> {
       items: List.generate(
         notes.length,
         (index) => (
-          notes[index].title,
+          notes[index].getTitle(context),
           () async {
             selectedNote = notes[index];
           },

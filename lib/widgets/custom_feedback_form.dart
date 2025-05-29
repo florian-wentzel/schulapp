@@ -41,7 +41,7 @@ class CustomFeedbackForm extends StatefulWidget {
 
           feedbackFile.writeAsBytesSync(feedback.screenshot);
 
-          String code = await GoFileIoManager().uploadFile(feedbackFile);
+          String code = await GoFileIoManager().uploadFiles([feedbackFile]);
 
           final extra = feedback.extra;
 

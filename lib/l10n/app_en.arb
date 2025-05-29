@@ -2,6 +2,8 @@
   "@@locale": "en",
   "language_name": "Englisch",
   "@language_name": {},
+  "version_0_9_8": "Tasks can now be easily shared",
+  "@version_0_9_8": {},
   "version_0_9_7": "Added option to display the whole week on the home screen. Abbreviations are used when space is limited. (Customizable)",
   "@version_0_9_7": {},
   "version_0_9_6": "Lessons can now be marked as absent due to illness (long press on lesson)",
@@ -822,6 +824,8 @@
   "@strImagePreviewTitle": {},
   "strDoYouWantToCreateACopyOfTheFile": "Would you like to create a copy of the file?",
   "@strDoYouWantToCreateACopyOfTheFile": {},
+  "strDoYouWantToCreateACopyOfTheFileDescription": "If you do not create a copy, the file cannot be shared.",
+  "@strDoYouWantToCreateACopyOfTheFileDescription": {},
   "strLastModifiedOn": "Last modified on",
   "@strLastModifiedOn": {},
   "strCreatedOn": "Created on",
@@ -967,7 +971,7 @@
   "@strShareViaOnlineCode": {},
   "strCode": "Code",
   "@strCode": {},
-  "strDataSavedViaGoFile": "The data is saved via GoFile.io and will be deleted after a while.",
+  "strDataSavedViaGoFile": "The data is stored on GoFile.io and will be automatically deleted after 10 days unless accessed regularly.",
   "@strDataSavedViaGoFile": {},
   "strFailedToUploadFile": "Failed to upload file. Status code: {statusCode}\nResponse: {body}",
   "@strFailedToUploadFile": {
@@ -1202,5 +1206,15 @@
   "strShortName": "Abbreviation",
   "@strShortName": {},
   "strShortNameExplanation": "The abbreviation is shown in the timetable when space is limited.",
-  "@strShortNameExplanation": {}
+  "@strShortNameExplanation": {},
+  "strShareTodoEventWarning": "Only import tasks from trusted people",
+  "@strShareTodoEventWarning": {},
+  "strShareTodoEventWarningDescription": "When you import a task, it may contain a note with harmful files. So be careful before opening a file!",
+  "@strShareTodoEventWarningDescription": {},
+  "strDoNotShowAgain": "Do not show again",
+  "@strDoNotShowAgain": {},
+  "strShareYourTodoEvents": "Share your tasks!",
+  "@strShareYourTodoEvents": {},
+  "strWhichTodoEventsWouldYouLikeToImport": "Which tasks would you like to import?",
+  "@strWhichTodoEventsWouldYouLikeToImport": {}
 }

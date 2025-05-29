@@ -155,6 +155,11 @@ class _ImportTimetablePageState extends State<ImportTimetablePage> {
   }
 
   void _selectViaCode() async {
+    final allowed =
+        await GoFileIoManager().showTermsOfServicesEnabledDialog(context);
+
+    if (!allowed || !mounted) return;
+
     final nameController = TextEditingController();
     const maxNameLength = 15;
 
@@ -242,10 +247,11 @@ class _ImportTimetablePageState extends State<ImportTimetablePage> {
     String? downloadedPath;
 
     try {
-      downloadedPath = await GoFileIoManager().downloadFile(
+      downloadedPath = (await GoFileIoManager().downloadFiles(
         code,
         isSaveCode: true,
-      );
+      ))
+          .first;
     } catch (e) {
       if (mounted) {
         Utils.showInfo(

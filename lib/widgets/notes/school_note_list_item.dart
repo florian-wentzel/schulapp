@@ -10,23 +10,30 @@ class SchoolNoteListItem extends StatefulWidget {
   final SchoolNote schoolNote;
   //gets called if the delete iconbutten gets pressed
   final Future<void> Function()? onDelete;
+  final Future<void> Function()? onDeletePressed;
   final bool showDeleteBtn;
 
   const SchoolNoteListItem({
     super.key,
     required this.schoolNote,
     this.onDelete,
+    this.onDeletePressed,
     this.showDeleteBtn = true,
   });
 
   @override
   State<SchoolNoteListItem> createState() => _SchoolNoteListItemState();
 
-  static Future<T?> openNote<T>(BuildContext context, SchoolNote note) {
+  static Future<T?> openNote<T>(
+    BuildContext context,
+    SchoolNote note, {
+    bool isCustomSchoolNote = false,
+  }) {
     return Navigator.of(context).push<T>(
       MaterialPageRoute(
         builder: (context) => EditNoteScreen(
           schoolNote: note,
+          isImportSchoolNote: isCustomSchoolNote,
         ),
       ),
     );
@@ -55,7 +62,7 @@ class _SchoolNoteListItemState extends State<SchoolNoteListItem> {
 
           setState(() {});
         },
-        title: Text(getTitle(widget.schoolNote)),
+        title: Text(widget.schoolNote.getTitle(context)),
         trailing: !widget.showDeleteBtn
             ? const Icon(
                 Icons.description,
@@ -66,15 +73,14 @@ class _SchoolNoteListItemState extends State<SchoolNoteListItem> {
                 children: <Widget>[
                   IconButton(
                     onPressed: () async {
-                      await widget.onDelete?.call();
-
+                      await widget.onDeletePressed?.call();
                       if (!context.mounted) return;
 
                       bool delete = await Utils.showBoolInputDialog(
                         context,
                         question: AppLocalizationsManager.localizations
                             .strDoYouWantToDeleteX(
-                          getTitle(widget.schoolNote),
+                          widget.schoolNote.getTitle(context),
                         ),
                         showYesAndNoInsteadOfOK: true,
                         markTrueAsRed: true,
@@ -84,6 +90,10 @@ class _SchoolNoteListItemState extends State<SchoolNoteListItem> {
 
                       bool removed = SchoolNotesManager()
                           .removeSchoolNote(widget.schoolNote);
+
+                      if (removed) {
+                        await widget.onDelete?.call();
+                      }
 
                       if (!context.mounted) return;
 
@@ -97,7 +107,7 @@ class _SchoolNoteListItemState extends State<SchoolNoteListItem> {
                           type: InfoType.success,
                           msg: AppLocalizationsManager.localizations
                               .strSuccessfullyRemoved(
-                            getTitle(widget.schoolNote),
+                            widget.schoolNote.getTitle(context),
                           ),
                         );
                       } else {
@@ -106,7 +116,7 @@ class _SchoolNoteListItemState extends State<SchoolNoteListItem> {
                           type: InfoType.error,
                           msg: AppLocalizationsManager.localizations
                               .strCouldNotBeRemoved(
-                            getTitle(widget.schoolNote),
+                            widget.schoolNote.getTitle(context),
                           ),
                         );
                       }
@@ -120,13 +130,5 @@ class _SchoolNoteListItemState extends State<SchoolNoteListItem> {
               ),
       ),
     );
-  }
-
-  String getTitle(SchoolNote note) {
-    if (note.title.isNotEmpty) {
-      return note.title;
-    }
-
-    return "${Utils.dateToString(note.creationDate)}, ${TimeOfDay.fromDateTime(note.creationDate).format(context)}";
   }
 }

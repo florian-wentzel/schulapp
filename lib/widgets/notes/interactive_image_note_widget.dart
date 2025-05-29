@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/school_note.dart';
 import 'package:schulapp/code_behind/school_note_part.dart';
+import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/screens/notes/image_preview_screen.dart';
 import 'package:schulapp/widgets/notes/resizeble_widget.dart';
 
@@ -25,7 +26,7 @@ class _InteractiveImageNoteWidgetState
     extends State<InteractiveImageNoteWidget> {
   final resizebleController = ResizebleWidgetController();
 
-  late String pathToImg;
+  String? pathToImg;
 
   @override
   void initState() {
@@ -64,10 +65,11 @@ class _InteractiveImageNoteWidgetState
   Widget _normalWidget() {
     return InkWell(
       onTap: () async {
+        if (pathToImg == null) return;
         await Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) => ImagePreviewScreen(
-              pathToImg: pathToImg,
+              pathToImg: pathToImg!,
               heroObj: widget.partImage,
             ),
           ),
@@ -79,10 +81,15 @@ class _InteractiveImageNoteWidgetState
       },
       child: Hero(
         tag: widget.partImage,
-        child: Image.file(
-          File(pathToImg),
-          fit: BoxFit.contain,
-        ),
+        child: pathToImg != null && File(pathToImg!).existsSync()
+            ? Image.file(
+                File(pathToImg!),
+                fit: BoxFit.contain,
+              )
+            : Text(
+                AppLocalizationsManager
+                    .localizations.strSelectedFileDoesNotExist,
+              ),
       ),
     );
   }
@@ -92,10 +99,15 @@ class _InteractiveImageNoteWidgetState
       children: [
         Hero(
           tag: widget.partImage,
-          child: Image.file(
-            File(pathToImg),
-            fit: BoxFit.contain,
-          ),
+          child: pathToImg != null && File(pathToImg!).existsSync()
+              ? Image.file(
+                  File(pathToImg!),
+                  fit: BoxFit.contain,
+                )
+              : Text(
+                  AppLocalizationsManager
+                      .localizations.strSelectedFileDoesNotExist,
+                ),
         ),
         _editBar(),
       ],
@@ -133,10 +145,12 @@ class _InteractiveImageNoteWidgetState
           ),
           IconButton(
             onPressed: () async {
+              if (pathToImg == null) return;
+
               await Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (context) => ImagePreviewScreen(
-                    pathToImg: pathToImg,
+                    pathToImg: pathToImg!,
                     heroObj: widget.partImage,
                     editMode: true,
                   ),

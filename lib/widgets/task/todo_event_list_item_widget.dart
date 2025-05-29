@@ -9,10 +9,13 @@ class TodoEventListItemWidget extends StatelessWidget {
   // Animation<double> animation;
   final void Function() onPressed;
   final void Function() onLongPressed;
-  final void Function() onInfoPressed;
+  final void Function()? onInfoPressed;
   final void Function() onDeleteSwipe;
 
   final TodoEvent event;
+  // Notiz, welche nicht in [SchoolNotesManager] gespeichert ist
+  // aber trotzdem angezeigt werden soll
+  final SchoolNote? notSavedNote;
   final bool removeHero;
   final bool showTimeLeft;
   final bool isSelected;
@@ -22,6 +25,7 @@ class TodoEventListItemWidget extends StatelessWidget {
     this.removeHero = false,
     this.showTimeLeft = true,
     this.isSelected = false,
+    this.notSavedNote,
     required this.event,
     required this.onInfoPressed,
     required this.onPressed,
@@ -57,9 +61,14 @@ class TodoEventListItemWidget extends StatelessWidget {
   }
 
   Widget _body(BuildContext context) {
-    final linkedSchoolNote = SchoolNotesManager().getSchoolNoteBySaveName(
-      event.linkedSchoolNote,
-    );
+    SchoolNote? linkedSchoolNote;
+    if (notSavedNote == null) {
+      linkedSchoolNote = SchoolNotesManager().getSchoolNoteBySaveName(
+        event.linkedSchoolNote,
+      );
+    } else {
+      linkedSchoolNote = notSavedNote;
+    }
 
     return Container(
         margin: const EdgeInsets.symmetric(
@@ -120,7 +129,9 @@ class TodoEventListItemWidget extends StatelessWidget {
                     linkedSchoolNote != null
                         ? IconButton(
                             onPressed: () => _onLinkedSchoolNotePressed(
-                                context, linkedSchoolNote),
+                              context,
+                              linkedSchoolNote!,
+                            ),
                             icon: const Icon(Icons.description),
                           )
                         : const SizedBox.shrink(),
@@ -142,10 +153,11 @@ class TodoEventListItemWidget extends StatelessWidget {
                             },
                           )
                         : const SizedBox.shrink(),
-                    IconButton(
-                      onPressed: onInfoPressed,
-                      icon: const Icon(Icons.info),
-                    ),
+                    if (onInfoPressed != null)
+                      IconButton(
+                        onPressed: onInfoPressed,
+                        icon: const Icon(Icons.info),
+                      ),
                   ],
                 ),
               ],
@@ -161,6 +173,7 @@ class TodoEventListItemWidget extends StatelessWidget {
     await SchoolNoteListItem.openNote(
       context,
       linkedSchoolNote,
+      isCustomSchoolNote: notSavedNote != null,
     );
   }
 }

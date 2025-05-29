@@ -162,11 +162,12 @@ class Utils {
     BuildContext context, {
     required String question,
     String? description,
-    TextButton? extraButton,
+    TextButton Function(BuildContext context)? extraButtonBuilder,
     bool autofocus = false,
     bool showYesAndNoInsteadOfOK = false,
     bool markTrueAsRed = false,
     bool markFalseAsRed = false,
+    bool hideFalse = false,
   }) async {
     bool? value = await showDialog<bool>(
       context: context,
@@ -175,7 +176,7 @@ class Utils {
           title: Text(question),
           content: description == null ? null : Text(description),
           actions: <Widget>[
-            if (extraButton != null) extraButton,
+            if (extraButtonBuilder != null) extraButtonBuilder.call(context),
             TextButton(
               style: markTrueAsRed
                   ? TextButton.styleFrom(
@@ -189,21 +190,22 @@ class Utils {
                   ? AppLocalizationsManager.localizations.strYes
                   : AppLocalizationsManager.localizations.strOK),
             ),
-            TextButton(
-              style: markFalseAsRed
-                  ? TextButton.styleFrom(
-                      foregroundColor: Colors.red,
-                    )
-                  : null,
-              onPressed: () {
-                Navigator.pop(context, false);
-              },
-              child: Text(
-                showYesAndNoInsteadOfOK
-                    ? AppLocalizationsManager.localizations.strNo
-                    : AppLocalizationsManager.localizations.strCancel,
+            if (!hideFalse)
+              TextButton(
+                style: markFalseAsRed
+                    ? TextButton.styleFrom(
+                        foregroundColor: Colors.red,
+                      )
+                    : null,
+                onPressed: () {
+                  Navigator.pop(context, false);
+                },
+                child: Text(
+                  showYesAndNoInsteadOfOK
+                      ? AppLocalizationsManager.localizations.strNo
+                      : AppLocalizationsManager.localizations.strCancel,
+                ),
               ),
-            ),
           ],
         );
       },
@@ -786,10 +788,11 @@ class Utils {
     String? underTitle,
     List<Widget>? bottomActions,
     bool boldTitle = true,
+    double scrollControlDisabledMaxHeightRatio = 0.6,
   }) async {
     await showModalBottomSheet(
       context: context,
-      scrollControlDisabledMaxHeightRatio: 0.6,
+      scrollControlDisabledMaxHeightRatio: scrollControlDisabledMaxHeightRatio,
       builder: (context) {
         return Container(
           margin: const EdgeInsets.all(16),

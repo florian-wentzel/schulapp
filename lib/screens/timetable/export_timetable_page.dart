@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_image_clipboard/flutter_image_clipboard.dart';
 import 'package:go_router/go_router.dart';
+import 'package:schulapp/code_behind/go_file_io_manager.dart';
 import 'package:schulapp/code_behind/multi_platform_manager.dart';
 import 'package:schulapp/code_behind/save_manager.dart';
-import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/timetable.dart';
 import 'package:schulapp/code_behind/timetable_controller.dart';
 import 'package:schulapp/code_behind/timetable_manager.dart';
@@ -15,7 +15,6 @@ import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/screens/home_screen.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class ExportTimetablePage extends StatefulWidget {
   final void Function() goToHomePage;
@@ -193,41 +192,10 @@ class EexportTimetablePageState extends State<ExportTimetablePage> {
   }
 
   Future<void> _onShareTimetable(Timetable timetable) async {
-    bool allowed = TimetableManager()
-        .settings
-        .getVar<bool>(Settings.termsOfServiceGoFileIoAllowed);
+    final enabled =
+        await GoFileIoManager().showTermsOfServicesEnabledDialog(context);
 
-    if (!allowed) {
-      allowed = await Utils.showBoolInputDialog(
-        context,
-        question: AppLocalizationsManager
-            .localizations.strDoYouAgreeToTermsAndServiceOfGoFileIo,
-        description: AppLocalizationsManager
-            .localizations.strFeatureUsesGoFileIoToStoreDataOnline,
-        showYesAndNoInsteadOfOK: true,
-        extraButton: TextButton(
-          onPressed: () {
-            launchUrl(Uri.parse('https://gofile.io/terms'));
-          },
-          child: Text(AppLocalizationsManager.localizations.strTermsOfService),
-        ),
-      );
-
-      if (!allowed) {
-        if (mounted) {
-          Utils.showInfo(
-            context,
-            msg: AppLocalizationsManager.localizations
-                .strYouMustAgreeToTheTermsOfServiceToUseThisFeature,
-            type: InfoType.error,
-          );
-        }
-        return;
-      }
-      TimetableManager()
-          .settings
-          .setVar<bool>(Settings.termsOfServiceGoFileIoAllowed, true);
-    }
+    if (!enabled) return;
 
     try {
       final code = SaveManager().shareTimetable(timetable);
@@ -260,9 +228,11 @@ class EexportTimetablePageState extends State<ExportTimetablePage> {
                   return const SizedBox.shrink();
                 }
 
-                child = ShareTimetableBottomSheet(
+                child = ShareGoFileIOBottomSheet(
                   key: const ValueKey("ShareTimetableBottomSheet"),
-                  headingText: headingText,
+                  shareText: AppLocalizationsManager
+                      .localizations.strShareYourTimetable,
+                  code: headingText,
                 );
               }
 
@@ -534,20 +504,22 @@ class EexportTimetablePageState extends State<ExportTimetablePage> {
   }
 }
 
-class ShareTimetableBottomSheet extends StatefulWidget {
-  const ShareTimetableBottomSheet({
+class ShareGoFileIOBottomSheet extends StatefulWidget {
+  const ShareGoFileIOBottomSheet({
     super.key,
-    required this.headingText,
+    required this.code,
+    required this.shareText,
   });
 
-  final String headingText;
+  final String code;
+  final String shareText;
 
   @override
-  State<ShareTimetableBottomSheet> createState() =>
-      _ShareTimetableBottomSheetState();
+  State<ShareGoFileIOBottomSheet> createState() =>
+      _ShareGoFileIOBottomSheetState();
 }
 
-class _ShareTimetableBottomSheetState extends State<ShareTimetableBottomSheet> {
+class _ShareGoFileIOBottomSheetState extends State<ShareGoFileIOBottomSheet> {
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -558,7 +530,7 @@ class _ShareTimetableBottomSheetState extends State<ShareTimetableBottomSheet> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                widget.headingText,
+                widget.code,
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -566,7 +538,7 @@ class _ShareTimetableBottomSheetState extends State<ShareTimetableBottomSheet> {
               IconButton(
                 onPressed: () {
                   Clipboard.setData(
-                    ClipboardData(text: widget.headingText),
+                    ClipboardData(text: widget.code),
                   );
                   Utils.showInfo(
                     context,
@@ -597,14 +569,14 @@ class _ShareTimetableBottomSheetState extends State<ShareTimetableBottomSheet> {
 
                   Navigator.of(context).pop();
                   Share.share(
-                    widget.headingText,
+                    widget.code,
                     sharePositionOrigin: sharePositionOrigin,
                     subject:
-                        "${AppLocalizationsManager.localizations.strShareYourTimetable}\n${AppLocalizationsManager.localizations.strCode}: ${widget.headingText}",
+                        "${widget.shareText}\n${AppLocalizationsManager.localizations.strCode}: ${widget.code}",
                   );
                 },
                 child: Text(
-                  AppLocalizationsManager.localizations.strShareYourTimetable,
+                  widget.shareText,
                 ),
               );
             },

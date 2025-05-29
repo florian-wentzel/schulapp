@@ -141,6 +141,7 @@ class Settings {
   static const calendarShowTodoEventColorKey = "calendarShowTodoEventColor";
   static const showNextDayAfterDayEndKey = "showNextDayAfterDayEnd";
   static const showAlwaysWeekTimetableKey = "showAlwaysWeekTimetable";
+  static const showImportTodoEventsWarnigKey = "showImportTodoEventsWarnig";
 
   static const waitBetweenAskForReviewDuration = Duration(days: 3);
 
@@ -466,6 +467,10 @@ class Settings {
     SettingsVar<bool>(
       key: showAlwaysWeekTimetableKey,
       defaultValue: () => false,
+    ),
+    SettingsVar<bool>(
+      key: showImportTodoEventsWarnigKey,
+      defaultValue: () => true,
     ),
   ];
 

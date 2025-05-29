@@ -6,8 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:schulapp/code_behind/abi_calculator.dart';
+import 'package:schulapp/code_behind/backup_manager.dart';
 import 'package:schulapp/code_behind/go_file_io_manager.dart';
 import 'package:schulapp/code_behind/school_note.dart';
+import 'package:schulapp/code_behind/school_notes_manager.dart';
 import 'package:schulapp/code_behind/special_lesson.dart';
 import 'package:schulapp/code_behind/todo_event.dart';
 import 'package:schulapp/code_behind/school_semester.dart';
@@ -40,10 +42,12 @@ class SaveManager {
   static const String finishedEventSaveName = "finsihedTodos.json";
   static const String todoEventSaveName = "todos.json";
   static const String timetableFileName = "timetable.json";
+  static const String todoEventFileName = "todoEvent.json";
   static const String schoolNoteFileName = "note.json";
   static const String semesterFileName = "semester.json";
   static const String specialLessonsDirName = "special-lessons";
   static const String timetableExportExtension = ".timetable";
+  static const String todoEventExportExtension = ".todo";
   static const String todosKey = "todos";
   static const String itemsKey = "items";
 
@@ -57,7 +61,7 @@ class SaveManager {
         join(schoolNoteDirPath, schoolNoteAddedFilesSaveDirName);
 
     Directory dir = Directory(schoolNoteAddedFilesDirPath);
-    dir.createSync();
+    dir.createSync(recursive: true);
 
     return dir;
   }
@@ -155,6 +159,33 @@ class SaveManager {
       String jsonString = json.encode(schoolNote.toJson());
 
       schoolNoteFile.writeAsStringSync(jsonString);
+    } catch (_) {}
+  }
+
+  void copySchoolNoteDir(
+    SchoolNote schoolNote, {
+    required String toPath,
+  }) {
+    try {
+      schoolNote.title = schoolNote.title.trim();
+
+      final schoolNoteDirPath = join(
+        getSchoolNotesDir().path,
+        schoolNote.saveFileName,
+      );
+
+      Directory schoolNoteDir = Directory(schoolNoteDirPath);
+
+      if (!schoolNoteDir.existsSync()) {
+        throw Exception(
+          "school note dir could not be created: ${schoolNoteDir.path}",
+        );
+      }
+
+      BackupManager.copyDirectorySync(
+        source: schoolNoteDir,
+        destination: Directory(toPath),
+      );
     } catch (_) {}
   }
 
@@ -313,6 +344,44 @@ class SaveManager {
     timetableFile.writeAsStringSync(jsonString);
   }
 
+  void saveTodoEventWithNote(
+    TodoEvent todoEvent, {
+    required String todoEventDirPath,
+  }) {
+    Directory todoEventDir = Directory(todoEventDirPath);
+    todoEventDir.createSync();
+
+    File todoEventFile = File(join(todoEventDirPath, todoEventFileName));
+
+    if (!todoEventDir.existsSync()) {
+      throw Exception(
+        "todoevent dir could not be created: ${todoEventDir.path}",
+      );
+    }
+
+    String jsonString = json.encode(todoEvent.toJson());
+
+    todoEventFile.writeAsStringSync(jsonString);
+
+    final linkedNote = todoEvent.linkedSchoolNote;
+    if (linkedNote == null) {
+      return;
+    }
+
+    final schoolNote = SchoolNotesManager().getSchoolNoteBySaveName(
+      linkedNote,
+    );
+
+    if (schoolNote == null) {
+      return;
+    }
+
+    SaveManager().copySchoolNoteDir(
+      schoolNote,
+      toPath: todoEventDirPath,
+    );
+  }
+
   void cleanExports() {
     const maxFileCount = 5;
     Directory exportsDir = getExportDir();
@@ -322,6 +391,77 @@ class SaveManager {
       files[0].deleteSync(recursive: true);
       files.removeAt(0);
     }
+  }
+
+  List<
+      ({
+        TodoEvent event,
+        SchoolNote? note,
+        Directory? filesDirForNote,
+      })> importTodoEvents(List<File> todoEventExportFiles) {
+    getImportDir().deleteSync(recursive: true);
+    List<
+        ({
+          TodoEvent event,
+          SchoolNote? note,
+          Directory? filesDirForNote,
+        })> todoEvents = [];
+
+    for (var file in todoEventExportFiles) {
+      if (!file.existsSync()) continue;
+
+      final exportDir =
+          Directory(join(getImportDir().path, basename(file.path)));
+
+      ZipManager.zipToFolder(
+        file,
+        exportDir,
+      );
+
+      String todoEventFilePath =
+          join(exportDir.path, SaveManager.todoEventFileName);
+      String schoolNoteFilePath =
+          join(exportDir.path, SaveManager.schoolNoteFileName);
+      String schoolNoteFilesDirPath = join(
+        exportDir.path,
+        SaveManager.schoolNoteAddedFilesSaveDirName,
+      );
+
+      final todoEventFile = File(todoEventFilePath);
+      final schoolNoteFile = File(schoolNoteFilePath);
+      final schoolNoteFilesDir = Directory(schoolNoteFilesDirPath);
+
+      String todoEventJsonString = todoEventFile.readAsStringSync();
+      String? schoolNoteJsonString = schoolNoteFile.existsSync()
+          ? schoolNoteFile.readAsStringSync()
+          : null;
+
+      Map<String, dynamic> todoEventJson = jsonDecode(todoEventJsonString);
+      Map<String, dynamic>? schoolNoteJson = schoolNoteJsonString == null
+          ? null
+          : jsonDecode(schoolNoteJsonString);
+
+      final ({
+        TodoEvent event,
+        SchoolNote? note,
+        Directory? filesDirForNote,
+      }) todoEvent = (
+        event: TodoEvent.fromJson(todoEventJson)..finished = false,
+        note: schoolNoteJson == null
+            ? null
+            : SchoolNote.fromJson(
+                schoolNoteJson,
+                isImporting: true,
+                noteImportDirectory: exportDir,
+              ),
+        filesDirForNote:
+            schoolNoteFilesDir.existsSync() ? schoolNoteFilesDir : null,
+      );
+
+      todoEvents.add(todoEvent);
+    }
+
+    return todoEvents;
   }
 
   Timetable? importTimetable(File timetableExportFile) {
@@ -347,14 +487,87 @@ class SaveManager {
       SaveManager().getTempDir().path,
     );
 
-    final code = await GoFileIoManager().uploadFile(
-      exportFile,
+    final code = await GoFileIoManager().uploadFiles(
+      [exportFile],
       returnSaveCode: true,
     );
 
     SaveManager().deleteTempDir();
 
     return code;
+  }
+
+  Future<String> shareTodoEvents(List<TodoEvent> todoEvents) async {
+    SaveManager().deleteTempDir();
+    List<File> files = [];
+
+    for (var todoEvent in todoEvents) {
+      final path = await shareTodoEvent(todoEvent, upload: false);
+      files.add(File(path));
+    }
+
+    final code = await GoFileIoManager().uploadFiles(
+      files,
+      returnSaveCode: true,
+    );
+
+    SaveManager().deleteTempDir();
+
+    return code;
+  }
+
+  /// returns the saveCode for GoFileIo if upload is true
+  /// otherwise it just returns the path to the exported file
+  Future<String> shareTodoEvent(
+    TodoEvent todoEvent, {
+    bool upload = true,
+  }) async {
+    final exportFile = SaveManager().exportTodoEvent(
+      todoEvent,
+      SaveManager().getTempDir().path,
+    );
+
+    if (upload == false) {
+      return exportFile.path;
+    }
+
+    final code = await GoFileIoManager().uploadFiles(
+      [exportFile],
+      returnSaveCode: true,
+    );
+
+    SaveManager().deleteTempDir();
+
+    return code;
+  }
+
+  File exportTodoEvent(TodoEvent todoEvent, String path) {
+    final now = DateTime.now();
+    final exportName = " ${now.day}.${now.month}.${now.year}";
+
+    final dirSavePath = join(
+      getExportDir().path,
+      todoEvent.key.toString() + exportName,
+    );
+
+    final zipExportPath = join(
+      path,
+      todoEvent.key.toString() + exportName + todoEventExportExtension,
+    );
+
+    saveTodoEventWithNote(
+      todoEvent,
+      todoEventDirPath: dirSavePath,
+    );
+
+    ZipManager.folderToZip(
+      Directory(dirSavePath),
+      File(zipExportPath),
+    );
+
+    Directory(dirSavePath).deleteSync(recursive: true);
+
+    return File(zipExportPath);
   }
 
   File exportTimetable(Timetable timetable, String path) {

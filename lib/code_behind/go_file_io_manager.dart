@@ -1,11 +1,16 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart';
 import 'package:schulapp/code_behind/save_manager.dart';
+import 'package:schulapp/code_behind/settings.dart';
+import 'package:schulapp/code_behind/timetable_manager.dart';
+import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class GoFileIoManager {
   static final GoFileIoManager _instance = GoFileIoManager._internal();
@@ -62,16 +67,56 @@ class GoFileIoManager {
     return utf8.decode(bytes.reversed.toList());
   }
 
-  Future<String> uploadFile(
-    File file, {
+  Future<String> uploadFiles(
+    List<File> files, {
     bool returnSaveCode = false,
   }) async {
-    if (!file.existsSync()) {
-      throw AppLocalizationsManager.localizations.strSelectedFileDoesNotExist;
+    for (var file in files) {
+      if (!file.existsSync()) {
+        throw AppLocalizationsManager.localizations.strSelectedFileDoesNotExist;
+      }
     }
 
-    var url = Uri.parse('https://store1.gofile.io/uploadFile');
+    String? folderID;
+    String? token;
+    String? code;
+
+    for (var file in files) {
+      final tuple = await _uploadFile(
+        file,
+        folderID: folderID,
+        returnSaveCode: returnSaveCode,
+        token: token,
+      );
+      code = tuple.$1;
+      folderID = tuple.$2;
+      token = tuple.$3;
+    }
+
+    if (code == null) {
+      throw AppLocalizationsManager.localizations.strThereWasAnError;
+    }
+
+    return code;
+  }
+
+  Future<(String code, String folderID, String token)> _uploadFile(
+    File file, {
+    String? folderID,
+    String? token,
+    bool returnSaveCode = false,
+  }) async {
+    //neue url wählt automatisch den nächstliegenden Server aus
+    // var url = Uri.parse('https://store1.gofile.io/uploadFile');
+    var url = Uri.parse('https://upload.gofile.io/uploadfile');
     var request = http.MultipartRequest('POST', url);
+
+    if (folderID != null) {
+      request.fields["folderId"] = folderID;
+    }
+    if (token != null) {
+      request.fields["token"] = token;
+    }
 
     request.files.add(await http.MultipartFile.fromPath('file', file.path));
 
@@ -83,11 +128,14 @@ class GoFileIoManager {
       Map<String, dynamic>? json = jsonDecode(responseBody);
 
       String? downlaodLink = json?["data"]["parentFolderCode"];
-      if (downlaodLink != null) {
+      String? token = json?["data"]["guestToken"];
+      String? folderID = json?["data"]["parentFolder"];
+
+      if (downlaodLink != null && token != null && folderID != null) {
         if (returnSaveCode) {
-          return stringToSafeCode(downlaodLink);
+          return (stringToSafeCode(downlaodLink), folderID, token);
         }
-        return downlaodLink;
+        return (downlaodLink, folderID, token);
       }
     }
     throw AppLocalizationsManager.localizations.strFailedToUploadFile(
@@ -96,7 +144,25 @@ class GoFileIoManager {
     );
   }
 
-  Future<String> downloadFile(
+  Future<bool> doesFileExists(
+    String id, {
+    bool isSaveCode = false,
+  }) async {
+    try {
+      if (isSaveCode) {
+        id = stringFromSafeCode(id);
+      }
+
+      String accToken = await _getAccToken();
+
+      await getFileLinksAndNames(id, accToken);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<List<String>> downloadFiles(
     String id, {
     bool isSaveCode = false,
   }) async {
@@ -106,47 +172,54 @@ class GoFileIoManager {
 
     String accToken = await _getAccToken();
 
-    (String link, String name) fileLinkAndName = await _getFileLinkAndName(
+    List<(String link, String name)> fileLinksAndNames =
+        await getFileLinksAndNames(
       id,
       accToken,
     );
 
-    String link = fileLinkAndName.$1;
-    String fileName = fileLinkAndName.$2;
+    List<String> paths = [];
 
-    var client = http.Client();
+    for (var fileLinkAndName in fileLinksAndNames) {
+      var client = http.Client();
 
-    var apiUrl = Uri.parse(link);
+      String link = fileLinkAndName.$1;
+      String fileName = fileLinkAndName.$2;
 
-    var request = http.Request('GET', apiUrl);
-    request.headers.addAll({
-      'Cookie': 'accountToken=$accToken',
-      'Accept': '*/*',
-    });
+      var apiUrl = Uri.parse(link);
+      var request = http.Request('GET', apiUrl);
 
-    var streamedResponse = await client.send(request);
+      request.headers.addAll({
+        'Cookie': 'accountToken=$accToken',
+        'Accept': '*/*',
+      });
 
-    if (streamedResponse.statusCode == 200) {
-      Directory appDocDir = SaveManager().getTempDir();
-      String filePath = join(appDocDir.path, fileName);
+      var streamedResponse = await client.send(request);
 
-      File file = File(filePath);
-      var fileSink = file.openWrite();
+      if (streamedResponse.statusCode == 200) {
+        Directory appDocDir = SaveManager().getTempDir();
+        String filePath = join(appDocDir.path, fileName);
 
-      await streamedResponse.stream.pipe(fileSink);
-      await fileSink.close();
+        File file = File(filePath);
+        var fileSink = file.openWrite();
 
-      client.close();
+        await streamedResponse.stream.pipe(fileSink);
+        await fileSink.close();
 
-      return filePath;
-    } else {
-      client.close();
+        client.close();
 
-      throw AppLocalizationsManager.localizations.strDownloadFailed(
-        streamedResponse.statusCode.toString(),
-        await streamedResponse.stream.bytesToString(),
-      );
+        paths.add(filePath);
+      } else {
+        client.close();
+
+        throw AppLocalizationsManager.localizations.strDownloadFailed(
+          streamedResponse.statusCode.toString(),
+          await streamedResponse.stream.bytesToString(),
+        );
+      }
     }
+
+    return paths;
   }
 
   Future<String> _getAccToken() async {
@@ -168,7 +241,7 @@ class GoFileIoManager {
     );
   }
 
-  Future<(String link, String name)> _getFileLinkAndName(
+  Future<List<(String link, String name)>> getFileLinksAndNames(
     String id,
     String accToken,
   ) async {
@@ -195,16 +268,100 @@ class GoFileIoManager {
             .localizations.strNoDataAvailablePleaseCheckCode;
       }
 
-      String? link = children.values.first['link'];
-      String? name = children.values.first['name'];
-      if (link != null && name != null) {
-        return (link, name);
+      List<(String link, String name)> list = [];
+
+      for (var item in children.values) {
+        String? link = item['link'];
+        String? name = item['name'];
+        if (link != null && name != null) {
+          list.add((link, name));
+        }
       }
+
+      if (list.isEmpty) {
+        throw AppLocalizationsManager.localizations.strSelectedFileDoesNotExist;
+      }
+
+      return list;
     }
 
     throw AppLocalizationsManager.localizations.strCouldNotGetFileLink(
       streamedResponse.statusCode.toString(),
       await streamedResponse.stream.bytesToString(),
     );
+  }
+
+  Future<bool> showTermsOfServicesEnabledDialog(BuildContext context) async {
+    bool allowed = TimetableManager()
+        .settings
+        .getVar<bool>(Settings.termsOfServiceGoFileIoAllowed);
+
+    if (!allowed) {
+      allowed = await Utils.showBoolInputDialog(
+        context,
+        question: AppLocalizationsManager
+            .localizations.strDoYouAgreeToTermsAndServiceOfGoFileIo,
+        description: AppLocalizationsManager
+            .localizations.strFeatureUsesGoFileIoToStoreDataOnline,
+        showYesAndNoInsteadOfOK: true,
+        extraButtonBuilder: (context) => TextButton(
+          onPressed: () {
+            launchUrl(Uri.parse('https://gofile.io/terms'));
+          },
+          child: Text(AppLocalizationsManager.localizations.strTermsOfService),
+        ),
+      );
+
+      if (!allowed) {
+        if (context.mounted) {
+          Utils.showInfo(
+            context,
+            msg: AppLocalizationsManager.localizations
+                .strYouMustAgreeToTheTermsOfServiceToUseThisFeature,
+            type: InfoType.error,
+          );
+        }
+        return false;
+      }
+      TimetableManager()
+          .settings
+          .setVar<bool>(Settings.termsOfServiceGoFileIoAllowed, true);
+    }
+    return true;
+  }
+
+  Future<bool> showImportTodoEventWarningDialog(BuildContext context) async {
+    bool show = TimetableManager()
+        .settings
+        .getVar<bool>(Settings.showImportTodoEventsWarnigKey);
+
+    if (show) {
+      final userKnows = await Utils.showBoolInputDialog(
+        context,
+        question:
+            AppLocalizationsManager.localizations.strShareTodoEventWarning,
+        description: AppLocalizationsManager
+            .localizations.strShareTodoEventWarningDescription,
+        extraButtonBuilder: (context) => TextButton(
+          onPressed: () {
+            show = false;
+            Navigator.of(context).pop();
+          },
+          child: Text(AppLocalizationsManager.localizations.strDoNotShowAgain),
+        ),
+      );
+
+      if (!show) {
+        TimetableManager()
+            .settings
+            .setVar<bool>(Settings.showImportTodoEventsWarnigKey, false);
+        return true;
+      }
+      if (userKnows) {
+        return true;
+      }
+      return false;
+    }
+    return true;
   }
 }

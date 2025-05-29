@@ -1,11 +1,18 @@
+import 'dart:io';
+
 import 'package:animated_list_plus/animated_list_plus.dart';
 import 'package:animated_list_plus/transitions.dart';
 import 'package:flutter/material.dart';
+import 'package:schulapp/code_behind/go_file_io_manager.dart';
+import 'package:schulapp/code_behind/save_manager.dart';
+import 'package:schulapp/code_behind/school_note.dart';
 import 'package:schulapp/code_behind/school_notes_manager.dart';
 import 'package:schulapp/code_behind/todo_event.dart';
 import 'package:schulapp/code_behind/timetable_manager.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
+import 'package:schulapp/screens/timetable/export_timetable_page.dart';
+import 'package:schulapp/widgets/animated_go_file_io_share_button.dart';
 import 'package:schulapp/widgets/navigation_bar_drawer.dart';
 import 'package:schulapp/code_behind/timetable_util_functions.dart';
 import 'package:schulapp/widgets/notes/school_note_list_item.dart';
@@ -117,6 +124,16 @@ class _TodoEventsScreenState extends State<TodoEventsScreen> {
                 Visibility(
                   visible: !widget.showFinishedTasks,
                   child: IconButton(
+                    onPressed: _importViaOnlineCode,
+                    tooltip: AppLocalizationsManager.localizations.strImport,
+                    icon: const Icon(
+                      Icons.file_download,
+                    ),
+                  ),
+                ),
+                Visibility(
+                  visible: !widget.showFinishedTasks,
+                  child: IconButton(
                     key: _showFinishedTasksActionKey,
                     onPressed: () async {
                       await Navigator.of(context).push(
@@ -137,6 +154,13 @@ class _TodoEventsScreenState extends State<TodoEventsScreen> {
                 ),
               ]
             : [
+                IconButton(
+                  onPressed: _shareAllItems,
+                  tooltip: AppLocalizationsManager.localizations.strExport,
+                  icon: const Icon(
+                    Icons.upload,
+                  ),
+                ),
                 IconButton(
                   onPressed: _unselectAllItems,
                   tooltip: AppLocalizationsManager.localizations.strCancel,
@@ -456,6 +480,87 @@ class _TodoEventsScreenState extends State<TodoEventsScreen> {
     );
   }
 
+  void _shareAllItems() async {
+    final enabled =
+        await GoFileIoManager().showTermsOfServicesEnabledDialog(context);
+
+    if (!enabled) return;
+
+    if (!isMultiselectionActive) return;
+    isMultiselectionActive = false;
+
+    try {
+      final codeFuture = SaveManager().shareTodoEvents(selectedTodoEvents);
+
+      if (!mounted) return;
+
+      await showModalBottomSheet(
+        context: context,
+        builder: (context) {
+          return FutureBuilder(
+            future: codeFuture,
+            builder: (context, snapshot) {
+              Widget child;
+              if (!snapshot.hasData) {
+                child = const Center(
+                  key: ValueKey("CircularProgressIndicator"),
+                  child: CircularProgressIndicator(),
+                );
+              } else {
+                final headingText = snapshot.data;
+
+                if (headingText == null) {
+                  Utils.showInfo(
+                    context,
+                    msg: AppLocalizationsManager
+                        .localizations.strThereWasAnError,
+                    type: InfoType.error,
+                  );
+                  Navigator.of(context).pop();
+                  return const SizedBox.shrink();
+                }
+
+                child = ShareGoFileIOBottomSheet(
+                  key: const ValueKey("ShareTodoEventBottomSheet"),
+                  shareText: AppLocalizationsManager
+                      .localizations.strShareYourTodoEvents,
+                  code: headingText,
+                );
+              }
+
+              return AnimatedSwitcher(
+                transitionBuilder: (Widget child, Animation<double> animation) {
+                  return FadeTransition(
+                    opacity: animation,
+                    child: SizeTransition(
+                      sizeFactor: animation,
+                      child: child,
+                    ),
+                  );
+                },
+                duration: const Duration(
+                  milliseconds: 400,
+                ),
+                child: child,
+              );
+            },
+          );
+        },
+      );
+      selectedTodoEvents.clear();
+    } catch (e) {
+      if (mounted) {
+        Utils.showInfo(
+          context,
+          msg: e.toString(),
+          type: InfoType.error,
+        );
+      }
+    }
+
+    setState(() {});
+  }
+
   void _unselectAllItems() {
     if (!isMultiselectionActive) return;
     isMultiselectionActive = false;
@@ -578,6 +683,250 @@ class _TodoEventsScreenState extends State<TodoEventsScreen> {
     );
   }
 
+  void _importViaOnlineCode() async {
+    final userKnows =
+        await GoFileIoManager().showImportTodoEventWarningDialog(context);
+
+    if (!userKnows) return;
+    if (!mounted) return;
+
+    final enabled =
+        await GoFileIoManager().showTermsOfServicesEnabledDialog(context);
+
+    if (!enabled) return;
+    if (!mounted) return;
+
+    final codeController = TextEditingController();
+    const maxCodeLength = 15;
+
+    bool createPressed = false;
+
+    await showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return Container(
+          margin: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              Text(
+                AppLocalizationsManager.localizations.strImportViaCode,
+                style: const TextStyle(
+                  fontSize: 24.0,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(
+                height: 12,
+              ),
+              TextField(
+                decoration: InputDecoration(
+                  hintText: AppLocalizationsManager.localizations.strCode,
+                ),
+                onSubmitted: (value) {
+                  createPressed = true;
+                  Navigator.of(context).pop();
+                },
+                autofocus: true,
+                maxLines: 1,
+                maxLength: maxCodeLength,
+                textAlign: TextAlign.center,
+                controller: codeController,
+              ),
+              const Spacer(),
+              ElevatedButton(
+                onPressed: () {
+                  createPressed = true;
+                  Navigator.of(context).pop();
+                },
+                child: Text(AppLocalizationsManager.localizations.strImport),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+
+    if (!createPressed) return;
+
+    final code = codeController.text.trim();
+
+    if (code.isEmpty || !mounted) return;
+
+    BuildContext? dialogContext;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext dContext) {
+        dialogContext = dContext;
+        return Dialog(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const CircularProgressIndicator(),
+                const SizedBox(width: 16),
+                TextButton(
+                  child: Text(AppLocalizationsManager.localizations.strCancel),
+                  onPressed: () {
+                    Navigator.of(dContext).pop();
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    List<String>? downloadedPaths;
+
+    try {
+      downloadedPaths = await GoFileIoManager().downloadFiles(
+        code,
+        isSaveCode: true,
+      );
+    } catch (e) {
+      if (mounted) {
+        Utils.showInfo(
+          context,
+          msg: e.toString(),
+          type: InfoType.error,
+        );
+      }
+    }
+
+    if (dialogContext != null && dialogContext!.mounted) {
+      Navigator.of(dialogContext!).pop();
+    }
+
+    if (downloadedPaths == null) return;
+
+    List<
+        ({
+          TodoEvent event,
+          SchoolNote? note,
+          Directory? filesDirForNote,
+        })> todoEventsList = [];
+
+    try {
+      todoEventsList = SaveManager().importTodoEvents(
+        downloadedPaths
+            .map(
+              (e) => File(e),
+            )
+            .toList(),
+      );
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+
+    if (mounted) {
+      if (todoEventsList.isEmpty) {
+        Utils.showInfo(
+          context,
+          msg: AppLocalizationsManager.localizations.strImportingFailed,
+          type: InfoType.error,
+        );
+      } else {
+        Utils.showInfo(
+          context,
+          msg: AppLocalizationsManager.localizations.strImportSuccessful,
+          type: InfoType.success,
+        );
+      }
+    }
+
+    if (todoEventsList.isEmpty) return;
+
+    await Future.delayed(
+      const Duration(milliseconds: 250),
+    );
+
+    if (!mounted) return;
+
+    bool okPressed = false;
+
+    List<bool> importList = List.generate(
+      todoEventsList.length,
+      (i) => true,
+    );
+
+    await Utils.showListSelectionBottomSheet(
+      context,
+      title: AppLocalizationsManager
+          .localizations.strWhichTodoEventsWouldYouLikeToImport,
+      items: todoEventsList,
+      scrollControlDisabledMaxHeightRatio: 0.7,
+      bottomActions: [
+        ElevatedButton(
+          onPressed: () {
+            okPressed = true;
+            Navigator.of(context).pop();
+          },
+          child: Text(AppLocalizationsManager.localizations.strImport),
+        ),
+      ],
+      itemBuilder: (context, index) {
+        final todoEventGeneric = todoEventsList[index];
+        return StatefulBuilder(
+          builder: (context, builder) {
+            return TodoEventListItemWidget(
+              event: todoEventGeneric.event,
+              onDeleteSwipe: () {
+                builder(() {
+                  importList[index] = false;
+                });
+              },
+              onLongPressed: () {
+                builder(() {
+                  importList[index] = !importList[index];
+                });
+              },
+              onPressed: () {
+                builder(() {
+                  importList[index] = !importList[index];
+                });
+              },
+              onInfoPressed: null,
+              isSelected: importList[index],
+              removeHero: true,
+              notSavedNote: todoEventGeneric.note,
+              showTimeLeft: false,
+            );
+          },
+        );
+      },
+    );
+
+    if (!okPressed) return;
+
+    if (!mounted) return;
+
+    for (var i = 0; i < todoEventsList.length; i++) {
+      final import = importList[i];
+
+      if (!import) continue;
+
+      final todoEventRecord = todoEventsList[i];
+
+      TimetableManager().addOrChangeTodoEvent(
+        todoEventRecord.event,
+      );
+
+      final note = todoEventRecord.note;
+      if (note != null) {
+        SchoolNotesManager().addSchoolNote(note);
+      }
+    }
+
+    SaveManager().deleteTempDir();
+    SaveManager().getImportDir().deleteSync(recursive: true);
+
+    setState(() {});
+  }
+
   void _animateTodoEvent({
     required TodoEvent todoEvent,
     required BuildContext itemContext,
@@ -621,12 +970,11 @@ class _TodoEventsScreenState extends State<TodoEventsScreen> {
   }
 }
 
-// ignore: must_be_immutable
 class TodoEventInfoPopUp extends StatelessWidget {
-  Future<TodoEvent?> Function(TodoEvent event) showEditTodoEventSheet;
-  TodoEvent event;
+  final Future<TodoEvent?> Function(TodoEvent event) showEditTodoEventSheet;
+  final TodoEvent event;
 
-  TodoEventInfoPopUp({
+  const TodoEventInfoPopUp({
     super.key,
     required this.event,
     required this.showEditTodoEventSheet,
@@ -729,14 +1077,24 @@ class TodoEventInfoPopUp extends StatelessWidget {
         const SizedBox(
           height: 12,
         ),
-        ElevatedButton(
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-          child: const Icon(
-            Icons.check,
-            size: 42,
-          ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            AnimatedGoFileIOShareButton(
+              onPressed: _shareTodoEvent,
+              saveOnlineCode: event.saveOnlineCode,
+              isSaveCode: true,
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Icon(
+                Icons.check,
+                size: 42,
+              ),
+            ),
+          ],
         ),
       ],
     );
@@ -797,5 +1155,19 @@ class TodoEventInfoPopUp extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<String?> _shareTodoEvent() async {
+    final code = await SaveManager().shareTodoEvent(event);
+
+    // nicht so machen, weil [addOrChangeTodoEvnet] diese Flag überschreibt
+    // event.saveOnlineCode = code;
+
+    TimetableManager().addOrChangeTodoEvent(
+      event,
+      saveOnlineCode: code,
+    );
+
+    return code;
   }
 }
