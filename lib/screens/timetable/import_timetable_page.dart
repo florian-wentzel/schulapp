@@ -8,6 +8,7 @@ import 'package:schulapp/code_behind/timetable.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/screens/timetable/create_timetable_screen.dart';
+import 'package:schulapp/widgets/online_code_bottom_sheet.dart';
 
 class ImportTimetablePage extends StatefulWidget {
   final void Function() goToHomePage;
@@ -160,59 +161,16 @@ class _ImportTimetablePageState extends State<ImportTimetablePage> {
 
     if (!allowed || !mounted) return;
 
-    final nameController = TextEditingController();
-    const maxNameLength = 15;
-
-    bool createPressed = false;
-
-    await showModalBottomSheet(
+    String? code = await showModalBottomSheet<String>(
       context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
       builder: (context) {
-        return Container(
-          margin: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              Text(
-                AppLocalizationsManager.localizations.strImportViaCode,
-                style: const TextStyle(
-                  fontSize: 24.0,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(
-                height: 12,
-              ),
-              TextField(
-                decoration: InputDecoration(
-                  hintText: AppLocalizationsManager.localizations.strCode,
-                ),
-                onSubmitted: (value) {
-                  createPressed = true;
-                  Navigator.of(context).pop();
-                },
-                autofocus: true,
-                maxLines: 1,
-                maxLength: maxNameLength,
-                textAlign: TextAlign.center,
-                controller: nameController,
-              ),
-              const Spacer(),
-              ElevatedButton(
-                onPressed: () {
-                  createPressed = true;
-                  Navigator.of(context).pop();
-                },
-                child: Text(AppLocalizationsManager.localizations.strImport),
-              ),
-            ],
-          ),
-        );
+        return const OnlineCodeBottomSheet();
       },
     );
 
-    if (!createPressed) return;
-
-    final code = nameController.text.trim();
+    if (code == null) return;
 
     if (code.isEmpty || !mounted) return;
 

@@ -352,6 +352,7 @@ class _EditSchoolGradeSubjectScreenState
 
     await showModalBottomSheet(
       context: context,
+      useSafeArea: true,
       builder: (context) {
         return Container(
           margin: const EdgeInsets.all(16),

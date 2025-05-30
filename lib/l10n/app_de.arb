@@ -1,6 +1,7 @@
 {
   "@@locale": "de",
   "language_name": "Deutsch",
+  "version_0_9_9": "Teilen per QR-Code hinzugefügt",
   "version_0_9_8": "Aufgaben können jetzt ganz einfach geteilt werden",
   "version_0_9_7": "Option hinzugefügt, die ganze Woche auf dem Startbildschirm anzuzeigen. Bei Platzmangel werden Abkürzungen genutzt. (Anpassbar)",
   "version_0_9_6": "Stunden können nun als Fehltag wegen Krankheit markiert werden (lange auf Stunde drücken)",

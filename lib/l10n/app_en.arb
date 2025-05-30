@@ -2,6 +2,8 @@
   "@@locale": "en",
   "language_name": "Englisch",
   "@language_name": {},
+  "version_0_9_9": "Added QR code sharing",
+  "@version_0_9_9": {},
   "version_0_9_8": "Tasks can now be easily shared",
   "@version_0_9_8": {},
   "version_0_9_7": "Added option to display the whole week on the home screen. Abbreviations are used when space is limited. (Customizable)",

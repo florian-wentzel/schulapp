@@ -4,6 +4,8 @@
 	<dict>
 		<key>NSPhotoLibraryUsageDescription</key>
 		<string>Diese App benötigt Zugriff auf die Fotobibliothek, um Bilder auszuwählen.</string>
+		<key>NSCameraUsageDescription</key>
+		<string>Diese App benötigt Zugriff auf die Kamera, um QR-Codes zu scannen.</string>
 		<key>CFBundleDevelopmentRegion</key>
 		<string>$(DEVELOPMENT_LANGUAGE)</string>
 		<key>CFBundleDisplayName</key>

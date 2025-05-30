@@ -792,6 +792,7 @@ class Utils {
   }) async {
     await showModalBottomSheet(
       context: context,
+      useSafeArea: true,
       scrollControlDisabledMaxHeightRatio: scrollControlDisabledMaxHeightRatio,
       builder: (context) {
         return Container(

@@ -38,7 +38,7 @@ class SchoolGradeSubjectScreen extends StatefulWidget {
     await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      scrollControlDisabledMaxHeightRatio: 0.5,
+      useSafeArea: true,
       builder: (context) {
         return SingleChildScrollView(
           child: Container(
@@ -165,7 +165,7 @@ class SchoolGradeSubjectScreen extends StatefulWidget {
     await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      scrollControlDisabledMaxHeightRatio: 0.5,
+      useSafeArea: true,
       builder: (context) {
         return SingleChildScrollView(
           child: Container(

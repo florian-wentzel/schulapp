@@ -16,6 +16,7 @@ import 'package:schulapp/widgets/animated_go_file_io_share_button.dart';
 import 'package:schulapp/widgets/navigation_bar_drawer.dart';
 import 'package:schulapp/code_behind/timetable_util_functions.dart';
 import 'package:schulapp/widgets/notes/school_note_list_item.dart';
+import 'package:schulapp/widgets/online_code_bottom_sheet.dart';
 import 'package:schulapp/widgets/task/todo_event_list_item_widget.dart';
 import 'package:schulapp/code_behind/todo_event_util_functions.dart';
 import 'package:schulapp/widgets/task/todo_event_to_finished_task_overlay.dart';
@@ -496,6 +497,8 @@ class _TodoEventsScreenState extends State<TodoEventsScreen> {
 
       await showModalBottomSheet(
         context: context,
+        isScrollControlled: true,
+        useSafeArea: true,
         builder: (context) {
           return FutureBuilder(
             future: codeFuture,
@@ -696,59 +699,16 @@ class _TodoEventsScreenState extends State<TodoEventsScreen> {
     if (!enabled) return;
     if (!mounted) return;
 
-    final codeController = TextEditingController();
-    const maxCodeLength = 15;
-
-    bool createPressed = false;
-
-    await showModalBottomSheet(
+    String? code = await showModalBottomSheet<String>(
       context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
       builder: (context) {
-        return Container(
-          margin: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              Text(
-                AppLocalizationsManager.localizations.strImportViaCode,
-                style: const TextStyle(
-                  fontSize: 24.0,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(
-                height: 12,
-              ),
-              TextField(
-                decoration: InputDecoration(
-                  hintText: AppLocalizationsManager.localizations.strCode,
-                ),
-                onSubmitted: (value) {
-                  createPressed = true;
-                  Navigator.of(context).pop();
-                },
-                autofocus: true,
-                maxLines: 1,
-                maxLength: maxCodeLength,
-                textAlign: TextAlign.center,
-                controller: codeController,
-              ),
-              const Spacer(),
-              ElevatedButton(
-                onPressed: () {
-                  createPressed = true;
-                  Navigator.of(context).pop();
-                },
-                child: Text(AppLocalizationsManager.localizations.strImport),
-              ),
-            ],
-          ),
-        );
+        return const OnlineCodeBottomSheet();
       },
     );
 
-    if (!createPressed) return;
-
-    final code = codeController.text.trim();
+    if (code == null) return;
 
     if (code.isEmpty || !mounted) return;
 
@@ -787,6 +747,7 @@ class _TodoEventsScreenState extends State<TodoEventsScreen> {
         code,
         isSaveCode: true,
       );
+      await Future.delayed(const Duration(milliseconds: 250));
     } catch (e) {
       if (mounted) {
         Utils.showInfo(

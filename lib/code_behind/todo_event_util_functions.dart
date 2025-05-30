@@ -15,7 +15,7 @@ Future<TodoEvent?> createNewTodoEventSheet(
   final todoEvent = await showModalBottomSheet<TodoEvent?>(
     context: context,
     isScrollControlled: true,
-    scrollControlDisabledMaxHeightRatio: 0.5,
+    useSafeArea: true,
     builder: (context) {
       return NewTodoEventWidget(
         event: event,
@@ -47,6 +47,7 @@ Future<List<NotificationSchedule>?> setNotificationScheduleList(
 
   return showModalBottomSheet<List<NotificationSchedule>?>(
     context: context,
+    useSafeArea: true,
     scrollControlDisabledMaxHeightRatio: 0.7,
     builder: (context) {
       return SetNotificationScheduleListWidget(

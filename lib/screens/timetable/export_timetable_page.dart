@@ -15,6 +15,7 @@ import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/screens/home_screen.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 class ExportTimetablePage extends StatefulWidget {
   final void Function() goToHomePage;
@@ -204,6 +205,8 @@ class EexportTimetablePageState extends State<ExportTimetablePage> {
 
       await showModalBottomSheet(
         context: context,
+        isScrollControlled: true,
+        useSafeArea: true,
         builder: (context) {
           return FutureBuilder(
             future: code,
@@ -373,6 +376,7 @@ class EexportTimetablePageState extends State<ExportTimetablePage> {
           await showModalBottomSheet(
             context: context,
             isScrollControlled: true,
+            useSafeArea: true,
             shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.vertical(
                 top: Radius.circular(16),
@@ -522,66 +526,98 @@ class ShareGoFileIOBottomSheet extends StatefulWidget {
 class _ShareGoFileIOBottomSheetState extends State<ShareGoFileIOBottomSheet> {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                widget.code,
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
-              IconButton(
-                onPressed: () {
-                  Clipboard.setData(
-                    ClipboardData(text: widget.code),
-                  );
-                  Utils.showInfo(
-                    context,
-                    msg: AppLocalizationsManager
-                        .localizations.strCopiedToClipboard,
-                    type: InfoType.success,
-                  );
-                },
-                icon: const Icon(Icons.copy),
-              ),
-            ],
-          ),
-          const SizedBox(
-            height: 12,
-          ),
-          Text(
-            AppLocalizationsManager.localizations.strDataSavedViaGoFile,
-          ),
-          const Spacer(),
-          Builder(
-            builder: (context) {
-              return ElevatedButton(
-                onPressed: () {
-                  final box = context.findRenderObject() as RenderBox?;
-
-                  Rect sharePositionOrigin =
-                      box!.localToGlobal(Offset.zero) & box.size;
-
-                  Navigator.of(context).pop();
-                  Share.share(
-                    widget.code,
-                    sharePositionOrigin: sharePositionOrigin,
-                    subject:
-                        "${widget.shareText}\n${AppLocalizationsManager.localizations.strCode}: ${widget.code}",
-                  );
-                },
-                child: Text(
-                  widget.shareText,
+    return SingleChildScrollView(
+      child: Container(
+        margin: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  widget.code,
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
-              );
-            },
-          ),
-        ],
+                IconButton(
+                  onPressed: () {
+                    Clipboard.setData(
+                      ClipboardData(text: widget.code),
+                    );
+                    Utils.showInfo(
+                      context,
+                      msg: AppLocalizationsManager
+                          .localizations.strCopiedToClipboard,
+                      type: InfoType.success,
+                    );
+                  },
+                  icon: const Icon(Icons.copy),
+                ),
+              ],
+            ),
+            const SizedBox(
+              height: 12,
+            ),
+            Text(
+              AppLocalizationsManager.localizations.strDataSavedViaGoFile,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(
+              height: 12,
+            ),
+            ClipRRect(
+              borderRadius: BorderRadiusGeometry.circular(8),
+              child: AspectRatio(
+                aspectRatio: 1,
+                child: QrImageView(
+                  padding: const EdgeInsets.all(16),
+                  data: widget.code,
+                  errorCorrectionLevel: QrErrorCorrectLevel.Q,
+                  version: QrVersions.auto,
+                  gapless: true,
+                  constrainErrorBounds: true,
+                  backgroundColor: Theme.of(context).canvasColor,
+                  eyeStyle: QrEyeStyle(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white
+                        : Colors.black,
+                    eyeShape: QrEyeShape.square,
+                  ),
+                  dataModuleStyle: QrDataModuleStyle(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white
+                        : Colors.black,
+                    dataModuleShape: QrDataModuleShape.square,
+                  ),
+                ),
+              ),
+            ),
+            Builder(
+              builder: (context) {
+                return ElevatedButton(
+                  onPressed: () {
+                    final box = context.findRenderObject() as RenderBox?;
+
+                    Rect sharePositionOrigin =
+                        box!.localToGlobal(Offset.zero) & box.size;
+
+                    Navigator.of(context).pop();
+                    Share.share(
+                      widget.code,
+                      sharePositionOrigin: sharePositionOrigin,
+                      subject:
+                          "${widget.shareText}\n${AppLocalizationsManager.localizations.strCode}: ${widget.code}",
+                    );
+                  },
+                  child: Text(
+                    widget.shareText,
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

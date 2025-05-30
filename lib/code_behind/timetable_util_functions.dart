@@ -75,7 +75,7 @@ Future<SchoolSemester?> showCreateSemesterSheet(
   await showModalBottomSheet(
     context: context,
     isScrollControlled: true,
-    scrollControlDisabledMaxHeightRatio: 0.6,
+    useSafeArea: true,
     builder: (context) {
       return SingleChildScrollView(
         child: StatefulBuilder(
@@ -307,6 +307,7 @@ Future<Timetable?> showCreateTimetableSheet(
   Timetable? timetable = await showModalBottomSheet<Timetable>(
     context: context,
     scrollControlDisabledMaxHeightRatio: 11.0 / 16.0,
+    useSafeArea: true,
     builder: (context) => CreateTimetableBottomSheet(
       onlySchoolTimes: onlySchoolTimes,
     ),
@@ -478,6 +479,7 @@ Future<(SchoolLessonPrefab schoolLessonPrefab, bool delete)?>
 
   bool? delete = await showModalBottomSheet(
     context: context,
+    useSafeArea: true,
     isScrollControlled: true,
     builder: (context) {
       return SafeArea(
@@ -723,6 +725,7 @@ Future<Timetable?> showSelectTimetableSheet(
 
   await showModalBottomSheet(
     context: context,
+    useSafeArea: true,
     scrollControlDisabledMaxHeightRatio: 0.7,
     builder: (context) {
       return Container(
@@ -1640,6 +1643,7 @@ class SelectLessonPrefabsSheet extends StatefulWidget {
     return await showModalBottomSheet<List<SchoolLessonPrefab>>(
       context: context,
       scrollControlDisabledMaxHeightRatio: 0.7,
+      useSafeArea: true,
       builder: (context) {
         return const SelectLessonPrefabsSheet();
       },

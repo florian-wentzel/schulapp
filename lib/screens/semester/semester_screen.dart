@@ -251,6 +251,7 @@ class _SemesterScreenState extends State<SemesterScreen> {
 
     await showModalBottomSheet(
       context: context,
+      useSafeArea: true,
       builder: (context) {
         return Container(
           margin: const EdgeInsets.all(16),

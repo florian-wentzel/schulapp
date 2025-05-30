@@ -887,6 +887,7 @@ class _AbiCalculationScreenState extends State<AbiCalculationScreen> {
 
     await showModalBottomSheet(
       context: context,
+      useSafeArea: true,
       builder: (context) {
         return Container(
           margin: const EdgeInsets.all(16),

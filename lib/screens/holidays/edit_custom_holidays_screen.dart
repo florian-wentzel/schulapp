@@ -141,6 +141,7 @@ class _EditCustomHolidaysScreenState extends State<EditCustomHolidaysScreen> {
 
     await showModalBottomSheet(
       context: context,
+      useSafeArea: true,
       builder: (context) {
         return Container(
           margin: const EdgeInsets.all(16),
