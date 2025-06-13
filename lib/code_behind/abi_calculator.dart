@@ -7,6 +7,9 @@ import 'package:schulapp/code_behind/school_semester.dart';
 import 'package:schulapp/code_behind/timetable_manager.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 
+//TODO: Automatische Gewichtung hinzufügen, die Formel ist die Folgende:
+//autoWeight = maxSectionIIPoints / (15 * subjectCount)
+
 class AbiCalculator {
   static const abiExamSubjectsKey = "abiExamSubjects";
   static const advancedSubjectsKey = "advancedSubjects";
@@ -470,7 +473,8 @@ class AbiCalculator {
     if (totalPoints == 0) {
       return null;
     }
-
+    //Wenn man hier anpasst auch die
+    //strAbiAverageNotAlwaysCorrectInfo Information anpassen
     return 5.66 - (totalPoints / 180); //Tabelle hinzufügen
   }
 }
