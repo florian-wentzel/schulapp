@@ -142,6 +142,8 @@ class Settings {
   static const showNextDayAfterDayEndKey = "showNextDayAfterDayEnd";
   static const showAlwaysWeekTimetableKey = "showAlwaysWeekTimetable";
   static const showImportTodoEventsWarnigKey = "showImportTodoEventsWarnig";
+  static const showAbiAverageNotAlwaysCorrectInfoKey =
+      "showAbiAverageNotAlwaysCorrect";
 
   static const waitBetweenAskForReviewDuration = Duration(days: 3);
 
@@ -470,6 +472,10 @@ class Settings {
     ),
     SettingsVar<bool>(
       key: showImportTodoEventsWarnigKey,
+      defaultValue: () => true,
+    ),
+    SettingsVar<bool>(
+      key: showAbiAverageNotAlwaysCorrectInfoKey,
       defaultValue: () => true,
     ),
   ];

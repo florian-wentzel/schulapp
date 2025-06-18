@@ -426,5 +426,6 @@
   "strShareTodoEventWarningDescription": "Beim Importieren einer Aufgabe kann eine Notiz enthalten sein, die schädliche Dateien enthält. Sei also vorsichtig, bevor du eine Datei öffnest!",
   "strDoNotShowAgain": "Nicht erneut Anzeigen",
   "strShareYourTodoEvents": "Teile deine Aufgaben!",
-  "strWhichTodoEventsWouldYouLikeToImport": "Welche Aufgaben möchtest du importieren?"
+  "strWhichTodoEventsWouldYouLikeToImport": "Welche Aufgaben möchtest du importieren?",
+  "strAbiAverageNotAlwaysCorrectInfo": "Die Durchschnittsberechnung kann falsch sein! Das ist nur eine Näherung, welche wie folgt berechnet wird: 5,66 - (Gesamtpunktzahl / 180)"
 }

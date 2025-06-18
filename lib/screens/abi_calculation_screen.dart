@@ -6,6 +6,7 @@ import 'package:schulapp/code_behind/grade.dart';
 import 'package:schulapp/code_behind/save_manager.dart';
 import 'package:schulapp/code_behind/school_grade_subject.dart';
 import 'package:schulapp/code_behind/school_semester.dart';
+import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/timetable_manager.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
@@ -34,6 +35,45 @@ class _AbiCalculationScreenState extends State<AbiCalculationScreen> {
   @override
   void initState() {
     MainApp.changeNavBarVisibility(false);
+
+    final show = TimetableManager()
+        .settings
+        .getVar(Settings.showAbiAverageNotAlwaysCorrectInfoKey);
+
+    if (show) {
+      WidgetsBinding.instance.addPostFrameCallback(
+        (timeStamp) {
+          showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog.adaptive(
+                title: Text(
+                  AppLocalizationsManager.localizations.strInformation,
+                ),
+                content: Text(
+                  AppLocalizationsManager
+                      .localizations.strAbiAverageNotAlwaysCorrectInfo,
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      TimetableManager().settings.setVar(
+                            Settings.showAbiAverageNotAlwaysCorrectInfoKey,
+                            false,
+                          );
+                      Navigator.of(context).pop();
+                    },
+                    child: Text(
+                      AppLocalizationsManager.localizations.strOK,
+                    ),
+                  ),
+                ],
+              );
+            },
+          );
+        },
+      );
+    }
 
     super.initState();
   }
