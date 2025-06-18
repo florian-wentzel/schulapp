@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:schulapp/code_behind/go_file_io_manager.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
+import 'package:schulapp/screens/timetable/export_timetable_page.dart';
 
 class AnimatedGoFileIOShareButton extends StatefulWidget {
   final Future<String?> Function() onPressed;
@@ -75,7 +76,22 @@ class _AnimatedGoFileIOShareButtonState
                 key: ValueKey('loading'),
               )
             : InkWell(
-                onTap: _saveOnlineCode == null ? null : _copyCode,
+                onTap: _saveOnlineCode == null
+                    ? null
+                    : () {
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          useSafeArea: true,
+                          builder: (context) {
+                            return ShareGoFileIOBottomSheet(
+                              shareText: AppLocalizationsManager
+                                  .localizations.strShareYourTodoEvents,
+                              code: _saveOnlineCode ?? '',
+                            );
+                          },
+                        );
+                      },
                 child: Row(
                   key: const ValueKey('iconButton'),
                   children: [

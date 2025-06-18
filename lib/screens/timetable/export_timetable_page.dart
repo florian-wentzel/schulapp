@@ -593,6 +593,9 @@ class _ShareGoFileIOBottomSheetState extends State<ShareGoFileIOBottomSheet> {
                 ),
               ),
             ),
+            const SizedBox(
+              height: 8,
+            ),
             Builder(
               builder: (context) {
                 return ElevatedButton(
