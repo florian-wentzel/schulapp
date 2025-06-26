@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:schulapp/code_behind/school_lesson.dart';
@@ -93,471 +92,306 @@ class _TimetableLessonWidgetState extends State<TimetableLessonWidget> {
       );
     }
 
-    return CupertinoContextMenu(
-      enableHapticFeedback: true,
-      actions: [
-        if (specialLesson is! CancelledSpecialLesson && specialLesson == null)
-          CupertinoContextMenuAction(
-            trailingIcon: Icons.cancel_outlined,
-            onPressed: SchoolLesson.isEmptyLesson(widget.lesson)
-                ? null
-                : () async {
-                    Navigator.of(context, rootNavigator: true).pop();
-
-                    await Future.delayed(
-                      const Duration(milliseconds: 550),
-                    );
-
-                    widget.containerController.strikeThrough = true;
-                    if (context.mounted) {
-                      widget.containerController
-                          .setStrikeColorToCancelled(context);
-                    }
-                    widget.tt.setSpecialLesson(
-                      weekIndex: widget.currWeekIndex,
-                      year: widget.currYear,
-                      specialLesson: CancelledSpecialLesson(
-                        dayIndex: widget.dayIndex,
-                        timeIndex: widget.lessonIndex,
-                      ),
-                    );
-                  },
-            child: Text(
-              AppLocalizationsManager.localizations.strMarkAsCancelled,
-            ),
-          ),
-        if (specialLesson is! SickSpecialLesson && specialLesson == null)
-          CupertinoContextMenuAction(
-            onPressed: SchoolLesson.isEmptyLesson(widget.lesson)
-                ? null
-                : () async {
-                    Navigator.of(context).pop();
-
-                    await Future.delayed(
-                      const Duration(milliseconds: 100),
-                    );
-                    widget.containerController.setStrikeColorToSick();
-                    widget.containerController.strikeThrough = true;
-                    widget.tt.setSpecialLesson(
-                      weekIndex: widget.currWeekIndex,
-                      year: widget.currYear,
-                      specialLesson: SickSpecialLesson(
-                        dayIndex: widget.dayIndex,
-                        timeIndex: widget.lessonIndex,
-                      ),
-                    );
-                  },
-            child: Text(
-              AppLocalizationsManager.localizations.strMarkAsSick,
-            ),
-          ),
-        //weil es wenn, nur alleine steht, brauch man nichts hinschreiben,
-        //weil es automatisch ausgeführt wird: autoRunOnlyPossibleOption: true
-        if (specialLesson is SickSpecialLesson ||
-            specialLesson is CancelledSpecialLesson)
-          CupertinoContextMenuAction(
-            onPressed: () async {
-              Navigator.pop(context);
-
-              await Future.delayed(
-                const Duration(milliseconds: 100),
-              );
-              widget.containerController.strikeThrough = false;
-              widget.tt.removeSpecialLesson(
-                weekIndex: widget.currWeekIndex,
-                year: widget.currYear,
+    return InkWell(
+      onTap: SchoolLesson.isEmptyLesson(widget.lesson) &&
+              specialLesson is! SubstituteSpecialLesson
+          ? null
+          : () => _onLessonWidgetTap(
                 dayIndex: widget.dayIndex,
-                timeIndex: widget.lessonIndex,
-              );
-            },
-            child: Text(
-              "MIau",
-            ),
-          ),
-        if (specialLesson is! SubstituteSpecialLesson && specialLesson == null)
-          CupertinoContextMenuAction(
-            onPressed: () async {
-              final prefabs = widget.tt.lessonPrefabs;
+                lessonIndex: widget.lessonIndex,
+                heroString: widget.heroString,
+                currEvent: widget.currEvent,
+                eventEndTime: widget.currLessonDateTime,
+                lesson: lessonPrefab,
+                showDeleteButton: specialLesson is SubstituteSpecialLesson,
+              ),
+      onLongPress: () {
+        final specialLesson = widget.tt.getSpecialLesson(
+          year: widget.currYear,
+          weekIndex: widget.currWeekIndex,
+          schoolDayIndex: widget.dayIndex,
+          schoolTimeIndex: widget.lessonIndex,
+        );
 
-              // prefabs.remove(
-              //   prefabs.cast<SchoolLessonPrefab?>().firstWhere(
-              //         (element) => element?.name == widget.lesson.name,
-              //         orElse: () => null,
-              //       ),
-              // );
-
-              //can not be shown to users and not inputted
-              final nullchar = String.fromCharCode(0);
-
-              prefabs.add(
-                SchoolLessonPrefab(
-                  name: AppLocalizationsManager.localizations.strCustomSubject +
-                      nullchar,
-                  color: Colors.transparent,
-                ),
-              );
-
-              if (!context.mounted) return;
-
-              SchoolLessonPrefab? prefab =
-                  await Utils.showSelectLessonPrefabList(
-                context,
-                prefabs: prefabs,
-              );
-
-              if (prefab == null) return;
-
-              if (prefab.name.contains(nullchar)) {
-                if (!context.mounted) {
-                  return;
+        Utils.showStringAcionListBottomSheet(
+          context,
+          runActionAfterPop: true,
+          autoRunOnlyPossibleOption: true,
+          items: [
+            if (specialLesson is! CancelledSpecialLesson &&
+                specialLesson == null)
+              (
+                AppLocalizationsManager.localizations.strMarkAsCancelled,
+                SchoolLesson.isEmptyLesson(widget.lesson)
+                    ? null
+                    : () async {
+                        await Future.delayed(
+                          const Duration(milliseconds: 100),
+                        );
+                        widget.containerController.strikeThrough = true;
+                        if (context.mounted) {
+                          widget.containerController
+                              .setStrikeColorToCancelled(context);
+                        }
+                        widget.tt.setSpecialLesson(
+                          weekIndex: widget.currWeekIndex,
+                          year: widget.currYear,
+                          specialLesson: CancelledSpecialLesson(
+                            dayIndex: widget.dayIndex,
+                            timeIndex: widget.lessonIndex,
+                          ),
+                        );
+                      }
+              ),
+            if (specialLesson is! SickSpecialLesson && specialLesson == null)
+              (
+                AppLocalizationsManager.localizations.strMarkAsSick,
+                SchoolLesson.isEmptyLesson(widget.lesson)
+                    ? null
+                    : () async {
+                        await Future.delayed(
+                          const Duration(milliseconds: 100),
+                        );
+                        widget.containerController.setStrikeColorToSick();
+                        widget.containerController.strikeThrough = true;
+                        widget.tt.setSpecialLesson(
+                          weekIndex: widget.currWeekIndex,
+                          year: widget.currYear,
+                          specialLesson: SickSpecialLesson(
+                            dayIndex: widget.dayIndex,
+                            timeIndex: widget.lessonIndex,
+                          ),
+                        );
+                      }
+              ),
+            //weil es wenn, nur alleine steht, brauch man nichts hinschreiben,
+            //weil es automatisch ausgeführt wird: autoRunOnlyPossibleOption: true
+            if (specialLesson is SickSpecialLesson ||
+                specialLesson is CancelledSpecialLesson)
+              (
+                "",
+                () async {
+                  await Future.delayed(
+                    const Duration(milliseconds: 100),
+                  );
+                  widget.containerController.strikeThrough = false;
+                  widget.tt.removeSpecialLesson(
+                    weekIndex: widget.currWeekIndex,
+                    year: widget.currYear,
+                    dayIndex: widget.dayIndex,
+                    timeIndex: widget.lessonIndex,
+                  );
                 }
+              ),
+            if (specialLesson is! SubstituteSpecialLesson &&
+                specialLesson == null)
+              (
+                AppLocalizationsManager.localizations.strMarkAsSubstitute,
+                () async {
+                  final prefabs = widget.tt.lessonPrefabs;
 
-                final lessonTuple =
-                    await showCreateNewPrefabBottomSheet(context);
+                  // prefabs.remove(
+                  //   prefabs.cast<SchoolLessonPrefab?>().firstWhere(
+                  //         (element) => element?.name == widget.lesson.name,
+                  //         orElse: () => null,
+                  //       ),
+                  // );
 
-                if (lessonTuple == null) return;
+                  //can not be shown to users and not inputted
+                  final nullchar = String.fromCharCode(0);
 
-                prefab = lessonTuple.$1;
-              }
+                  prefabs.add(
+                    SchoolLessonPrefab(
+                      name: AppLocalizationsManager
+                              .localizations.strCustomSubject +
+                          nullchar,
+                      color: Colors.transparent,
+                    ),
+                  );
 
-              widget.tt.setSpecialLesson(
-                weekIndex: widget.currWeekIndex,
-                year: widget.currYear,
-                specialLesson: SubstituteSpecialLesson(
-                  dayIndex: widget.dayIndex,
-                  timeIndex: widget.lessonIndex,
-                  prefab: prefab,
-                ),
+                  if (!context.mounted) return;
+
+                  SchoolLessonPrefab? prefab =
+                      await Utils.showSelectLessonPrefabList(
+                    context,
+                    prefabs: prefabs,
+                  );
+
+                  if (prefab == null) return;
+
+                  if (prefab.name.contains(nullchar)) {
+                    if (!context.mounted) {
+                      return;
+                    }
+
+                    final lessonTuple =
+                        await showCreateNewPrefabBottomSheet(context);
+
+                    if (lessonTuple == null) return;
+
+                    prefab = lessonTuple.$1;
+                  }
+
+                  widget.tt.setSpecialLesson(
+                    weekIndex: widget.currWeekIndex,
+                    year: widget.currYear,
+                    specialLesson: SubstituteSpecialLesson(
+                      dayIndex: widget.dayIndex,
+                      timeIndex: widget.lessonIndex,
+                      prefab: prefab,
+                    ),
+                  );
+
+                  setState(() {});
+                }
+              ),
+            //weil es wenn, nur alleine steht, brauch man nichts hinschreiben,
+            //weil es automatisch ausgeführt wird: autoRunOnlyPossibleOption: true
+            if (specialLesson is SubstituteSpecialLesson)
+              (
+                "",
+                () async {
+                  widget.tt.removeSpecialLesson(
+                    weekIndex: widget.currWeekIndex,
+                    year: widget.currYear,
+                    dayIndex: widget.dayIndex,
+                    timeIndex: widget.lessonIndex,
+                  );
+
+                  setState(() {});
+                }
+              )
+          ],
+        );
+      },
+      child: Container(
+        color: widget.containerColor,
+        width: widget.lessonWidth,
+        height: widget.lessonHeight,
+        child: Center(
+          child: Hero(
+            tag: widget.heroString,
+            flightShuttleBuilder: (context, animation, __, ___, ____) {
+              const targetAlpha = 220;
+
+              return AnimatedBuilder(
+                animation: animation,
+                builder: (context, _) {
+                  return Container(
+                    width: widget.lessonWidth,
+                    height: widget.lessonHeight,
+                    margin: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: ColorTween(
+                        begin: lessonPrefab.color,
+                        end: Theme.of(context).cardColor.withAlpha(targetAlpha),
+                      ).lerp(animation.value),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  );
+                },
               );
-
-              setState(() {});
             },
-            child: Text(
-              AppLocalizationsManager.localizations.strMarkAsSubstitute,
-            ),
-          ),
-        //weil es wenn, nur alleine steht, brauch man nichts hinschreiben,
-        //weil es automatisch ausgeführt wird: autoRunOnlyPossibleOption: true
-        if (specialLesson is SubstituteSpecialLesson)
-          CupertinoContextMenuAction(
-            onPressed: () async {
-              widget.tt.removeSpecialLesson(
-                weekIndex: widget.currWeekIndex,
-                year: widget.currYear,
-                dayIndex: widget.dayIndex,
-                timeIndex: widget.lessonIndex,
-              );
-
-              setState(() {});
-            },
-            child: Text(
-              "Vertretung entfernen",
-            ),
-          ),
-      ],
-      child: GestureDetector(
-        onTap: SchoolLesson.isEmptyLesson(widget.lesson) &&
-                specialLesson is! SubstituteSpecialLesson
-            ? null
-            : () => _onLessonWidgetTap(
-                  dayIndex: widget.dayIndex,
-                  lessonIndex: widget.lessonIndex,
-                  heroString: widget.heroString,
-                  currEvent: widget.currEvent,
-                  eventEndTime: widget.currLessonDateTime,
-                  lesson: lessonPrefab,
-                  showDeleteButton: specialLesson is SubstituteSpecialLesson,
+            child: StrikeThroughContainer(
+              key: UniqueKey(),
+              controller: widget.containerController,
+              child: Container(
+                width: widget.lessonWidth,
+                height: widget.lessonHeight,
+                margin: const EdgeInsets.all(6),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 4,
+                  horizontal: 8,
                 ),
-        // onLongPress: () {
-        //   final specialLesson = widget.tt.getSpecialLesson(
-        //     year: widget.currYear,
-        //     weekIndex: widget.currWeekIndex,
-        //     schoolDayIndex: widget.dayIndex,
-        //     schoolTimeIndex: widget.lessonIndex,
-        //   );
-
-        //   Utils.showStringAcionListBottomSheet(
-        //     context,
-        //     runActionAfterPop: true,
-        //     autoRunOnlyPossibleOption: true,
-        //     items: [
-        //       if (specialLesson is! CancelledSpecialLesson &&
-        //           specialLesson == null)
-        //         (
-        //           AppLocalizationsManager.localizations.strMarkAsCancelled,
-        //           SchoolLesson.isEmptyLesson(widget.lesson)
-        //               ? null
-        //               : () async {
-        //                   await Future.delayed(
-        //                     const Duration(milliseconds: 100),
-        //                   );
-        //                   widget.containerController.strikeThrough = true;
-        //                   if (context.mounted) {
-        //                     widget.containerController
-        //                         .setStrikeColorToCancelled(context);
-        //                   }
-        //                   widget.tt.setSpecialLesson(
-        //                     weekIndex: widget.currWeekIndex,
-        //                     year: widget.currYear,
-        //                     specialLesson: CancelledSpecialLesson(
-        //                       dayIndex: widget.dayIndex,
-        //                       timeIndex: widget.lessonIndex,
-        //                     ),
-        //                   );
-        //                 }
-        //         ),
-        //       if (specialLesson is! SickSpecialLesson && specialLesson == null)
-        //         (
-        //           AppLocalizationsManager.localizations.strMarkAsSick,
-        //           SchoolLesson.isEmptyLesson(widget.lesson)
-        //               ? null
-        //               : () async {
-        //                   await Future.delayed(
-        //                     const Duration(milliseconds: 100),
-        //                   );
-        //                   widget.containerController.setStrikeColorToSick();
-        //                   widget.containerController.strikeThrough = true;
-        //                   widget.tt.setSpecialLesson(
-        //                     weekIndex: widget.currWeekIndex,
-        //                     year: widget.currYear,
-        //                     specialLesson: SickSpecialLesson(
-        //                       dayIndex: widget.dayIndex,
-        //                       timeIndex: widget.lessonIndex,
-        //                     ),
-        //                   );
-        //                 }
-        //         ),
-        //       //weil es wenn, nur alleine steht, brauch man nichts hinschreiben,
-        //       //weil es automatisch ausgeführt wird: autoRunOnlyPossibleOption: true
-        //       if (specialLesson is SickSpecialLesson ||
-        //           specialLesson is CancelledSpecialLesson)
-        //         (
-        //           "",
-        //           () async {
-        //             await Future.delayed(
-        //               const Duration(milliseconds: 100),
-        //             );
-        //             widget.containerController.strikeThrough = false;
-        //             widget.tt.removeSpecialLesson(
-        //               weekIndex: widget.currWeekIndex,
-        //               year: widget.currYear,
-        //               dayIndex: widget.dayIndex,
-        //               timeIndex: widget.lessonIndex,
-        //             );
-        //           }
-        //         ),
-        //       if (specialLesson is! SubstituteSpecialLesson &&
-        //           specialLesson == null)
-        //         (
-        //           AppLocalizationsManager.localizations.strMarkAsSubstitute,
-        //           () async {
-        //             final prefabs = widget.tt.lessonPrefabs;
-
-        //             // prefabs.remove(
-        //             //   prefabs.cast<SchoolLessonPrefab?>().firstWhere(
-        //             //         (element) => element?.name == widget.lesson.name,
-        //             //         orElse: () => null,
-        //             //       ),
-        //             // );
-
-        //             //can not be shown to users and not inputted
-        //             final nullchar = String.fromCharCode(0);
-
-        //             prefabs.add(
-        //               SchoolLessonPrefab(
-        //                 name: AppLocalizationsManager
-        //                         .localizations.strCustomSubject +
-        //                     nullchar,
-        //                 color: Colors.transparent,
-        //               ),
-        //             );
-
-        //             if (!context.mounted) return;
-
-        //             SchoolLessonPrefab? prefab =
-        //                 await Utils.showSelectLessonPrefabList(
-        //               context,
-        //               prefabs: prefabs,
-        //             );
-
-        //             if (prefab == null) return;
-
-        //             if (prefab.name.contains(nullchar)) {
-        //               if (!context.mounted) {
-        //                 return;
-        //               }
-
-        //               final lessonTuple =
-        //                   await showCreateNewPrefabBottomSheet(context);
-
-        //               if (lessonTuple == null) return;
-
-        //               prefab = lessonTuple.$1;
-        //             }
-
-        //             widget.tt.setSpecialLesson(
-        //               weekIndex: widget.currWeekIndex,
-        //               year: widget.currYear,
-        //               specialLesson: SubstituteSpecialLesson(
-        //                 dayIndex: widget.dayIndex,
-        //                 timeIndex: widget.lessonIndex,
-        //                 prefab: prefab,
-        //               ),
-        //             );
-
-        //             setState(() {});
-        //           }
-        //         ),
-        //       //weil es wenn, nur alleine steht, brauch man nichts hinschreiben,
-        //       //weil es automatisch ausgeführt wird: autoRunOnlyPossibleOption: true
-        //       if (specialLesson is SubstituteSpecialLesson)
-        //         (
-        //           "",
-        //           () async {
-        //             widget.tt.removeSpecialLesson(
-        //               weekIndex: widget.currWeekIndex,
-        //               year: widget.currYear,
-        //               dayIndex: widget.dayIndex,
-        //               timeIndex: widget.lessonIndex,
-        //             );
-
-        //             setState(() {});
-        //           }
-        //         )
-        //     ],
-        //   );
-        // },
-        child: Container(
-          color: widget.containerColor,
-          width: widget.lessonWidth,
-          height: widget.lessonHeight,
-          child: Center(
-            child: Hero(
-              tag: widget.heroString,
-              flightShuttleBuilder: (context, animation, __, ___, ____) {
-                const targetAlpha = 220;
-
-                return AnimatedBuilder(
-                  animation: animation,
-                  builder: (context, _) {
-                    return Container(
-                      width: widget.lessonWidth,
-                      height: widget.lessonHeight,
-                      margin: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: ColorTween(
-                          begin: lessonPrefab.color,
-                          end: Theme.of(context)
-                              .cardColor
-                              .withAlpha(targetAlpha),
-                        ).lerp(animation.value),
-                        borderRadius: BorderRadius.circular(12),
+                decoration: BoxDecoration(
+                  color: lessonPrefab.color,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          HighContrastText(
+                            text: widget.showOnlyShortName
+                                ? lessonPrefab.shortName
+                                : lessonPrefab.name,
+                            highContrastEnabled: highContrastEnabled,
+                            textStyle: Theme.of(context).textTheme.bodyLarge,
+                            fontWeight: null,
+                            outlineWidth: 2,
+                          ),
+                          lessonPrefab.room.isEmpty
+                              ? const SizedBox.shrink()
+                              : HighContrastText(
+                                  text: lessonPrefab.room,
+                                  highContrastEnabled: highContrastEnabled,
+                                  textStyle:
+                                      Theme.of(context).textTheme.bodyLarge,
+                                  fontWeight: null,
+                                  outlineWidth: 2,
+                                ),
+                        ],
                       ),
-                    );
-                  },
-                );
-              },
-              child: StrikeThroughContainer(
-                key: UniqueKey(),
-                controller: widget.containerController,
-                child: Container(
-                  width: widget.lessonWidth,
-                  height: widget.lessonHeight,
-                  margin: const EdgeInsets.all(6),
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 4,
-                    horizontal: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: lessonPrefab.color,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            HighContrastText(
-                              text: widget.showOnlyShortName
-                                  ? lessonPrefab.shortName
-                                  : lessonPrefab.name,
-                              highContrastEnabled: highContrastEnabled,
-                              textStyle: Theme.of(context).textTheme.bodyLarge,
-                              fontWeight: null,
-                              outlineWidth: 2,
+                    ),
+                    if (specialLesson is SubstituteSpecialLesson &&
+                        widget.showSubstituteLessons)
+                      const Align(
+                        alignment: Alignment.topLeft,
+                        child: Icon(
+                          Icons.swap_horiz,
+                          color: Colors.white,
+                          shadows: [
+                            Shadow(
+                              offset: Offset(1.5, 1.5),
+                              blurRadius: 3.0,
+                              color: Colors.black,
                             ),
-                            lessonPrefab.room.isEmpty
-                                ? const SizedBox.shrink()
-                                : HighContrastText(
-                                    text: lessonPrefab.room,
-                                    highContrastEnabled: highContrastEnabled,
-                                    textStyle:
-                                        Theme.of(context).textTheme.bodyLarge,
-                                    fontWeight: null,
-                                    outlineWidth: 2,
-                                  ),
                           ],
                         ),
                       ),
-                      if (specialLesson is SubstituteSpecialLesson &&
-                          widget.showSubstituteLessons)
-                        const Align(
-                          alignment: Alignment.topLeft,
-                          child: Icon(
-                            Icons.swap_horiz,
-                            color: Colors.white,
-                            shadows: [
-                              Shadow(
-                                offset: Offset(1.5, 1.5),
-                                blurRadius: 3.0,
-                                color: Colors.black,
-                              ),
-                            ],
-                          ),
-                        ),
-                      // Align(
-                      //   alignment: Alignment.topLeft,
-                      //   child: Container(
-                      //     padding:
-                      //         EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      //     decoration: BoxDecoration(
-                      //       color: Colors.red,
-                      //       borderRadius: BorderRadius.only(
-                      //         topRight: Radius.circular(10),
-                      //         bottomLeft: Radius.circular(10),
-                      //       ),
-                      //     ),
-                      //     child: Text(
-                      //       'Vertretung',
-                      //       style: TextStyle(color: Colors.white, fontSize: 10),
-                      //     ),
-                      //   ),
-                      // ),
-                      if (widget.currEvent != null)
-                        Visibility(
-                          visible: widget.showTaskOnHomescreen,
-                          child: Align(
-                            alignment: Alignment.bottomRight,
-                            child: HighContrastText(
-                              text: widget.currEvent?.finished ?? false
-                                  ? Timetable.tickMark
-                                  : Timetable.exclamationMark,
-                              fillColor: widget.currEvent?.getColor(),
-                              textStyle: GoogleFonts.dmSerifDisplay(
-                                textStyle:
-                                    Theme.of(context).textTheme.headlineMedium,
-                              ),
-                              outlineWidth: 2,
-                              fontWeight: FontWeight.bold,
+                    // Align(
+                    //   alignment: Alignment.topLeft,
+                    //   child: Container(
+                    //     padding:
+                    //         EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    //     decoration: BoxDecoration(
+                    //       color: Colors.red,
+                    //       borderRadius: BorderRadius.only(
+                    //         topRight: Radius.circular(10),
+                    //         bottomLeft: Radius.circular(10),
+                    //       ),
+                    //     ),
+                    //     child: Text(
+                    //       'Vertretung',
+                    //       style: TextStyle(color: Colors.white, fontSize: 10),
+                    //     ),
+                    //   ),
+                    // ),
+                    if (widget.currEvent != null)
+                      Visibility(
+                        visible: widget.showTaskOnHomescreen,
+                        child: Align(
+                          alignment: Alignment.bottomRight,
+                          child: HighContrastText(
+                            text: widget.currEvent?.finished ?? false
+                                ? Timetable.tickMark
+                                : Timetable.exclamationMark,
+                            fillColor: widget.currEvent?.getColor(),
+                            textStyle: GoogleFonts.dmSerifDisplay(
+                              textStyle:
+                                  Theme.of(context).textTheme.headlineMedium,
                             ),
+                            outlineWidth: 2,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                    ],
-                  ),
+                      ),
+                  ],
                 ),
               ),
             ),
