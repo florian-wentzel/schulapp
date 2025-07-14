@@ -1,7 +1,7 @@
 # 📚 Schulapp – Die perfekte Organisation für deinen Schulalltag!
 
 Willkommen im offiziellen Repository der **Schulapp**!  
-Mit der Schulapp hast du alles, was du für deinen Schulalltag brauchst – modern, intuitiv und komplett kostenlos.
+Mit der Schulapp organisierst du deinen Schulalltag einfach, modern und intuitiv – komplett kostenlos, werbefrei und ohne Datenerhebung.<br>
 Entwickelt **von Schülern für Schüler**, unterstützt dich die Schulapp dabei, organisiert und stressfreier durch den Schulalltag zu kommen – egal ob Stundenplan, Noten oder Hausaufgaben.
 
 ---
@@ -15,41 +15,41 @@ Entwickelt **von Schülern für Schüler**, unterstützt dich die Schulapp dabei
       Sieh sofort deinen aktuellen Tag, teile deinen Plan mit Freund*innen und verwalte A-/B-Wochen.<br>
       <img src="screenshots/stundenplan.png" width="300">
     </td>
-    <td width="50%">
+    <td align="center" width="50%">
       <h4>🔹 Intelligenter Aufgaben-Manager</h4>
       Plane Hausaufgaben, Tests und Klausuren mit automatischen Erinnerungen.<br>
       <img src="screenshots/aufgaben.png" width="300">
     </td>
   </tr>
   <tr>
-    <td>
+    <td align="center">
       <h4>🔹 Notenverwaltung & Durchschnitt</h4>
       Behalte deine Noten im Blick – inkl. Notengewichtung und Statistiken.<br>
       <img src="screenshots/noten.png" width="300">
     </td>
-    <td>
+    <td align="center">
       <h4>🔹 Notizen & Anhänge</h4>
-      Speichere wichtige Infos als Text, Bild oder PDF – direkt an Fächer oder Aufgaben gebunden.<br>
+      Speichere wichtige Infos als Notizen mit Text, Bild und PDF-Anhängen anschließend ganz einfach mit Aufgaben verbinden.<br>
+      (Und ganz einfach per QR-Code teilen!)<br>
       <img src="screenshots/notizen.png" width="300">
     </td>
   </tr>
   <tr>
-    <td>
-      <h4>🔹 Ferien & Feiertage</h4>
+    <td align="center">
+      <h4>🔹 Statistik + Ferien & Feiertage</h4>
       Automatische Anzeige je nach Bundesland.<br><br>
-      <img src="screenshots/ferien.png" width="300">
+      <img src="screenshots/statistik.png" width="300">
     </td>
-    <td>
-      <h4>🔹 Individuelle Anpassungen</h4>
-      Wähle zwischen hell/dunkel, verschiedenen Notensystemen u. v. m.<br>
-      <img src="screenshots/einstellungen.png" width="300">
+    <td align="center">
+      <h4>🔹 Android Homescreen-Widget</h4>
+      Dein aktueller Stundenplan – direkt auf dem Homescreen.<br>
+      <img src="screenshots/android-widget.png" width="300">
     </td>
   </tr>
   <tr>
     <td colspan="2" align="center">
-      <h4>🔹 Android Homescreen-Widget</h4>
-      Dein aktueller Stundenplan – direkt auf dem Homescreen.<br>
-      <img src="screenshots/widget.png" width="300">
+      <h4>🔹 Individuelle Anpassungen</h4>
+      Wähle zwischen hell/dunkel, verschiedenen Notensystemen und Kurzstunden.<br>
     </td>
   </tr>
 </table>
