@@ -8,6 +8,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:schulapp/code_behind/abi_calculator.dart';
 import 'package:schulapp/code_behind/backup_manager.dart';
 import 'package:schulapp/code_behind/go_file_io_manager.dart';
+import 'package:schulapp/code_behind/school_lesson_notification.dart';
 import 'package:schulapp/code_behind/school_note.dart';
 import 'package:schulapp/code_behind/school_notes_manager.dart';
 import 'package:schulapp/code_behind/special_lesson.dart';
@@ -33,6 +34,7 @@ class SaveManager {
   static const String schoolNotesSaveDirName = "notes";
   static const String schoolNoteAddedFilesSaveDirName = "files";
   static const String abiCalculatorFileName = "abi-calculator.json";
+  static const String lessonRemindersFileName = "lesson-reminders.json";
   //for backups
   static const String tempDirName = "temp";
   static const String exportDirName = "exports";
@@ -50,6 +52,7 @@ class SaveManager {
   static const String todoEventExportExtension = ".todo";
   static const String todosKey = "todos";
   static const String itemsKey = "items";
+  static const String notificationsKey = "notifications";
 
   Directory? applicationDocumentsDirectory;
 
@@ -1188,6 +1191,56 @@ class SaveManager {
 
       file.writeAsStringSync(jsonString);
     } catch (_) {}
+  }
+
+  void saveLessonReminders(
+      List<SchoolLessonNotification> notificationsToSchedule) {
+    try {
+      final file = File(
+        join(getMainSaveDir().path, lessonRemindersFileName),
+      );
+
+      final Map<String, dynamic> jsonMap = {
+        notificationsKey: List<Map<String, dynamic>>.generate(
+          notificationsToSchedule.length,
+          (index) => notificationsToSchedule[index].toJson(),
+        ),
+      };
+
+      final jsonString = jsonEncode(jsonMap);
+
+      file.writeAsStringSync(jsonString);
+    } catch (e) {
+      debugPrint("Error saving lesson reminders: $e");
+    }
+  }
+
+  List<SchoolLessonNotification> loadLessonReminders() {
+    try {
+      final file = File(
+        join(getMainSaveDir().path, lessonRemindersFileName),
+      );
+
+      if (!file.existsSync()) {
+        return [];
+      }
+
+      final jsonString = file.readAsStringSync();
+
+      final Map<String, dynamic> jsonMap = jsonDecode(jsonString);
+
+      final List<Map<String, dynamic>> notificationsListMap =
+          (jsonMap[notificationsKey] as List).cast();
+
+      return notificationsListMap.map(
+        (e) {
+          return SchoolLessonNotification.fromJson(e);
+        },
+      ).toList();
+    } catch (e) {
+      debugPrint("Error saving lesson reminders: $e");
+      return [];
+    }
   }
 
   // Future<File> moveFile(File sourceFile, String newPath) async {

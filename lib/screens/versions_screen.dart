@@ -58,7 +58,8 @@ class _VersionsScreenState extends State<VersionsScreen> {
                       );
 
                   NotificationManager().showNotifications(
-                    id: UniqueIdGenerator.createUniqueId(),
+                    id: UniqueIdGenerator
+                        .createUniqueId(), //TimetableManager().todoEvents.first.key
                     title: "Testing Notification",
                     body: "Debug Mode: $debugMode",
                   );

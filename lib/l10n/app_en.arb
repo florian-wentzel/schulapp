@@ -1220,5 +1220,7 @@
   "strWhichTodoEventsWouldYouLikeToImport": "Which tasks would you like to import?",
   "@strWhichTodoEventsWouldYouLikeToImport": {},
   "strAbiAverageNotAlwaysCorrectInfo": "The average calculation may be incorrect! This is only an approximation, calculated as follows: 5.66 - (total score / 180)",
-  "@strAbiAverageNotAlwaysCorrectInfo": {}
+  "@strAbiAverageNotAlwaysCorrectInfo": {},
+  "strLessonReminderNotification": "Lesson reminder notification",
+  "@strLessonReminderNotification": {}
 }

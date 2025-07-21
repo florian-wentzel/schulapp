@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:schulapp/app.dart';
+import 'package:schulapp/code_behind/notification_manager.dart';
 import 'package:schulapp/code_behind/school_lesson_prefab.dart';
 import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/timetable.dart';
@@ -137,6 +138,7 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
   @override
   void dispose() {
     _prefabScrollController.dispose();
+    _pageController.dispose();
     super.dispose();
   }
 
@@ -476,6 +478,17 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
                         Settings.showTutorialInCreateTimetableScreenKey,
                         false,
                       );
+
+                  final mainTt = TimetableManager().settings.getVar<String?>(
+                        Settings.mainTimetableNameKey,
+                      );
+
+                  if (widget.timetable.name == mainTt) {
+                    NotificationManager()
+                        .resetScheduleNotificationWithTimetable(
+                      timetable: widget.timetable,
+                    );
+                  }
 
                   //weil neuer timetable erstellt return true damit kann man später vielleicht was anfangen
                   Navigator.of(context).pop(true);

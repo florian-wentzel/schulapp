@@ -1,6 +1,7 @@
 import 'dart:math';
 
 class UniqueIdGenerator {
+  //muss (id < 0x7FFFFFFF && id > -0x80000000)
   static int createUniqueId() {
     final now =
         DateTime.now().microsecondsSinceEpoch; // Current time in microseconds

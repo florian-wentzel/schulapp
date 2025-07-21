@@ -7,9 +7,9 @@ import 'package:schulapp/extensions.dart';
 
 // ignore: must_be_immutable
 class SchoolGradeSubjectWidget extends StatelessWidget {
-  SchoolGradeSubject subject;
-  SchoolSemester semester;
-  bool showName;
+  final SchoolGradeSubject subject;
+  final SchoolSemester semester;
+  final bool showName;
 
   SchoolGradeSubjectWidget({
     super.key,

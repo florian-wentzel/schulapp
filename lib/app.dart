@@ -167,6 +167,8 @@ class _MainAppState extends State<MainApp> {
 
     WidgetsBinding.instance.addPostFrameCallback(postFrameCallback);
 
+    _registerLessonNotification();
+
     super.initState();
   }
 
@@ -199,5 +201,31 @@ class _MainAppState extends State<MainApp> {
 
     if (!mounted) return;
     await HomeWidgetManager.updateWithDefaultTimetable(context: context);
+  }
+
+  Future<void> _registerLessonNotification() async {
+    final registerNotification = TimetableManager().settings.getVar<bool>(
+          Settings.lessonReminderNotificationEnabledKey,
+        );
+
+    if (!registerNotification) {
+      return;
+    }
+
+    final timetable = Utils.getHomescreenTimetable();
+
+    if (timetable == null) {
+      return;
+    }
+
+    final timeBeforeLessonNotification =
+        TimetableManager().settings.getVar<Duration>(
+              Settings.preLessonReminderNotificationDurationKey,
+            );
+
+    NotificationManager().scheduleNotificationForTimetable(
+      timetable: timetable,
+      timeBeforeLessonNotification: timeBeforeLessonNotification,
+    );
   }
 }

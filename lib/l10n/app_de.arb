@@ -427,5 +427,6 @@
   "strDoNotShowAgain": "Nicht erneut Anzeigen",
   "strShareYourTodoEvents": "Teile deine Aufgaben!",
   "strWhichTodoEventsWouldYouLikeToImport": "Welche Aufgaben möchtest du importieren?",
-  "strAbiAverageNotAlwaysCorrectInfo": "Die Durchschnittsberechnung kann falsch sein! Das ist nur eine Näherung, welche wie folgt berechnet wird: 5,66 - (Gesamtpunktzahl / 180)"
+  "strAbiAverageNotAlwaysCorrectInfo": "Die Durchschnittsberechnung kann falsch sein! Das ist nur eine Näherung, welche wie folgt berechnet wird: 5,66 - (Gesamtpunktzahl / 180)",
+  "strLessonReminderNotification": "Erinnerung an nächste Stunde (Benachrichtigung)"
 }

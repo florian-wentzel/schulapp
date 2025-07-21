@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:schulapp/code_behind/notification_manager.dart';
 import 'package:schulapp/code_behind/school_lesson.dart';
 import 'package:schulapp/code_behind/school_lesson_prefab.dart';
 import 'package:schulapp/code_behind/settings.dart';
@@ -128,6 +129,7 @@ class _TimetableLessonWidgetState extends State<TimetableLessonWidget> {
                         await Future.delayed(
                           const Duration(milliseconds: 100),
                         );
+
                         widget.containerController.strikeThrough = true;
                         if (context.mounted) {
                           widget.containerController
@@ -141,6 +143,8 @@ class _TimetableLessonWidgetState extends State<TimetableLessonWidget> {
                             timeIndex: widget.lessonIndex,
                           ),
                         );
+
+                        _updateNotification();
                       }
               ),
             if (specialLesson is! SickSpecialLesson && specialLesson == null)
@@ -152,6 +156,7 @@ class _TimetableLessonWidgetState extends State<TimetableLessonWidget> {
                         await Future.delayed(
                           const Duration(milliseconds: 100),
                         );
+
                         widget.containerController.setStrikeColorToSick();
                         widget.containerController.strikeThrough = true;
                         widget.tt.setSpecialLesson(
@@ -162,6 +167,8 @@ class _TimetableLessonWidgetState extends State<TimetableLessonWidget> {
                             timeIndex: widget.lessonIndex,
                           ),
                         );
+
+                        _updateNotification();
                       }
               ),
             //weil es wenn, nur alleine steht, brauch man nichts hinschreiben,
@@ -181,6 +188,8 @@ class _TimetableLessonWidgetState extends State<TimetableLessonWidget> {
                     dayIndex: widget.dayIndex,
                     timeIndex: widget.lessonIndex,
                   );
+
+                  _updateNotification();
                 }
               ),
             if (specialLesson is! SubstituteSpecialLesson &&
@@ -242,6 +251,8 @@ class _TimetableLessonWidgetState extends State<TimetableLessonWidget> {
                     ),
                   );
 
+                  _updateNotification();
+
                   setState(() {});
                 }
               ),
@@ -257,6 +268,8 @@ class _TimetableLessonWidgetState extends State<TimetableLessonWidget> {
                     dayIndex: widget.dayIndex,
                     timeIndex: widget.lessonIndex,
                   );
+
+                  _updateNotification();
 
                   setState(() {});
                 }
@@ -398,6 +411,27 @@ class _TimetableLessonWidgetState extends State<TimetableLessonWidget> {
           ),
         ),
       ),
+    );
+  }
+
+  Future<void> _updateNotification() {
+    final monday = Utils.getWeekDay(
+      widget.currLessonDateTime.toUtc().copyWith(
+            hour: 0,
+            minute: 0,
+            second: 0,
+            millisecond: 0,
+            microsecond: 0,
+          ),
+      DateTime.monday,
+    );
+
+    return NotificationManager().updateNotification(
+      currTimetable: widget.tt,
+      monday: monday,
+      dayIndex: widget.dayIndex,
+      lessonIndex: widget.lessonIndex,
+      lesson: widget.lesson,
     );
   }
 

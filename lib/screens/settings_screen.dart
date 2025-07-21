@@ -182,6 +182,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _highContrastOnHomeScreen(),
         _reducedClassHoursEnabled(),
         _reducedClassHours(),
+        _lessonReminderNotification(),
         _todoEventNotificationScheduleEnabled(),
         _todoEventNotificationScheduleList(),
         _pinHomeWidget(),
@@ -761,6 +762,48 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ElevatedButton(
           onPressed: _setTimesPressed,
           child: Text(AppLocalizationsManager.localizations.strSetTimes),
+        ),
+      ],
+    );
+  }
+
+  Widget _lessonReminderNotification() {
+    return SettingsScreen.listItem(
+      context,
+      title:
+          AppLocalizationsManager.localizations.strLessonReminderNotification,
+      afterTitle: [
+        Switch.adaptive(
+          value: TimetableManager().settings.getVar(
+                Settings.lessonReminderNotificationEnabledKey,
+              ),
+          onChanged: (value) {
+            if (value) {
+              final tt = Utils.getHomescreenTimetable();
+
+              if (tt == null) {
+                Utils.showInfo(
+                  context,
+                  msg: "Sie haben noch keinen Stundenplan eingerichtet!",
+                  type: InfoType.error,
+                );
+                return;
+              }
+
+              NotificationManager().resetScheduleNotificationWithTimetable(
+                timetable: tt,
+              );
+            } else {
+              NotificationManager().resetScheduleNotification();
+            }
+
+            TimetableManager().settings.setVar(
+                  Settings.lessonReminderNotificationEnabledKey,
+                  value,
+                );
+
+            setState(() {});
+          },
         ),
       ],
     );

@@ -144,6 +144,10 @@ class Settings {
   static const showImportTodoEventsWarnigKey = "showImportTodoEventsWarnig";
   static const showAbiAverageNotAlwaysCorrectInfoKey =
       "showAbiAverageNotAlwaysCorrect";
+  static const lessonReminderNotificationEnabledKey =
+      "lessonNotificationEnabled";
+  static const preLessonReminderNotificationDurationKey =
+      "preLessonReminderNotificationDuration";
 
   static const waitBetweenAskForReviewDuration = Duration(days: 3);
 
@@ -477,6 +481,26 @@ class Settings {
     SettingsVar<bool>(
       key: showAbiAverageNotAlwaysCorrectInfoKey,
       defaultValue: () => true,
+    ),
+    SettingsVar<bool>(
+      key: lessonReminderNotificationEnabledKey,
+      defaultValue: () => false,
+    ),
+    SettingsVar<Duration>(
+      key: preLessonReminderNotificationDurationKey,
+      defaultValue: () => const Duration(minutes: 5),
+      saveCustomType: (type) {
+        return type.inMilliseconds.toString();
+      },
+      loadCustomType: (value) {
+        if (value == null) return null;
+
+        final millis = int.tryParse(value);
+
+        if (millis == null) return null;
+
+        return Duration(milliseconds: millis);
+      },
     ),
   ];
 
