@@ -16,6 +16,7 @@ import 'package:schulapp/code_behind/timetable_manager.dart';
 import 'package:schulapp/code_behind/todo_event.dart';
 import 'package:schulapp/code_behind/unique_id_generator.dart';
 import 'package:schulapp/code_behind/utils.dart';
+import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/screens/todo_events_screen.dart';
 import 'package:timezone/timezone.dart';
 
@@ -41,6 +42,7 @@ class NotificationManager {
       android: const AndroidNotificationDetails(
         "channelId",
         "todos",
+        category: AndroidNotificationCategory.reminder,
         importance: Importance.max,
         priority: Priority.high,
       ),
@@ -232,12 +234,10 @@ class NotificationManager {
     );
   }
 
-  Future<void> updateNotification({
-    required Timetable currTimetable,
+  Future<void> updateNotificationsForDay({
+    required Timetable timetable,
     required DateTime monday, //utc
     required int dayIndex,
-    required int lessonIndex,
-    required SchoolLesson lesson,
   }) async {
     final enabled = TimetableManager()
         .settings
@@ -246,6 +246,75 @@ class NotificationManager {
     if (!enabled) return;
 
     final defaultTt = Utils.getHomescreenTimetable();
+
+    final currTimetable = timetable.getWeekTimetableForDateTime(monday);
+
+    if (currTimetable.name != defaultTt?.name) return;
+
+    final schoolDay = currTimetable.schoolDays[dayIndex];
+
+    final notificationsToSchedule = SaveManager().loadLessonReminders();
+
+    final now = DateTime.now().toUtc();
+
+    notificationsToSchedule.removeWhere(
+      (element) => element.scheduledTime.isBefore(now),
+    );
+
+    List<SchoolTime>? schoolTimesOverride;
+
+    final reducedClassHoursEnabled = TimetableManager().settings.getVar<bool>(
+          Settings.reducedClassHoursEnabledKey,
+        );
+
+    if (reducedClassHoursEnabled) {
+      schoolTimesOverride =
+          TimetableManager().settings.getVar<List<SchoolTime>?>(
+                Settings.reducedClassHoursKey,
+              );
+    }
+
+    final timeBeforeLessonNotification =
+        TimetableManager().settings.getVar<Duration>(
+              Settings.preLessonReminderNotificationDurationKey,
+            );
+
+    for (int lessonIndex = 0;
+        lessonIndex < currTimetable.maxLessonCount;
+        lessonIndex++) {
+      await _scheduleLessonNotification(
+        currTimetable: currTimetable,
+        schoolDay: schoolDay,
+        lessonIndex: lessonIndex,
+        monday: monday,
+        notificationsToSchedule: notificationsToSchedule,
+        now: now,
+        schoolTimesOverride: schoolTimesOverride,
+        timeBeforeLessonNotification: timeBeforeLessonNotification,
+        weekDayIndex: dayIndex,
+      );
+    }
+
+    SaveManager().saveLessonReminders(
+      notificationsToSchedule,
+    );
+  }
+
+  Future<void> updateNotification({
+    required Timetable timetable,
+    required DateTime monday, //utc
+    required int dayIndex,
+    required int lessonIndex,
+  }) async {
+    final enabled = TimetableManager()
+        .settings
+        .getVar<bool>(Settings.lessonReminderNotificationEnabledKey);
+
+    if (!enabled) return;
+
+    final defaultTt = Utils.getHomescreenTimetable();
+
+    final currTimetable = timetable.getWeekTimetableForDateTime(monday);
 
     if (currTimetable.name != defaultTt?.name) return;
 
@@ -340,12 +409,12 @@ class NotificationManager {
       schoolTimesOverride: schoolTimesOverride,
     );
 
-    // _registerScheduleNotificationsForWeek(
-    //   monday: nowMonday.add(const Duration(days: 7)),
-    //   timetable: timetable,
-    //   timeBeforeLessonNotification: timeBeforeLessonNotification,
-    //   notificationsToSchedule: notificationsToSchedule,
-    // );
+    _registerScheduleNotificationsForWeek(
+      monday: nowMonday.add(const Duration(days: 7)),
+      timetable: timetable,
+      timeBeforeLessonNotification: timeBeforeLessonNotification,
+      notificationsToSchedule: notificationsToSchedule,
+    );
 
     SaveManager().saveLessonReminders(
       notificationsToSchedule,
@@ -433,10 +502,12 @@ class NotificationManager {
     if (specialLesson != null) {
       if (specialLesson is CancelledSpecialLesson ||
           specialLesson is SickSpecialLesson) {
-        //todo: vielleicht doch eine Benachrichtigung für abgesagte Stunden?
+        lessonName =
+            "${lesson.name} ${AppLocalizationsManager.localizations.strCancelledInBrackets}";
         isCancled = true;
       } else if (specialLesson is SubstituteSpecialLesson) {
-        lessonName = "${specialLesson.name} (Vertretung)";
+        lessonName =
+            "${specialLesson.name} ${AppLocalizationsManager.localizations.strSubstitutionInBrackets}";
         lessonRoom = specialLesson.room;
         isSubstituded = true;
       }
@@ -469,20 +540,41 @@ class NotificationManager {
     }
 
     if (SchoolLesson.isEmptyLesson(lesson) && !isSubstituded) return;
-    if (isCancled) return;
+
+    final cancelledReminder = TimetableManager().settings.getVar(
+          Settings.cancelledLessonReminderNotificationEnabledKey,
+        );
+
+    if (isCancled && !cancelledReminder) return;
 
     if (scheduledDateTime.isBefore(now)) return; //schon vorbei
 
     final id = UniqueIdGenerator.createUniqueId();
 
+    // falls es zufälliger weise doch schon eine Nachricht gibt
     await cancleNotification(id);
 
-    await scheduleNotification(
-      id: id,
-      scheduledDateTime: scheduledDateTime,
-      title: "Gleich beginnt $lessonName",
-      body: "Im Raum $lessonRoom",
-    );
+    if (isCancled) {
+      await scheduleNotification(
+        id: id,
+        scheduledDateTime: scheduledDateTime,
+        title: AppLocalizationsManager.localizations.strXisCancelled(
+          lesson.name, //hier ganz normalen namen verwendet
+        ),
+        body: AppLocalizationsManager.localizations.strTimeToRelaxEnjoyIt,
+      );
+    } else {
+      await scheduleNotification(
+        id: id,
+        scheduledDateTime: scheduledDateTime,
+        title: AppLocalizationsManager.localizations.strXisAboutToStart(
+          lessonName,
+        ),
+        body: AppLocalizationsManager.localizations.strInRoomX(
+          lessonRoom,
+        ),
+      );
+    }
 
     final notification = SchoolLessonNotification(
       dayIndex: weekDayIndex,
@@ -495,20 +587,5 @@ class NotificationManager {
     );
 
     notificationsToSchedule.add(notification);
-  }
-}
-
-class LessonReminderNotificationManager {
-  static final LessonReminderNotificationManager _instance =
-      LessonReminderNotificationManager._privateConstructor();
-  LessonReminderNotificationManager._privateConstructor();
-
-  factory LessonReminderNotificationManager() {
-    return _instance;
-  }
-
-  Future<void> scheduleLessonReminders(Timetable timetable) async {
-    // Implement logic to schedule reminders for lessons in the timetable
-    // This could involve iterating through the timetable and scheduling notifications
   }
 }

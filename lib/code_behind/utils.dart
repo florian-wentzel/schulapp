@@ -254,6 +254,11 @@ class Utils {
                             value = snapPoint;
                           }
                         }
+
+                        if (onlyIntegers) {
+                          value = value.round().toDouble();
+                        }
+
                         snapshot.call(
                           () {
                             currValue = value;

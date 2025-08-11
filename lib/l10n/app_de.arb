@@ -428,5 +428,13 @@
   "strShareYourTodoEvents": "Teile deine Aufgaben!",
   "strWhichTodoEventsWouldYouLikeToImport": "Welche Aufgaben möchtest du importieren?",
   "strAbiAverageNotAlwaysCorrectInfo": "Die Durchschnittsberechnung kann falsch sein! Das ist nur eine Näherung, welche wie folgt berechnet wird: 5,66 - (Gesamtpunktzahl / 180)",
-  "strLessonReminderNotification": "Erinnerung an nächste Stunde (Benachrichtigung)"
+  "strLessonReminderNotification": "Erinnerung an nächste Stunde (Benachrichtigung)",
+  "strSubstitutionInBrackets": "(Vertretung)",
+  "strCancelledInBrackets": "(Ausfall)",
+  "strXisAboutToStart": "Gleich beginnt {lessonName}",
+  "strInRoomX": "Im Raum {lessonRoom}",
+  "strXisCancelled": "Ausfall: {lessonName} findet nicht statt",
+  "strTimeToRelaxEnjoyIt": "Zeit zum Entspannen - viel Spaß dabei!",
+  "strNotifyAboutCanceledLessons": "Auch über Stunden-Ausfälle benachrichtigen",
+  "strReminderXminutesEarly": "Erinnerung: {minutes, plural, =1{eine Minute} other{{minutes} Minuten}} vorher"
 }

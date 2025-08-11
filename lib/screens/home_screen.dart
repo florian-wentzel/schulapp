@@ -12,6 +12,7 @@ import 'package:schulapp/code_behind/calendar_todo_event_style.dart';
 import 'package:schulapp/code_behind/grading_system_manager.dart';
 import 'package:schulapp/code_behind/holidays.dart';
 import 'package:schulapp/code_behind/holidays_manager.dart';
+import 'package:schulapp/code_behind/notification_manager.dart';
 import 'package:schulapp/code_behind/school_lesson.dart';
 import 'package:schulapp/code_behind/school_lesson_prefab.dart';
 import 'package:schulapp/code_behind/school_semester.dart';
@@ -382,6 +383,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
             HomeWidgetManager.updateWithDefaultTimetable(
               context: context,
+            );
+
+            NotificationManager().resetScheduleNotificationWithTimetable(
+              timetable: tt,
             );
 
             //damit der screen neu erstellt und der neue timetable angezeigt wird

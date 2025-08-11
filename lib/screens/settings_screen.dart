@@ -183,6 +183,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _reducedClassHoursEnabled(),
         _reducedClassHours(),
         _lessonReminderNotification(),
+        _lessonReminderForCancelledLessons(),
+        _preLessonReminderNotificationDuration(),
         _todoEventNotificationScheduleEnabled(),
         _todoEventNotificationScheduleList(),
         _pinHomeWidget(),
@@ -379,6 +381,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         await Future.delayed(
                           const Duration(milliseconds: 250),
                         );
+
+                        final tt = Utils.getHomescreenTimetable();
+
+                        if (tt != null) {
+                          NotificationManager()
+                              .resetScheduleNotificationWithTimetable(
+                            timetable: tt,
+                          );
+                        }
+
                         _showUpdateTimetableDayNamesAndSemesterGradeGroups();
                       },
                     );
@@ -615,6 +627,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 type: InfoType.warning,
               );
             }
+
+            final tt = Utils.getHomescreenTimetable();
+
+            if (tt != null) {
+              NotificationManager().resetScheduleNotificationWithTimetable(
+                timetable: tt,
+              );
+            }
+
             setState(() {});
           },
         ),
@@ -770,6 +791,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget _lessonReminderNotification() {
     return SettingsScreen.listItem(
       context,
+      roundedBottonCorners: !TimetableManager().settings.getVar(
+            Settings.lessonReminderNotificationEnabledKey,
+          ),
       title:
           AppLocalizationsManager.localizations.strLessonReminderNotification,
       afterTitle: [
@@ -804,6 +828,127 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
             setState(() {});
           },
+        ),
+      ],
+    );
+  }
+
+  Widget _lessonReminderForCancelledLessons() {
+    return SettingsScreen.listItem(
+      context,
+      title: null,
+      roundedBottonCorners: false,
+      hide: !TimetableManager().settings.getVar(
+            Settings.lessonReminderNotificationEnabledKey,
+          ),
+      afterTitle: [
+        // simulate a title like in SettingsScreen.listItem
+        Flexible(
+          child: Text(
+            AppLocalizationsManager.localizations.strNotifyAboutCanceledLessons,
+            style: Theme.of(context).textTheme.headlineMedium,
+          ),
+        ),
+        Switch.adaptive(
+          value: TimetableManager().settings.getVar(
+                Settings.cancelledLessonReminderNotificationEnabledKey,
+              ),
+          onChanged: (value) {
+            final tt = Utils.getHomescreenTimetable();
+
+            if (tt == null) {
+              Utils.showInfo(
+                context,
+                msg: "Sie haben noch keinen Stundenplan eingerichtet!",
+                type: InfoType.error,
+              );
+              return;
+            }
+
+            NotificationManager().resetScheduleNotificationWithTimetable(
+              timetable: tt,
+            );
+
+            TimetableManager().settings.setVar(
+                  Settings.cancelledLessonReminderNotificationEnabledKey,
+                  value,
+                );
+
+            setState(() {});
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _preLessonReminderNotificationDuration() {
+    return SettingsScreen.listItem(
+      context,
+      title: null,
+      hide: !TimetableManager().settings.getVar(
+            Settings.lessonReminderNotificationEnabledKey,
+          ),
+      afterTitle: [
+        // simulate a title like in SettingsScreen.listItem
+        Flexible(
+          child: Text(
+            AppLocalizationsManager.localizations.strReminderXminutesEarly(
+              TimetableManager()
+                  .settings
+                  .getVar<Duration>(
+                    Settings.preLessonReminderNotificationDurationKey,
+                  )
+                  .inMinutes,
+            ),
+            style: Theme.of(context).textTheme.headlineMedium,
+          ),
+        ),
+        ElevatedButton(
+          onPressed: () async {
+            final tt = Utils.getHomescreenTimetable();
+
+            if (tt == null) {
+              Utils.showInfo(
+                context,
+                msg: "Sie haben noch keinen Stundenplan eingerichtet!",
+                type: InfoType.error,
+              );
+              return;
+            }
+
+            final initValue = TimetableManager()
+                .settings
+                .getVar<Duration>(
+                  Settings.preLessonReminderNotificationDurationKey,
+                )
+                .inMinutes;
+
+            double? value = await Utils.showRangeInputDialog(
+              context,
+              title: null,
+              textAfterValue: AppLocalizationsManager.localizations.strMinutes,
+              minValue: 1,
+              maxValue: 15,
+              startValue: initValue.toDouble(),
+              onlyIntegers: true,
+            );
+
+            if (value == null) return;
+
+            TimetableManager().settings.setVar<Duration>(
+                  Settings.preLessonReminderNotificationDurationKey,
+                  Duration(
+                    minutes: value.toInt(),
+                  ),
+                );
+
+            setState(() {});
+
+            NotificationManager().resetScheduleNotificationWithTimetable(
+              timetable: tt,
+            );
+          },
+          child: Text(AppLocalizationsManager.localizations.strEdit),
         ),
       ],
     );
@@ -1182,6 +1327,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
         context,
         msg: AppLocalizationsManager.localizations.strSuccessfullySaved,
         type: InfoType.success,
+      );
+    }
+
+    final tt = Utils.getHomescreenTimetable();
+
+    if (tt != null) {
+      NotificationManager().resetScheduleNotificationWithTimetable(
+        timetable: tt,
       );
     }
 

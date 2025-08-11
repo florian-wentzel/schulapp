@@ -427,11 +427,10 @@ class _TimetableLessonWidgetState extends State<TimetableLessonWidget> {
     );
 
     return NotificationManager().updateNotification(
-      currTimetable: widget.tt,
+      timetable: widget.tt,
       monday: monday,
       dayIndex: widget.dayIndex,
       lessonIndex: widget.lessonIndex,
-      lesson: widget.lesson,
     );
   }
 
@@ -462,6 +461,8 @@ class _TimetableLessonWidgetState extends State<TimetableLessonWidget> {
           dayIndex: widget.dayIndex,
           timeIndex: widget.lessonIndex,
         );
+
+        _updateNotification();
       },
     );
 

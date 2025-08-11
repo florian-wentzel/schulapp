@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:schulapp/app.dart';
+import 'package:schulapp/code_behind/notification_manager.dart';
 import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/timetable.dart';
 import 'package:schulapp/code_behind/timetable_manager.dart';
@@ -92,6 +93,10 @@ class _TimetablesScreenState extends State<TimetablesScreen> {
               HomeWidgetManager.updateWithDefaultTimetable(
                 context: context,
               );
+
+              NotificationManager().resetScheduleNotificationWithTimetable(
+                timetable: tt,
+              );
             },
           ),
           SpeedDialChild(
@@ -147,10 +152,7 @@ class _TimetablesScreenState extends State<TimetablesScreen> {
   Widget _itemBuilder(BuildContext context, int index) {
     Timetable tt = TimetableManager().timetables[index];
 
-    // String mainTimetableName = TimetableManager().settings.getVar(
-    //           Settings.mainTimetableNameKey,
-    //         ) ??
-    //     "";
+    String mainTimetableName = Utils.getHomescreenTimetable()?.name ?? "";
 
     return Container(
       margin: const EdgeInsets.symmetric(
@@ -177,7 +179,12 @@ class _TimetablesScreenState extends State<TimetablesScreen> {
 
           setState(() {});
         },
-        title: Text(tt.name),
+        title: Text(
+          tt.name,
+          style: tt.name == mainTimetableName
+              ? const TextStyle(fontWeight: FontWeight.bold)
+              : null,
+        ),
         trailing: Wrap(
           spacing: 8,
           crossAxisAlignment: WrapCrossAlignment.center,

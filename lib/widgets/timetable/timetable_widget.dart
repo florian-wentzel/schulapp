@@ -576,6 +576,12 @@ class _TimetableWidgetState extends State<TimetableWidget> {
                           if (mounted) {
                             setState(() {});
                           }
+
+                          NotificationManager().updateNotificationsForDay(
+                            timetable: tt,
+                            monday: currMonday,
+                            dayIndex: dayIndex,
+                          );
                         },
                 ),
               if (dayIsCancelled)
@@ -626,6 +632,12 @@ class _TimetableWidgetState extends State<TimetableWidget> {
                           if (mounted) {
                             setState(() {});
                           }
+
+                          NotificationManager().updateNotificationsForDay(
+                            timetable: tt,
+                            monday: currMonday,
+                            dayIndex: dayIndex,
+                          );
                         },
                 ),
               if (!dayIsSick)
@@ -692,6 +704,12 @@ class _TimetableWidgetState extends State<TimetableWidget> {
                           if (mounted) {
                             setState(() {});
                           }
+
+                          NotificationManager().updateNotificationsForDay(
+                            timetable: tt,
+                            monday: currMonday,
+                            dayIndex: dayIndex,
+                          );
                         },
                 ),
               if (dayIsSick)
@@ -736,6 +754,12 @@ class _TimetableWidgetState extends State<TimetableWidget> {
                           if (mounted) {
                             setState(() {});
                           }
+
+                          NotificationManager().updateNotificationsForDay(
+                            timetable: tt,
+                            monday: currMonday,
+                            dayIndex: dayIndex,
+                          );
                         },
                 ),
               if (!dayIsSubstituted)
@@ -814,6 +838,12 @@ class _TimetableWidgetState extends State<TimetableWidget> {
 
                             setState(() {});
                           }
+
+                          NotificationManager().updateNotificationsForDay(
+                            timetable: tt,
+                            monday: currMonday,
+                            dayIndex: dayIndex,
+                          );
                         },
                 ),
               if (dayIsSubstituted)
@@ -852,6 +882,12 @@ class _TimetableWidgetState extends State<TimetableWidget> {
 
                             setState(() {});
                           }
+
+                          NotificationManager().updateNotificationsForDay(
+                            timetable: tt,
+                            monday: currMonday,
+                            dayIndex: dayIndex,
+                          );
                         },
                 ),
             ],

@@ -146,6 +146,9 @@ class Settings {
       "showAbiAverageNotAlwaysCorrect";
   static const lessonReminderNotificationEnabledKey =
       "lessonNotificationEnabled";
+  static const cancelledLessonReminderNotificationEnabledKey =
+      "cancelledLessonReminderNotificationEnabled";
+
   static const preLessonReminderNotificationDurationKey =
       "preLessonReminderNotificationDuration";
 
@@ -484,6 +487,10 @@ class Settings {
     ),
     SettingsVar<bool>(
       key: lessonReminderNotificationEnabledKey,
+      defaultValue: () => false,
+    ),
+    SettingsVar(
+      key: cancelledLessonReminderNotificationEnabledKey,
       defaultValue: () => false,
     ),
     SettingsVar<Duration>(
