@@ -1,4 +1,4 @@
-synthetic-package: false
+# synthetic-package: false
 
 # The files are generated into the path specified by `arb-dir`
 arb-dir: lib/l10n

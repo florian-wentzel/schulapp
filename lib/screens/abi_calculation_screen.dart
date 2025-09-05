@@ -43,34 +43,7 @@ class _AbiCalculationScreenState extends State<AbiCalculationScreen> {
     if (show) {
       WidgetsBinding.instance.addPostFrameCallback(
         (timeStamp) {
-          showDialog(
-            context: context,
-            builder: (context) {
-              return AlertDialog.adaptive(
-                title: Text(
-                  AppLocalizationsManager.localizations.strInformation,
-                ),
-                content: Text(
-                  AppLocalizationsManager
-                      .localizations.strAbiAverageNotAlwaysCorrectInfo,
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      TimetableManager().settings.setVar(
-                            Settings.showAbiAverageNotAlwaysCorrectInfoKey,
-                            false,
-                          );
-                      Navigator.of(context).pop();
-                    },
-                    child: Text(
-                      AppLocalizationsManager.localizations.strOK,
-                    ),
-                  ),
-                ],
-              );
-            },
-          );
+          _showInfoDialog();
         },
       );
     }
@@ -94,6 +67,12 @@ class _AbiCalculationScreenState extends State<AbiCalculationScreen> {
         title: Text(
           AppLocalizationsManager.localizations.strAbiCalculator,
         ),
+        actions: [
+          IconButton(
+            onPressed: _showInfoDialog,
+            icon: const Icon(Icons.info),
+          ),
+        ],
       ),
       bottomNavigationBar: Container(
         height: kBottomNavigationBarHeight,
@@ -173,6 +152,37 @@ class _AbiCalculationScreenState extends State<AbiCalculationScreen> {
         ),
       ),
       body: _body(context),
+    );
+  }
+
+  Future<void> _showInfoDialog() async {
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog.adaptive(
+          title: Text(
+            AppLocalizationsManager.localizations.strInformation,
+          ),
+          content: Text(
+            AppLocalizationsManager
+                .localizations.strAbiAverageNotAlwaysCorrectInfo,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                TimetableManager().settings.setVar(
+                      Settings.showAbiAverageNotAlwaysCorrectInfoKey,
+                      false,
+                    );
+                Navigator.of(context).pop();
+              },
+              child: Text(
+                AppLocalizationsManager.localizations.strOK,
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
