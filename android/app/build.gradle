@@ -13,7 +13,7 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace = "com.flologames.schulapp"
-    compileSdk = 35//flutter.compileSdkVersion
+    compileSdk = 36//flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
