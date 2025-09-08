@@ -16,12 +16,19 @@ import 'package:schulapp/code_behind/timetable_manager.dart';
 import 'package:schulapp/code_behind/todo_event.dart';
 import 'package:schulapp/code_behind/unique_id_generator.dart';
 import 'package:schulapp/code_behind/utils.dart';
+import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/screens/todo_events_screen.dart';
 import 'package:timezone/timezone.dart';
 
 @pragma('vm:entry-point')
 void notificationTapBackground(NotificationResponse notificationResponse) {
   NotificationManager()._pendingNotificationResponse = notificationResponse;
+}
+
+//WENN MAN HIER WEITERE HINZUFÜGT MUSS MAN AUCH [_notificationDetailsMap] ERWEITERN
+enum NotificationType {
+  todo,
+  lessonReminder,
 }
 
 class NotificationManager {
@@ -37,9 +44,10 @@ class NotificationManager {
   FlutterLocalNotificationsPlugin notificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
-  static final _notificationDetails = NotificationDetails(
+  static final _notificationDetailsMap = {
+    NotificationType.todo: NotificationDetails(
       android: const AndroidNotificationDetails(
-        "channelId",
+        "todo",
         "todos",
         importance: Importance.max,
         priority: Priority.high,
@@ -54,7 +62,28 @@ class NotificationManager {
             placement: WindowsImagePlacement.appLogoOverride,
           ),
         ],
-      ));
+      ),
+    ),
+    NotificationType.lessonReminder: NotificationDetails(
+      android: const AndroidNotificationDetails(
+        "lessonReminders",
+        "lesson reminders",
+        importance: Importance.high,
+        priority: Priority.defaultPriority,
+      ),
+      iOS: const DarwinNotificationDetails(),
+      windows: WindowsNotificationDetails(
+        images: [
+          WindowsImage(
+            WindowsImage.getAssetUri("assets/icon_for_play_store.png"),
+            altText: "Icon",
+            addQueryParams: false,
+            placement: WindowsImagePlacement.appLogoOverride,
+          ),
+        ],
+      ),
+    ),
+  };
 
   NotificationResponse? _pendingNotificationResponse;
   bool get pendingNotification => _pendingNotificationResponse != null;
@@ -136,8 +165,12 @@ class NotificationManager {
     }
   }
 
-  Future<void> showNotifications(
-      {required int id, required String title, String? body}) async {
+  Future<void> showNotifications({
+    required int id,
+    required String title,
+    String? body,
+    NotificationType type = NotificationType.todo,
+  }) async {
     if (!Platform.isIOS && !Platform.isAndroid && !Platform.isWindows) {
       return;
     }
@@ -146,13 +179,14 @@ class NotificationManager {
       id,
       title,
       body,
-      _notificationDetails,
+      _notificationDetailsMap[type],
       payload: "$id",
     );
   }
 
   Future<void> scheduleNotification({
     required int id,
+    required NotificationType type,
     String? title,
     String? body,
     String? payload,
@@ -169,13 +203,19 @@ class NotificationManager {
     if (id > maxIdNum) return;
 
     try {
+      var details = _notificationDetailsMap[type];
+
+      assert(details != null, 'Notification details must not be null');
+
+      if (details == null) return;
+
       return notificationsPlugin.zonedSchedule(
         id,
         title,
         body,
         payload: payload ?? "$id",
         TZDateTime.from(scheduledDateTime, local),
-        _notificationDetails,
+        details,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       );
     } catch (e) {
@@ -340,12 +380,12 @@ class NotificationManager {
       schoolTimesOverride: schoolTimesOverride,
     );
 
-    // _registerScheduleNotificationsForWeek(
-    //   monday: nowMonday.add(const Duration(days: 7)),
-    //   timetable: timetable,
-    //   timeBeforeLessonNotification: timeBeforeLessonNotification,
-    //   notificationsToSchedule: notificationsToSchedule,
-    // );
+    await _registerScheduleNotificationsForWeek(
+      monday: nowMonday.add(const Duration(days: 7)),
+      timetable: timetable,
+      timeBeforeLessonNotification: timeBeforeLessonNotification,
+      notificationsToSchedule: notificationsToSchedule,
+    );
 
     SaveManager().saveLessonReminders(
       notificationsToSchedule,
@@ -436,7 +476,8 @@ class NotificationManager {
         //todo: vielleicht doch eine Benachrichtigung für abgesagte Stunden?
         isCancled = true;
       } else if (specialLesson is SubstituteSpecialLesson) {
-        lessonName = "${specialLesson.name} (Vertretung)";
+        lessonName = AppLocalizationsManager.localizations
+            .strLessonIsSubstite(specialLesson.name);
         lessonRoom = specialLesson.room;
         isSubstituded = true;
       }
@@ -480,8 +521,10 @@ class NotificationManager {
     await scheduleNotification(
       id: id,
       scheduledDateTime: scheduledDateTime,
-      title: "Gleich beginnt $lessonName",
-      body: "Im Raum $lessonRoom",
+      title:
+          AppLocalizationsManager.localizations.strLessonStartsSoon(lessonName),
+      body: AppLocalizationsManager.localizations.strLessonInRoom(lessonRoom),
+      type: NotificationType.lessonReminder,
     );
 
     final notification = SchoolLessonNotification(

@@ -236,7 +236,12 @@ class Utils {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: title == null ? null : Text(title),
+          title: title == null
+              ? null
+              : Text(
+                  title,
+                  textAlign: TextAlign.center,
+                ),
           content: StatefulBuilder(
             builder: (context, snapshot) {
               return Column(
@@ -256,7 +261,11 @@ class Utils {
                         }
                         snapshot.call(
                           () {
-                            currValue = value;
+                            if (onlyIntegers) {
+                              currValue = value.toInt().toDouble();
+                            } else {
+                              currValue = value;
+                            }
                           },
                         );
                       },

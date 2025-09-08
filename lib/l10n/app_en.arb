@@ -2,6 +2,8 @@
   "@@locale": "en",
   "language_name": "Englisch",
   "@language_name": {},
+  "version_0_10_0": "Added lesson notifications (configurable in settings)",
+  "@version_0_10_0": {},
   "version_0_9_9": "Added QR code sharing",
   "@version_0_9_9": {},
   "version_0_9_8": "Tasks can now be easily shared",
@@ -1222,5 +1224,43 @@
   "strAbiAverageNotAlwaysCorrectInfo": "The average calculation may be incorrect! This is only an approximation, calculated as follows: 5.66 - (total score / 180)",
   "@strAbiAverageNotAlwaysCorrectInfo": {},
   "strLessonReminderNotification": "Lesson reminder notification",
-  "@strLessonReminderNotification": {}
+  "@strLessonReminderNotification": {},
+  "strSetPreLessonReminderNotificationDuration": "Set reminder time\n({minutes} minutes before)",
+  "@strSetPreLessonReminderNotificationDuration": {
+    "placeholders": {
+      "minutes": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "strSetPreLessonReminderNotificationDurationTitle": "Set reminder time",
+  "@strSetPreLessonReminderNotificationDurationTitle": {},
+  "strLessonStartsSoon": "{lesson} starts soon",
+  "@strLessonStartsSoon": {
+    "placeholders": {
+      "lesson": {
+        "type": "String",
+        "example": "Deutsch"
+      }
+    }
+  },
+  "strLessonIsSubstite": "{lesson} (Substitute)",
+  "@strLessonIsSubstite": {
+    "placeholders": {
+      "lesson": {
+        "type": "String",
+        "example": "Deutsch"
+      }
+    }
+  },
+  "strLessonInRoom": "In room {room}",
+  "@strLessonInRoom": {
+    "placeholders": {
+      "room": {
+        "type": "String",
+        "example": "215"
+      }
+    }
+  }
 }

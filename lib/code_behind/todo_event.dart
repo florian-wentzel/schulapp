@@ -252,6 +252,7 @@ class TodoEvent {
         scheduledDateTime: correctedDateTime,
         title: title,
         body: body,
+        type: NotificationType.todo,
       );
     }
   }

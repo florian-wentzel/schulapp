@@ -183,6 +183,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _reducedClassHoursEnabled(),
         _reducedClassHours(),
         _lessonReminderNotification(),
+        _preLessonReminderNotificationDuration(),
         _todoEventNotificationScheduleEnabled(),
         _todoEventNotificationScheduleList(),
         _pinHomeWidget(),
@@ -379,7 +380,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         await Future.delayed(
                           const Duration(milliseconds: 250),
                         );
+
                         _showUpdateTimetableDayNamesAndSemesterGradeGroups();
+
+                        var lessonReminderNotificationEnabled =
+                            TimetableManager().settings.getVar(
+                                  Settings.lessonReminderNotificationEnabledKey,
+                                );
+
+                        if (!lessonReminderNotificationEnabled) return;
+
+                        final tt = Utils.getHomescreenTimetable();
+
+                        if (tt != null) {
+                          await NotificationManager()
+                              .resetScheduleNotificationWithTimetable(
+                            timetable: tt,
+                          );
+                        }
                       },
                     );
                   }),
@@ -616,6 +634,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
               );
             }
             setState(() {});
+
+            final tt = Utils.getHomescreenTimetable();
+
+            if (tt == null) {
+              Utils.showInfo(
+                context,
+                msg: AppLocalizationsManager
+                    .localizations.strYouDontHaveATimetableJet,
+                type: InfoType.error,
+              );
+              return;
+            }
+
+            var notificationEnabled = TimetableManager().settings.getVar(
+                  Settings.lessonReminderNotificationEnabledKey,
+                );
+
+            if (notificationEnabled) {
+              NotificationManager().resetScheduleNotificationWithTimetable(
+                timetable: tt,
+              );
+            }
           },
         ),
       ],
@@ -770,6 +810,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget _lessonReminderNotification() {
     return SettingsScreen.listItem(
       context,
+      roundedBottonCorners: !TimetableManager().settings.getVar(
+            Settings.lessonReminderNotificationEnabledKey,
+          ),
       title:
           AppLocalizationsManager.localizations.strLessonReminderNotification,
       afterTitle: [
@@ -784,7 +827,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               if (tt == null) {
                 Utils.showInfo(
                   context,
-                  msg: "Sie haben noch keinen Stundenplan eingerichtet!",
+                  msg: AppLocalizationsManager
+                      .localizations.strYouDontHaveATimetableJet,
                   type: InfoType.error,
                 );
                 return;
@@ -804,6 +848,76 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
             setState(() {});
           },
+        ),
+      ],
+    );
+  }
+
+  Widget _preLessonReminderNotificationDuration() {
+    var preTime = TimetableManager()
+        .settings
+        .getVar<Duration>(Settings.preLessonReminderNotificationDurationKey);
+
+    return SettingsScreen.listItem(
+      context,
+      title: null,
+      hide: !TimetableManager().settings.getVar(
+            Settings.lessonReminderNotificationEnabledKey,
+          ),
+      body: [
+        ElevatedButton(
+          onPressed: () async {
+            var minutesBefore = await Utils.showRangeInputDialog(
+              context,
+              minValue: 0,
+              maxValue: 60,
+              startValue: preTime.inMinutes.toDouble(),
+              onlyIntegers: true,
+              textAfterValue: AppLocalizationsManager.localizations.strMinutes,
+              title: AppLocalizationsManager.localizations
+                  .strSetPreLessonReminderNotificationDurationTitle,
+            );
+
+            if (minutesBefore == null) return;
+
+            if (preTime.inMinutes.toDouble() == minutesBefore) {
+              return;
+            }
+
+            TimetableManager().settings.setVar<Duration>(
+                  Settings.preLessonReminderNotificationDurationKey,
+                  Duration(
+                    minutes: minutesBefore.toInt(),
+                  ),
+                );
+
+            setState(() {});
+
+            final tt = Utils.getHomescreenTimetable();
+
+            if (tt != null) {
+              await NotificationManager()
+                  .resetScheduleNotificationWithTimetable(
+                timetable: tt,
+              );
+            }
+
+            if (tt == null && mounted) {
+              Utils.showInfo(
+                context,
+                msg: AppLocalizationsManager
+                    .localizations.strYouDontHaveATimetableJet,
+                type: InfoType.error,
+              );
+            }
+          },
+          child: Text(
+            AppLocalizationsManager.localizations
+                .strSetPreLessonReminderNotificationDuration(
+              preTime.inMinutes,
+            ),
+            textAlign: TextAlign.center,
+          ),
         ),
       ],
     );
@@ -1139,8 +1253,33 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
 
     await TimetableManager().removeTodoEventNotifications();
+    await NotificationManager().resetScheduleNotification();
 
     TimetableManager().markAllDataToBeReloaded();
+
+    // Schedule Notifications for Lessons
+    var notificationEnabled = TimetableManager().settings.getVar(
+          Settings.lessonReminderNotificationEnabledKey,
+        );
+
+    if (notificationEnabled) {
+      final tt = Utils.getHomescreenTimetable();
+
+      if (tt != null) {
+        await NotificationManager().resetScheduleNotificationWithTimetable(
+          timetable: tt,
+        );
+      }
+
+      if (tt == null && mounted) {
+        Utils.showInfo(
+          context,
+          msg:
+              AppLocalizationsManager.localizations.strYouDontHaveATimetableJet,
+          type: InfoType.error,
+        );
+      }
+    }
 
     if (mounted) {
       Utils.showInfo(
