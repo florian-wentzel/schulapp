@@ -1,6 +1,7 @@
 {
   "@@locale": "de",
   "language_name": "Deutsch",
+  "version_0_10_1": "Fehlerbehebungen beim Teilen vom Stundenplan via Online Code",
   "version_0_10_0": "Stundenbenachrichtigungen hinzugefügt (einstellbar in den Einstellungen)",
   "version_0_9_9": "Teilen per QR-Code hinzugefügt",
   "version_0_9_8": "Aufgaben können jetzt ganz einfach geteilt werden",

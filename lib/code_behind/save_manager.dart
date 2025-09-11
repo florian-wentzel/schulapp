@@ -485,7 +485,7 @@ class SaveManager {
   }
 
   Future<String> shareTimetable(Timetable timetable) async {
-    final exportFile = SaveManager().exportTimetable(
+    final exportFile = await SaveManager().exportTimetable(
       timetable,
       SaveManager().getTempDir().path,
     );
@@ -525,7 +525,7 @@ class SaveManager {
     TodoEvent todoEvent, {
     bool upload = true,
   }) async {
-    final exportFile = SaveManager().exportTodoEvent(
+    final exportFile = await SaveManager().exportTodoEvent(
       todoEvent,
       SaveManager().getTempDir().path,
     );
@@ -544,7 +544,7 @@ class SaveManager {
     return code;
   }
 
-  File exportTodoEvent(TodoEvent todoEvent, String path) {
+  Future<File> exportTodoEvent(TodoEvent todoEvent, String path) async {
     final now = DateTime.now();
     final exportName = " ${now.day}.${now.month}.${now.year}";
 
@@ -563,7 +563,7 @@ class SaveManager {
       todoEventDirPath: dirSavePath,
     );
 
-    ZipManager.folderToZip(
+    await ZipManager.folderToZip(
       Directory(dirSavePath),
       File(zipExportPath),
     );
@@ -573,7 +573,7 @@ class SaveManager {
     return File(zipExportPath);
   }
 
-  File exportTimetable(Timetable timetable, String path) {
+  Future<File> exportTimetable(Timetable timetable, String path) async {
     final now = DateTime.now();
     final exportName = " ${now.day}.${now.month}.${now.year}";
 
@@ -591,7 +591,7 @@ class SaveManager {
       timetableDirPath: dirSavePath,
     );
 
-    ZipManager.folderToZip(
+    await ZipManager.folderToZip(
       Directory(dirSavePath),
       File(zipExportPath),
     );

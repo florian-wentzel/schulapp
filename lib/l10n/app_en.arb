@@ -2,6 +2,8 @@
   "@@locale": "en",
   "language_name": "Englisch",
   "@language_name": {},
+  "version_0_10_1": "Bug fixes when sharing the timetable via online code",
+  "@version_0_10_1": {},
   "version_0_10_0": "Added lesson notifications (configurable in settings)",
   "@version_0_10_0": {},
   "version_0_9_9": "Added QR code sharing",

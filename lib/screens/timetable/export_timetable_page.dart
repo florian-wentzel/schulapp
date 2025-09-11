@@ -74,7 +74,7 @@ class EexportTimetablePageState extends State<ExportTimetablePage> {
     );
   }
 
-  Widget _itemBuilder(context, index) {
+  Widget _itemBuilder(BuildContext context, int index) {
     Timetable timetable = TimetableManager().timetables[index];
 
     return IgnorePointer(
@@ -153,7 +153,8 @@ class EexportTimetablePageState extends State<ExportTimetablePage> {
     File? exportFile;
 
     try {
-      exportFile = SaveManager().exportTimetable(timetable, selectedDirectory);
+      exportFile =
+          await SaveManager().exportTimetable(timetable, selectedDirectory);
       if (mounted) {
         Utils.hideCurrInfo(context);
       }

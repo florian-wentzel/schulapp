@@ -41,7 +41,7 @@ class BackupManager {
 
       final exportFile = File(join(path, exportName));
 
-      final zipFile = ZipManager.folderToZip(
+      final zipFile = await ZipManager.folderToZip(
         tempDir,
         exportFile,
         onProgress: onProgress,

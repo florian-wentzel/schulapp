@@ -30,11 +30,11 @@ class ZipManager {
     return exportDir;
   }
 
-  static File folderToZip(
+  static Future<File> folderToZip(
     Directory selectedDir,
     File exportFile, {
     void Function(double)? onProgress,
-  }) {
+  }) async {
     if (!selectedDir.existsSync()) {
       throw Exception(
         AppLocalizationsManager.localizations.strSelectedDirDoesNotExist,
@@ -43,7 +43,7 @@ class ZipManager {
 
     var encoder = ZipFileEncoder();
 
-    encoder.zipDirectory(
+    await encoder.zipDirectory(
       selectedDir,
       filename: exportFile.path,
       onProgress: onProgress,
