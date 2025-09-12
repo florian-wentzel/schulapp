@@ -81,6 +81,19 @@ class _OnlineCodeBottomSheetState extends State<OnlineCodeBottomSheet> {
                     ? ElevatedButton(
                         key: const ValueKey("button"),
                         onPressed: () async {
+                          // Weil IOS nicht über .request() gefragt wird, müssen wir gleich das Widget zeigen, anschließend wird man gefragt..
+                          if (Platform.isIOS) {
+                            FocusManager.instance.primaryFocus?.unfocus();
+
+                            await Future.delayed(
+                                const Duration(milliseconds: 250));
+
+                            setState(() {
+                              _showQRScanner = true;
+                            });
+                            return;
+                          }
+
                           final status = await Permission.camera.request();
                           if (!status.isGranted) {
                             if (context.mounted) {
