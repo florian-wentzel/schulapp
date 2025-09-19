@@ -9,6 +9,7 @@ import 'package:schulapp/code_behind/backup_manager.dart';
 import 'package:schulapp/code_behind/calendar_todo_event_style.dart';
 import 'package:schulapp/code_behind/grading_system_manager.dart';
 import 'package:schulapp/code_behind/notification_manager.dart';
+import 'package:schulapp/code_behind/online_sync_manager.dart';
 import 'package:schulapp/code_behind/school_semester.dart';
 import 'package:schulapp/code_behind/school_time.dart';
 import 'package:schulapp/code_behind/settings.dart';
@@ -189,6 +190,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _pinHomeWidget(),
         _createBackup(),
         _selectLanguage(),
+        _googleDrive(),
         _paulDessauLogout(),
         _currentVersion(),
         //weil padding nur nach oben geht muss ganz am ende
@@ -1031,6 +1033,57 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
           ],
+        ),
+      ],
+    );
+  }
+
+  Widget _googleDrive() {
+    return SettingsScreen.listItem(
+      context,
+      title: "Google-Drive-Backup",
+      // hide: username == null,
+      body: [
+        ElevatedButton(
+          onPressed: () async {
+            String? error = await GoogleAuthManager().signIn();
+
+            if (error != null && mounted) {
+              Utils.showInfo(
+                context,
+                msg: error,
+                type: InfoType.error,
+              );
+              return;
+            }
+
+            setState(() {});
+
+            if (!mounted || error != null) return;
+
+            Utils.showInfo(
+              context,
+              msg: "Erfolgreich angemeldet",
+              type: InfoType.success,
+            );
+          },
+          child: const Text("Abmelden"),
+        ),
+        ElevatedButton(
+          onPressed: () async {
+            await GoogleAuthManager().signOut();
+
+            setState(() {});
+
+            if (!mounted) return;
+
+            Utils.showInfo(
+              context,
+              msg: "Erfolgreich abgemeldet",
+              type: InfoType.success,
+            );
+          },
+          child: const Text("Abmelden"),
         ),
       ],
     );

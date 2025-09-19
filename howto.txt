@@ -10,3 +10,6 @@ How to Build Windows:
 How to change package name:
  - run the following command in console (in project dir)
    "dart run change_app_package_name:main com.new.package.name"
+
+How to sign for GooglePlayStore (not 100% sure):
+ - android\key.properties file needed

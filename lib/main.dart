@@ -2,6 +2,7 @@ import 'package:feedback/feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:schulapp/app.dart';
 import 'package:schulapp/code_behind/notification_manager.dart';
+import 'package:schulapp/code_behind/online_sync_manager.dart';
 import 'package:schulapp/code_behind/save_manager.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/theme/theme_manager.dart';
@@ -14,6 +15,7 @@ void main() async {
   final futures = [
     NotificationManager().initNotifications(),
     SaveManager().loadApplicationDocumentsDirectory(),
+    GoogleAuthManager().init(),
   ];
 
   tz.initializeTimeZones();
