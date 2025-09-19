@@ -718,6 +718,7 @@ Future<Timetable?> showSelectTimetableSheet(
   BuildContext context, {
   required String title,
   VoidCallback? onRemove,
+  bool showCancelButton = false,
 }) async {
   List<Timetable> timetables = TimetableManager().timetables;
 
@@ -728,62 +729,76 @@ Future<Timetable?> showSelectTimetableSheet(
     useSafeArea: true,
     scrollControlDisabledMaxHeightRatio: 0.7,
     builder: (context) {
-      return Container(
-        margin: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              title,
-              style: Theme.of(context).textTheme.headlineMedium,
-              textAlign: TextAlign.center,
-            ),
-            Expanded(
-              child: Container(
-                margin: const EdgeInsets.all(16),
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).cardColor,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: ListView.builder(
-                  itemCount: timetables.length,
-                  itemBuilder: (context, index) => ListTile(
-                    title: Text(timetables[index].name),
-                    trailing: IconButton(
-                      onPressed: () {
-                        Navigator.of(context).push(MaterialPageRoute(
-                          builder: (context) => HomeScreen(
-                            title: AppLocalizationsManager.localizations
-                                .strTimetableWithName(
-                              timetables[index].name,
+      return SafeArea(
+        child: Container(
+          margin: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                title,
+                style: Theme.of(context).textTheme.headlineMedium,
+                textAlign: TextAlign.center,
+              ),
+              Expanded(
+                child: Container(
+                  margin: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).cardColor,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: ListView.builder(
+                    itemCount: timetables.length,
+                    itemBuilder: (context, index) => ListTile(
+                      title: Text(timetables[index].name),
+                      trailing: IconButton(
+                        onPressed: () {
+                          Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => HomeScreen(
+                              title: AppLocalizationsManager.localizations
+                                  .strTimetableWithName(
+                                timetables[index].name,
+                              ),
+                              timetable: timetables[index],
                             ),
-                            timetable: timetables[index],
-                          ),
-                        ));
+                          ));
+                        },
+                        icon: const Icon(Icons.info),
+                      ),
+                      onTap: () {
+                        selectedTimetable = timetables[index];
+                        Navigator.of(context).pop();
                       },
-                      icon: const Icon(Icons.info),
                     ),
-                    onTap: () {
-                      selectedTimetable = timetables[index];
-                      Navigator.of(context).pop();
-                    },
                   ),
                 ),
               ),
-            ),
-            if (onRemove != null)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).pop(null);
-                    onRemove.call();
-                  },
-                  child: const Icon(Icons.delete, color: Colors.red),
+              if (onRemove != null)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(null);
+                      onRemove.call();
+                    },
+                    child: const Icon(Icons.delete, color: Colors.red),
+                  ),
                 ),
-              ),
-          ],
+              if (showCancelButton)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(null);
+                    },
+                    child: Text(
+                      AppLocalizationsManager.localizations.strCancel,
+                    ),
+                  ),
+                ),
+            ],
+          ),
         ),
       );
     },
@@ -911,15 +926,17 @@ class _CreateTimetableBottomSheetState
         ),
       );
     }
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: actions,
+    return SafeArea(
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: actions,
+        ),
       ),
     );
   }
@@ -932,6 +949,8 @@ class _CreateTimetableBottomSheetState
     if (!nextPage) {
       return;
     }
+
+    FocusManager.instance.primaryFocus?.unfocus();
 
     _pageController.nextPage(
       duration: const Duration(milliseconds: 500),
@@ -1188,55 +1207,150 @@ class _CreateTimetableBottomSheetState
   }
 
   Widget _page2() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: [
-        Text(
-          AppLocalizationsManager.localizations.strSetTimes,
-          style: Theme.of(context).textTheme.headlineMedium,
-        ),
-        const SizedBox(
-          height: 8,
-        ),
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
+    return SingleChildScrollView(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Text(
+            AppLocalizationsManager.localizations.strSetTimes,
+            style: Theme.of(context).textTheme.headlineMedium,
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
+          const SizedBox(
+            height: 8,
+          ),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                const Spacer(),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Text(
+                        AppLocalizationsManager.localizations.strStartOfSchool),
+                    const SizedBox(
+                      height: 8,
+                    ),
+                    TimeSelectionButton(
+                      controller: _dateSelectionButtonController,
+                    ),
+                  ],
+                ),
+                const Spacer(),
+                Column(
+                  children: [
+                    Text(
+                      AppLocalizationsManager
+                          .localizations.strLengthOfSchoolHours,
+                    ),
+                    Slider(
+                      value: _lessonLength.toDouble(),
+                      min: 30,
+                      max: 90,
+                      onChanged: (value) {
+                        _lessonLength = value.toInt();
+                        const snapPoint = 45;
+
+                        double distToSnapPoint = (value - snapPoint).abs();
+                        if (distToSnapPoint < 2) {
+                          _lessonLength = snapPoint;
+                        }
+                        setState(() {});
+                      },
+                    ),
+                    InkWell(
+                      onTap: () async {
+                        int? length = await Utils.showIntInputDialog(
+                          context,
+                          hintText: AppLocalizationsManager
+                              .localizations.strLengthOfSchoolHours,
+                        );
+
+                        if (length == null) return;
+
+                        if (length < 30 || length > 90) {
+                          return;
+                        }
+
+                        _lessonLength = length;
+                        setState(() {});
+                      },
+                      child: Text(
+                        AppLocalizationsManager.localizations
+                            .strXMinutes(_lessonLength),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(
+            height: 12,
+          ),
+          Row(
             children: [
-              const Spacer(),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Text(AppLocalizationsManager.localizations.strStartOfSchool),
-                  const SizedBox(
-                    height: 8,
+              Flexible(
+                fit: FlexFit.tight,
+                child: TextFormField(
+                  validator: (value) {
+                    final errorMsg = AppLocalizationsManager.localizations
+                        .strLessonCountMustBeInRange(
+                      _minLessonCount,
+                      _maxLessonCount,
+                    );
+                    if (_lessonCountController.text.trim().isEmpty) {
+                      return errorMsg;
+                    }
+
+                    try {
+                      final lessonCount = int.parse(
+                        _lessonCountController.text.trim(),
+                      );
+                      if (lessonCount < _minLessonCount ||
+                          lessonCount > _maxLessonCount) {
+                        return errorMsg;
+                      }
+                    } catch (e) {
+                      //
+                    }
+                    return null;
+                  },
+                  decoration: InputDecoration(
+                    hintText:
+                        AppLocalizationsManager.localizations.strLessonCount,
                   ),
-                  TimeSelectionButton(
-                    controller: _dateSelectionButtonController,
-                  ),
-                ],
+                  autofocus: false,
+                  maxLines: 1,
+                  textAlign: TextAlign.center,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                  ],
+                  controller: _lessonCountController,
+                ),
               ),
-              const Spacer(),
               Column(
                 children: [
                   Text(
                     AppLocalizationsManager
-                        .localizations.strLengthOfSchoolHours,
+                        .localizations.strBreaksBetweenLessons,
                   ),
                   Slider(
-                    value: _lessonLength.toDouble(),
-                    min: 30,
-                    max: 90,
+                    value: _timeBetweenLessons.toDouble(),
+                    min: 0,
+                    max: 45,
                     onChanged: (value) {
-                      _lessonLength = value.toInt();
-                      const snapPoint = 45;
+                      _timeBetweenLessons = value.toInt();
+                      const snapPoint = 10;
 
                       double distToSnapPoint = (value - snapPoint).abs();
                       if (distToSnapPoint < 2) {
-                        _lessonLength = snapPoint;
+                        _timeBetweenLessons = snapPoint;
                       }
                       setState(() {});
                     },
@@ -1246,137 +1360,46 @@ class _CreateTimetableBottomSheetState
                       int? length = await Utils.showIntInputDialog(
                         context,
                         hintText: AppLocalizationsManager
-                            .localizations.strLengthOfSchoolHours,
+                            .localizations.strBreaksBetweenLessons,
                       );
 
                       if (length == null) return;
 
-                      if (length < 30 || length > 90) {
+                      if (length < 0 || length > 45) {
                         return;
                       }
 
-                      _lessonLength = length;
+                      _timeBetweenLessons = length;
                       setState(() {});
                     },
                     child: Text(
                       AppLocalizationsManager.localizations
-                          .strXMinutes(_lessonLength),
+                          .strXMinutes(_timeBetweenLessons),
                     ),
                   ),
                 ],
               ),
             ],
           ),
-        ),
-        const SizedBox(
-          height: 12,
-        ),
-        Row(
-          children: [
-            Flexible(
-              fit: FlexFit.tight,
-              child: TextFormField(
-                validator: (value) {
-                  final errorMsg = AppLocalizationsManager.localizations
-                      .strLessonCountMustBeInRange(
-                    _minLessonCount,
-                    _maxLessonCount,
-                  );
-                  if (_lessonCountController.text.trim().isEmpty) {
-                    return errorMsg;
-                  }
-
-                  try {
-                    final lessonCount = int.parse(
-                      _lessonCountController.text.trim(),
-                    );
-                    if (lessonCount < _minLessonCount ||
-                        lessonCount > _maxLessonCount) {
-                      return errorMsg;
-                    }
-                  } catch (e) {
-                    //
-                  }
-                  return null;
-                },
-                decoration: InputDecoration(
-                  hintText:
-                      AppLocalizationsManager.localizations.strLessonCount,
-                ),
-                autofocus: false,
-                maxLines: 1,
-                textAlign: TextAlign.center,
-                keyboardType: TextInputType.number,
-                inputFormatters: [
-                  FilteringTextInputFormatter.digitsOnly,
-                ],
-                controller: _lessonCountController,
-              ),
-            ),
-            Column(
+          if (!widget.onlySchoolTimes)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
-                  AppLocalizationsManager.localizations.strBreaksBetweenLessons,
+                Text(AppLocalizationsManager.localizations.strSaturdayLessons),
+                const SizedBox(
+                  width: 4,
                 ),
-                Slider(
-                  value: _timeBetweenLessons.toDouble(),
-                  min: 0,
-                  max: 45,
+                Switch.adaptive(
+                  value: _addSaturday,
                   onChanged: (value) {
-                    _timeBetweenLessons = value.toInt();
-                    const snapPoint = 10;
-
-                    double distToSnapPoint = (value - snapPoint).abs();
-                    if (distToSnapPoint < 2) {
-                      _timeBetweenLessons = snapPoint;
-                    }
+                    _addSaturday = value;
                     setState(() {});
                   },
-                ),
-                InkWell(
-                  onTap: () async {
-                    int? length = await Utils.showIntInputDialog(
-                      context,
-                      hintText: AppLocalizationsManager
-                          .localizations.strBreaksBetweenLessons,
-                    );
-
-                    if (length == null) return;
-
-                    if (length < 0 || length > 45) {
-                      return;
-                    }
-
-                    _timeBetweenLessons = length;
-                    setState(() {});
-                  },
-                  child: Text(
-                    AppLocalizationsManager.localizations
-                        .strXMinutes(_timeBetweenLessons),
-                  ),
                 ),
               ],
             ),
-          ],
-        ),
-        if (!widget.onlySchoolTimes)
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(AppLocalizationsManager.localizations.strSaturdayLessons),
-              const SizedBox(
-                width: 4,
-              ),
-              Switch.adaptive(
-                value: _addSaturday,
-                onChanged: (value) {
-                  _addSaturday = value;
-                  setState(() {});
-                },
-              ),
-            ],
-          ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -1642,7 +1665,7 @@ class SelectLessonPrefabsSheet extends StatefulWidget {
   static Future<List<SchoolLessonPrefab>?> show(BuildContext context) async {
     return await showModalBottomSheet<List<SchoolLessonPrefab>>(
       context: context,
-      scrollControlDisabledMaxHeightRatio: 0.7,
+      scrollControlDisabledMaxHeightRatio: 0.8,
       useSafeArea: true,
       builder: (context) {
         return const SelectLessonPrefabsSheet();
@@ -1694,243 +1717,248 @@ class _SelectLessonPrefabsSheetState extends State<SelectLessonPrefabsSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 300),
-                  transitionBuilder:
-                      (Widget child, Animation<double> animation) {
-                    final inAnimation = Tween<Offset>(
-                      begin: const Offset(1.0, 0.0),
-                      end: const Offset(0.0, 0.0),
-                    ).animate(animation);
-                    final outAnimation = Tween<Offset>(
-                      begin: const Offset(-1.0, 0.0),
-                      end: const Offset(0.0, 0.0),
-                    ).animate(animation);
+    return SafeArea(
+      child: Container(
+        margin: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    transitionBuilder:
+                        (Widget child, Animation<double> animation) {
+                      final inAnimation = Tween<Offset>(
+                        begin: const Offset(1.0, 0.0),
+                        end: const Offset(0.0, 0.0),
+                      ).animate(animation);
+                      final outAnimation = Tween<Offset>(
+                        begin: const Offset(-1.0, 0.0),
+                        end: const Offset(0.0, 0.0),
+                      ).animate(animation);
 
-                    return ClipRect(
-                      child: SlideTransition(
-                        position: child.key == const ValueKey('textF')
-                            ? inAnimation
-                            : outAnimation,
-                        child: child,
-                      ),
-                    );
-                  },
-                  child: _searching
-                      ? Container(
-                          key: const ValueKey('textF'),
-                          margin: const EdgeInsets.symmetric(horizontal: 16),
-                          height: 60,
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: TextFormField(
-                              focusNode: _fnSearch,
-                              controller: _searchController,
-                              autofocus: true,
-                              keyboardType: TextInputType.text,
-                              textInputAction: TextInputAction.search,
-                              textAlign: TextAlign.start,
-                              minLines: 1,
-                              cursorColor: ThemeData().primaryColor,
-                              textAlignVertical: TextAlignVertical.center,
-                              decoration: InputDecoration(
-                                labelText: AppLocalizationsManager
-                                    .localizations.strSearch,
-                                alignLabelWithHint: true,
-                                contentPadding: const EdgeInsets.symmetric(
-                                  vertical: 8,
-                                  horizontal: 8,
-                                ),
-                                border: const UnderlineInputBorder(
-                                  borderRadius: BorderRadius.all(
-                                    Radius.circular(4),
+                      return ClipRect(
+                        child: SlideTransition(
+                          position: child.key == const ValueKey('textF')
+                              ? inAnimation
+                              : outAnimation,
+                          child: child,
+                        ),
+                      );
+                    },
+                    child: _searching
+                        ? Container(
+                            key: const ValueKey('textF'),
+                            margin: const EdgeInsets.symmetric(horizontal: 16),
+                            height: 60,
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: TextFormField(
+                                focusNode: _fnSearch,
+                                controller: _searchController,
+                                autofocus: true,
+                                keyboardType: TextInputType.text,
+                                textInputAction: TextInputAction.search,
+                                textAlign: TextAlign.start,
+                                minLines: 1,
+                                cursorColor: ThemeData().primaryColor,
+                                textAlignVertical: TextAlignVertical.center,
+                                decoration: InputDecoration(
+                                  labelText: AppLocalizationsManager
+                                      .localizations.strSearch,
+                                  alignLabelWithHint: true,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    vertical: 8,
+                                    horizontal: 8,
+                                  ),
+                                  border: const UnderlineInputBorder(
+                                    borderRadius: BorderRadius.all(
+                                      Radius.circular(4),
+                                    ),
                                   ),
                                 ),
+                                onChanged: _onSearch,
+                                onFieldSubmitted: _onSearch,
                               ),
-                              onChanged: _onSearch,
-                              onFieldSubmitted: _onSearch,
+                            ),
+                          )
+                        : SizedBox(
+                            key: const ValueKey('align'),
+                            height: 60,
+                            child: Align(
+                              alignment: Alignment.center,
+                              child: Text(
+                                AppLocalizationsManager
+                                    .localizations.strSelectSubjects,
+                                style:
+                                    Theme.of(context).textTheme.headlineMedium,
+                                textAlign: TextAlign.center, //start
+                              ),
                             ),
                           ),
-                        )
-                      : SizedBox(
-                          key: const ValueKey('align'),
-                          height: 60,
-                          child: Align(
-                            alignment: Alignment.center,
-                            child: Text(
-                              "Wähle deine Fächer",
-                              style: Theme.of(context).textTheme.headlineMedium,
-                              textAlign: TextAlign.center, //start
+                  ),
+                ),
+                IconButton(
+                  icon: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 350),
+                    transitionBuilder:
+                        (Widget child, Animation<double> animation) {
+                      final inAnimation = Tween<Offset>(
+                        begin: const Offset(0.0, 1.0),
+                        end: const Offset(0.0, 0.0),
+                      ).animate(animation);
+                      final outAnimation = Tween<Offset>(
+                        begin: const Offset(0.0, -1.0),
+                        end: const Offset(0.0, 0.0),
+                      ).animate(animation);
+
+                      return ClipRect(
+                        child: SlideTransition(
+                          position: child.key == const ValueKey('close')
+                              ? inAnimation
+                              : outAnimation,
+                          child: child,
+                        ),
+                      );
+                    },
+                    child: _searching
+                        ? const Icon(
+                            Icons.close,
+                            key: ValueKey('close'),
+                          )
+                        : const Icon(
+                            Icons.search,
+                            key: ValueKey('search'),
+                          ),
+                  ),
+                  onPressed: () {
+                    if (_searching && _searchController.text.isNotEmpty) {
+                      _searchController.clear();
+                    } else {
+                      _searching = !_searching;
+                      if (_searching) _fnSearch.requestFocus();
+                    }
+                    _onSearch("");
+                    setState(() {});
+                  },
+                ),
+              ],
+            ),
+            Expanded(
+              child: Container(
+                margin: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).cardColor,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: ListView.builder(
+                  itemCount: allDefaultLessonSelections.length + 1,
+                  itemBuilder: (context, index) {
+                    final lessonIndex = index;
+                    if (index == allDefaultLessonSelections.length) {
+                      return ListTile(
+                        onTap: () async {
+                          String initText = "";
+                          if (allDefaultLessonSelections.isEmpty) {
+                            initText = _searchController.text.trim();
+                          }
+                          final name = await Utils.showStringInputDialog(
+                            context,
+                            hintText: AppLocalizationsManager
+                                .localizations.strSubjectName,
+                            initText: initText,
+                          );
+
+                          if (name == null) return;
+
+                          allDefaultLessons.add(
+                            SchoolLessonPrefab(
+                              name: name,
+                              color: Colors.blue,
+                              room: "selected",
                             ),
+                          );
+
+                          _onSearch("");
+                        },
+                        leading: const Icon(
+                          Icons.add,
+                        ),
+                        title: Text(
+                          AppLocalizationsManager
+                              .localizations.strCreateNewSubject,
+                        ),
+                      );
+                    }
+                    return ListTile(
+                      title: Text(allDefaultLessonSelections[lessonIndex].name),
+                      leading: InkWell(
+                        onTap: () async {
+                          final color = await Utils.showColorInputDialog(
+                            context,
+                            pickerColor:
+                                allDefaultLessonSelections[lessonIndex].color,
+                          );
+
+                          if (color == null) return;
+
+                          allDefaultLessonSelections[lessonIndex].color = color;
+                          setState(() {});
+                        },
+                        child: Container(
+                          width: 10,
+                          height: 20,
+                          decoration: BoxDecoration(
+                            color:
+                                allDefaultLessonSelections[lessonIndex].color,
+                            borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                ),
-              ),
-              IconButton(
-                icon: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 350),
-                  transitionBuilder:
-                      (Widget child, Animation<double> animation) {
-                    final inAnimation = Tween<Offset>(
-                      begin: const Offset(0.0, 1.0),
-                      end: const Offset(0.0, 0.0),
-                    ).animate(animation);
-                    final outAnimation = Tween<Offset>(
-                      begin: const Offset(0.0, -1.0),
-                      end: const Offset(0.0, 0.0),
-                    ).animate(animation);
-
-                    return ClipRect(
-                      child: SlideTransition(
-                        position: child.key == const ValueKey('close')
-                            ? inAnimation
-                            : outAnimation,
-                        child: child,
                       ),
+                      trailing: Checkbox(
+                        value: allDefaultLessonSelections[lessonIndex]
+                            .room
+                            .isNotEmpty,
+                        onChanged: (value) {
+                          allDefaultLessonSelections[lessonIndex].room =
+                              (value ?? false) ? "selected" : "";
+                          setState(() {});
+                        },
+                      ),
+                      onTap: () {
+                        final value = allDefaultLessonSelections[lessonIndex]
+                            .room
+                            .isNotEmpty;
+                        allDefaultLessonSelections[lessonIndex].room =
+                            !value ? "selected" : "";
+                        setState(() {});
+                      },
                     );
                   },
-                  child: _searching
-                      ? const Icon(
-                          Icons.close,
-                          key: ValueKey('close'),
-                        )
-                      : const Icon(
-                          Icons.search,
-                          key: ValueKey('search'),
-                        ),
                 ),
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: ElevatedButton(
                 onPressed: () {
-                  if (_searching && _searchController.text.isNotEmpty) {
-                    _searchController.clear();
-                  } else {
-                    _searching = !_searching;
-                    if (_searching) _fnSearch.requestFocus();
+                  List<SchoolLessonPrefab> selectedLessons = [];
+                  for (int i = 0; i < allDefaultLessons.length; i++) {
+                    if (allDefaultLessons[i].room.isNotEmpty) {
+                      allDefaultLessons[i].room = "";
+                      selectedLessons.add(allDefaultLessons[i]);
+                    }
                   }
-                  _onSearch("");
-                  setState(() {});
+                  Navigator.of(context).pop(selectedLessons);
                 },
-              ),
-            ],
-          ),
-          Expanded(
-            child: Container(
-              margin: const EdgeInsets.all(16),
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: ListView.builder(
-                itemCount: allDefaultLessonSelections.length + 1,
-                itemBuilder: (context, index) {
-                  final lessonIndex = index;
-                  if (index == allDefaultLessonSelections.length) {
-                    return ListTile(
-                      onTap: () async {
-                        String initText = "";
-                        if (allDefaultLessonSelections.isEmpty) {
-                          initText = _searchController.text.trim();
-                        }
-                        final name = await Utils.showStringInputDialog(
-                          context,
-                          hintText: AppLocalizationsManager
-                              .localizations.strSubjectName,
-                          initText: initText,
-                        );
-
-                        if (name == null) return;
-
-                        allDefaultLessons.add(
-                          SchoolLessonPrefab(
-                            name: name,
-                            color: Colors.blue,
-                            room: "selected",
-                          ),
-                        );
-
-                        _onSearch("");
-                      },
-                      leading: const Icon(
-                        Icons.add,
-                      ),
-                      title: Text(
-                        AppLocalizationsManager
-                            .localizations.strCreateNewSubject,
-                      ),
-                    );
-                  }
-                  return ListTile(
-                    title: Text(allDefaultLessonSelections[lessonIndex].name),
-                    leading: InkWell(
-                      onTap: () async {
-                        final color = await Utils.showColorInputDialog(
-                          context,
-                          pickerColor:
-                              allDefaultLessonSelections[lessonIndex].color,
-                        );
-
-                        if (color == null) return;
-
-                        allDefaultLessonSelections[lessonIndex].color = color;
-                        setState(() {});
-                      },
-                      child: Container(
-                        width: 10,
-                        height: 20,
-                        decoration: BoxDecoration(
-                          color: allDefaultLessonSelections[lessonIndex].color,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                    ),
-                    trailing: Checkbox(
-                      value: allDefaultLessonSelections[lessonIndex]
-                          .room
-                          .isNotEmpty,
-                      onChanged: (value) {
-                        allDefaultLessonSelections[lessonIndex].room =
-                            (value ?? false) ? "selected" : "";
-                        setState(() {});
-                      },
-                    ),
-                    onTap: () {
-                      final value = allDefaultLessonSelections[lessonIndex]
-                          .room
-                          .isNotEmpty;
-                      allDefaultLessonSelections[lessonIndex].room =
-                          !value ? "selected" : "";
-                      setState(() {});
-                    },
-                  );
-                },
+                child: Text(AppLocalizationsManager.localizations.strFinished),
               ),
             ),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: ElevatedButton(
-              onPressed: () {
-                List<SchoolLessonPrefab> selectedLessons = [];
-                for (int i = 0; i < allDefaultLessons.length; i++) {
-                  if (allDefaultLessons[i].room.isNotEmpty) {
-                    allDefaultLessons[i].room = "";
-                    selectedLessons.add(allDefaultLessons[i]);
-                  }
-                }
-                Navigator.of(context).pop(selectedLessons);
-              },
-              child: Text(AppLocalizationsManager.localizations.strFinished),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

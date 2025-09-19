@@ -169,9 +169,12 @@ class _CustomFeedbackFormState extends State<CustomFeedbackForm> {
             ],
           ),
         ),
-        TextButton(
-          onPressed: _sending ? null : sendFeedback,
-          child: Text(AppLocalizationsManager.localizations.strSendFeedback),
+        SafeArea(
+          top: false,
+          child: TextButton(
+            onPressed: _sending ? null : sendFeedback,
+            child: Text(AppLocalizationsManager.localizations.strSendFeedback),
+          ),
         ),
         const SizedBox(height: 8),
       ],

@@ -804,49 +804,51 @@ class Utils {
       useSafeArea: true,
       scrollControlDisabledMaxHeightRatio: scrollControlDisabledMaxHeightRatio,
       builder: (context) {
-        return Container(
-          margin: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              if (title != null)
-                Text(
-                  title,
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        fontWeight: boldTitle ? FontWeight.bold : null,
+        return SafeArea(
+          child: Container(
+            margin: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (title != null)
+                  Text(
+                    title,
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                          fontWeight: boldTitle ? FontWeight.bold : null,
+                        ),
+                    textAlign: TextAlign.center,
+                  ),
+                underTitle == null
+                    ? Container()
+                    : Column(
+                        children: [
+                          const SizedBox(
+                            height: 12,
+                          ),
+                          Text(
+                            underTitle,
+                            style: Theme.of(context).textTheme.bodyMedium,
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
                       ),
-                  textAlign: TextAlign.center,
-                ),
-              underTitle == null
-                  ? Container()
-                  : Column(
-                      children: [
-                        const SizedBox(
-                          height: 12,
-                        ),
-                        Text(
-                          underTitle,
-                          style: Theme.of(context).textTheme.bodyMedium,
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
+                Expanded(
+                  child: Container(
+                    margin: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).cardColor,
+                      borderRadius: BorderRadius.circular(16),
                     ),
-              Expanded(
-                child: Container(
-                  margin: const EdgeInsets.all(16),
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).cardColor,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: ListView.builder(
-                    itemCount: items.length,
-                    itemBuilder: itemBuilder,
+                    child: ListView.builder(
+                      itemCount: items.length,
+                      itemBuilder: itemBuilder,
+                    ),
                   ),
                 ),
-              ),
-              if (bottomActions != null) ...bottomActions,
-            ],
+                if (bottomActions != null) ...bottomActions,
+              ],
+            ),
           ),
         );
       },
