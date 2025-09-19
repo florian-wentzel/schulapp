@@ -74,79 +74,82 @@ class _AbiCalculationScreenState extends State<AbiCalculationScreen> {
           ),
         ],
       ),
-      bottomNavigationBar: Container(
-        height: kBottomNavigationBarHeight,
-        margin: const EdgeInsets.symmetric(
-          horizontal: 8,
-          vertical: 4,
-        ),
-        padding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 8,
-        ),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          color: Theme.of(context).cardColor,
-        ),
-        child: Center(
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              spacing: 8,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ElevatedButton(
-                  onPressed: () async {
-                    await showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          title: Text(
-                            AppLocalizationsManager
-                                .localizations.strSelectSemester,
-                          ),
-                          content: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: List.generate(
-                              4,
-                              (index) {
-                                final displayIndex = index + 1;
-
-                                return ListTile(
-                                  title: Text(
-                                    AppLocalizationsManager.localizations
-                                        .strQX(displayIndex),
-                                  ),
-                                  onTap: () async {
-                                    await _selectSemesterForCalculator(
-                                      context,
-                                      index,
-                                    );
-
-                                    if (!context.mounted) return;
-
-                                    Navigator.of(context).pop();
-                                    setState(() {});
-                                  },
-                                );
-                              },
+      bottomNavigationBar: SafeArea(
+        child: Container(
+          height: kBottomNavigationBarHeight,
+          margin: const EdgeInsets.symmetric(
+            horizontal: 8,
+            vertical: 4,
+          ),
+          padding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 8,
+          ),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            color: Theme.of(context).cardColor,
+          ),
+          child: Center(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                spacing: 8,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ElevatedButton(
+                    onPressed: () async {
+                      await showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: Text(
+                              AppLocalizationsManager
+                                  .localizations.strSelectSemester,
                             ),
-                          ),
-                        );
-                      },
-                    );
-                    setState(() {});
-                    calculator.save();
-                  },
-                  child: Text(
-                    AppLocalizationsManager.localizations.strSelectSemester,
+                            content: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: List.generate(
+                                4,
+                                (index) {
+                                  final displayIndex = index + 1;
+
+                                  return ListTile(
+                                    title: Text(
+                                      AppLocalizationsManager.localizations
+                                          .strQX(displayIndex),
+                                    ),
+                                    onTap: () async {
+                                      await _selectSemesterForCalculator(
+                                        context,
+                                        index,
+                                      );
+
+                                      if (!context.mounted) return;
+
+                                      Navigator.of(context).pop();
+                                      setState(() {});
+                                    },
+                                  );
+                                },
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                      setState(() {});
+                      calculator.save();
+                    },
+                    child: Text(
+                      AppLocalizationsManager.localizations.strSelectSemester,
+                    ),
                   ),
-                ),
-                ElevatedButton(
-                  onPressed: _onExamPressed,
-                  child: Text(AppLocalizationsManager.localizations.strAddExam),
-                ),
-              ],
+                  ElevatedButton(
+                    onPressed: _onExamPressed,
+                    child:
+                        Text(AppLocalizationsManager.localizations.strAddExam),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

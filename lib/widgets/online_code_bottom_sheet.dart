@@ -113,7 +113,8 @@ class _OnlineCodeBottomSheetState extends State<OnlineCodeBottomSheet> {
                             _showQRScanner = true;
                           });
                         },
-                        child: const Text("QR-Code Scannen"),
+                        child: Text(AppLocalizationsManager
+                            .localizations.strScanQRCode),
                       )
                     : ClipRRect(
                         key: const ValueKey("scanner"),

@@ -134,33 +134,35 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
                 oldItem.value == newItem.value,
           ),
         ),
-        Container(
-          margin: const EdgeInsets.all(8),
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              IconButton(
-                onPressed: _onAddImagePressed,
-                icon: const Icon(
-                  Icons.add_photo_alternate_outlined,
+        SafeArea(
+          child: Container(
+            margin: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                IconButton(
+                  onPressed: _onAddImagePressed,
+                  icon: const Icon(
+                    Icons.add_photo_alternate_outlined,
+                  ),
                 ),
-              ),
-              IconButton(
-                onPressed: _onAddFilePressed,
-                icon: const Icon(Icons.note_add),
-              ),
-              IconButton(
-                onPressed: _onAddTextPressed,
-                icon: const Icon(
-                  Icons.add_box_outlined,
+                IconButton(
+                  onPressed: _onAddFilePressed,
+                  icon: const Icon(Icons.note_add),
                 ),
-              ),
-            ],
+                IconButton(
+                  onPressed: _onAddTextPressed,
+                  icon: const Icon(
+                    Icons.add_box_outlined,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ],

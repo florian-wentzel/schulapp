@@ -1,7 +1,7 @@
 name: schulapp
 description: "A new Flutter project."
 publish_to: "none"
-version: 0.10.1+26 #v.v.v+versionForGooglePlayStore
+version: 0.10.2+27 #v.v.v+versionForGooglePlayStore
 
 environment:
   sdk: ">=3.2.0 <4.0.0"
@@ -16,7 +16,7 @@ dependencies:
   google_fonts: ^6.2.1
   path: ^1.8.3
   path_provider: ^2.1.1
-  file_picker: ^10.3.2
+  file_picker: ^10.3.3
   animated_list_plus: ^0.5.2
   flutter_local_notifications: ^19.2.1
   timezone: ^0.10.0

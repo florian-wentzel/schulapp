@@ -2,6 +2,8 @@
   "@@locale": "en",
   "language_name": "Englisch",
   "@language_name": {},
+  "version_0_10_2": "Small bug fixes: Edge-to-Edge (#4)",
+  "@version_0_10_2": {},
   "version_0_10_1": "Bug fixes when sharing the timetable via online code",
   "@version_0_10_1": {},
   "version_0_10_0": "Added lesson notifications (configurable in settings)",
@@ -476,7 +478,7 @@
   "@strShowGradesGraph": {},
   "strCreateNewSubject": "Create new Subject",
   "@strCreateNewSubject": {},
-  "strImportSubjectsFromTimetable": "Import Subjects from Timetable",
+  "strImportSubjectsFromTimetable": "Import Subjects from other Timetable",
   "@strImportSubjectsFromTimetable": {},
   "strDoYouWantToExitWithoutSaving": "Do you want to exit without saving?",
   "@strDoYouWantToExitWithoutSaving": {},
@@ -1264,5 +1266,9 @@
         "example": "215"
       }
     }
-  }
+  },
+  "strSelectSubjects": "Select your subjects",
+  "@strSelectSubjects": {},
+  "strScanQRCode": "Scan QR-Code",
+  "@strScanQRCode": {}
 }

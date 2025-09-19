@@ -1,6 +1,7 @@
 {
   "@@locale": "de",
   "language_name": "Deutsch",
+  "version_0_10_2": "Kleine Fehlerbehebungen Edge-to-Edge (#4)",
   "version_0_10_1": "Fehlerbehebungen beim Teilen vom Stundenplan via Online Code",
   "version_0_10_0": "Stundenbenachrichtigungen hinzugefügt (einstellbar in den Einstellungen)",
   "version_0_9_9": "Teilen per QR-Code hinzugefügt",
@@ -163,7 +164,7 @@
   "strSetEndGrade": "Zeugnisnote setzen",
   "strShowGradesGraph": "Zeige Notendiagramm",
   "strCreateNewSubject": "Neues Fach erstellen",
-  "strImportSubjectsFromTimetable": "Fächer aus Stundenplan importieren",
+  "strImportSubjectsFromTimetable": "Fächer aus anderem Stundenplan importieren",
   "strDoYouWantToExitWithoutSaving": "Möchtest Du ohne zu speichern abbrechen?",
   "strYes": "Ja",
   "strNo": "Nein",
@@ -435,5 +436,7 @@
   "strSetPreLessonReminderNotificationDurationTitle": "Erinnerungszeit einstellen",
   "strLessonStartsSoon": "Gleich beginnt {lesson}",
   "strLessonIsSubstite": "{lesson} (Vertretung)",
-  "strLessonInRoom": "Im Raum {room}"
+  "strLessonInRoom": "Im Raum {room}",
+  "strSelectSubjects": "Wähle deine Fächer",
+  "strScanQRCode": "QR-Code Scannen"
 }

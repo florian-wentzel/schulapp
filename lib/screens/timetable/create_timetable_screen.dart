@@ -405,110 +405,113 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
   }
 
   Widget _bottomNavBar() {
-    return Container(
-      padding: const EdgeInsets.all(4),
-      margin: const EdgeInsets.only(
-        bottom: 8,
-        left: 8,
-        right: 8,
-      ),
-      height: kBottomNavigationBarHeight,
-      width: MediaQuery.of(context).size.width,
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Center(
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: [
-              ElevatedButton(
-                key: _saveButtonKey,
-                onPressed: () async {
-                  final setAsDefault = TimetableManager().timetables.isEmpty;
+    return SafeArea(
+      child: Container(
+        padding: const EdgeInsets.all(4),
+        margin: const EdgeInsets.only(
+          bottom: 8,
+          left: 8,
+          right: 8,
+        ),
+        height: kBottomNavigationBarHeight,
+        width: MediaQuery.of(context).size.width,
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Center(
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                ElevatedButton(
+                  key: _saveButtonKey,
+                  onPressed: () async {
+                    final setAsDefault = TimetableManager().timetables.isEmpty;
 
-                  if (setAsDefault) {
-                    TimetableManager().settings.setVar(
-                          Settings.mainTimetableNameKey,
-                          _timetableCopy.name,
+                    if (setAsDefault) {
+                      TimetableManager().settings.setVar(
+                            Settings.mainTimetableNameKey,
+                            _timetableCopy.name,
+                          );
+                    }
+
+                    _canPop = true;
+                    _timetableCopy.setLessonPrefabs(_lessonPrefabs);
+                    final success =
+                        await TimetableManager().addOrChangeTimetable(
+                      _timetableCopy,
+                      originalName: widget.timetable.name,
+                      onAlreadyExists: () {
+                        return Utils.showBoolInputDialog(
+                          context,
+                          question: AppLocalizationsManager.localizations
+                              .strDoYouWantToOverrideTimetableX(
+                            _timetableCopy.name,
+                          ),
+                          markTrueAsRed: true,
+                          showYesAndNoInsteadOfOK: true,
                         );
-                  }
+                      },
+                    );
 
-                  _canPop = true;
-                  _timetableCopy.setLessonPrefabs(_lessonPrefabs);
-                  final success = await TimetableManager().addOrChangeTimetable(
-                    _timetableCopy,
-                    originalName: widget.timetable.name,
-                    onAlreadyExists: () {
-                      return Utils.showBoolInputDialog(
-                        context,
-                        question: AppLocalizationsManager.localizations
-                            .strDoYouWantToOverrideTimetableX(
-                          _timetableCopy.name,
-                        ),
-                        markTrueAsRed: true,
-                        showYesAndNoInsteadOfOK: true,
-                      );
-                    },
-                  );
+                    if (!success) {
+                      if (mounted) {
+                        Utils.showInfo(
+                          context,
+                          msg: AppLocalizationsManager
+                              .localizations.strThereWasAnErrorWhileSaving,
+                          type: InfoType.error,
+                        );
+                      }
+                      return;
+                    }
 
-                  if (!success) {
-                    if (mounted) {
-                      Utils.showInfo(
-                        context,
-                        msg: AppLocalizationsManager
-                            .localizations.strThereWasAnErrorWhileSaving,
-                        type: InfoType.error,
+                    //den eigentlichen tt auf die richitgen werte die bereits gespeichert wurden setzen
+                    widget.timetable.setValuesFrom(_timetableCopy);
+
+                    if (!mounted) return;
+
+                    HomeWidgetManager.updateWithDefaultTimetable(
+                      context: context,
+                    );
+
+                    TimetableManager().settings.setVar(
+                          Settings.showTutorialInCreateTimetableScreenKey,
+                          false,
+                        );
+
+                    final mainTt = TimetableManager().settings.getVar<String?>(
+                          Settings.mainTimetableNameKey,
+                        );
+
+                    if (widget.timetable.name == mainTt) {
+                      NotificationManager()
+                          .resetScheduleNotificationWithTimetable(
+                        timetable: widget.timetable,
                       );
                     }
-                    return;
-                  }
 
-                  //den eigentlichen tt auf die richitgen werte die bereits gespeichert wurden setzen
-                  widget.timetable.setValuesFrom(_timetableCopy);
-
-                  if (!mounted) return;
-
-                  HomeWidgetManager.updateWithDefaultTimetable(
-                    context: context,
-                  );
-
-                  TimetableManager().settings.setVar(
-                        Settings.showTutorialInCreateTimetableScreenKey,
-                        false,
-                      );
-
-                  final mainTt = TimetableManager().settings.getVar<String?>(
-                        Settings.mainTimetableNameKey,
-                      );
-
-                  if (widget.timetable.name == mainTt) {
-                    NotificationManager()
-                        .resetScheduleNotificationWithTimetable(
-                      timetable: widget.timetable,
-                    );
-                  }
-
-                  //weil neuer timetable erstellt return true damit kann man später vielleicht was anfangen
-                  Navigator.of(context).pop(true);
-                },
-                child: Text(
-                  AppLocalizationsManager.localizations.strSave,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
+                    //weil neuer timetable erstellt return true damit kann man später vielleicht was anfangen
+                    Navigator.of(context).pop(true);
+                  },
+                  child: Text(
+                    AppLocalizationsManager.localizations.strSave,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(
-                width: 16,
-              ),
-              ElevatedButton(
-                key: _moreActionsButtonKey,
-                onPressed: _onMoreActionsButtonPressed,
-                child: const Icon(Icons.more_horiz),
-              ),
-            ],
+                const SizedBox(
+                  width: 16,
+                ),
+                ElevatedButton(
+                  key: _moreActionsButtonKey,
+                  onPressed: _onMoreActionsButtonPressed,
+                  child: const Icon(Icons.more_horiz),
+                ),
+              ],
+            ),
           ),
         ),
       ),
