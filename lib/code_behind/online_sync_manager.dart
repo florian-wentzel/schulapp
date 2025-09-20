@@ -1,16 +1,16 @@
 import 'dart:async';
 
-import 'package:extension_google_sign_in_as_googleapis_auth/extension_google_sign_in_as_googleapis_auth.dart';
+// import 'package:extension_google_sign_in_as_googleapis_auth/extension_google_sign_in_as_googleapis_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:googleapis/drive/v3.dart';
-import 'package:googleapis/people/v1.dart';
-import 'package:googleapis_auth/googleapis_auth.dart' as auth show AuthClient;
+import 'package:googleapis/drive/v3.dart' as drive;
+// import 'package:googleapis/people/v1.dart';
+// import 'package:googleapis_auth/googleapis_auth.dart' as auth show AuthClient;
 
-import 'package:googleapis/drive/v3.dart';
-
-/// The scopes used by this example.
-const List<String> scopes = <String>[DriveApi.driveScope];
+// import 'package:googleapis/drive/v3.dart';
+import 'package:schulapp/code_behind/google_auth_data.dart';
+import 'package:schulapp/code_behind/google_drive/google_auth_client.dart';
 
 class OnlineSyncManager {
   OnlineSyncManager._privateConstructor();
@@ -25,8 +25,7 @@ class OnlineSyncManager {
 
 class GoogleAuthManager {
   static const List<String> scopes = <String>[
-    'https://www.googleapis.com/auth/drive.file',
-    DriveApi.driveAppdataScope
+    drive.DriveApi.driveAppdataScope,
   ];
 
   GoogleAuthManager._privateConstructor();
@@ -42,9 +41,17 @@ class GoogleAuthManager {
   GoogleSignInAccount? _currentUser;
   GoogleSignInClientAuthorization? _authorization;
 
+  String? get currentUserEmail => _currentUser?.email;
+
   Future<void> init() async {
     final GoogleSignIn signIn = GoogleSignIn.instance;
-    _signInInitialized = signIn.initialize();
+
+    _signInInitialized = signIn.initialize(
+      clientId:
+          kDebugMode ? GoogleAuthData.debugClientId : GoogleAuthData.clientId,
+      serverClientId: GoogleAuthData.serverClientId,
+    );
+
     signIn.authenticationEvents.listen((GoogleSignInAuthenticationEvent event) {
       switch (event) {
         case GoogleSignInAuthenticationEventSignIn():
@@ -68,7 +75,7 @@ class GoogleAuthManager {
 
   Future<String?> signIn() async {
     try {
-      await GoogleSignIn.instance.authenticate();
+      await GoogleSignIn.instance.authenticate(scopeHint: scopes);
       return null;
     } catch (error) {
       debugPrint(error.toString());
@@ -96,6 +103,7 @@ class GoogleAuthManager {
   Future<void> _handleGetContact(
     GoogleSignInClientAuthorization authorization,
   ) async {
+    print("Authorized");
     // // setState(() {
     // //   _contactText = 'Loading contact info...';
     // // });
@@ -126,7 +134,23 @@ class GoogleAuthManager {
     // }
   }
 
-  logout() async {
-    // await _googleSignIn.signOut();
+  Future<drive.DriveApi?> getDriveApi() async {
+    drive.DriveApi? driveApi;
+    try {
+      Map<String, String>? headers =
+          await _currentUser?.authorizationClient.authorizationHeaders(
+        scopes,
+      );
+      if (headers == null) {
+        return null;
+      }
+
+      GoogleAuthClient client = GoogleAuthClient(headers);
+
+      driveApi = drive.DriveApi(client);
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+    return driveApi;
   }
 }
