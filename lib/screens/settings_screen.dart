@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:path/path.dart' as path;
 import 'package:schulapp/app.dart';
 import 'package:schulapp/code_behind/backup_manager.dart';
 import 'package:schulapp/code_behind/calendar_todo_event_style.dart';
@@ -26,6 +27,7 @@ import 'package:schulapp/screens/versions_screen.dart';
 import 'package:schulapp/theme/theme_manager.dart';
 import 'package:schulapp/widgets/custom_feedback_form.dart';
 import 'package:schulapp/widgets/navigation_bar_drawer.dart';
+import 'package:googleapis/drive/v3.dart' as drive;
 
 class SettingsScreen extends StatefulWidget {
   static const String route = "/settings";
@@ -1071,7 +1073,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               return;
             } else {
               if (mounted) {
-                final msg = files.map((f) => f.name).join(", ");
+                final msg = files.map((f) => f.name).join(" | ");
 
                 Utils.showInfo(
                   context,
@@ -1082,6 +1084,96 @@ class _SettingsScreenState extends State<SettingsScreen> {
             }
           },
           child: const Text("Show files"),
+        ),
+        ElevatedButton(
+          onPressed: () async {
+            final files = await OnlineSyncManager().getAllDriveFiles();
+
+            if (files == null) {
+              if (mounted) {
+                Utils.showInfo(
+                  context,
+                  msg: "Fehler beim Laden der Dateien",
+                  type: InfoType.error,
+                );
+              }
+              return;
+            }
+            if (files.isEmpty) {
+              if (mounted) {
+                Utils.showInfo(
+                  context,
+                  msg: "Keine Backup-Dateien gefunden",
+                  type: InfoType.info,
+                );
+              }
+              return;
+            }
+
+            if (!mounted) return;
+
+            drive.File? selectedFile;
+
+            await Utils.showListSelectionBottomSheet(
+              context,
+              title: "Select Backup",
+              items: files,
+              itemBuilder: (context, index) {
+                final file = files[index];
+                return ListTile(
+                  title: Text(file.name ?? "No name"),
+                  subtitle: Text(
+                      "Größe: ${file.size} bytes\nErstellt: ${file.createdTime}"),
+                  onTap: () {
+                    selectedFile ??= file;
+                    Navigator.of(context).pop();
+                  },
+                );
+              },
+            );
+
+            if (selectedFile == null) return;
+
+            String? selectedDirectory =
+                await FilePicker.platform.getDirectoryPath();
+
+            if (selectedDirectory == null) {
+              return;
+            }
+
+            final file = File(
+              path.join(
+                selectedDirectory,
+                (selectedFile?.name ?? "filename"),
+              ),
+            );
+
+            final downloadedFile = await OnlineSyncManager().downloadDriveFile(
+              driveFile: selectedFile!,
+              targetLocalPath: file.path,
+            );
+
+            if (downloadedFile == null) {
+              if (mounted) {
+                Utils.showInfo(
+                  context,
+                  msg: "Fehler beim herunterladen der Datei",
+                  type: InfoType.error,
+                );
+              }
+              return;
+            } else {
+              if (mounted) {
+                Utils.showInfo(
+                  context,
+                  msg:
+                      "Datei erfolgreich heruntergeladen: ${downloadedFile.path}",
+                  type: InfoType.success,
+                );
+              }
+            }
+          },
+          child: const Text("Download file"),
         ),
         ElevatedButton(
           onPressed: () async {

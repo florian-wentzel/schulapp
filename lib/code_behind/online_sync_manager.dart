@@ -46,10 +46,6 @@ class OnlineSyncManager {
 
   late Future<void> _initFuture;
   GoogleSignInAccount? _currentUser;
-  bool _isAuthorized = false; // has granted permissions?
-  String _contactText = '';
-  String _errorMessage = '';
-  String _serverAuthCode = '';
   drive.DriveApi? _driveClient;
 
   String? get currentUserEmail => _currentUser?.email;
@@ -82,8 +78,8 @@ class OnlineSyncManager {
 
     // setState(() {
     _currentUser = user;
-    _isAuthorized = authorization != null;
-    _errorMessage = '';
+    // _isAuthorized = authorization != null;
+    // _errorMessage = '';
     // });
 
     // If the user has already granted access to the required scopes, call the
@@ -95,10 +91,10 @@ class OnlineSyncManager {
 
   Future<void> _handleAuthenticationError(Object e) async {
     _currentUser = null;
-    _isAuthorized = false;
-    _errorMessage = e is GoogleSignInException
-        ? _errorMessageFromSignInException(e)
-        : 'Unknown error: $e';
+    // _isAuthorized = false;
+    // _errorMessage = e is GoogleSignInException
+    //     ? _errorMessageFromSignInException(e)
+    //     : 'Unknown error: $e';
   }
 
   Future<drive.DriveApi?> getDriveApi(GoogleSignInAccount googleUser) async {
@@ -191,19 +187,47 @@ class OnlineSyncManager {
     }
   }
 
+  Future<io.File?> downloadDriveFile({
+    required drive.File driveFile,
+    required String targetLocalPath,
+  }) async {
+    try {
+      final client = _driveClient;
+
+      if (client == null) return null;
+
+      drive.Media media = await client.files.get(driveFile.id!,
+          downloadOptions: drive.DownloadOptions.fullMedia) as drive.Media;
+
+      List<int> dataStore = [];
+
+      await media.stream.forEach((element) {
+        dataStore.addAll(element);
+      });
+
+      io.File file = io.File(targetLocalPath);
+      file.writeAsBytesSync(dataStore);
+
+      return file;
+    } catch (e) {
+      debugPrint(e.toString());
+      return null;
+    }
+  }
+
   Future<void> _handleInitDrive(GoogleSignInAccount user) async {
     _driveClient = await getDriveApi(user);
 
     print("Drive API initialized: $_driveClient");
   }
 
-  String _errorMessageFromSignInException(GoogleSignInException e) {
-    // In practice, an application should likely have specific handling for most
-    // or all of the, but for simplicity this just handles cancel, and reports
-    // the rest as generic errors.
-    return switch (e.code) {
-      GoogleSignInExceptionCode.canceled => 'Sign in canceled',
-      _ => 'GoogleSignInException ${e.code}: ${e.description}',
-    };
-  }
+  // String _errorMessageFromSignInException(GoogleSignInException e) {
+  //   // In practice, an application should likely have specific handling for most
+  //   // or all of the, but for simplicity this just handles cancel, and reports
+  //   // the rest as generic errors.
+  //   return switch (e.code) {
+  //     GoogleSignInExceptionCode.canceled => 'Sign in canceled',
+  //     _ => 'GoogleSignInException ${e.code}: ${e.description}',
+  //   };
+  // }
 }

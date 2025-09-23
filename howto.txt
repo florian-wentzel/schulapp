@@ -13,3 +13,8 @@ How to change package name:
 
 How to sign for GooglePlayStore (not 100% sure):
  - android\key.properties file needed
+
+ How to sync with GoogleDrive:
+ - add "lib/code_behind/google_auth_data.dart" 
+ - see compie errors..
+   
