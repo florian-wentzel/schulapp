@@ -1044,22 +1044,90 @@ class _SettingsScreenState extends State<SettingsScreen> {
       title: "Google-Drive-Backup",
       // hide: username == null,
       body: [
+        Text(
+          "Angemeldet als: ${OnlineSyncManager().currentUserEmail ?? "Nicht angemeldet"}",
+        ),
         ElevatedButton(
           onPressed: () async {
-            String? error = await GoogleAuthManager().signIn();
+            final files = await OnlineSyncManager().getAllDriveFiles();
 
-            if (error != null && mounted) {
-              Utils.showInfo(
-                context,
-                msg: error,
-                type: InfoType.error,
-              );
+            if (files == null) {
+              if (mounted) {
+                Utils.showInfo(
+                  context,
+                  msg: "Fehler beim Laden der Dateien",
+                  type: InfoType.error,
+                );
+              }
+              return;
+            } else if (files.isEmpty) {
+              if (mounted) {
+                Utils.showInfo(
+                  context,
+                  msg: "Keine Backup-Dateien gefunden",
+                  type: InfoType.info,
+                );
+              }
+              return;
+            } else {
+              if (mounted) {
+                final msg = files.map((f) => f.name).join(", ");
+
+                Utils.showInfo(
+                  context,
+                  msg: "Gefundene Backups: $msg",
+                  type: InfoType.success,
+                );
+              }
+            }
+          },
+          child: const Text("Show files"),
+        ),
+        ElevatedButton(
+          onPressed: () async {
+            final result = await FilePicker.platform.pickFiles(
+              allowMultiple: false,
+              type: FileType.custom,
+            );
+
+            String? path = result?.files.first.path;
+
+            if (result == null || result.files.isEmpty || path == null) {
+              if (mounted) {
+                Utils.showInfo(
+                  context,
+                  msg: "Keine Datei ausgewählt",
+                  type: InfoType.error,
+                );
+              }
               return;
             }
 
+            await OnlineSyncManager().uploadDriveFile(
+              file: File(path),
+            );
+          },
+          child: const Text("Upload file"),
+        ),
+        const SizedBox(
+          height: 8,
+        ),
+        ElevatedButton(
+          onPressed: () async {
+            OnlineSyncManager().signIn();
+
+            // if (error != null && mounted) {
+            //   Utils.showInfo(
+            //     context,
+            //     msg: error,
+            //     type: InfoType.error,
+            //   );
+            //   return;
+            // }
+
             setState(() {});
 
-            if (!mounted || error != null) return;
+            // if (!mounted || error != null) return;
 
             Utils.showInfo(
               context,
@@ -1067,11 +1135,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
               type: InfoType.success,
             );
           },
-          child: const Text("Abmelden"),
+          child: const Text("Anmelden"),
         ),
         ElevatedButton(
           onPressed: () async {
-            await GoogleAuthManager().signOut();
+            await OnlineSyncManager().signOut();
 
             setState(() {});
 

@@ -15,13 +15,14 @@ void main() async {
   final futures = [
     NotificationManager().initNotifications(),
     SaveManager().loadApplicationDocumentsDirectory(),
-    GoogleAuthManager().init(),
   ];
 
   tz.initializeTimeZones();
 
   await Future.wait(futures);
 
+  //damit GoogleSignIn.init aufgerufen wird
+  OnlineSyncManager();
   // debugRepaintRainbowEnabled = true;
 
   runApp(
