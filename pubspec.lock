@@ -398,13 +398,53 @@ packages:
     source: hosted
     version: "0.3.3+1"
   google_sign_in:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: google_sign_in
       sha256: "521031b65853b4409b8213c0387d57edaad7e2a949ce6dea0d8b2afc9cb29763"
       url: "https://pub.dev"
     source: hosted
     version: "7.2.0"
+  google_sign_in_all_platforms:
+    dependency: "direct main"
+    description:
+      name: google_sign_in_all_platforms
+      sha256: "3faab55abf133ee5650de9afec4d63663fbe1b99a62bb924f71c73b907a97777"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.2"
+  google_sign_in_all_platforms_desktop:
+    dependency: transitive
+    description:
+      name: google_sign_in_all_platforms_desktop
+      sha256: d0ad9f7ed30eb7d8aa5a781ef58d4f1c9c7ad9d7634e27652411436fb6b2c670
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.0"
+  google_sign_in_all_platforms_interface:
+    dependency: transitive
+    description:
+      name: google_sign_in_all_platforms_interface
+      sha256: bf9b2a17067d2e023862cd565a076555c8de088c64e4d35ee68826cad0ad972d
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.1"
+  google_sign_in_all_platforms_mobile:
+    dependency: transitive
+    description:
+      name: google_sign_in_all_platforms_mobile
+      sha256: "65b1e71356db2fbdc4ea78a76e4b5ec40740694955af903a75a3fe5e319030e4"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.0"
+  google_sign_in_all_platforms_web:
+    dependency: transitive
+    description:
+      name: google_sign_in_all_platforms_web
+      sha256: "1af470d499396a522740044f70906d3e220a7da40c2976d5a46ec0ede5d2cfb1"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.0"
   google_sign_in_android:
     dependency: transitive
     description:
@@ -446,7 +486,7 @@ packages:
     source: hosted
     version: "14.0.0"
   googleapis_auth:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: googleapis_auth
       sha256: b81fe352cc4a330b3710d2b7ad258d9bcef6f909bb759b306bf42973a7d046db
@@ -469,6 +509,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.5.0"
+  http_methods:
+    dependency: transitive
+    description:
+      name: http_methods
+      sha256: "6bccce8f1ec7b5d701e7921dca35e202d425b57e317ba1a37f2638590e29e566"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.1"
   http_parser:
     dependency: transitive
     description:
@@ -1029,6 +1077,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.4.1"
+  shelf:
+    dependency: transitive
+    description:
+      name: shelf
+      sha256: e7dd780a7ffb623c57850b33f43309312fc863fb6aa3d276a754bb299839ef12
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.4.2"
+  shelf_router:
+    dependency: transitive
+    description:
+      name: shelf_router
+      sha256: f5e5d492440a7fb165fe1e2e1a623f31f734d3370900070b2b1e0d0428d59864
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.4"
   simple_gesture_detector:
     dependency: transitive
     description:

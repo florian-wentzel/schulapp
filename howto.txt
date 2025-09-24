@@ -16,5 +16,5 @@ How to sign for GooglePlayStore (not 100% sure):
 
  How to sync with GoogleDrive:
  - add "lib/code_behind/google_auth_data.dart" 
- - see compie errors..
+ - you only need WEB credentials see the google_sign_in_all_platforms package readme
    

@@ -5,20 +5,14 @@
 // ignore_for_file: avoid_print
 
 import 'dart:async';
-import 'dart:convert' show json;
+import 'dart:convert' show utf8, base64Url, jsonDecode;
 import 'dart:io' as io;
 import 'package:googleapis/drive/v3.dart' as drive;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:http/http.dart' as http;
+import 'package:google_sign_in_all_platforms/google_sign_in_all_platforms.dart';
 import 'package:path/path.dart' as path;
 import 'package:schulapp/code_behind/google_auth_data.dart';
-import 'package:schulapp/code_behind/google_drive/google_auth_client.dart';
-
-const List<String> scopes = <String>[
-  drive.DriveApi.driveAppdataScope,
-];
 
 class OnlineSyncManager {
   static final OnlineSyncManager _instance = OnlineSyncManager._internal();
@@ -28,86 +22,60 @@ class OnlineSyncManager {
   }
 
   OnlineSyncManager._internal() {
-    final GoogleSignIn signIn = GoogleSignIn.instance;
-
-    _initFuture = signIn.initialize(
-      clientId: GoogleAuthData.clientId,
-      serverClientId: GoogleAuthData.serverClientId,
-    );
-
-    _initFuture.then(
-      (_) {
-        signIn.authenticationEvents
-            .listen(_handleAuthenticationEvent)
-            .onError(_handleAuthenticationError);
-      },
-    );
+    _googleSignIn.authenticationState
+        .listen(_handleAuthenticationEvent)
+        .onError(_handleAuthenticationError);
+    _googleSignIn.silentSignIn();
   }
 
-  late Future<void> _initFuture;
-  GoogleSignInAccount? _currentUser;
-  drive.DriveApi? _driveClient;
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    params: const GoogleSignInParams(
+      clientId: GoogleAuthData.serverClientId,
+      clientSecret: GoogleAuthData.serverClientSecret,
+      scopes: [
+        drive.DriveApi.driveAppdataScope,
+        // "email",
+      ],
+    ),
+  );
 
-  String? get currentUserEmail => _currentUser?.email;
+  drive.DriveApi? _driveClient;
+  GoogleUserData? _currUserData;
+
+  String? get currentUserName => _currUserData?.name;
+  String? get currentUserEmail => _currUserData?.email;
 
   Future<bool> signIn() async {
-    final GoogleSignIn signIn = GoogleSignIn.instance;
-
-    await _initFuture;
-
-    return (await signIn.attemptLightweightAuthentication()) != null;
+    final user = await _googleSignIn.signIn();
+    return user != null;
   }
 
-  Future<void> signOut() => GoogleSignIn.instance.disconnect();
+  Future<void> signOut() => _googleSignIn.signOut();
 
   Future<void> _handleAuthenticationEvent(
-    GoogleSignInAuthenticationEvent event,
+    GoogleSignInCredentials? user,
   ) async {
-    final GoogleSignInAccount? user = switch (event) {
-      GoogleSignInAuthenticationEventSignIn() => event.user,
-      GoogleSignInAuthenticationEventSignOut() => null,
-    };
+    final loggedin = user != null;
 
-    // Check for existing authorization.
-    GoogleSignInClientAuthorization? authorization =
-        await user?.authorizationClient.authorizationForScopes(scopes);
-
-    if (authorization == null && user != null) {
-      authorization = await user.authorizationClient.authorizeScopes(scopes);
-    }
-
-    // setState(() {
-    _currentUser = user;
-    // _isAuthorized = authorization != null;
-    // _errorMessage = '';
-    // });
-
-    // If the user has already granted access to the required scopes, call the
-    // REST API.
-    if (user != null && authorization != null) {
-      unawaited(_handleInitDrive(user));
+    if (loggedin) {
+      unawaited(_handleAfterLogInInit(user));
     }
   }
 
   Future<void> _handleAuthenticationError(Object e) async {
-    _currentUser = null;
     // _isAuthorized = false;
     // _errorMessage = e is GoogleSignInException
     //     ? _errorMessageFromSignInException(e)
     //     : 'Unknown error: $e';
   }
 
-  Future<drive.DriveApi?> getDriveApi(GoogleSignInAccount googleUser) async {
+  Future<drive.DriveApi?> getDriveApi() async {
     drive.DriveApi? driveApi;
     try {
-      Map<String, String>? headers =
-          await googleUser.authorizationClient.authorizationHeaders(scopes);
+      final client = await _googleSignIn.authenticatedClient;
 
-      if (headers == null) {
-        return null;
-      }
+      if (client == null) return null;
 
-      GoogleAuthClient client = GoogleAuthClient(headers);
       driveApi = drive.DriveApi(client);
     } catch (e) {
       debugPrint(e.toString());
@@ -215,10 +183,43 @@ class OnlineSyncManager {
     }
   }
 
-  Future<void> _handleInitDrive(GoogleSignInAccount user) async {
-    _driveClient = await getDriveApi(user);
+  Future<GoogleUserData?> getCurrUser(GoogleSignInCredentials creds) async {
+    final parts = creds.idToken!.split('.');
 
-    print("Drive API initialized: $_driveClient");
+    if (parts.length != 3) {
+      return null;
+    }
+
+    final payload = utf8.decode(
+      base64Url.decode(
+        base64Url.normalize(parts[1]),
+      ),
+    );
+
+    final Map<String, dynamic> claims = jsonDecode(payload);
+
+    final email = claims['email'];
+    final name = claims['name'];
+    final picture = claims['picture'];
+    final sub = claims['sub']; // user’s unique Google ID
+
+    if (email == null || name == null || picture == null || sub == null) {
+      return null;
+    }
+
+    return GoogleUserData(
+      email: email,
+      name: name,
+      picture: picture,
+      sub: sub,
+    );
+  }
+
+  Future<void> _handleAfterLogInInit(GoogleSignInCredentials user) async {
+    _driveClient = await getDriveApi();
+    _currUserData = await getCurrUser(user);
+
+    print("Drive API initialized: $_currUserData");
   }
 
   // String _errorMessageFromSignInException(GoogleSignInException e) {
@@ -230,4 +231,23 @@ class OnlineSyncManager {
   //     _ => 'GoogleSignInException ${e.code}: ${e.description}',
   //   };
   // }
+}
+
+class GoogleUserData {
+  GoogleUserData({
+    required this.email,
+    required this.name,
+    required this.picture,
+    required this.sub,
+  });
+
+  final String email;
+  final String name;
+  final String picture;
+  final String sub;
+
+  @override
+  String toString() {
+    return 'GoogleUserData{email: $email, name: $name, picture: $picture, sub: $sub}';
+  }
 }
