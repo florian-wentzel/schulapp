@@ -102,17 +102,31 @@ class OnlineSyncManager {
     }
   }
 
-  Future<List<drive.File>?> getAllDriveFiles() async {
+  Future<Map<String, drive.File>?> getAllDriveFiles() async {
     try {
       final client = _driveClient;
       if (client == null) return null;
 
       drive.FileList fileList = await client.files.list(
-          spaces: 'appDataFolder', $fields: 'files(id, name, modifiedTime)');
+          spaces: 'appDataFolder',
+          $fields: 'files(id, name, modifiedTime, parents, createdTime, size)');
 
       List<drive.File>? files = fileList.files;
 
-      return files;
+      if (files == null) return null;
+
+      Map<String, drive.File> fileMap = {};
+
+      for (int i = 0; i < files.length; i++) {
+        final id = files[i].id;
+        if (id != null) {
+          fileMap[id] = files[i];
+        } else {
+          debugPrint("File without ID found: ${files[i]}");
+        }
+      }
+
+      return fileMap;
     } catch (e) {
       debugPrint(e.toString());
       return null;
@@ -184,9 +198,9 @@ class OnlineSyncManager {
   }
 
   Future<GoogleUserData?> getCurrUser(GoogleSignInCredentials creds) async {
-    final parts = creds.idToken!.split('.');
+    final parts = creds.idToken?.split('.');
 
-    if (parts.length != 3) {
+    if (parts == null || parts.length != 3) {
       return null;
     }
 
@@ -222,6 +236,32 @@ class OnlineSyncManager {
     print("Drive API initialized: $_currUserData");
   }
 
+  Future<bool> createOnlineBackup() async {
+    // upload version.json with info about backup and who uploaded it
+    // vielleicht nicht als .zip speichern damit man einzelne datein hochladen kann?
+    return false;
+  }
+
+  Future<drive.File?> createDriveFolder(
+    String name, {
+    drive.DriveApi? driveApi,
+    String? parentId,
+  }) async {
+    driveApi ??= _driveClient;
+
+    if (driveApi == null) return null;
+
+    final folder = drive.File()
+      ..name = name
+      ..mimeType = 'application/vnd.google-apps.folder';
+
+    folder.parents = [parentId ?? 'appDataFolder'];
+
+    final created = await driveApi.files.create(folder);
+    return created;
+  }
+
+  // vielleicht kann man das später noch hinzufügn
   // String _errorMessageFromSignInException(GoogleSignInException e) {
   //   // In practice, an application should likely have specific handling for most
   //   // or all of the, but for simplicity this just handles cancel, and reports
@@ -233,6 +273,7 @@ class OnlineSyncManager {
   // }
 }
 
+/// Custom class for saving user data from Googl login
 class GoogleUserData {
   GoogleUserData({
     required this.email,

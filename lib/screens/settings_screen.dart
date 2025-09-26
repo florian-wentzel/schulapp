@@ -1051,6 +1051,49 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         ElevatedButton(
           onPressed: () async {
+            var fileCreated =
+                await OnlineSyncManager().createDriveFolder("Testfolder");
+
+            if (fileCreated?.id == null) {
+              if (mounted) {
+                Utils.showInfo(
+                  context,
+                  msg: "Fehler beim Erstellen des Ordners",
+                  type: InfoType.error,
+                );
+              }
+              return;
+            }
+
+            fileCreated = await OnlineSyncManager().createDriveFolder(
+                "Testfolderinside",
+                parentId: fileCreated?.id);
+
+            if (fileCreated == null) {
+              if (mounted) {
+                Utils.showInfo(
+                  context,
+                  msg: "Fehler beim Erstellen des Ordners",
+                  type: InfoType.error,
+                );
+              }
+              return;
+            } else {
+              if (mounted) {
+                Utils.showInfo(
+                  context,
+                  msg:
+                      "Ordner wurde erstellt: ${fileCreated.name} | ${fileCreated.id}",
+                  type: InfoType.success,
+                );
+              }
+            }
+            print(fileCreated);
+          },
+          child: const Text("Directory erstellen"),
+        ),
+        ElevatedButton(
+          onPressed: () async {
             final files = await OnlineSyncManager().getAllDriveFiles();
 
             if (files == null) {
@@ -1073,7 +1116,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               return;
             } else {
               if (mounted) {
-                final msg = files.map((f) => f.name).join(" | ");
+                final msg = files.values.map((file) => file.name).join(" | ");
 
                 Utils.showInfo(
                   context,
@@ -1112,18 +1155,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
             if (!mounted) return;
 
+            final filesList = files.values.toList();
+
             drive.File? selectedFile;
 
             await Utils.showListSelectionBottomSheet(
               context,
               title: "Select Backup",
-              items: files,
+              items: filesList,
               itemBuilder: (context, index) {
-                final file = files[index];
+                final file = filesList[index];
+                final parents = (file.parents ?? [])
+                    .map(
+                      (e) =>
+                          files[e]?.name ??
+                          "Appdata", // Wenn die id nicht gefunden wird muss es Appdata sein
+                    )
+                    .join(", ");
                 return ListTile(
                   title: Text(file.name ?? "No name"),
                   subtitle: Text(
-                      "Größe: ${file.size} bytes\nErstellt: ${file.createdTime}"),
+                    "Größe: ${file.size} bytes\nErstellt: ${file.createdTime}\nparents: $parents",
+                  ),
                   onTap: () {
                     selectedFile ??= file;
                     Navigator.of(context).pop();
@@ -1179,7 +1232,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           onPressed: () async {
             final result = await FilePicker.platform.pickFiles(
               allowMultiple: false,
-              type: FileType.custom,
+              type: FileType.any,
             );
 
             String? path = result?.files.first.path;
@@ -1195,9 +1248,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
               return;
             }
 
-            await OnlineSyncManager().uploadDriveFile(
+            final uploadedFile = await OnlineSyncManager().uploadDriveFile(
               file: File(path),
             );
+
+            if (uploadedFile == null) {
+              if (mounted) {
+                Utils.showInfo(
+                  context,
+                  msg: "Fehler beim Hochladen der Datei",
+                  type: InfoType.error,
+                );
+              }
+              return;
+            } else {
+              if (mounted) {
+                Utils.showInfo(
+                  context,
+                  msg: "Datei erfolgreich hochgeladen: ${uploadedFile.name}",
+                  type: InfoType.success,
+                );
+              }
+            }
           },
           child: const Text("Upload file"),
         ),
@@ -1206,20 +1278,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         ElevatedButton(
           onPressed: () async {
-            OnlineSyncManager().signIn();
+            final success = await OnlineSyncManager().signIn();
 
-            // if (error != null && mounted) {
-            //   Utils.showInfo(
-            //     context,
-            //     msg: error,
-            //     type: InfoType.error,
-            //   );
-            //   return;
-            // }
+            if (!success) {
+              if (mounted) {
+                Utils.showInfo(
+                  context,
+                  msg: "Es ist ein Fehler bei der Anmeldung aufgetreten.",
+                  type: InfoType.error,
+                );
+              }
+              return;
+            }
 
             setState(() {});
 
-            // if (!mounted || error != null) return;
+            if (!mounted) return;
 
             Utils.showInfo(
               context,
