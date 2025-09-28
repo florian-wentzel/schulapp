@@ -254,6 +254,8 @@ class OnlineSyncManager {
     print("Drive API initialized: $_currUserData");
   }
 
+  // upload version.json with info about backup and who uploaded it
+  // vielleicht nicht als .zip speichern damit man einzelne datein hochladen kann?
   Future<OnlineSyncState> createOnlineBackup() async {
     final alreadyRunningFuture = _createOnlineBackupFuture;
     if (alreadyRunningFuture != null) {
@@ -267,28 +269,36 @@ class OnlineSyncManager {
       ),
     );
 
-    // upload version.json with info about backup and who uploaded it
-    // vielleicht nicht als .zip speichern damit man einzelne datein hochladen kann?
+    void task(SendPort port) async {
+      for (int i = 0; i < 10; i++) {
+        port.send(
+          OnlineSyncState(state: OnlineSyncStateEnum.syncing, progress: i / 10),
+        );
+        await Future<void>.delayed(const Duration(seconds: 2));
+      }
 
-    _createOnlineBackupFuture = Isolate.run<OnlineSyncState>(
-      () async {
-        // for (int i = 0; i < 10; i++) {
-        //   _setStreamState(
-        //     OnlineSyncState(
-        //         state: OnlineSyncStateEnum.syncing, progress: i / 10),
-        //   );
-        //   await Future<void>.delayed(const Duration(seconds: 2));
-        // }
-        await Future<void>.delayed(const Duration(seconds: 3));
-
-        // throw "Test";
-        return OnlineSyncState(
+      port.send(
+        OnlineSyncState(
           state: OnlineSyncStateEnum.syncedSucessful,
           progress: 100,
-        );
-      },
+        ),
+      );
+    }
+
+    final receivePort = ReceivePort();
+    StreamSubscription subscription;
+    final isolate = await Isolate.spawn(
+      task,
+      receivePort.sendPort,
       debugName: kDebugMode ? "createOnlineBackup" : null,
     );
+
+    subscription = receivePort.listen((state) {
+      if (state is OnlineSyncState) {
+        _setStreamState(state);
+        if(state.state == OnlineSyncStateEnum.errorWhileSync)
+      }
+    });
 
     //TODO überprüfen ob then auch freigegeben wird
     _createOnlineBackupFuture?.then(
