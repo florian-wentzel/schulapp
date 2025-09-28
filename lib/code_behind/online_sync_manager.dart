@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:google_sign_in_all_platforms/google_sign_in_all_platforms.dart';
 import 'package:path/path.dart' as path;
 import 'package:schulapp/code_behind/google_auth_data.dart';
+import 'package:schulapp/code_behind/google_drive/online_sync_state.dart';
 
 class OnlineSyncManager {
   static final OnlineSyncManager _instance = OnlineSyncManager._internal();
@@ -21,6 +22,7 @@ class OnlineSyncManager {
         .listen(_handleAuthenticationEvent)
         .onError(_handleAuthenticationError);
     _googleSignIn.silentSignIn();
+    _setStreamState(_currentState);
   }
 
   final GoogleSignIn _googleSignIn = GoogleSignIn(
@@ -29,7 +31,8 @@ class OnlineSyncManager {
       clientSecret: GoogleAuthData.serverClientSecret,
       scopes: [
         drive.DriveApi.driveAppdataScope,
-        // "email",
+        "email",
+        "profile",
       ],
     ),
   );
@@ -46,6 +49,26 @@ class OnlineSyncManager {
   }
 
   Future<void> signOut() => _googleSignIn.signOut();
+
+  //if string is null it was successful
+  Future<OnlineSyncState>? _createOnlineBackupFuture;
+  bool get isCreatingOnlineBackup => _createOnlineBackupFuture != null;
+
+  /// Stream shit
+  final StreamController<OnlineSyncState> _stateController =
+      StreamController<OnlineSyncState>.broadcast();
+
+  // replace with BehaviorSubject?
+  Stream<OnlineSyncState> get stateStream => _stateController.stream;
+  OnlineSyncState _currentState = OnlineSyncState(
+    state: OnlineSyncStateEnum.idle,
+  );
+  OnlineSyncState get currentState => _currentState;
+
+  void _setStreamState(OnlineSyncState state) {
+    _currentState = state;
+    _stateController.add(state);
+  }
 
   Future<void> _handleAuthenticationEvent(
     GoogleSignInCredentials? user,
@@ -231,31 +254,67 @@ class OnlineSyncManager {
     print("Drive API initialized: $_currUserData");
   }
 
-  Future<bool>? _createOnlineBackupFuture;
-  bool get isCreatingOnlineBackup => _createOnlineBackupFuture != null;
-
-  // TODO: hier lieber ein enum mit success error etc zurückgeben
-  Future<bool> createOnlineBackup() async {
-    if (isCreatingOnlineBackup) {
-      return true;
+  Future<OnlineSyncState> createOnlineBackup() async {
+    final alreadyRunningFuture = _createOnlineBackupFuture;
+    if (alreadyRunningFuture != null) {
+      return alreadyRunningFuture;
     }
+
+    _setStreamState(
+      OnlineSyncState(
+        state: OnlineSyncStateEnum.syncing,
+        progress: 0,
+      ),
+    );
+
     // upload version.json with info about backup and who uploaded it
     // vielleicht nicht als .zip speichern damit man einzelne datein hochladen kann?
-    _createOnlineBackupFuture = Isolate.run<bool>(
+
+    _createOnlineBackupFuture = Isolate.run<OnlineSyncState>(
       () async {
-        await Future<void>.delayed(const Duration(seconds: 10));
-        return false;
+        // for (int i = 0; i < 10; i++) {
+        //   _setStreamState(
+        //     OnlineSyncState(
+        //         state: OnlineSyncStateEnum.syncing, progress: i / 10),
+        //   );
+        //   await Future<void>.delayed(const Duration(seconds: 2));
+        // }
+        await Future<void>.delayed(const Duration(seconds: 3));
+
+        // throw "Test";
+        return OnlineSyncState(
+          state: OnlineSyncStateEnum.syncedSucessful,
+          progress: 100,
+        );
       },
-      debugName: "createOnlineBackup",
+      debugName: kDebugMode ? "createOnlineBackup" : null,
     );
 
     //TODO überprüfen ob then auch freigegeben wird
     _createOnlineBackupFuture?.then(
-      (value) => _createOnlineBackupFuture = null,
-      onError: (e) => _createOnlineBackupFuture = null,
+      (state) {
+        _createOnlineBackupFuture = null;
+        _setStreamState(
+          state,
+        );
+      },
+      onError: (e) {
+        _createOnlineBackupFuture = null;
+        _setStreamState(
+          OnlineSyncState(
+            state: OnlineSyncStateEnum.errorWhileSync,
+            errorMsg: e.toString(),
+          ),
+        );
+      },
     );
 
-    return _createOnlineBackupFuture ?? Future.value(false);
+    return _createOnlineBackupFuture ??
+        Future.value(
+          OnlineSyncState(
+            state: OnlineSyncStateEnum.idle,
+          ),
+        );
   }
 
   Future<drive.File?> createDriveFolder(

@@ -28,6 +28,7 @@ import 'package:schulapp/theme/theme_manager.dart';
 import 'package:schulapp/widgets/custom_feedback_form.dart';
 import 'package:schulapp/widgets/navigation_bar_drawer.dart';
 import 'package:googleapis/drive/v3.dart' as drive;
+import 'package:schulapp/widgets/sync_button_widget.dart';
 
 class SettingsScreen extends StatefulWidget {
   static const String route = "/settings";
@@ -148,6 +149,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           AppLocalizationsManager.localizations.strSettings,
         ),
         actions: [
+          SyncButtonWidget(),
           IconButton(
             onPressed: () async {
               final openFeedback = await Utils.showBoolInputDialog(
