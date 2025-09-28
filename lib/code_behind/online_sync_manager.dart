@@ -1,12 +1,7 @@
-// Copyright 2013 The Flutter Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
-// ignore_for_file: avoid_print
-
 import 'dart:async';
 import 'dart:convert' show utf8, base64Url, jsonDecode;
 import 'dart:io' as io;
+import 'dart:isolate';
 import 'package:googleapis/drive/v3.dart' as drive;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -236,10 +231,31 @@ class OnlineSyncManager {
     print("Drive API initialized: $_currUserData");
   }
 
+  Future<bool>? _createOnlineBackupFuture;
+  bool get isCreatingOnlineBackup => _createOnlineBackupFuture != null;
+
+  // TODO: hier lieber ein enum mit success error etc zurückgeben
   Future<bool> createOnlineBackup() async {
+    if (isCreatingOnlineBackup) {
+      return true;
+    }
     // upload version.json with info about backup and who uploaded it
     // vielleicht nicht als .zip speichern damit man einzelne datein hochladen kann?
-    return false;
+    _createOnlineBackupFuture = Isolate.run<bool>(
+      () async {
+        await Future<void>.delayed(const Duration(seconds: 10));
+        return false;
+      },
+      debugName: "createOnlineBackup",
+    );
+
+    //TODO überprüfen ob then auch freigegeben wird
+    _createOnlineBackupFuture?.then(
+      (value) => _createOnlineBackupFuture = null,
+      onError: (e) => _createOnlineBackupFuture = null,
+    );
+
+    return _createOnlineBackupFuture ?? Future.value(false);
   }
 
   Future<drive.File?> createDriveFolder(
