@@ -4,7 +4,6 @@ import 'dart:io' as io;
 import 'dart:isolate';
 import 'package:googleapis/drive/v3.dart' as drive;
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:google_sign_in_all_platforms/google_sign_in_all_platforms.dart';
 import 'package:path/path.dart' as path;
 import 'package:schulapp/code_behind/google_auth_data.dart';
@@ -50,9 +49,8 @@ class OnlineSyncManager {
 
   Future<void> signOut() => _googleSignIn.signOut();
 
-  //if string is null it was successful
-  Future<OnlineSyncState>? _createOnlineBackupFuture;
-  bool get isCreatingOnlineBackup => _createOnlineBackupFuture != null;
+  StreamSubscription<dynamic>? _onlineBackupSubscription;
+  bool get isCreatingOnlineBackup => _onlineBackupSubscription != null;
 
   /// Stream shit
   final StreamController<OnlineSyncState> _stateController =
@@ -256,10 +254,10 @@ class OnlineSyncManager {
 
   // upload version.json with info about backup and who uploaded it
   // vielleicht nicht als .zip speichern damit man einzelne datein hochladen kann?
-  Future<OnlineSyncState> createOnlineBackup() async {
-    final alreadyRunningFuture = _createOnlineBackupFuture;
-    if (alreadyRunningFuture != null) {
-      return alreadyRunningFuture;
+  Future<OnlineSyncState?> createOnlineBackup() async {
+    final alreadyRunningSub = _onlineBackupSubscription;
+    if (alreadyRunningSub != null) {
+      return alreadyRunningSub.asFuture();
     }
 
     _setStreamState(
@@ -270,56 +268,70 @@ class OnlineSyncManager {
     );
 
     void task(SendPort port) async {
-      for (int i = 0; i < 10; i++) {
+      try {
+        for (int i = 0; i < 10; i++) {
+          port.send(
+            OnlineSyncState(
+                state: OnlineSyncStateEnum.syncing, progress: i / 10),
+          );
+          if (i == 7) throw "Test";
+          await Future<void>.delayed(const Duration(seconds: 2));
+        }
         port.send(
-          OnlineSyncState(state: OnlineSyncStateEnum.syncing, progress: i / 10),
+          OnlineSyncState(
+            state: OnlineSyncStateEnum.syncedSucessful,
+            progress: 100,
+          ),
         );
-        await Future<void>.delayed(const Duration(seconds: 2));
+      } catch (e) {
+        port.send(
+          OnlineSyncState(
+            state: OnlineSyncStateEnum.errorWhileSync,
+            errorMsg: e.toString(),
+          ),
+        );
       }
-
-      port.send(
-        OnlineSyncState(
-          state: OnlineSyncStateEnum.syncedSucessful,
-          progress: 100,
-        ),
-      );
     }
 
     final receivePort = ReceivePort();
-    StreamSubscription subscription;
     final isolate = await Isolate.spawn(
       task,
       receivePort.sendPort,
       debugName: kDebugMode ? "createOnlineBackup" : null,
     );
 
-    subscription = receivePort.listen((state) {
-      if (state is OnlineSyncState) {
-        _setStreamState(state);
-        if(state.state == OnlineSyncStateEnum.errorWhileSync)
-      }
-    });
+    void kill() {
+      isolate.kill(priority: Isolate.immediate);
+      _onlineBackupSubscription?.cancel();
+      receivePort.close();
+      _onlineBackupSubscription = null;
+    }
 
-    //TODO überprüfen ob then auch freigegeben wird
-    _createOnlineBackupFuture?.then(
+    _onlineBackupSubscription = receivePort.listen(
       (state) {
-        _createOnlineBackupFuture = null;
-        _setStreamState(
-          state,
-        );
+        assert(state is OnlineSyncState);
+        if (state is OnlineSyncState) {
+          _setStreamState(state);
+          if (!state.isSyncing) {
+            kill();
+          }
+        }
       },
       onError: (e) {
-        _createOnlineBackupFuture = null;
         _setStreamState(
           OnlineSyncState(
             state: OnlineSyncStateEnum.errorWhileSync,
             errorMsg: e.toString(),
           ),
         );
+        kill();
+      },
+      onDone: () {
+        kill();
       },
     );
 
-    return _createOnlineBackupFuture ??
+    return _onlineBackupSubscription?.asFuture() ??
         Future.value(
           OnlineSyncState(
             state: OnlineSyncStateEnum.idle,
