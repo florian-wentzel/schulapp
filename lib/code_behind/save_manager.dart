@@ -8,6 +8,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:schulapp/code_behind/abi_calculator.dart';
 import 'package:schulapp/code_behind/backup_manager.dart';
 import 'package:schulapp/code_behind/go_file_io_manager.dart';
+import 'package:schulapp/code_behind/school_file.dart';
 import 'package:schulapp/code_behind/school_lesson_notification.dart';
 import 'package:schulapp/code_behind/school_note.dart';
 import 'package:schulapp/code_behind/school_notes_manager.dart';
@@ -1242,6 +1243,65 @@ class SaveManager {
       return [];
     }
   }
+
+  //Könnte man auch für ein Backup verwenden,
+  //wird alle Datein aus der App zurückeben
+  List<SchoolFileBase> getAllSchoolFiles() {
+    SchoolDirectory todoEventDir = SchoolDirectory(
+      todoEventSaveDirName,
+    );
+
+    SchoolFile finishedEvents = SchoolFile(
+      todoEventSaveName,
+      contentGenerator: () {
+        final events = TimetableManager().todoEvents;
+
+        List<Map<String, dynamic>> todos = [];
+
+        for (var event in events) {
+          todos.add(event.toJson());
+        }
+
+        return utf8.encode(jsonEncode(todos));
+      },
+    );
+
+    todoEventDir.addChild(finishedEvents);
+
+    SchoolDirectory semestersDir = SchoolDirectory(
+      semestersSaveDirName,
+    );
+
+    for (var semester in TimetableManager().semesters) {
+      SchoolDirectory semesterDir = SchoolDirectory(
+        semester.uniqueKey.toString(),
+        children: [
+          SchoolFile(
+            semesterFileName,
+            contentGenerator: () {
+              return utf8.encode(
+                jsonEncode(
+                  semester.toJson(),
+                ),
+              );
+            },
+          ),
+        ],
+      );
+
+      semestersDir.addChild(semesterDir);
+    }
+
+    return [
+      todoEventDir,
+      semestersDir,
+    ];
+  }
+
+  // List<SchoolFileBase> getTodoEventSchoolFiles() {
+
+  //   return dir;
+  // }
 
   // Future<File> moveFile(File sourceFile, String newPath) async {
   //   try {

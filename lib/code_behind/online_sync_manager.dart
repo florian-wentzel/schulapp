@@ -1,15 +1,14 @@
 import 'dart:async';
 import 'dart:convert' show utf8, base64Url, jsonDecode;
 import 'dart:io' as io;
-import 'dart:isolate';
 import 'package:googleapis/drive/v3.dart' as drive;
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:google_sign_in_all_platforms/google_sign_in_all_platforms.dart';
 import 'package:path/path.dart' as path;
 import 'package:schulapp/code_behind/google_auth_data.dart';
 import 'package:schulapp/code_behind/google_drive/online_sync_state.dart';
 import 'package:schulapp/code_behind/save_manager.dart';
+import 'package:schulapp/code_behind/school_file.dart';
 
 class OnlineSyncManager {
   static final OnlineSyncManager _instance = OnlineSyncManager._internal();
@@ -128,7 +127,7 @@ class OnlineSyncManager {
 
       drive.FileList fileList = await client.files.list(
           spaces: 'appDataFolder',
-          $fields: 'files(id, name, modifiedTime, parents, createdTime, size)');
+          $fields: 'files(id, name, modifiedTime, parents, mimeType)');
 
       List<drive.File>? files = fileList.files;
 
@@ -150,6 +149,40 @@ class OnlineSyncManager {
       debugPrint(e.toString());
       return null;
     }
+  }
+
+  Future<drive.File?> uploadDriveFileFromBytes({
+    required String name,
+    required Uint8List data,
+    required String? id,
+    required String parentId,
+  }) async {
+    final driveApi = _driveClient;
+
+    if (driveApi == null) return null;
+
+    drive.File fileMetadata = drive.File();
+    fileMetadata.name = name;
+    fileMetadata.parents = [parentId];
+
+    late drive.File response;
+    final stream = Stream.value(data);
+    if (id != null) {
+      /// [driveFileId] not null means we want to update existing file
+      response = await driveApi.files.update(
+        fileMetadata,
+        id,
+        uploadMedia: drive.Media(stream, data.length),
+      );
+    } else {
+      /// [driveFileId] is null means we want to create new file
+      response = await driveApi.files.create(
+        fileMetadata,
+        uploadMedia: drive.Media(stream, data.length),
+      );
+    }
+
+    return response;
   }
 
   Future<drive.File?> uploadDriveFile({
@@ -255,6 +288,8 @@ class OnlineSyncManager {
     print("Drive API initialized: $_currUserData");
   }
 
+  static const _folderMimeType = "application/vnd.google-apps.folder";
+
   Future<OnlineSyncState> createOnlineBackup() async {
     final alreadyRunningFuture = _createOnlineBackupFuture;
     if (alreadyRunningFuture != null) {
@@ -286,7 +321,85 @@ class OnlineSyncManager {
           throw Exception("Could not get files from Google Drive");
         }
 
-        final localFiles = SaveManager().getLocalFiles();
+        if (files.isNotEmpty) {
+          for (var entry in files.entries) {
+            print(
+                "${entry.value.mimeType} | ${entry.value.name} | ${entry.value.modifiedTime}");
+          }
+          throw Exception(files.toString());
+        }
+
+        _setStreamState(
+          OnlineSyncState(
+            state: OnlineSyncStateEnum.syncing,
+            progress: 10,
+          ),
+        );
+
+        final allFiles = SaveManager().getAllSchoolFiles();
+
+        int countFilesAndDirs(List<SchoolFileBase> files, int currCount) {
+          for (var file in files) {
+            if (file is SchoolFile) {
+              currCount++;
+              continue;
+            }
+            if (file is SchoolDirectory) {
+              currCount++; //weil wir dirs mitzählen
+              currCount += countFilesAndDirs(file.children, 0);
+              continue;
+            }
+          }
+          return currCount;
+        }
+
+        int filesCount = countFilesAndDirs(allFiles, 0);
+
+        // ignore: unused_element
+        Future<void> addFolderContentToDrive(
+            List<SchoolFileBase> files, String parentId) async {
+          for (var dir in files) {
+            if (dir is! SchoolDirectory) {
+              continue;
+            }
+
+            final createdFolder = await createDriveFolder(
+              dir.name,
+              parentId: parentId,
+            );
+
+            final id = createdFolder?.id;
+
+            if (createdFolder == null || id == null) {
+              throw "'${dir.name}' konnte nicht erstellt werden!";
+            }
+
+            await addFolderContentToDrive(dir.children, id);
+          }
+
+          for (var file in files) {
+            if (file is! SchoolFile) {
+              continue;
+            }
+
+            final uploadedFile = await uploadDriveFileFromBytes(
+              name: file.name,
+              data: file.content,
+              id: file.driveId,
+              parentId: parentId,
+            );
+
+            if (uploadedFile == null) {
+              throw "File '${file.name}' could not be uploaded!";
+            }
+          }
+        }
+
+        // await addFolderContentToDrive(allFiles, "appDataFolder");
+
+        return OnlineSyncState(
+          state: OnlineSyncStateEnum.syncedSucessful,
+        );
 
         // alles was nicht schon onineist wird hochgeladen
         // alles was schon online ist und sich nicht geändert hat wird übersprungen
