@@ -4,10 +4,12 @@ import 'dart:io' as io;
 import 'dart:isolate';
 import 'package:googleapis/drive/v3.dart' as drive;
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:google_sign_in_all_platforms/google_sign_in_all_platforms.dart';
 import 'package:path/path.dart' as path;
 import 'package:schulapp/code_behind/google_auth_data.dart';
 import 'package:schulapp/code_behind/google_drive/online_sync_state.dart';
+import 'package:schulapp/code_behind/save_manager.dart';
 
 class OnlineSyncManager {
   static final OnlineSyncManager _instance = OnlineSyncManager._internal();
@@ -49,8 +51,9 @@ class OnlineSyncManager {
 
   Future<void> signOut() => _googleSignIn.signOut();
 
-  StreamSubscription<dynamic>? _onlineBackupSubscription;
-  bool get isCreatingOnlineBackup => _onlineBackupSubscription != null;
+  //if string is null it was successful
+  Future<OnlineSyncState>? _createOnlineBackupFuture;
+  bool get isCreatingOnlineBackup => _createOnlineBackupFuture != null;
 
   /// Stream shit
   final StreamController<OnlineSyncState> _stateController =
@@ -252,12 +255,10 @@ class OnlineSyncManager {
     print("Drive API initialized: $_currUserData");
   }
 
-  // upload version.json with info about backup and who uploaded it
-  // vielleicht nicht als .zip speichern damit man einzelne datein hochladen kann?
-  Future<OnlineSyncState?> createOnlineBackup() async {
-    final alreadyRunningSub = _onlineBackupSubscription;
-    if (alreadyRunningSub != null) {
-      return alreadyRunningSub.asFuture();
+  Future<OnlineSyncState> createOnlineBackup() async {
+    final alreadyRunningFuture = _createOnlineBackupFuture;
+    if (alreadyRunningFuture != null) {
+      return alreadyRunningFuture;
     }
 
     _setStreamState(
@@ -267,71 +268,65 @@ class OnlineSyncManager {
       ),
     );
 
-    void task(SendPort port) async {
-      try {
-        for (int i = 0; i < 10; i++) {
-          port.send(
-            OnlineSyncState(
-                state: OnlineSyncStateEnum.syncing, progress: i / 10),
-          );
-          if (i == 7) throw "Test";
-          await Future<void>.delayed(const Duration(seconds: 2));
-        }
-        port.send(
-          OnlineSyncState(
-            state: OnlineSyncStateEnum.syncedSucessful,
-            progress: 100,
-          ),
-        );
-      } catch (e) {
-        port.send(
-          OnlineSyncState(
-            state: OnlineSyncStateEnum.errorWhileSync,
-            errorMsg: e.toString(),
-          ),
-        );
-      }
-    }
+    // upload version.json with info about backup and who uploaded it
+    // vielleicht nicht als .zip speichern damit man einzelne datein hochladen kann?
 
-    final receivePort = ReceivePort();
-    final isolate = await Isolate.spawn(
-      task,
-      receivePort.sendPort,
-      debugName: kDebugMode ? "createOnlineBackup" : null,
+    _createOnlineBackupFuture = Future<OnlineSyncState>(
+      () async {
+        _setStreamState(
+          OnlineSyncState(
+            state: OnlineSyncStateEnum.syncing,
+            progress: 1,
+          ),
+        );
+
+        final files = await getAllDriveFiles();
+
+        if (files == null) {
+          throw Exception("Could not get files from Google Drive");
+        }
+
+        final localFiles = SaveManager().getLocalFiles();
+
+        // alles was nicht schon onineist wird hochgeladen
+        // alles was schon online ist und sich nicht geändert hat wird übersprungen
+        // alles was schon online ist und sich geändert hat wird überschrieben?
+
+        // for (int i = 0; i < 10; i++) {
+        //   _setStreamState(
+        //     OnlineSyncState(
+        //         state: OnlineSyncStateEnum.syncing, progress: i / 10),
+        //   );
+        //   await Future<void>.delayed(const Duration(seconds: 2));
+        // }
+
+        // return OnlineSyncState(
+        //   state: OnlineSyncStateEnum.syncedSucessful,
+        //   progress: 100,
+        // );
+      },
     );
 
-    void kill() {
-      isolate.kill(priority: Isolate.immediate);
-      _onlineBackupSubscription?.cancel();
-      receivePort.close();
-      _onlineBackupSubscription = null;
-    }
-
-    _onlineBackupSubscription = receivePort.listen(
+    //TODO überprüfen ob then auch freigegeben wird
+    _createOnlineBackupFuture?.then(
       (state) {
-        assert(state is OnlineSyncState);
-        if (state is OnlineSyncState) {
-          _setStreamState(state);
-          if (!state.isSyncing) {
-            kill();
-          }
-        }
+        _createOnlineBackupFuture = null;
+        _setStreamState(
+          state,
+        );
       },
       onError: (e) {
+        _createOnlineBackupFuture = null;
         _setStreamState(
           OnlineSyncState(
             state: OnlineSyncStateEnum.errorWhileSync,
             errorMsg: e.toString(),
           ),
         );
-        kill();
-      },
-      onDone: () {
-        kill();
       },
     );
 
-    return _onlineBackupSubscription?.asFuture() ??
+    return _createOnlineBackupFuture ??
         Future.value(
           OnlineSyncState(
             state: OnlineSyncStateEnum.idle,
