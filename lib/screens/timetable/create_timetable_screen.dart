@@ -180,6 +180,14 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
               _timetableCopy.name,
             ),
           ),
+          actions: [
+            IconButton(
+              icon: Icon(Icons.help),
+              onPressed: () {
+                TutorialOverlay.show(context, _tutorial);
+              },
+            ),
+          ],
         ),
         bottomNavigationBar: _bottomNavBar(),
         // floatingActionButton: FloatingActionButton(
@@ -551,6 +559,30 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
 
     List<Widget> children = [];
 
+    children.add(
+      const SizedBox(
+        width: 8,
+      ),
+    );
+    //TODO Tutorial anpassen
+    children.add(
+      InkWell(
+        key: _createLessonPrefabKey,
+        onTap: _createNewPrefab,
+        child: Container(
+          width: minContainerHeight,
+          height: minContainerHeight,
+          padding: const EdgeInsets.all(8),
+          margin: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Theme.of(context).cardColor,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: const Icon(Icons.add),
+        ),
+      ),
+    );
+
     if (_lessonPrefabs.isEmpty && TimetableManager().timetables.isNotEmpty) {
       children.add(
         InkWell(
@@ -664,23 +696,6 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
       );
     }
 
-    children.add(
-      InkWell(
-        key: _createLessonPrefabKey,
-        onTap: _createNewPrefab,
-        child: Container(
-          width: minContainerHeight,
-          height: minContainerHeight,
-          padding: const EdgeInsets.all(8),
-          margin: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: const Icon(Icons.add),
-        ),
-      ),
-    );
     //so there is a bit space between add Button and right screen end
     children.add(
       const SizedBox(
