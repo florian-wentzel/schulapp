@@ -1251,8 +1251,10 @@ class SaveManager {
       todoEventSaveDirName,
     );
 
-    SchoolFile finishedEvents = SchoolFile(
+    SchoolFile todoEventsFile = SchoolFile(
       todoEventSaveName,
+      modifiedTime: DateTime.now(), //TODO!!!
+      // modifiedTime: TimetableManager().todoEvents.sort((a, b) => a.lastModifiedTime...,),
       contentGenerator: () {
         final events = TimetableManager().todoEvents;
 
@@ -1266,7 +1268,7 @@ class SaveManager {
       },
     );
 
-    todoEventDir.addChild(finishedEvents);
+    todoEventDir.addChild(todoEventsFile);
 
     SchoolDirectory semestersDir = SchoolDirectory(
       semestersSaveDirName,
@@ -1278,6 +1280,7 @@ class SaveManager {
         children: [
           SchoolFile(
             semesterFileName,
+            modifiedTime: DateTime.now(), // TODO!!
             contentGenerator: () {
               return utf8.encode(
                 jsonEncode(

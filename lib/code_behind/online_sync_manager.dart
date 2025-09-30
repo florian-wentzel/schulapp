@@ -10,6 +10,10 @@ import 'package:schulapp/code_behind/google_drive/online_sync_state.dart';
 import 'package:schulapp/code_behind/save_manager.dart';
 import 'package:schulapp/code_behind/school_file.dart';
 
+//TODO: hier muss noch last sync time rein,
+//damit man global sehen kann was der letzte Sync war
+//Die klassen speichern dann einzeln selber wann sie zuletzt bearbeitet worden
+//sind, somit weiß man was hochzuladen ist und was nicht..
 class OnlineSyncManager {
   static final OnlineSyncManager _instance = OnlineSyncManager._internal();
 
@@ -322,9 +326,38 @@ class OnlineSyncManager {
         }
 
         if (files.isNotEmpty) {
+          SchoolDirectory driveFilesDir = SchoolDirectory("appdata");
+          Map<String, SchoolFileBase> lookUpMap = {
+            "appdata": driveFilesDir,
+          };
+
+          /// Zuerst nur Folder
+          /// vielleicht noch sortieren?
           for (var entry in files.entries) {
-            print(
-                "${entry.value.mimeType} | ${entry.value.name} | ${entry.value.modifiedTime}");
+            if (entry.value.mimeType != _folderMimeType) {
+              continue;
+            }
+            final name = entry.value.name;
+            // final modifiedTime = entry.value.modifiedTime;
+            if (name == null) throw "DriveFolder has no name!";
+
+            final id = entry.value.id;
+            if (id == null) throw "DriveFolder has no id: $name";
+
+            final folder = SchoolDirectory(name);
+
+            // currParent.addChild(folder);
+            // lookUpMap[id] = folder;
+
+            print("Folder | ${entry.value.name} | ${entry.value.modifiedTime}");
+          }
+
+          /// Anschließend die Datein hinzufügen
+          for (var entry in files.entries) {
+            if (entry.value.mimeType == _folderMimeType) {
+              continue;
+            }
+            print("File | ${entry.value.name} | ${entry.value.modifiedTime}");
           }
           throw Exception(files.toString());
         }
