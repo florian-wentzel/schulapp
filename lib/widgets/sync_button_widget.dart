@@ -75,7 +75,10 @@ class _SyncButtonWidgetState extends State<SyncButtonWidget>
           tooltip =
               "Syncing (${onlineSyncState.progress?.toStringAsFixed(1)}%)";
         } else if (onlineSyncState.isSyncedSucessful) {
-          icon = Icon(Icons.sync);
+          icon = Icon(
+            Icons.cloud_done,
+            color: Colors.green,
+          );
           tooltip = "Sync was Successful";
           onPressed = () {
             syncManager.createOnlineBackup();

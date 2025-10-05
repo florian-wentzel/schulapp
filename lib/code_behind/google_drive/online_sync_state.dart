@@ -9,7 +9,7 @@ class OnlineSyncState {
   final OnlineSyncStateEnum state;
 
   /// in percent
-  final double? progress;
+  final int? progress;
   final String? errorMsg;
 
   OnlineSyncState({

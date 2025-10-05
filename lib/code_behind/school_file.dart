@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:collection';
+import 'dart:convert';
 import 'dart:typed_data';
 
 abstract class SchoolFileBase {
@@ -39,6 +40,12 @@ class SchoolFile extends SchoolFileBase {
 
   FutureOr<Uint8List> get content => _contentGenerator();
 
+  FutureOr<Map<String, dynamic>> getContentAsJson() async => jsonDecode(
+        utf8.decode(
+          await _contentGenerator(),
+        ),
+      );
+
   @override
   String toString() {
     return "$_name (File)";
@@ -67,10 +74,28 @@ class SchoolDirectory extends SchoolFileBase {
     String? driveId,
   })  : _name = name,
         _children = children ?? [],
-        _driveId = driveId;
+        _driveId = driveId {
+    _children.sort((a, b) {
+      if (a is SchoolDirectory && b is! SchoolDirectory) {
+        return -1;
+      } else if (a is! SchoolDirectory && b is SchoolDirectory) {
+        return 1;
+      } else {
+        return a.name.compareTo(b.name);
+      }
+    });
+  }
 
   void addChild(SchoolFileBase file) {
     _children.add(file);
+  }
+
+  SchoolFileBase? getChildByName(String name) {
+    try {
+      return _children.firstWhere((element) => element.name == name);
+    } catch (e) {
+      return null;
+    }
   }
 
   @override

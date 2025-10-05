@@ -1,6 +1,7 @@
 import 'dart:async';
-import 'dart:convert' show utf8, base64Url, jsonDecode;
+import 'dart:convert' show utf8, base64Url, jsonDecode, jsonEncode;
 import 'dart:io' as io;
+import 'dart:math';
 import 'package:googleapis/drive/v3.dart' as drive;
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in_all_platforms/google_sign_in_all_platforms.dart';
@@ -11,11 +12,16 @@ import 'package:schulapp/code_behind/save_manager.dart';
 import 'package:schulapp/code_behind/school_file.dart';
 import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/timetable_manager.dart';
+import 'package:schulapp/code_behind/version_manager.dart';
 
 //damit man global sehen kann was der letzte Sync war
 //Die klassen speichern dann einzeln selber wann sie zuletzt bearbeitet worden
 //sind, somit weiß man was hochzuladen ist und was nicht..
 class OnlineSyncManager {
+  static const infoJsonFileName = "info.json";
+  static const lastSyncTimeKey = "lastSyncTime";
+  static const appVersionKey = "appVersion";
+
   static final OnlineSyncManager _instance = OnlineSyncManager._internal();
 
   factory OnlineSyncManager() {
@@ -230,6 +236,32 @@ class OnlineSyncManager {
     }
   }
 
+  Future<Uint8List?> downloadDriveFileAsBytes({
+    required String driveFileId,
+  }) async {
+    try {
+      final client = _driveClient;
+
+      if (client == null) return null;
+
+      drive.Media media = await client.files.get(
+        driveFileId,
+        downloadOptions: drive.DownloadOptions.fullMedia,
+      ) as drive.Media;
+
+      List<int> dataStore = [];
+
+      await media.stream.forEach((element) {
+        dataStore.addAll(element);
+      });
+
+      return Uint8List.fromList(dataStore);
+    } catch (e) {
+      debugPrint(e.toString());
+      return null;
+    }
+  }
+
   Future<io.File?> downloadDriveFile({
     required drive.File driveFile,
     required String targetLocalPath,
@@ -299,6 +331,276 @@ class OnlineSyncManager {
 
   static const _folderMimeType = "application/vnd.google-apps.folder";
 
+  Future<OnlineSyncState> _createOnlineBackupFutureImpl() async {
+    _setStreamState(
+      OnlineSyncState(
+        state: OnlineSyncStateEnum.syncing,
+        progress: 1,
+      ),
+    );
+
+    final files = await getAllDriveFiles();
+
+    if (files == null) {
+      throw Exception("Could not get files from Google Drive");
+    }
+
+    SchoolDirectory driveFilesDir = SchoolDirectory("appDataFolder");
+
+    _listToFileTree(
+      files,
+      driveFilesDir,
+    );
+
+    final infoFile = driveFilesDir.getChildByName(infoJsonFileName);
+
+    if (infoFile == null && files.isNotEmpty) {
+      throw "info.json file not found in Drive files, but other files are present. This should not happen.";
+    }
+
+    if (infoFile is! SchoolFile?) {
+      throw "info.json file is not a SchoolFile";
+    }
+
+    DateTime? driveLastSyncTime;
+    String? lastSyncVersion;
+
+    //wenn hier ein ein Fehler passiert, vielleicht von gestern ausgehen
+    if (infoFile != null) {
+      final Map<String, dynamic> infoJson = await infoFile.getContentAsJson();
+
+      final lastSyncTimeString = infoJson[lastSyncTimeKey] as String?;
+      if (lastSyncTimeString != null) {
+        driveLastSyncTime = DateTime.tryParse(lastSyncTimeString);
+        // if (_lastSyncTime != null) {
+        //   TimetableManager()
+        //       .settings
+        //       .setVar(Settings.lastSyncTimeKey, _lastSyncTime);
+        // }
+      }
+
+      final appVersion = infoJson[appVersionKey] as String?;
+      if (appVersion != null) {
+        lastSyncVersion = appVersion;
+      }
+    }
+
+    debugPrint(
+      "driveLastSyncTime: $driveLastSyncTime | lastSyncVersion: $lastSyncVersion",
+    );
+
+    _setStreamState(
+      OnlineSyncState(
+        state: OnlineSyncStateEnum.syncing,
+        progress: 10,
+      ),
+    );
+
+    final allLocalFiles = SaveManager().getAllSchoolFiles();
+
+    /// Wir zählen dirs nicht mit
+    int countFilesAndDirs(List<SchoolFileBase> files, int currCount) {
+      for (var file in files) {
+        if (file is SchoolFile) {
+          currCount++;
+          continue;
+        }
+        if (file is SchoolDirectory) {
+          // currCount++; //weil wir dirs mitzählen
+          currCount += countFilesAndDirs(file.children, 0);
+          continue;
+        }
+      }
+      return currCount;
+    }
+
+    int localFilesCount = countFilesAndDirs(allLocalFiles, 0);
+    int remoteFilesCount = countFilesAndDirs(driveFilesDir.children, 0);
+
+    int totalFilesCount = max(localFilesCount, remoteFilesCount);
+    int processedFilesCount = 0;
+
+    print(
+      "Local files count: $localFilesCount | Remote files count: $remoteFilesCount | Total files count: $totalFilesCount",
+    );
+
+    void updateProgress() {
+      processedFilesCount++;
+      double progress =
+          10 + (processedFilesCount / totalFilesCount) * 90; // 10 to 100
+      _setStreamState(
+        OnlineSyncState(
+          state: OnlineSyncStateEnum.syncing,
+          progress: progress.toInt(),
+        ),
+      );
+    }
+
+    /// wenn meine Ändrungen neuer sind als die auf dem server
+    /// dann zuerst durch die lokalen datein gehen und alles hochladen was neuer ist
+    /// dann durch die datein auf dem server gehen und alles runterladen was neuer ist
+    ///
+    /// Jetzt gehe ich davon aus, dass lokale immer neuer sind als die auf dem servers
+    /// zum testen..
+
+    void compareDirs(SchoolDirectory localDir, SchoolDirectory remoteDir) {
+      /// Weil die children von SchoolDirectory immer sortiert sind..
+      for (var localChild in localDir.children) {
+        final remoteChild = remoteDir.getChildByName(localChild.name);
+
+        if (localChild is SchoolDirectory) {
+          if (remoteChild is SchoolDirectory) {
+            //beide sind dirs, also vergleichen wir die inhalte
+            compareDirs(localChild, remoteChild);
+          } else if (remoteChild is SchoolFile) {
+            //local dir, remote file -> remote löschen und local hochladen
+            //TODO remote löschen
+            updateProgress();
+            // print("Remote file is a file but local is a dir: ${localChild.name}");
+            // continue;
+            unawaited(
+              addFolderContentToDrive(
+                [localChild],
+                "appDataFolder",
+              ).then((value) => updateProgress()),
+            );
+          } else {
+            //remote existiert nicht, also einfach hochladen
+            updateProgress();
+            unawaited(
+              addFolderContentToDrive(
+                [localChild],
+                "appDataFolder",
+              ).then((value) => updateProgress()),
+            );
+          }
+        } else if (localChild is SchoolFile) {
+          if (remoteChild is SchoolDirectory) {
+            //local file, remote dir -> remote löschen und local hochladen
+            //TODO remote löschen
+            updateProgress();
+            // print("Remote file is a dir but local is a file: ${localChild.name}");
+            // continue;
+            unawaited(
+              addFolderContentToDrive(
+                [localChild],
+                "appDataFolder",
+              ).then((value) => updateProgress()),
+            );
+          } else if (remoteChild is SchoolFile) {
+            //beide sind files, also vergleichen wir die modifiedTime
+            if (localChild.modifiedTime.isAfter(remoteChild.modifiedTime)) {
+              //lokale datei ist neuer, also hochladen
+              updateProgress();
+              unawaited(
+                addFolderContentToDrive(
+                  [localChild],
+                  "appDataFolder",
+                ).then((value) => updateProgress()),
+              );
+            } else {
+              //remote datei ist neuer oder gleich alt, also runterladen
+              updateProgress();
+              unawaited(
+                downloadDriveFile(
+                  driveFile: files![remoteChild.driveId]!,
+                  targetLocalPath: path.join(
+                    SaveManager().getSaveDir().path,
+                    localChild.name,
+                  ),
+                ).then((value) => updateProgress
+    }
+
+    compareDirs(
+      SchoolDirectory("appDataFolder", children: allLocalFiles),
+      driveFilesDir,
+    );
+
+    while (processedFilesCount < totalFilesCount) {
+      updateProgress();
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+    }
+
+    Future<void> addFolderContentToDrive(
+        List<SchoolFileBase> files, String parentId) async {
+      for (var dir in files) {
+        if (dir is! SchoolDirectory) {
+          continue;
+        }
+
+        final createdFolder = await createDriveFolder(
+          dir.name,
+          parentId: parentId,
+        );
+
+        final id = createdFolder?.id;
+
+        if (createdFolder == null || id == null) {
+          throw "'${dir.name}' konnte nicht erstellt werden!";
+        }
+
+        await addFolderContentToDrive(dir.children, id);
+      }
+
+      for (var file in files) {
+        if (file is! SchoolFile) {
+          continue;
+        }
+
+        final uploadedFile = await uploadDriveFileFromBytes(
+          name: file.name,
+          data: await file.content,
+          id: file.driveId,
+          parentId: parentId,
+        );
+
+        if (uploadedFile == null) {
+          throw "File '${file.name}' could not be uploaded!";
+        }
+      }
+    }
+
+    /// Upload
+    // await addFolderContentToDrive(allFiles, "appDataFolder");
+    Map<String, dynamic> infoJson = {
+      lastSyncTimeKey: DateTime.now().toIso8601String(),
+      appVersionKey: await VersionManager().getVersionWithBuildnumberString(),
+      // "user": {
+      //   "name": _currUserData?.name,
+      //   "email": _currUserData?.email,
+      //   "id": _currUserData?.sub,
+      // },
+    };
+
+    // await uploadDriveFileFromBytes(
+    //   name: infoJsonFileName,
+    //   data: utf8.encode(jsonEncode(infoJson)),
+    //   id: null,
+    //   parentId: "appDataFolder",
+    // );
+
+    return OnlineSyncState(
+      state: OnlineSyncStateEnum.syncedSucessful,
+    );
+
+    // alles was nicht schon onineist wird hochgeladen
+    // alles was schon online ist und sich nicht geändert hat wird übersprungen
+    // alles was schon online ist und sich geändert hat wird überschrieben?
+
+    // for (int i = 0; i < 10; i++) {
+    //   _setStreamState(
+    //     OnlineSyncState(
+    //         state: OnlineSyncStateEnum.syncing, progress: i / 10),
+    //   );
+    //   await Future<void>.delayed(const Duration(seconds: 2));
+    // }
+
+    // return OnlineSyncState(
+    //   state: OnlineSyncStateEnum.syncedSucessful,
+    //   progress: 100,
+    // );
+  }
+
   Future<OnlineSyncState> createOnlineBackup() async {
     final alreadyRunningFuture = _createOnlineBackupFuture;
     if (alreadyRunningFuture != null) {
@@ -315,209 +617,7 @@ class OnlineSyncManager {
     // upload version.json with info about backup and who uploaded it
     // vielleicht nicht als .zip speichern damit man einzelne datein hochladen kann?
 
-    _createOnlineBackupFuture = Future<OnlineSyncState>(
-      () async {
-        _setStreamState(
-          OnlineSyncState(
-            state: OnlineSyncStateEnum.syncing,
-            progress: 1,
-          ),
-        );
-
-        final files = await getAllDriveFiles();
-
-        if (files == null) {
-          throw Exception("Could not get files from Google Drive");
-        }
-
-        if (files.isNotEmpty) {
-          SchoolDirectory driveFilesDir = SchoolDirectory("appdata");
-          Map<String, SchoolFileBase> lookUpMap = {
-            "appdata": driveFilesDir,
-          };
-
-          /// Zuerst nur Folder
-          /// vielleicht noch sortieren?
-          for (var entry in files.entries) {
-            if (entry.value.mimeType != _folderMimeType) {
-              continue;
-            }
-            final name = entry.value.name;
-            // final modifiedTime = entry.value.modifiedTime;
-            if (name == null) throw "DriveFolder has no name!";
-
-            final id = entry.value.id;
-            if (id == null) throw "DriveFolder has no id: $name";
-
-            final parentId = entry.value.parents?.first;
-            if (parentId == null) {
-              throw "DriveFolder has no parentId: $name";
-            }
-
-            final folder = SchoolDirectory(
-              name,
-              driveId: id,
-            );
-
-            // currParent.addChild(folder);
-            lookUpMap[id] = folder;
-          }
-
-          /// Anschließend die Datein hinzufügen und auch die parents der Ordner setzen
-          for (var entry in files.entries) {
-            if (entry.value.mimeType == _folderMimeType) {
-              final parentId = entry.value.parents?.first;
-              final parent = lookUpMap[parentId];
-              print(
-                  "Folder | ${entry.value.name} | ${entry.value.modifiedTime} | parent: $parent");
-              //Wenn es das parent jetzt noch nicht gibt, dann setzen wir es später
-              if (parent == null) {
-                continue;
-              }
-
-              if (parent is! SchoolDirectory) {
-                throw "Parent is not a directory: $parentId | $parent";
-              }
-              final folder = lookUpMap[entry.key];
-              if (folder == null) {
-                throw "Folder not found in lookup map: ${entry.value.name}";
-              }
-              parent.addChild(folder);
-              continue;
-            }
-            final name = entry.value.name;
-            final modifiedTime = entry.value.modifiedTime;
-
-            if (name == null) {
-              throw "DriveFile has no name: $name";
-            }
-            if (modifiedTime == null) {
-              throw "DriveFile has no modifiedTime: $name";
-            }
-
-            final file = SchoolFile(
-              name,
-              contentGenerator: () async {
-                final file = await downloadDriveFile(
-                  driveFile: entry.value,
-                  targetLocalPath: path.join(
-                      io.Directory.systemTemp.path, entry.value.name!),
-                );
-                if (file == null) {
-                  throw "Could not download file: ${entry.value.name}";
-                }
-                return file.readAsBytes();
-              },
-              modifiedTime: modifiedTime,
-            );
-            final parentId = entry.value.parents?.first;
-            if (parentId == null) {
-              throw "DriveFile has no parentId: $name";
-            }
-            final parent = lookUpMap[parentId];
-            if (parent == null) {
-              throw "DriveFile parent not found in lookup map: $parentId | $name";
-            }
-            if (parent is! SchoolDirectory) {
-              throw "DriveFile parent is not a directory: $parentId | $parent | $name";
-            }
-            parent.addChild(file);
-            print(
-                "File | ${entry.value.name} | ${entry.value.modifiedTime} | parent: $parent");
-          }
-          throw Exception(files.toString());
-        }
-
-        _setStreamState(
-          OnlineSyncState(
-            state: OnlineSyncStateEnum.syncing,
-            progress: 10,
-          ),
-        );
-
-        final allFiles = SaveManager().getAllSchoolFiles();
-
-        int countFilesAndDirs(List<SchoolFileBase> files, int currCount) {
-          for (var file in files) {
-            if (file is SchoolFile) {
-              currCount++;
-              continue;
-            }
-            if (file is SchoolDirectory) {
-              currCount++; //weil wir dirs mitzählen
-              currCount += countFilesAndDirs(file.children, 0);
-              continue;
-            }
-          }
-          return currCount;
-        }
-
-        int filesCount = countFilesAndDirs(allFiles, 0);
-
-        // ignore: unused_element
-        Future<void> addFolderContentToDrive(
-            List<SchoolFileBase> files, String parentId) async {
-          for (var dir in files) {
-            if (dir is! SchoolDirectory) {
-              continue;
-            }
-
-            final createdFolder = await createDriveFolder(
-              dir.name,
-              parentId: parentId,
-            );
-
-            final id = createdFolder?.id;
-
-            if (createdFolder == null || id == null) {
-              throw "'${dir.name}' konnte nicht erstellt werden!";
-            }
-
-            await addFolderContentToDrive(dir.children, id);
-          }
-
-          for (var file in files) {
-            if (file is! SchoolFile) {
-              continue;
-            }
-
-            final uploadedFile = await uploadDriveFileFromBytes(
-              name: file.name,
-              data: await file.content,
-              id: file.driveId,
-              parentId: parentId,
-            );
-
-            if (uploadedFile == null) {
-              throw "File '${file.name}' could not be uploaded!";
-            }
-          }
-        }
-
-        // await addFolderContentToDrive(allFiles, "appDataFolder");
-
-        return OnlineSyncState(
-          state: OnlineSyncStateEnum.syncedSucessful,
-        );
-
-        // alles was nicht schon onineist wird hochgeladen
-        // alles was schon online ist und sich nicht geändert hat wird übersprungen
-        // alles was schon online ist und sich geändert hat wird überschrieben?
-
-        // for (int i = 0; i < 10; i++) {
-        //   _setStreamState(
-        //     OnlineSyncState(
-        //         state: OnlineSyncStateEnum.syncing, progress: i / 10),
-        //   );
-        //   await Future<void>.delayed(const Duration(seconds: 2));
-        // }
-
-        // return OnlineSyncState(
-        //   state: OnlineSyncStateEnum.syncedSucessful,
-        //   progress: 100,
-        // );
-      },
-    );
+    _createOnlineBackupFuture = _createOnlineBackupFutureImpl();
 
     //TODO überprüfen ob then auch freigegeben wird
     _createOnlineBackupFuture?.then(
@@ -563,6 +663,111 @@ class OnlineSyncManager {
 
     final created = await driveApi.files.create(folder);
     return created;
+  }
+
+  void _listToFileTree(
+    Map<String, drive.File> files,
+    SchoolDirectory driveFilesDir,
+  ) {
+    Map<String, SchoolFileBase> lookUpMap = {};
+
+    /// Zuerst nur Folder
+    /// vielleicht noch sortieren?
+    for (var entry in files.entries) {
+      if (entry.value.mimeType != _folderMimeType) {
+        continue;
+      }
+      final name = entry.value.name;
+      // final modifiedTime = entry.value.modifiedTime;
+      if (name == null) throw "DriveFolder has no name!";
+
+      final id = entry.value.id;
+      if (id == null) throw "DriveFolder has no id: $name";
+
+      final parentId = entry.value.parents?.first;
+      if (parentId == null) {
+        throw "DriveFolder has no parentId: $name";
+      }
+
+      final folder = SchoolDirectory(
+        name,
+        driveId: id,
+      );
+
+      // currParent.addChild(folder);
+      lookUpMap[id] = folder;
+    }
+
+    /// Anschließend die Datein hinzufügen und auch die parents der Ordner setzen
+    for (var entry in files.entries) {
+      if (entry.value.mimeType == _folderMimeType) {
+        final parentId = entry.value.parents?.first;
+        final parent = lookUpMap[parentId] ?? driveFilesDir;
+        print(
+            "Folder | ${entry.value.name} | ${entry.value.modifiedTime} | parent: $parent");
+
+        if (parent is! SchoolDirectory) {
+          throw "Parent is not a directory: $parentId | $parent";
+        }
+        final folder = lookUpMap[entry.key];
+        if (folder == null) {
+          throw "Folder not found in lookup map: ${entry.value.name}";
+        }
+        parent.addChild(folder);
+        continue;
+      }
+      final name = entry.value.name;
+      final modifiedTime = entry.value.modifiedTime;
+
+      if (name == null) {
+        throw "DriveFile has no name: $name";
+      }
+      if (modifiedTime == null) {
+        throw "DriveFile has no modifiedTime: $name";
+      }
+
+      final file = SchoolFile(
+        name,
+        contentGenerator: () async {
+          final id = entry.value.id;
+          if (id == null) {
+            throw "DriveFile has no id: $name";
+          }
+
+          final bytes = await downloadDriveFileAsBytes(driveFileId: id);
+
+          if (bytes == null) {
+            throw "Could not download file as bytes: $name";
+          }
+
+          return bytes;
+          // final file = await downloadDriveFile(
+          //   driveFile: entry.value,
+          //   targetLocalPath:
+          //       path.join(io.Directory.systemTemp.path, entry.value.name!),
+          // );
+          // if (file == null) {
+          //   throw "Could not download file: ${entry.value.name}";
+          // }
+          // return file.readAsBytes();
+        },
+        modifiedTime: modifiedTime,
+      );
+      final parentId = entry.value.parents?.first;
+      if (parentId == null) {
+        throw "DriveFile has no parentId: $name";
+      }
+      final parent = lookUpMap[parentId] ?? driveFilesDir;
+      // if (parent == null) {
+      //   throw "DriveFile parent not found in lookup map: $parentId | $name";
+      // }
+      if (parent is! SchoolDirectory) {
+        throw "DriveFile parent is not a directory: $parentId | $parent | $name";
+      }
+      parent.addChild(file);
+      print(
+          "File | ${entry.value.name} | ${entry.value.modifiedTime} | parent: $parent");
+    }
   }
 
   // vielleicht kann man das später noch hinzufügn
