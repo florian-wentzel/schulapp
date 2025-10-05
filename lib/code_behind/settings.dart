@@ -148,6 +148,7 @@ class Settings {
       "lessonNotificationEnabled";
   static const preLessonReminderNotificationDurationKey =
       "preLessonReminderNotificationDuration";
+  static const lastSyncTimeKey = "lastSyncTime";
 
   static const waitBetweenAskForReviewDuration = Duration(days: 3);
 
@@ -500,6 +501,21 @@ class Settings {
         if (millis == null) return null;
 
         return Duration(milliseconds: millis);
+      },
+    ),
+    SettingsVar<DateTime?>(
+      key: lastSyncTimeKey,
+      defaultValue: () => null,
+      canBeNull: () => null,
+      loadCustomType: (value) {
+        if (value == null) return null;
+
+        return DateTime.tryParse(value);
+      },
+      saveCustomType: (type) {
+        if (type == null) return null;
+
+        return type.toIso8601String();
       },
     ),
   ];

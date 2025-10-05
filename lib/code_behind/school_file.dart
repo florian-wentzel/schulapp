@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:collection';
 import 'dart:typed_data';
 
@@ -7,6 +8,11 @@ abstract class SchoolFileBase {
 
   /// UTC
   DateTime get modifiedTime;
+
+  @override
+  String toString() {
+    return "$name (Base)";
+  }
 }
 
 class SchoolFile extends SchoolFileBase {
@@ -19,11 +25,11 @@ class SchoolFile extends SchoolFileBase {
   final String _name;
   final DateTime _modifiedTime;
   final String? _driveId;
-  final Uint8List Function() _contentGenerator;
+  final FutureOr<Uint8List> Function() _contentGenerator;
 
   SchoolFile(
     String name, {
-    required Uint8List Function() contentGenerator,
+    required FutureOr<Uint8List> Function() contentGenerator,
     required DateTime modifiedTime,
     String? driveId,
   })  : _name = name,
@@ -31,7 +37,7 @@ class SchoolFile extends SchoolFileBase {
         _driveId = driveId,
         _modifiedTime = modifiedTime;
 
-  Uint8List get content => _contentGenerator();
+  FutureOr<Uint8List> get content => _contentGenerator();
 
   @override
   String toString() {
@@ -49,15 +55,19 @@ class SchoolDirectory extends SchoolFileBase {
 
   UnmodifiableListView<SchoolFileBase> get children =>
       UnmodifiableListView(_children);
+  String? get driveId => _driveId;
 
   final String _name;
   final List<SchoolFileBase> _children;
+  final String? _driveId;
 
   SchoolDirectory(
     String name, {
     List<SchoolFileBase>? children,
+    String? driveId,
   })  : _name = name,
-        _children = children ?? [];
+        _children = children ?? [],
+        _driveId = driveId;
 
   void addChild(SchoolFileBase file) {
     _children.add(file);

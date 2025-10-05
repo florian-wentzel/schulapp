@@ -9,8 +9,9 @@ import 'package:schulapp/code_behind/google_auth_data.dart';
 import 'package:schulapp/code_behind/google_drive/online_sync_state.dart';
 import 'package:schulapp/code_behind/save_manager.dart';
 import 'package:schulapp/code_behind/school_file.dart';
+import 'package:schulapp/code_behind/settings.dart';
+import 'package:schulapp/code_behind/timetable_manager.dart';
 
-//TODO: hier muss noch last sync time rein,
 //damit man global sehen kann was der letzte Sync war
 //Die klassen speichern dann einzeln selber wann sie zuletzt bearbeitet worden
 //sind, somit weiß man was hochzuladen ist und was nicht..
@@ -27,6 +28,8 @@ class OnlineSyncManager {
         .onError(_handleAuthenticationError);
     _googleSignIn.silentSignIn();
     _setStreamState(_currentState);
+    _lastSyncTime =
+        TimetableManager().settings.getVar(Settings.lastSyncTimeKey);
   }
 
   final GoogleSignIn _googleSignIn = GoogleSignIn(
@@ -41,6 +44,9 @@ class OnlineSyncManager {
     ),
   );
 
+  DateTime? _lastSyncTime;
+  DateTime? get lastSyncTime => _lastSyncTime;
+
   drive.DriveApi? _driveClient;
   GoogleUserData? _currUserData;
 
@@ -54,7 +60,6 @@ class OnlineSyncManager {
 
   Future<void> signOut() => _googleSignIn.signOut();
 
-  //if string is null it was successful
   Future<OnlineSyncState>? _createOnlineBackupFuture;
   bool get isCreatingOnlineBackup => _createOnlineBackupFuture != null;
 
@@ -253,7 +258,7 @@ class OnlineSyncManager {
     }
   }
 
-  Future<GoogleUserData?> getCurrUser(GoogleSignInCredentials creds) async {
+  GoogleUserData? getCurrUser(GoogleSignInCredentials creds) {
     final parts = creds.idToken?.split('.');
 
     if (parts == null || parts.length != 3) {
@@ -287,7 +292,7 @@ class OnlineSyncManager {
 
   Future<void> _handleAfterLogInInit(GoogleSignInCredentials user) async {
     _driveClient = await getDriveApi();
-    _currUserData = await getCurrUser(user);
+    _currUserData = getCurrUser(user);
 
     print("Drive API initialized: $_currUserData");
   }
@@ -344,20 +349,81 @@ class OnlineSyncManager {
             final id = entry.value.id;
             if (id == null) throw "DriveFolder has no id: $name";
 
-            final folder = SchoolDirectory(name);
+            final parentId = entry.value.parents?.first;
+            if (parentId == null) {
+              throw "DriveFolder has no parentId: $name";
+            }
+
+            final folder = SchoolDirectory(
+              name,
+              driveId: id,
+            );
 
             // currParent.addChild(folder);
-            // lookUpMap[id] = folder;
-
-            print("Folder | ${entry.value.name} | ${entry.value.modifiedTime}");
+            lookUpMap[id] = folder;
           }
 
-          /// Anschließend die Datein hinzufügen
+          /// Anschließend die Datein hinzufügen und auch die parents der Ordner setzen
           for (var entry in files.entries) {
             if (entry.value.mimeType == _folderMimeType) {
+              final parentId = entry.value.parents?.first;
+              final parent = lookUpMap[parentId];
+              print(
+                  "Folder | ${entry.value.name} | ${entry.value.modifiedTime} | parent: $parent");
+              //Wenn es das parent jetzt noch nicht gibt, dann setzen wir es später
+              if (parent == null) {
+                continue;
+              }
+
+              if (parent is! SchoolDirectory) {
+                throw "Parent is not a directory: $parentId | $parent";
+              }
+              final folder = lookUpMap[entry.key];
+              if (folder == null) {
+                throw "Folder not found in lookup map: ${entry.value.name}";
+              }
+              parent.addChild(folder);
               continue;
             }
-            print("File | ${entry.value.name} | ${entry.value.modifiedTime}");
+            final name = entry.value.name;
+            final modifiedTime = entry.value.modifiedTime;
+
+            if (name == null) {
+              throw "DriveFile has no name: $name";
+            }
+            if (modifiedTime == null) {
+              throw "DriveFile has no modifiedTime: $name";
+            }
+
+            final file = SchoolFile(
+              name,
+              contentGenerator: () async {
+                final file = await downloadDriveFile(
+                  driveFile: entry.value,
+                  targetLocalPath: path.join(
+                      io.Directory.systemTemp.path, entry.value.name!),
+                );
+                if (file == null) {
+                  throw "Could not download file: ${entry.value.name}";
+                }
+                return file.readAsBytes();
+              },
+              modifiedTime: modifiedTime,
+            );
+            final parentId = entry.value.parents?.first;
+            if (parentId == null) {
+              throw "DriveFile has no parentId: $name";
+            }
+            final parent = lookUpMap[parentId];
+            if (parent == null) {
+              throw "DriveFile parent not found in lookup map: $parentId | $name";
+            }
+            if (parent is! SchoolDirectory) {
+              throw "DriveFile parent is not a directory: $parentId | $parent | $name";
+            }
+            parent.addChild(file);
+            print(
+                "File | ${entry.value.name} | ${entry.value.modifiedTime} | parent: $parent");
           }
           throw Exception(files.toString());
         }
@@ -417,7 +483,7 @@ class OnlineSyncManager {
 
             final uploadedFile = await uploadDriveFileFromBytes(
               name: file.name,
-              data: file.content,
+              data: await file.content,
               id: file.driveId,
               parentId: parentId,
             );
