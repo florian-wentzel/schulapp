@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:encrypt/encrypt.dart' as encrypt;
 import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/calendar_todo_event_style.dart';
+import 'package:schulapp/code_behind/google_drive/confilct_resolution.dart';
 import 'package:schulapp/code_behind/grading_system_manager.dart';
 import 'package:schulapp/code_behind/notification_schedule.dart';
 import 'package:schulapp/code_behind/save_manager.dart';
@@ -149,6 +150,7 @@ class Settings {
   static const preLessonReminderNotificationDurationKey =
       "preLessonReminderNotificationDuration";
   static const lastSyncTimeKey = "lastSyncTime";
+  static const syncConflictResolutionKey = "syncConflictResolution";
 
   static const waitBetweenAskForReviewDuration = Duration(days: 3);
 
@@ -516,6 +518,21 @@ class Settings {
         if (type == null) return null;
 
         return type.toIso8601String();
+      },
+    ),
+    SettingsVar<ConflictResolutionStrategy>(
+      key: syncConflictResolutionKey,
+      defaultValue: () => ConflictResolutionStrategy.lastWriteWins,
+      saveCustomType: (type) {
+        return type.toString();
+      },
+      loadCustomType: (value) {
+        for (var item in ConflictResolutionStrategy.values) {
+          if (value == item.toString()) {
+            return item;
+          }
+        }
+        return null;
       },
     ),
   ];

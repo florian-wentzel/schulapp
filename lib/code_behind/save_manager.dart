@@ -1033,8 +1033,16 @@ class SaveManager {
     Directory eventDir = getTodosDir();
     String pathToFile = join(eventDir.path, todoEventSaveName);
     try {
-      String fileCOntent = File(pathToFile).readAsStringSync();
-      Map<String, dynamic> json = jsonDecode(fileCOntent);
+      String fileContent = File(pathToFile).readAsStringSync();
+      Map<String, dynamic> json = jsonDecode(fileContent);
+      return todoEventsFromJson(json);
+    } catch (e) {
+      return [];
+    }
+  }
+
+  List<TodoEvent> todoEventsFromJson(Map<String, dynamic> json) {
+    try {
       List<Map<String, dynamic>> todos = (json[todosKey] as List).cast();
 
       return List.generate(

@@ -94,12 +94,15 @@
 // //   List<MergeItem> getMergeItems();
 // // }
 
-// abstract class MergableClass<T> {
-//   String get uid; //UUID
-//   T get parent;
+abstract class MergableClass<T> {
+  DateTime get lastModified;
+  String get uid; //UUID
+  T get parent;
 
-//   void merge(T other);
-// }
+  //returns new merged object
+  //vielleicht null wenn beide gespeichert werden sollen
+  T merge(T other);
+}
 
 // abstract class IMergableVar<T> {
 //   DateTime lastModified;

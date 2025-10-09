@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:schulapp/code_behind/mergable.dart';
 import 'package:schulapp/code_behind/notification_manager.dart';
 import 'package:schulapp/code_behind/notification_schedule.dart';
+import 'package:schulapp/code_behind/online_sync_manager.dart';
 import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/timetable_manager.dart';
 import 'package:schulapp/code_behind/unique_id_generator.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 
-class TodoEvent {
+class TodoEvent extends MergableClass<TodoEvent> {
   static const String _nameKey = "name";
   static const String _linkedSubjectNameKey = "linkedSubjectName";
   static const String _linkedSchoolNoteKey = "linkedNote";
@@ -17,12 +19,24 @@ class TodoEvent {
   static const String _finishedKey = "finished";
   static const String _customEventKey = "isCustomEvent";
   static const String _saveOnlineCodeKey = "saveOnlineCode";
+  static const String _uidKey = "uid";
+  static const String _lastModifiedKey = "lastModified";
 
   static const IconData homeworkIcon = Icons.assignment;
   static const IconData presentationIcon = Icons.speaker_notes;
   static const IconData testIcon = Icons.edit;
   static const IconData examIcon = Icons.school;
   static const int maxNameLength = 25;
+
+  @override
+  DateTime get lastModified => _lastModified;
+  DateTime _lastModified;
+
+  @override
+  TodoEvent get parent => this;
+
+  @override //vielleicht key? erst setzen nach dem snchronisiert wurde?
+  String get uid => _key.toString();
 
   ///identifyer set at runtime from [UniqueIdGenerator.createUniqueId()]
   int get key => _key;
@@ -56,7 +70,8 @@ class TodoEvent {
     required this.finished,
     required this.isCustomEvent,
     this.saveOnlineCode,
-  }) {
+    DateTime? lastModified,
+  }) : _lastModified = lastModified?.toUtc() ?? DateTime.now().toUtc() {
     key ??= UniqueIdGenerator.createUniqueId();
 
     if (key > NotificationManager.maxIdNum) {
@@ -98,6 +113,8 @@ class TodoEvent {
   Map<String, dynamic> toJson() {
     return {
       _nameKey: name,
+      // _uidKey: uid, //weil bisher uid = key
+      _lastModifiedKey: _lastModified.toIso8601String(),
       _linkedSchoolNoteKey: linkedSchoolNote,
       _linkedSubjectNameKey: linkedSubjectName,
       _endTimeKey: endTime?.millisecondsSinceEpoch,
@@ -112,6 +129,8 @@ class TodoEvent {
 
   static TodoEvent fromJson(Map<String, dynamic> json) {
     String name = json[_nameKey];
+    // String uid = json[_uidKey]; //Weilbisher uid = key
+    String lastModified = json[_lastModifiedKey];
     String linkedSubjectName = json[_linkedSubjectNameKey];
     String? linkedSchoolNote = json[_linkedSchoolNoteKey];
     String? saveOnlineCode = json[_saveOnlineCodeKey];
@@ -130,6 +149,8 @@ class TodoEvent {
 
     return TodoEvent(
       key: key,
+      // uid: uid,
+      lastModified: DateTime.tryParse(lastModified),
       name: name,
       linkedSchoolNote: linkedSchoolNote,
       linkedSubjectName: linkedSubjectName,
@@ -333,6 +354,53 @@ class TodoEvent {
         return onTest;
       case TodoType.homework:
         return onHomework;
+    }
+  }
+
+  @override
+  TodoEvent merge(TodoEvent other) {
+    if (other.key != key) {
+      throw "Can only merge TodoEvents with the same key!";
+    }
+    if (other.uid != uid) {
+      throw "Can only merge TodoEvents with the same uid!";
+    }
+
+    // Settings.syncConflictResolutionTimeKey
+    // lastsynced
+    // lastmodified
+
+    final lastSyncTime = OnlineSyncManager().lastSyncTime;
+
+    if (lastSyncTime == null) {
+      //never synced before, take the most recently modified one
+      if (lastModified.isAfter(other.lastModified)) {
+        return this;
+      } else {
+        return other;
+      }
+    }
+
+    final thisChanged = lastModified.isAfter(lastSyncTime);
+    final otherChanged = other.lastModified.isAfter(lastSyncTime);
+    if (thisChanged && !otherChanged) {
+      return this;
+    } else if (!thisChanged && otherChanged) {
+      return other;
+    } else if (!thisChanged && !otherChanged) {
+      //none changed
+      return this;
+    } else {
+      //both changed
+// ConflictResolutionStrategy strategy = ConflictResolutionStrategy.lastWriteWins;
+//       switch (strategy) {
+//         case ConflictResolutionStrategy.lastWriteWins:
+      if (lastModified.isAfter(other.lastModified)) {
+        return this;
+      } else {
+        return other;
+      }
+      // }
     }
   }
 }
