@@ -46,6 +46,10 @@ class SchoolFile extends SchoolFileBase {
         ),
       );
 
+  FutureOr<String> contentAsUtf8String() async => utf8.decode(
+        await _contentGenerator(),
+      );
+
   @override
   String toString() {
     return "$_name (File)";

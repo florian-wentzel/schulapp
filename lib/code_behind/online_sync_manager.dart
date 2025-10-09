@@ -21,7 +21,11 @@ import 'package:schulapp/code_behind/version_manager.dart';
 class OnlineSyncManager {
   static const infoJsonFileName = "info.json";
   static const lastSyncTimeKey = "lastSyncTime";
+  static const infoLastUpdatedKey = "infoLastUpdated";
+  static const syncingKey = "syncing";
   static const appVersionKey = "appVersion";
+
+  static const maxSyncTime = 5; //Minutes
 
   static final OnlineSyncManager _instance = OnlineSyncManager._internal();
 
@@ -356,15 +360,19 @@ class OnlineSyncManager {
     final infoFile = driveFilesDir.getChildByName(infoJsonFileName);
 
     if (infoFile == null && driveFiles.isNotEmpty) {
-      throw "info.json file not found in Drive files, but other files are present. This should not happen.";
+      print(
+          "info.json file not found in Drive files, but other files are present. This should not happen.");
     }
 
     if (infoFile is! SchoolFile?) {
       throw "info.json file is not a SchoolFile";
     }
 
+    String? existingInfoFileId; //hier weitermachen
     DateTime? driveLastSyncTime;
+    DateTime? infoLastUpdatedTime;
     String? lastSyncVersion;
+    bool isSyncing = false;
 
     //wenn hier ein ein Fehler passiert, vielleicht von gestern ausgehen
     if (infoFile != null) {
@@ -384,7 +392,31 @@ class OnlineSyncManager {
       if (appVersion != null) {
         lastSyncVersion = appVersion;
       }
+
+      final infoLastUpdatedString = infoJson[infoLastUpdatedKey] as String?;
+      if (infoLastUpdatedString != null) {
+        infoLastUpdatedTime = DateTime.tryParse(infoLastUpdatedString);
+      }
+
+      final syncing = infoJson[syncingKey] as bool?;
+      if (syncing != null) {
+        isSyncing = syncing;
+      }
     }
+
+    if (isSyncing && infoLastUpdatedTime != null) {
+      final difference = DateTime.now().difference(infoLastUpdatedTime);
+      if (difference.inMinutes < maxSyncTime) {
+        //Wenn der letzte Sync weniger als maxSyncTime Minuten her ist, dann abbrechen
+        throw "Last sync was ${difference.inMinutes} min ago, wait at least $maxSyncTime minutes, another sync might be running...";
+      }
+    }
+
+    await _updateInfoJson(
+      lastSyncTime: driveLastSyncTime ?? DateTime.now(),
+      syncing: true,
+      appVersion: lastSyncVersion,
+    );
 
     debugPrint(
       "driveLastSyncTime: $driveLastSyncTime | lastSyncVersion: $lastSyncVersion",
@@ -503,7 +535,7 @@ class OnlineSyncManager {
 
     Map<String, Future<bool> Function(SchoolFileBase, SchoolFileBase)>
         dirOrFileNameToWhatToDoWithFile = {
-      SaveManager.todoEventSaveName: (
+      SaveManager.todoEventSaveDirName: (
         SchoolFileBase localParent,
         SchoolFileBase remoteParent,
       ) async {
@@ -642,6 +674,11 @@ class OnlineSyncManager {
       }
     }
 
+    await _updateInfoJson(
+      lastSyncTime: DateTime.now(),
+      syncing: false,
+    );
+
     while (processedFilesCount < totalFilesCount) {
       updateProgress();
       await Future<void>.delayed(const Duration(milliseconds: 50));
@@ -649,22 +686,6 @@ class OnlineSyncManager {
 
     /// Upload
     // await addFolderContentToDrive(allFiles, "appDataFolder");
-    Map<String, dynamic> infoJson = {
-      lastSyncTimeKey: DateTime.now().toIso8601String(),
-      appVersionKey: await VersionManager().getVersionWithBuildnumberString(),
-      // "user": {
-      //   "name": _currUserData?.name,
-      //   "email": _currUserData?.email,
-      //   "id": _currUserData?.sub,
-      // },
-    };
-
-    // await uploadDriveFileFromBytes(
-    //   name: infoJsonFileName,
-    //   data: utf8.encode(jsonEncode(infoJson)),
-    //   id: null,
-    //   parentId: "appDataFolder",
-    // );
 
     return OnlineSyncState(
       state: OnlineSyncStateEnum.syncedSucessful,
@@ -686,6 +707,40 @@ class OnlineSyncManager {
     //   state: OnlineSyncStateEnum.syncedSucessful,
     //   progress: 100,
     // );
+  }
+
+  Future<drive.File> _updateInfoJson({
+    required DateTime lastSyncTime,
+    required bool syncing,
+    required String? existingFileId,
+    String? appVersion,
+  }) async {
+    Map<String, dynamic> infoJson = {
+      infoLastUpdatedKey: DateTime.now().toUtc().toIso8601String(),
+      syncingKey: syncing,
+      lastSyncTimeKey: lastSyncTime.toUtc().toIso8601String(),
+      appVersionKey: appVersion ??
+          await VersionManager().getVersionWithBuildnumberString(),
+      // TODO: könnte man noch hinzufügen..
+      // "user": {
+      //   "name": _currUserData?.name,
+      //   "email": _currUserData?.email,
+      //   "id": _currUserData?.sub,
+      // },
+    };
+
+    final response = await uploadDriveFileFromBytes(
+      name: infoJsonFileName,
+      data: utf8.encode(jsonEncode(infoJson)),
+      id: existingFileId,
+      parentId: "appDataFolder",
+    );
+
+    if (response == null) {
+      throw "info.json konnte nicht angepasst werden";
+    }
+
+    return response;
   }
 
   Future<void> _addFolderContentToDrive(

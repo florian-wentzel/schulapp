@@ -1010,15 +1010,19 @@ class SaveManager {
     }
   }
 
-  bool saveTodoEvents(List<TodoEvent> todoEvents) {
-    Directory eventDir = getTodosDir();
-    String pathToFile = join(eventDir.path, todoEventSaveName);
-    Map<String, dynamic> json = {
+  Map<String, dynamic> todoEventsToJson(List<TodoEvent> todoEvents) {
+    return {
       todosKey: List<Map<String, dynamic>>.generate(
         todoEvents.length,
         (index) => todoEvents[index].toJson(),
       ),
     };
+  }
+
+  bool saveTodoEvents(List<TodoEvent> todoEvents) {
+    Directory eventDir = getTodosDir();
+    String pathToFile = join(eventDir.path, todoEventSaveName);
+    Map<String, dynamic> json = todoEventsToJson(todoEvents);
 
     String fileContent = jsonEncode(json);
     try {
@@ -1266,11 +1270,7 @@ class SaveManager {
       contentGenerator: () {
         final events = TimetableManager().todoEvents;
 
-        List<Map<String, dynamic>> todos = [];
-
-        for (var event in events) {
-          todos.add(event.toJson());
-        }
+        Map<String, dynamic> todos = SaveManager().todoEventsToJson(events);
 
         return utf8.encode(jsonEncode(todos));
       },
