@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/google_drive/online_sync_state.dart';
+import 'package:schulapp/code_behind/mergable.dart';
 import 'package:schulapp/code_behind/online_sync_manager.dart';
+import 'package:schulapp/code_behind/utils.dart';
 
 class SyncButtonWidget extends StatefulWidget {
   const SyncButtonWidget({super.key});
@@ -82,6 +84,60 @@ class _SyncButtonWidgetState extends State<SyncButtonWidget>
           tooltip = "Sync was Successful";
           onPressed = () {
             syncManager.createOnlineBackup();
+          };
+        } else if (onlineSyncState.isWaitingForUserInput) {
+          icon = Icon(
+            Icons.warning_amber_rounded, //help_outline
+            color: Colors.orange,
+          );
+          tooltip = "User input required";
+          onPressed = () async {
+            //TODO: besseres UI
+            final decision = await showDialog(
+              context: context,
+              builder: (context) => AlertDialog(
+                title: Text("Merge Error"),
+                content: Text(onlineSyncState.errorMsg ?? "Unknown error"),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(MergeErrorSolution.keepLocal);
+                    },
+                    child: Text("Behalte Links"),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(MergeErrorSolution.keepBoth);
+                    },
+                    child: Text("Behalte Beide"),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(MergeErrorSolution.keepRemote);
+                    },
+                    child: Text("Behalte Rechts"),
+                  ),
+                ],
+              ),
+            );
+
+            if (decision == null) {
+              if (context.mounted) {
+                Utils.showInfo(
+                  context,
+                  msg:
+                      "Sync kann erst weitergehen, wenn du eine Auswahl triffst!",
+                  type: InfoType.warning,
+                  duration: Duration(seconds: 5),
+                );
+              }
+              return;
+            }
+
+            final completer = onlineSyncState.userInputCompleter;
+            if (completer != null && !completer.isCompleted) {
+              completer.complete(decision);
+            }
           };
         } else {
           //muss error sein

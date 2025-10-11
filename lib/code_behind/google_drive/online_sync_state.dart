@@ -1,8 +1,14 @@
+import 'dart:async';
+
+import 'package:schulapp/code_behind/mergable.dart';
+
 enum OnlineSyncStateEnum {
   idle,
   syncing,
   errorWhileSync,
   syncedSucessful,
+  // if there was an error while merging
+  waitingForUserInput,
 }
 
 class OnlineSyncState {
@@ -10,12 +16,15 @@ class OnlineSyncState {
 
   /// in percent
   final int? progress;
+  //Wenn Fehler auftreten oder wenn user input benötigt wird
   final String? errorMsg;
+  final Completer<MergeErrorSolution>? userInputCompleter;
 
   OnlineSyncState({
     required this.state,
     this.progress,
     this.errorMsg,
+    this.userInputCompleter,
   });
 
   bool get isIdle => state == OnlineSyncStateEnum.idle;
@@ -25,6 +34,9 @@ class OnlineSyncState {
   bool get isSyncedSucessful => state == OnlineSyncStateEnum.syncedSucessful;
 
   bool get isErrorWhileSync => state == OnlineSyncStateEnum.errorWhileSync;
+
+  bool get isWaitingForUserInput =>
+      state == OnlineSyncStateEnum.waitingForUserInput;
 }
 
 /*

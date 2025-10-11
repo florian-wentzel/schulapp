@@ -32,7 +32,7 @@ class SchoolFile extends SchoolFileBase {
     String name, {
     required FutureOr<Uint8List> Function() contentGenerator,
     required DateTime modifiedTime,
-    String? driveId,
+    required String? driveId,
   })  : _name = name,
         _contentGenerator = contentGenerator,
         _driveId = driveId,

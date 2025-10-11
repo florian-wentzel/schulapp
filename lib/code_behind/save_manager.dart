@@ -1258,6 +1258,7 @@ class SaveManager {
 
   //Könnte man auch für ein Backup verwenden,
   //wird alle Datein aus der App zurückeben
+  //es gibt lokale datein zurück, also enthalten die Datein keine Drive ID
   List<SchoolFileBase> getAllSchoolFiles() {
     SchoolDirectory todoEventDir = SchoolDirectory(
       todoEventSaveDirName,
@@ -1265,6 +1266,7 @@ class SaveManager {
 
     SchoolFile todoEventsFile = SchoolFile(
       todoEventSaveName,
+      driveId: null,
       modifiedTime: DateTime.now(), //TODO!!!
       // modifiedTime: TimetableManager().todoEvents.sort((a, b) => a.lastModifiedTime...,),
       contentGenerator: () {
@@ -1288,6 +1290,7 @@ class SaveManager {
         children: [
           SchoolFile(
             semesterFileName,
+            driveId: null,
             modifiedTime: DateTime.now(), // TODO!!
             contentGenerator: () {
               return utf8.encode(

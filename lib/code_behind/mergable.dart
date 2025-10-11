@@ -1,3 +1,27 @@
+// class MergeConflict {
+//   final String msg;
+
+//   MergeConflict({required this.msg});
+// }
+
+enum MergeErrorSolution {
+  keepLocal,
+  keepRemote,
+  keepBoth,
+}
+
+abstract class MergableClass<T> {
+  DateTime get lastModified;
+  String get uid; //UUID
+  T get parent;
+
+  //returns new merged object
+  //vielleicht null wenn beide gespeichert werden sollen
+  Future<List<T>> merge(
+    T other,
+    Future<MergeErrorSolution> Function(String errorMsg) onMergeError,
+  );
+}
 // import 'package:uuid/data.dart';
 // import 'package:uuid/rng.dart';
 // import 'package:uuid/uuid.dart';
@@ -93,16 +117,6 @@
 
 // //   List<MergeItem> getMergeItems();
 // // }
-
-abstract class MergableClass<T> {
-  DateTime get lastModified;
-  String get uid; //UUID
-  T get parent;
-
-  //returns new merged object
-  //vielleicht null wenn beide gespeichert werden sollen
-  T merge(T other);
-}
 
 // abstract class IMergableVar<T> {
 //   DateTime lastModified;

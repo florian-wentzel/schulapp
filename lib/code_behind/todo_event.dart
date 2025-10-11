@@ -212,9 +212,9 @@ class TodoEvent extends MergableClass<TodoEvent> {
     );
   }
 
-  TodoEvent copy() {
+  TodoEvent copy({bool withNewKey = false}) {
     return TodoEvent(
-      key: _key,
+      key: withNewKey ? null : _key,
       name: name,
       linkedSchoolNote: linkedSchoolNote,
       linkedSubjectName: linkedSubjectName,
@@ -358,7 +358,10 @@ class TodoEvent extends MergableClass<TodoEvent> {
   }
 
   @override
-  TodoEvent merge(TodoEvent other) {
+  Future<List<TodoEvent>> merge(
+    TodoEvent other,
+    Future<MergeErrorSolution> Function(String errorMsg) onMergeError,
+  ) async {
     if (other.key != key) {
       throw "Can only merge TodoEvents with the same key!";
     }
@@ -375,32 +378,41 @@ class TodoEvent extends MergableClass<TodoEvent> {
     if (lastSyncTime == null) {
       //never synced before, take the most recently modified one
       if (lastModified.isAfter(other.lastModified)) {
-        return this;
+        return [this];
       } else {
-        return other;
+        return [other];
       }
     }
 
     final thisChanged = lastModified.isAfter(lastSyncTime);
     final otherChanged = other.lastModified.isAfter(lastSyncTime);
+
     if (thisChanged && !otherChanged) {
-      return this;
+      return [this];
     } else if (!thisChanged && otherChanged) {
-      return other;
+      return [other];
     } else if (!thisChanged && !otherChanged) {
       //none changed
-      return this;
+      return [this];
     } else {
       //both changed
-// ConflictResolutionStrategy strategy = ConflictResolutionStrategy.lastWriteWins;
-//       switch (strategy) {
-//         case ConflictResolutionStrategy.lastWriteWins:
-      if (lastModified.isAfter(other.lastModified)) {
-        return this;
+      //Man könnte jetzt noch einzelne oft bearbeitete Membervars mit DateTimes anpassen um diese einzeln nach konflikten zu testen..
+      final solution = await onMergeError(
+        "Die Aufgabe $name und ${other.name} "
+        "wurden beide verändert. Welche Version soll beibehalten werden?",
+      );
+
+      if (solution == MergeErrorSolution.keepLocal) {
+        return [this];
+      } else if (solution == MergeErrorSolution.keepRemote) {
+        return [other];
       } else {
-        return other;
+        //keepBoth
+        return [
+          this,
+          other.copy(withNewKey: true),
+        ];
       }
-      // }
     }
   }
 }

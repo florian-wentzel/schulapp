@@ -8,6 +8,7 @@ import 'package:google_sign_in_all_platforms/google_sign_in_all_platforms.dart';
 import 'package:path/path.dart' as path;
 import 'package:schulapp/code_behind/google_auth_data.dart';
 import 'package:schulapp/code_behind/google_drive/online_sync_state.dart';
+import 'package:schulapp/code_behind/mergable.dart';
 import 'package:schulapp/code_behind/save_manager.dart';
 import 'package:schulapp/code_behind/school_file.dart';
 import 'package:schulapp/code_behind/settings.dart';
@@ -189,6 +190,8 @@ class OnlineSyncManager {
     final stream = Stream.value(data);
     if (id != null) {
       /// [driveFileId] not null means we want to update existing file
+      // Weil man so nicht die parents anpassen darf, muss man die hier noch rausnehmen
+      fileMetadata.parents = null;
       response = await driveApi.files.update(
         fileMetadata,
         id,
@@ -368,7 +371,7 @@ class OnlineSyncManager {
       throw "info.json file is not a SchoolFile";
     }
 
-    String? existingInfoFileId; //hier weitermachen
+    String? existingInfoFileId = infoFile?.driveId;
     DateTime? driveLastSyncTime;
     DateTime? infoLastUpdatedTime;
     String? lastSyncVersion;
@@ -412,11 +415,13 @@ class OnlineSyncManager {
       }
     }
 
-    await _updateInfoJson(
+    existingInfoFileId = (await _updateInfoJson(
       lastSyncTime: driveLastSyncTime ?? DateTime.now(),
       syncing: true,
       appVersion: lastSyncVersion,
-    );
+      existingFileId: existingInfoFileId,
+    ))
+        .id;
 
     debugPrint(
       "driveLastSyncTime: $driveLastSyncTime | lastSyncVersion: $lastSyncVersion",
@@ -431,7 +436,6 @@ class OnlineSyncManager {
 
     final allLocalFiles = SaveManager().getAllSchoolFiles();
 
-    /// Wir zählen dirs nicht mit
     int countFilesAndDirs(List<SchoolFileBase> files, int currCount) {
       for (var file in files) {
         if (file is SchoolFile) {
@@ -439,7 +443,7 @@ class OnlineSyncManager {
           continue;
         }
         if (file is SchoolDirectory) {
-          // currCount++; //weil wir dirs mitzählen
+          currCount++; //weil wir dirs mitzählen
           currCount += countFilesAndDirs(file.children, 0);
           continue;
         }
@@ -469,69 +473,17 @@ class OnlineSyncManager {
       );
     }
 
-    /// wenn meine Ändrungen neuer sind als die auf dem server
-    /// dann zuerst durch die lokalen datein gehen und alles hochladen was neuer ist
-    /// dann durch die datein auf dem server gehen und alles runterladen was neuer ist
-    ///
-    /// Jetzt gehe ich davon aus, dass lokale immer neuer sind als die auf dem servers
-    /// zum testen..
+    Future<MergeErrorSolution> onMergeError(String errorMsg) async {
+      Completer<MergeErrorSolution> userInputCompleter = Completer();
+      _setStreamState(
+        OnlineSyncState(
+          state: OnlineSyncStateEnum.waitingForUserInput,
+          userInputCompleter: userInputCompleter,
+        ),
+      );
 
-    // Future<void> mergeDirs(
-    //   SchoolDirectory localDir,
-    //   SchoolDirectory remoteDir,
-    //   Future<(SchoolFile?, bool upload)> Function(
-    //     SchoolFile localChild,
-    //     SchoolFile remoteChild,
-    //   )? mergeFilesCB,
-    // ) async {
-    //   for (var localChild in localDir.children) {
-    //     final remoteChild = remoteDir.getChildByName(localChild.name);
-
-    //     if (localChild is SchoolDirectory) {
-    //       if (remoteChild == null) {
-    //         //Upload local directory
-    //         continue;
-    //       }
-    //       if (remoteChild is! SchoolDirectory) {
-    //         throw "Remote is not a Dir ${remoteChild.name}";
-    //       }
-    //       await mergeDirs(localChild, remoteChild);
-    //       continue;
-    //     }
-    //     if (localChild is SchoolFile) {
-    //       if (remoteChild == null) {
-    //         //upload local file
-    //         updateProgress();
-    //         continue;
-    //       }
-    //       if (remoteChild is! SchoolFile) {
-    //         throw "Remote is not a File ${remoteChild.name}";
-    //       }
-
-    //       final (SchoolFile?, bool upload)? response = await mergeFilesCB?.call(
-    //         localChild,
-    //         remoteChild,
-    //       );
-
-    //       final mergedFile = response?.$1;
-    //       final uploadFile = response?.$2;
-
-    //       /// Serverfile is newer -> file not upload
-    //       /// Localfile is newer -> file and upload
-    //       /// Files need to be merged -> file and upload
-    //       /// Error while merging -> null
-    //       updateProgress();
-    //       continue;
-    //     }
-
-    //     assert(false, "Something went wrong, localChild is on File nor Dir");
-    //   }
-    // }
-
-    // mergeDirs(
-    //   SchoolDirectory("appDataFolder", children: allLocalFiles),
-    //   driveFilesDir,
-    // );
+      return userInputCompleter.future;
+    }
 
     Map<String, Future<bool> Function(SchoolFileBase, SchoolFileBase)>
         dirOrFileNameToWhatToDoWithFile = {
@@ -583,13 +535,13 @@ class OnlineSyncManager {
           //upload
           final parentId = remoteParent.driveId;
           if (parentId == null) throw "parentId not set";
-          await uploadDriveFileFromBytes(
+          final response = await uploadDriveFileFromBytes(
             name: localFile.name,
             data: await localFile.content,
             id: remoteFile?.driveId,
             parentId: parentId,
           );
-          return true;
+          return response != null;
         }
 
         //hier fängt das eigentliche mergen an
@@ -607,12 +559,42 @@ class OnlineSyncManager {
             continue;
           }
 
-          final mergedTodo = localTodo.merge(remoteTodo);
-          mergedTodos.add(mergedTodo);
+          final mergedTodo = await localTodo.merge(remoteTodo, onMergeError);
+          mergedTodos.addAll(mergedTodo);
         }
 
-        //upload merged
-        return true;
+        for (var remoteTodo in remoteTodos) {
+          final localTodo = localTodos.cast<TodoEvent?>().firstWhere(
+                (todoEvent) => todoEvent?.uid == remoteTodo.uid,
+                orElse: () => null,
+              );
+
+          //if todoEvent is deleted locally, then do not add it
+
+          if (localTodo == null) {
+            /// Wenn lokal das Todo nicht hat, dann einfach die server Version übernehmen
+            /// außer wenn es gelöscht wurde
+            mergedTodos.add(remoteTodo);
+            continue;
+          }
+        }
+
+        if (remoteFile == null) {
+          throw "Remote file is null";
+        }
+
+        final response = await uploadDriveFileFromBytes(
+          name: remoteFile.name,
+          data: utf8.encode(
+            jsonEncode(
+              SaveManager().todoEventsToJson(mergedTodos),
+            ),
+          ),
+          id: remoteFile.driveId,
+          parentId: remoteParent.driveId!,
+        );
+
+        return response != null;
       },
     };
 
@@ -677,6 +659,7 @@ class OnlineSyncManager {
     await _updateInfoJson(
       lastSyncTime: DateTime.now(),
       syncing: false,
+      existingFileId: existingInfoFileId,
     );
 
     while (processedFilesCount < totalFilesCount) {
@@ -757,6 +740,8 @@ class OnlineSyncManager {
         dir.name,
         parentId: parentId,
       );
+
+      updateProgress();
 
       final id = createdFolder?.id;
 
@@ -918,6 +903,7 @@ class OnlineSyncManager {
 
       final file = SchoolFile(
         name,
+        driveId: entry.value.id,
         contentGenerator: () async {
           final id = entry.value.id;
           if (id == null) {
