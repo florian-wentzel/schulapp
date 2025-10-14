@@ -546,36 +546,80 @@ class OnlineSyncManager {
 
         //hier fängt das eigentliche mergen an
 
-        List<TodoEvent> mergedTodos = [];
+        List<TodoEvent> remoteDeletedTodos = [];
+        List<TodoEvent> localDeletedTodos = [];
 
+        //id, todoevent
+        Map<String, TodoEvent> mergedTodosMap = {};
+
+        // Zuerst lokale mergen
         for (var localTodo in localTodos) {
           final remoteTodo = remoteTodos.cast<TodoEvent?>().firstWhere(
                 (todoEvent) => todoEvent?.uid == localTodo.uid,
               );
 
           if (remoteTodo == null) {
+            final deletedTodo =
+                remoteDeletedTodos.cast<TodoEvent?>().firstWhere(
+                      (element) => element?.uid == localTodo.uid,
+                      orElse: () => null,
+                    );
+            if (deletedTodo != null) {
+              // linkedSchoolNote soll wenn schoolnotes gesynced werden gelöscht werden
+              TimetableManager().removeTodoEvent(localTodo);
+              //wenn es vom Server gelöscht wurde, dann nicht wieder hinzufügen
+              localDeletedTodos.add(localTodo);
+              continue;
+            }
+
             /// Wenn server das Todo nicht hat, dann einfach lokale Version hochladen
-            mergedTodos.add(localTodo);
+            mergedTodosMap[localTodo.uid] = localTodo;
             continue;
           }
 
           final mergedTodo = await localTodo.merge(remoteTodo, onMergeError);
-          mergedTodos.addAll(mergedTodo);
+          for (var todo in mergedTodo) {
+            mergedTodosMap[todo.uid] = todo;
+          }
         }
 
+        // anschließend remotes mergen
         for (var remoteTodo in remoteTodos) {
           final localTodo = localTodos.cast<TodoEvent?>().firstWhere(
                 (todoEvent) => todoEvent?.uid == remoteTodo.uid,
                 orElse: () => null,
               );
 
-          //if todoEvent is deleted locally, then do not add it
-
+          /// Wenn lokal das Todo nicht hat, dann einfach die server Version übernehmen
+          /// außer wenn es gelöscht wurde
           if (localTodo == null) {
-            /// Wenn lokal das Todo nicht hat, dann einfach die server Version übernehmen
-            /// außer wenn es gelöscht wurde
-            mergedTodos.add(remoteTodo);
+            final deletedTodo =
+                remoteDeletedTodos.cast<TodoEvent?>().firstWhere(
+                      (element) => element?.uid == remoteTodo.uid,
+                      orElse: () => null,
+                    );
+
+            if (deletedTodo != null) {
+              remoteDeletedTodos.add(deletedTodo);
+              continue;
+            }
+
+            if (!mergedTodosMap.containsKey(remoteTodo.uid)) {
+              mergedTodosMap[remoteTodo.uid] = remoteTodo;
+            } else {
+              print("Todo gab es schon! ${remoteTodo.name}");
+            }
             continue;
+          }
+
+          //Wenn die Aufgabe bereits gemerged wurde, dann skippen
+          if (mergedTodosMap.containsKey(remoteTodo.uid)) {
+            continue;
+          }
+
+          final mergedTodo = await localTodo.merge(remoteTodo, onMergeError);
+          for (var todo in mergedTodo) {
+            mergedTodosMap[todo.uid] = todo;
           }
         }
 
@@ -583,11 +627,15 @@ class OnlineSyncManager {
           throw "Remote file is null";
         }
 
+        final mergedTodoEventsList = mergedTodosMap.values.toList();
+
+        TimetableManager().setTodoEvents(mergedTodoEventsList);
+
         final response = await uploadDriveFileFromBytes(
           name: remoteFile.name,
           data: utf8.encode(
             jsonEncode(
-              SaveManager().todoEventsToJson(mergedTodos),
+              SaveManager().todoEventsToJson(mergedTodoEventsList),
             ),
           ),
           id: remoteFile.driveId,

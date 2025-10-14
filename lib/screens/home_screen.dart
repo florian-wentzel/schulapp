@@ -40,6 +40,7 @@ import 'package:schulapp/screens/vertretungsplan_paul_dessau_screen.dart';
 import 'package:schulapp/widgets/drag_down_container.dart';
 import 'package:schulapp/code_behind/timetable_util_functions.dart';
 import 'package:schulapp/widgets/navigation_bar_drawer.dart';
+import 'package:schulapp/widgets/sync_button_widget.dart';
 import 'package:schulapp/widgets/task/todo_event_list_item_widget.dart';
 import 'package:schulapp/code_behind/todo_event_util_functions.dart';
 import 'package:schulapp/widgets/tutorial_overlay.dart';
@@ -139,6 +140,7 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: Text(widget.title),
         actions: [
+          SyncButtonWidget(),
           ListenableBuilder(
             listenable: _dragCalendarDownController,
             builder: (context, child) {

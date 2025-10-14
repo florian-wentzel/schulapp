@@ -45,6 +45,16 @@ class TimetableManager {
     return _todoEvents!;
   }
 
+  void setTodoEvents(List<TodoEvent> newEvents) {
+    //TODO
+    //alle die es bereits gibt, checken ob sich was geändert hat, wenn ja dann neue Benachrichtigung
+    //wenn nicht dann einfach übernehmen, alle anderen müssen halt hinzugefügt werden
+    //erstmal nur übernehmen
+    _todoEvents = newEvents;
+    SaveManager().saveTodoEvents(todoEvents);
+    //notifyListeners dass was passiert ist
+  }
+
   Future<void> setTodoEventsNotifications() async {
     for (int i = 0; i < todoEvents.length; i++) {
       await todoEvents[i].cancleNotification();
