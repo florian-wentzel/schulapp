@@ -39,7 +39,9 @@ class OnlineSyncManager {
         .onError(_handleAuthenticationError);
     _googleSignIn.silentSignIn();
     _setStreamState(_currentState);
-    _lastSyncTime = SaveManager().loadLastOnlineSyncTime();
+    final lastSyncTimeAndTry = SaveManager().loadLastOnlineSyncTimeAndTry();
+    _lastSyncTime = lastSyncTimeAndTry.$1;
+    _lastSyncTryTime = lastSyncTimeAndTry.$2;
   }
 
   final GoogleSignIn _googleSignIn = GoogleSignIn(
@@ -58,7 +60,14 @@ class OnlineSyncManager {
   DateTime? get lastSyncTime => _lastSyncTime;
   set lastSyncTime(DateTime? time) {
     _lastSyncTime = time;
-    SaveManager().saveLastOnlineSyncTime(time);
+    SaveManager().saveLastOnlineSyncTimeAndTry(time, lastSyncTryTime);
+  }
+
+  DateTime? _lastSyncTryTime;
+  DateTime? get lastSyncTryTime => _lastSyncTryTime;
+  set lastSyncTryTime(DateTime? time) {
+    _lastSyncTryTime = time;
+    SaveManager().saveLastOnlineSyncTimeAndTry(lastSyncTime, time);
   }
 
   drive.DriveApi? _driveClient;
@@ -652,21 +661,28 @@ class OnlineSyncManager {
       }
     }
 
+    //ist bereits jemand am syncen
     if (isSyncing && infoLastUpdatedTime != null) {
       final difference = DateTime.now().difference(infoLastUpdatedTime);
-      if (difference.inMinutes < maxSyncTime) {
+      //Wenn nicht 5 min nach dem letzten sync vergangen sind warten..
+      //Außer: man selbst hat den sync eingeleitet, dann hat man die selbe Zeit also kann man fortfahren
+      if (difference.inMinutes < maxSyncTime &&
+          infoLastUpdatedTime != lastSyncTryTime) {
         //Wenn der letzte Sync weniger als maxSyncTime Minuten her ist, dann abbrechen
         throw "Last sync was ${difference.inMinutes} min ago, wait at least $maxSyncTime minutes, another sync might be running...";
       }
     }
 
-    existingInfoFileId = (await _updateInfoJson(
+    final updateInfoJsonReturn = await _updateInfoJson(
       lastSyncTime: driveLastSyncTime ?? DateTime.now(),
       syncing: true,
       appVersion: lastSyncVersion,
       existingFileId: existingInfoFileId,
-    ))
-        .id;
+    );
+
+    existingInfoFileId = updateInfoJsonReturn.$1.id;
+
+    lastSyncTryTime = updateInfoJsonReturn.$2;
 
     debugPrint(
       "driveLastSyncTime: $driveLastSyncTime | lastSyncVersion: $lastSyncVersion",
@@ -801,14 +817,15 @@ class OnlineSyncManager {
     );
   }
 
-  Future<drive.File> _updateInfoJson({
+  Future<(drive.File, DateTime)> _updateInfoJson({
     required DateTime lastSyncTime,
     required bool syncing,
     required String? existingFileId,
     String? appVersion,
   }) async {
+    final infoLastUpdatedTime = DateTime.now().toUtc();
     Map<String, dynamic> infoJson = {
-      infoLastUpdatedKey: DateTime.now().toUtc().toIso8601String(),
+      infoLastUpdatedKey: infoLastUpdatedTime.toIso8601String(),
       syncingKey: syncing,
       lastSyncTimeKey: lastSyncTime.toUtc().toIso8601String(),
       appVersionKey: appVersion ??
@@ -832,7 +849,7 @@ class OnlineSyncManager {
       throw "info.json konnte nicht angepasst werden";
     }
 
-    return response;
+    return (response, infoLastUpdatedTime);
   }
 
   Future<void> _addFolderContentToDrive(

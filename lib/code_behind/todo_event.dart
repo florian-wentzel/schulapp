@@ -416,6 +416,25 @@ class TodoEvent extends MergableClass<TodoEvent> {
       return [this];
     } else {
       //both changed
+
+      //bevor man fragt welche behalten werden soll, vielleicht wurden ja beide gleich verändert?
+      if (name == other.name &&
+          linkedSubjectName == other.linkedSubjectName &&
+          linkedSchoolNote == other.linkedSchoolNote &&
+          isCustomEvent == other.isCustomEvent &&
+          saveOnlineCode == other.saveOnlineCode &&
+          endTime == other.endTime &&
+          type == other.type &&
+          desciption == other.desciption &&
+          finished == other.finished) {
+        //weil beide doch gleich sind, einfach das neuere zurückgeben..
+        if (lastModified.isAfter(other.lastModified)) {
+          return [this];
+        } else {
+          return [other];
+        }
+      }
+
       //Man könnte jetzt noch einzelne oft bearbeitete Membervars mit DateTimes anpassen um diese einzeln nach konflikten zu testen..
       final solution = await onMergeError(
         "Die Aufgabe (lokal) $linkedSubjectName $name ${typeToString(type)} und\n"

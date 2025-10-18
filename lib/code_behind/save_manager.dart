@@ -57,6 +57,8 @@ class SaveManager {
   static const String todosKey = "todos";
   static const String itemsKey = "items";
   static const String notificationsKey = "notifications";
+  static const String lastSyncTimeKey = "lastSyncTime";
+  static const String lastSyncTimeTryKey = "lastSyncTimeTry";
 
   Directory? applicationDocumentsDirectory;
 
@@ -1278,7 +1280,7 @@ class SaveManager {
     }
   }
 
-  DateTime? loadLastOnlineSyncTime() {
+  (DateTime?, DateTime?) loadLastOnlineSyncTimeAndTry() {
     try {
       final file = File(
         join(
@@ -1288,19 +1290,29 @@ class SaveManager {
       );
 
       if (!file.existsSync()) {
-        return null;
+        return (null, null);
       }
 
       final content = file.readAsStringSync();
 
-      return DateTime.tryParse(content);
+      Map<String, dynamic> jsonMap = jsonDecode(content);
+
+      final lastOnlineSyncTime = DateTime.tryParse(
+        jsonMap[lastSyncTimeKey] ?? "",
+      );
+      final lastOnlineSyncTryTime = DateTime.tryParse(
+        jsonMap[lastSyncTimeTryKey] ?? "",
+      );
+
+      return (lastOnlineSyncTime, lastOnlineSyncTryTime);
     } catch (e) {
       debugPrint("Error loading last online sync time: $e");
-      return null;
+      return (null, null);
     }
   }
 
-  void saveLastOnlineSyncTime(DateTime? time) {
+  void saveLastOnlineSyncTimeAndTry(
+      DateTime? lastSyncTime, DateTime? lastSyncTimeTry) {
     try {
       final file = File(
         join(
@@ -1309,12 +1321,14 @@ class SaveManager {
         ),
       );
 
-      if (time == null) {
-        file.deleteSync();
-        return;
-      }
+      Map<String, dynamic> jsonMap = {
+        lastSyncTimeKey: lastSyncTime?.toIso8601String(),
+        lastSyncTimeTryKey: lastSyncTimeTry?.toIso8601String(),
+      };
 
-      file.writeAsStringSync(time.toIso8601String());
+      file.writeAsStringSync(
+        jsonEncode(jsonMap),
+      );
     } catch (e) {
       debugPrint("Error saving last online sync time: $e");
     }
