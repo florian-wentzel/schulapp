@@ -49,13 +49,28 @@ class TodoEvent extends MergableClass<TodoEvent> {
   final String? linkedSchoolNote;
   final bool isCustomEvent;
 
-  String? saveOnlineCode;
+  String? _saveOnlineCode;
+  String? get saveOnlineCode => _saveOnlineCode;
+  set saveOnlineCode(String? value) {
+    _saveOnlineCode = value;
+    _lastModified = DateTime.now().toUtc();
+  }
 
-  DateTime? endTime;
-  TodoType type;
+  final DateTime? _endTime;
+  DateTime? get endTime => _endTime;
 
-  String desciption;
-  bool finished;
+  final TodoType _type;
+  TodoType get type => _type;
+
+  final String _desciption;
+  String get desciption => _desciption;
+
+  bool _finished;
+  bool get finished => _finished;
+  set finished(bool value) {
+    _finished = value;
+    _lastModified = DateTime.now().toUtc();
+  }
 
   static const int maxDescriptionLength = 150;
 
@@ -64,14 +79,19 @@ class TodoEvent extends MergableClass<TodoEvent> {
     required this.name,
     required this.linkedSubjectName,
     required this.linkedSchoolNote,
-    required this.endTime,
-    required this.type,
-    required this.desciption,
-    required this.finished,
+    required DateTime? endTime,
+    required TodoType type,
+    required String desciption,
+    required bool finished,
     required this.isCustomEvent,
-    this.saveOnlineCode,
+    String? saveOnlineCode,
     DateTime? lastModified,
-  }) : _lastModified = lastModified?.toUtc() ?? DateTime.now().toUtc() {
+  })  : _desciption = desciption,
+        _finished = finished,
+        _saveOnlineCode = saveOnlineCode,
+        _endTime = endTime,
+        _type = type,
+        _lastModified = lastModified?.toUtc() ?? DateTime.now().toUtc() {
     key ??= UniqueIdGenerator.createUniqueId();
 
     if (key > NotificationManager.maxIdNum) {
@@ -398,7 +418,8 @@ class TodoEvent extends MergableClass<TodoEvent> {
       //both changed
       //Man könnte jetzt noch einzelne oft bearbeitete Membervars mit DateTimes anpassen um diese einzeln nach konflikten zu testen..
       final solution = await onMergeError(
-        "Die Aufgabe $name und ${other.name} "
+        "Die Aufgabe (lokal) $linkedSubjectName $name ${typeToString(type)} und\n"
+        "(remote) ${other.linkedSubjectName} ${other.name} ${typeToString(other.type)}\n"
         "wurden beide verändert. Welche Version soll beibehalten werden?",
       );
 
@@ -415,6 +436,8 @@ class TodoEvent extends MergableClass<TodoEvent> {
       }
     }
   }
+
+  String toDeletedString() => "${uid}_$key";
 }
 
 enum TodoType {

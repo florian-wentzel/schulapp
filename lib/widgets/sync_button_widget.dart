@@ -103,7 +103,7 @@ class _SyncButtonWidgetState extends State<SyncButtonWidget>
                     onPressed: () {
                       Navigator.of(context).pop(MergeErrorSolution.keepLocal);
                     },
-                    child: Text("Behalte Links"),
+                    child: Text("Behalte Lokal"),
                   ),
                   TextButton(
                     onPressed: () {
@@ -115,7 +115,7 @@ class _SyncButtonWidgetState extends State<SyncButtonWidget>
                     onPressed: () {
                       Navigator.of(context).pop(MergeErrorSolution.keepRemote);
                     },
-                    child: Text("Behalte Rechts"),
+                    child: Text("Behalte Remote"),
                   ),
                 ],
               ),

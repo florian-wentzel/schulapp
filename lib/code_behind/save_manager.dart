@@ -36,6 +36,8 @@ class SaveManager {
   static const String schoolNoteAddedFilesSaveDirName = "files";
   static const String abiCalculatorFileName = "abi-calculator.json";
   static const String lessonRemindersFileName = "lesson-reminders.json";
+  static const String onlineSyncManagerFile = "online_sync_manager.json";
+
   //for backups
   static const String tempDirName = "temp";
   static const String exportDirName = "exports";
@@ -44,6 +46,7 @@ class SaveManager {
   static const String todoEventSaveDirName = "todos";
   static const String finishedEventSaveName = "finsihedTodos.json";
   static const String todoEventSaveName = "todos.json";
+  static const String deletedTodoEventSaveName = "deletedTodos.json";
   static const String timetableFileName = "timetable.json";
   static const String todoEventFileName = "todoEvent.json";
   static const String schoolNoteFileName = "note.json";
@@ -1019,12 +1022,34 @@ class SaveManager {
     };
   }
 
+  Map<String, dynamic> deletedTodoEventsToJson(List<String> deletedTodoEvents) {
+    return {
+      todosKey: deletedTodoEvents,
+    };
+  }
+
   bool saveTodoEvents(List<TodoEvent> todoEvents) {
     Directory eventDir = getTodosDir();
     String pathToFile = join(eventDir.path, todoEventSaveName);
     Map<String, dynamic> json = todoEventsToJson(todoEvents);
 
     String fileContent = jsonEncode(json);
+    try {
+      File(pathToFile).writeAsStringSync(fileContent);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  bool saveDeletedTodoEvents(List<String> deletedTodoEvents) {
+    Directory eventDir = getTodosDir();
+    String pathToFile = join(eventDir.path, deletedTodoEventSaveName);
+
+    Map<String, dynamic> json = deletedTodoEventsToJson(deletedTodoEvents);
+
+    String fileContent = jsonEncode(json);
+
     try {
       File(pathToFile).writeAsStringSync(fileContent);
       return true;
@@ -1040,6 +1065,31 @@ class SaveManager {
       String fileContent = File(pathToFile).readAsStringSync();
       Map<String, dynamic> json = jsonDecode(fileContent);
       return todoEventsFromJson(json);
+    } catch (e) {
+      return [];
+    }
+  }
+
+  List<String> loadAllDeletedTodoEvents() {
+    Directory eventDir = getTodosDir();
+    String pathToFile = join(eventDir.path, deletedTodoEventSaveName);
+    try {
+      String fileContent = File(pathToFile).readAsStringSync();
+      Map<String, dynamic> json = jsonDecode(fileContent);
+      return deletedTodoEventsFromJson(json);
+    } catch (e) {
+      return [];
+    }
+  }
+
+  List<String> deletedTodoEventsFromJson(Map<String, dynamic> json) {
+    try {
+      List<dynamic> todos = (json[todosKey] as List).cast();
+
+      return List.generate(
+        todos.length,
+        (index) => todos[index] as String,
+      );
     } catch (e) {
       return [];
     }
@@ -1225,6 +1275,48 @@ class SaveManager {
       file.writeAsStringSync(jsonString);
     } catch (e) {
       debugPrint("Error saving lesson reminders: $e");
+    }
+  }
+
+  DateTime? loadLastOnlineSyncTime() {
+    try {
+      final file = File(
+        join(
+          getMainSaveDir().path,
+          onlineSyncManagerFile,
+        ),
+      );
+
+      if (!file.existsSync()) {
+        return null;
+      }
+
+      final content = file.readAsStringSync();
+
+      return DateTime.tryParse(content);
+    } catch (e) {
+      debugPrint("Error loading last online sync time: $e");
+      return null;
+    }
+  }
+
+  void saveLastOnlineSyncTime(DateTime? time) {
+    try {
+      final file = File(
+        join(
+          getMainSaveDir().path,
+          onlineSyncManagerFile,
+        ),
+      );
+
+      if (time == null) {
+        file.deleteSync();
+        return;
+      }
+
+      file.writeAsStringSync(time.toIso8601String());
+    } catch (e) {
+      debugPrint("Error saving last online sync time: $e");
     }
   }
 

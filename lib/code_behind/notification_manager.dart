@@ -114,10 +114,13 @@ class NotificationManager {
       guid: '4a9f4a94-8f00-4cc5-a82d-20187c1a4240',
     );
 
+    const initializationSettingsLinux = LinuxInitializationSettings(defaultActionName: "Schulapp",);
+
     var initializationSettings = const InitializationSettings(
       android: initializationSettingsAndroid,
       iOS: initializationSettingsIOS,
       windows: initializationSettingsWindows,
+      linux: initializationSettingsLinux,
     );
 
     bool? success = await notificationsPlugin.initialize(

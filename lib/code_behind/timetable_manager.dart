@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/school_notes_manager.dart';
 import 'package:schulapp/code_behind/special_lesson.dart';
 import 'package:schulapp/code_behind/todo_event.dart';
@@ -7,7 +8,7 @@ import 'package:schulapp/code_behind/timetable.dart';
 import 'package:schulapp/code_behind/save_manager.dart';
 
 ///Contains, timetables, semesters, todoEvents and settings
-class TimetableManager {
+class TimetableManager extends ChangeNotifier {
   static final TimetableManager _instance =
       TimetableManager._privateConstructor();
   TimetableManager._privateConstructor();
@@ -20,6 +21,8 @@ class TimetableManager {
   List<Timetable>? _timetables;
   List<SchoolSemester>? _semesters;
   List<TodoEvent>? _todoEvents;
+  //Speicher keys von gelöschten TodoEvents.toDeletedString()
+  List<String>? _deletedTodoEventKeys;
   Settings? _settings;
 
   List<Timetable> get timetables {
@@ -45,6 +48,35 @@ class TimetableManager {
     return _todoEvents!;
   }
 
+  List<String> get deletedTodoEvents {
+    _deletedTodoEventKeys ??= SaveManager().loadAllDeletedTodoEvents();
+    return _deletedTodoEventKeys!;
+  }
+
+  void addDeletedTodoEvent(
+    TodoEvent todoEvent, {
+    bool saveAfterRemove = true,
+  }) {
+    addDeletedTodoEventStr(
+      todoEvent.toDeletedString(),
+      saveAfterRemove: saveAfterRemove,
+    );
+  }
+
+  void addDeletedTodoEventStr(
+    String todoEventKey, {
+    bool saveAfterRemove = true,
+  }) {
+    deletedTodoEvents.add(todoEventKey);
+    if (saveAfterRemove) {
+      saveDeletedTodoEvents();
+    }
+  }
+
+  void saveDeletedTodoEvents() {
+    SaveManager().saveDeletedTodoEvents(deletedTodoEvents);
+  }
+
   void setTodoEvents(List<TodoEvent> newEvents) {
     //TODO
     //alle die es bereits gibt, checken ob sich was geändert hat, wenn ja dann neue Benachrichtigung
@@ -52,7 +84,7 @@ class TimetableManager {
     //erstmal nur übernehmen
     _todoEvents = newEvents;
     SaveManager().saveTodoEvents(todoEvents);
-    //notifyListeners dass was passiert ist
+    notifyListeners();
   }
 
   Future<void> setTodoEventsNotifications() async {
@@ -356,7 +388,11 @@ class TimetableManager {
     SaveManager().saveTodoEvents(todoEvents);
   }
 
-  bool removeTodoEvent(TodoEvent event, {bool deleteLinkedSchoolNote = false}) {
+  bool removeTodoEvent(
+    TodoEvent event, {
+    bool deleteLinkedSchoolNote = false,
+    bool saveAfterRemove = true,
+  }) {
     event.cancleNotification();
 
     if (deleteLinkedSchoolNote) {
@@ -364,6 +400,7 @@ class TimetableManager {
           SchoolNotesManager().getSchoolNoteBySaveName(event.linkedSchoolNote);
 
       if (note != null) {
+        // TODO saveAfterRemove hinzufügen
         SchoolNotesManager().removeSchoolNote(note);
       }
     }
@@ -381,7 +418,15 @@ class TimetableManager {
       }
     }
 
-    return SaveManager().saveTodoEvents(todoEvents);
+    addDeletedTodoEvent(
+      event,
+      saveAfterRemove: saveAfterRemove,
+    );
+
+    if (saveAfterRemove) {
+      return SaveManager().saveTodoEvents(todoEvents);
+    }
+    return true;
   }
 
   bool removeSemesterAt(int index) {

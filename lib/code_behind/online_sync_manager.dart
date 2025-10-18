@@ -11,7 +11,6 @@ import 'package:schulapp/code_behind/google_drive/online_sync_state.dart';
 import 'package:schulapp/code_behind/mergable.dart';
 import 'package:schulapp/code_behind/save_manager.dart';
 import 'package:schulapp/code_behind/school_file.dart';
-import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/timetable_manager.dart';
 import 'package:schulapp/code_behind/todo_event.dart';
 import 'package:schulapp/code_behind/version_manager.dart';
@@ -40,8 +39,7 @@ class OnlineSyncManager {
         .onError(_handleAuthenticationError);
     _googleSignIn.silentSignIn();
     _setStreamState(_currentState);
-    _lastSyncTime =
-        TimetableManager().settings.getVar(Settings.lastSyncTimeKey);
+    _lastSyncTime = SaveManager().loadLastOnlineSyncTime();
   }
 
   final GoogleSignIn _googleSignIn = GoogleSignIn(
@@ -58,6 +56,10 @@ class OnlineSyncManager {
 
   DateTime? _lastSyncTime;
   DateTime? get lastSyncTime => _lastSyncTime;
+  set lastSyncTime(DateTime? time) {
+    _lastSyncTime = time;
+    SaveManager().saveLastOnlineSyncTime(time);
+  }
 
   drive.DriveApi? _driveClient;
   GoogleUserData? _currUserData;
@@ -339,6 +341,233 @@ class OnlineSyncManager {
 
   static const _folderMimeType = "application/vnd.google-apps.folder";
 
+  Future<MergeErrorSolution> _onMergeError(String errorMsg) async {
+    Completer<MergeErrorSolution> userInputCompleter = Completer();
+    _setStreamState(
+      OnlineSyncState(
+        state: OnlineSyncStateEnum.waitingForUserInput,
+        userInputCompleter: userInputCompleter,
+        errorMsg: errorMsg,
+      ),
+    );
+
+    return userInputCompleter.future;
+  }
+
+  Future<bool> _syncTodoEventDirs(
+    SchoolFileBase localParent,
+    SchoolFileBase remoteParent,
+  ) async {
+    if (localParent is! SchoolDirectory) {
+      throw "local is not SchoolDir";
+    }
+    if (remoteParent is! SchoolDirectory) {
+      throw "remote is not SchoolDir";
+    }
+
+    final localChildren = localParent.children;
+    final remoteChildren = remoteParent.children;
+
+    if (localChildren.length > 2) {
+      throw "Local TodoEvent has more than two children: $localChildren";
+    }
+    if (remoteChildren.length > 2) {
+      throw "Remote TodoEvent has more than two children: $remoteChildren";
+    }
+
+    final remoteTodoEventFile = remoteParent.getChildByName(
+      SaveManager.todoEventSaveName,
+    );
+    final remoteDeletedTodoEventFile = remoteParent.getChildByName(
+      SaveManager.deletedTodoEventSaveName,
+    );
+
+    final localTodoEventsFile = localParent.getChildByName(
+      SaveManager.todoEventSaveName,
+    );
+    final localDeletedTodoEventsFile = localParent.getChildByName(
+      SaveManager.deletedTodoEventSaveName,
+    );
+
+    if (localTodoEventsFile == null) {
+      throw "Local todoevent file isnt there!";
+    }
+    if (localTodoEventsFile is! SchoolFile) {
+      throw "local todoevent file is not a file?!";
+    }
+    if (localDeletedTodoEventsFile is! SchoolFile?) {
+      throw "local deletedTodoEvent file is not a file?!";
+    }
+    if (remoteTodoEventFile is! SchoolFile?) {
+      throw "remote todoevent file is not a file?!";
+    }
+    if (remoteDeletedTodoEventFile is! SchoolFile?) {
+      throw "remote deletedTodoEvent file is not a file?!";
+    }
+
+    final remoteTodoEventsMap = await remoteTodoEventFile?.getContentAsJson();
+
+    List<TodoEvent>? remoteTodos = remoteTodoEventsMap == null
+        ? []
+        : SaveManager().todoEventsFromJson(
+            remoteTodoEventsMap,
+          );
+
+    //Weil die create Content funktion die gleichen daten nimmt, wäre es unnötig das hier dann zu parsen..
+    List<TodoEvent> localTodos = TimetableManager().todoEvents;
+
+    final remoteDeletedTodoEventsMap =
+        await remoteDeletedTodoEventFile?.getContentAsJson();
+
+    final List<String> remoteDeletedTodos = remoteDeletedTodoEventsMap == null
+        ? []
+        : SaveManager().deletedTodoEventsFromJson(
+            remoteDeletedTodoEventsMap,
+          );
+
+    // if (remoteTodos.isEmpty && remoteDeletedTodos.isEmpty) {
+    //   //upload
+    //   final parentId = remoteParent.driveId;
+    //   if (parentId == null) throw "parentId not set";
+    //   final response = await uploadDriveFileFromBytes(
+    //     name: localTodoEventsFile.name,
+    //     data: await localTodoEventsFile.content,
+    //     id: remoteTodoEventFile?.driveId,
+    //     parentId: parentId,
+    //   );
+    //   return response != null;
+    // }
+
+    //hier fängt das eigentliche mergen an
+
+    //id, todoevent
+    Map<String, TodoEvent> mergedTodosMap = {};
+
+    List<TodoEvent> todoEventsToDelete = [];
+
+    // Zuerst lokale mergen
+    for (var localTodo in localTodos) {
+      final remoteTodo = remoteTodos.cast<TodoEvent?>().firstWhere(
+            (todoEvent) => todoEvent?.uid == localTodo.uid,
+            orElse: () => null,
+          );
+
+      if (remoteTodo == null) {
+        final deletedTodo = remoteDeletedTodos.cast<String?>().firstWhere(
+              (element) => element == localTodo.toDeletedString(),
+              orElse: () => null,
+            );
+        if (deletedTodo != null) {
+          // linkedSchoolNote soll wenn schoolnotes gesynced werden gelöscht werden
+          // weil wir gerade durch die localTodos iterieren, können wir sie erst nach der schleife entfernen..
+          todoEventsToDelete.add(localTodo);
+
+          //wenn es vom Server gelöscht wurde, dann nicht wieder hinzufügen
+          //Falls man später die uid doch ändert, dann so abspeichern, damit man sachen nicht kaputt macht..
+          // localDeletedTodos.add(localTodo.toDeletedString());
+          continue;
+        }
+
+        /// Wenn server das Todo nicht hat, dann einfach lokale Version hochladen
+        mergedTodosMap[localTodo.uid] = localTodo;
+        continue;
+      }
+
+      final mergedTodo = await localTodo.merge(remoteTodo, _onMergeError);
+
+      //hier nochmal sagen, dass es noch bzw. wieder synctonisiert
+
+      for (var todo in mergedTodo) {
+        mergedTodosMap[todo.uid] = todo;
+      }
+    }
+
+    // nun können die lokalen TodoEvents welche auf dem server schon gelöscht worden sind, löschen
+
+    for (var todo in todoEventsToDelete) {
+      TimetableManager().removeTodoEvent(
+        todo,
+        saveAfterRemove: false,
+      );
+    }
+
+    // anschließend remotes mergen
+    for (var remoteTodo in remoteTodos) {
+      final localTodo = localTodos.cast<TodoEvent?>().firstWhere(
+            (todoEvent) => todoEvent?.uid == remoteTodo.uid,
+            orElse: () => null,
+          );
+
+      /// Wenn lokal das Todo nicht hat, dann einfach die server Version übernehmen
+      /// außer wenn es gelöscht wurde
+      if (localTodo == null) {
+        final localDeletedTodos = TimetableManager().deletedTodoEvents;
+
+        final deletedTodo = localDeletedTodos.cast<String?>().firstWhere(
+              (element) => element == remoteTodo.toDeletedString(),
+              orElse: () => null,
+            );
+
+        if (deletedTodo != null) {
+          remoteDeletedTodos.add(deletedTodo);
+          continue;
+        }
+
+        if (!mergedTodosMap.containsKey(remoteTodo.uid)) {
+          mergedTodosMap[remoteTodo.uid] = remoteTodo;
+        }
+        continue;
+      }
+
+      //Wenn die Aufgabe bereits gemerged wurde, dann skippen
+      if (mergedTodosMap.containsKey(remoteTodo.uid)) {
+        continue;
+      }
+
+      final mergedTodo = await localTodo.merge(remoteTodo, _onMergeError);
+
+      //hier nochmal sagen, dass es noch bzw. wieder synctonisiert
+
+      for (var todo in mergedTodo) {
+        mergedTodosMap[todo.uid] = todo;
+      }
+    }
+
+    if (remoteTodoEventFile == null) {
+      throw "Remote file is null";
+    }
+
+    final mergedTodoEventsList = mergedTodosMap.values.toList();
+
+    TimetableManager().setTodoEvents(mergedTodoEventsList);
+    TimetableManager().saveDeletedTodoEvents();
+
+    final response = await uploadDriveFileFromBytes(
+      name: remoteTodoEventFile.name,
+      data: utf8.encode(
+        jsonEncode(
+          SaveManager().todoEventsToJson(mergedTodoEventsList),
+        ),
+      ),
+      id: remoteTodoEventFile.driveId,
+      parentId: remoteParent.driveId!,
+    );
+
+    final responseDeleted = await uploadDriveFileFromBytes(
+      name: remoteDeletedTodoEventFile?.name ??
+          SaveManager.deletedTodoEventSaveName,
+      data: utf8.encode(
+        jsonEncode(
+          SaveManager().deletedTodoEventsToJson(remoteDeletedTodos),
+        ),
+      ),
+      id: remoteDeletedTodoEventFile?.driveId,
+      parentId: remoteParent.driveId!,
+    );
+
+    return response != null && responseDeleted != null;
+  }
+
   Future<OnlineSyncState> _createOnlineBackupFutureImpl() async {
     _setStreamState(
       OnlineSyncState(
@@ -473,177 +702,9 @@ class OnlineSyncManager {
       );
     }
 
-    Future<MergeErrorSolution> onMergeError(String errorMsg) async {
-      Completer<MergeErrorSolution> userInputCompleter = Completer();
-      _setStreamState(
-        OnlineSyncState(
-          state: OnlineSyncStateEnum.waitingForUserInput,
-          userInputCompleter: userInputCompleter,
-        ),
-      );
-
-      return userInputCompleter.future;
-    }
-
     Map<String, Future<bool> Function(SchoolFileBase, SchoolFileBase)>
         dirOrFileNameToWhatToDoWithFile = {
-      SaveManager.todoEventSaveDirName: (
-        SchoolFileBase localParent,
-        SchoolFileBase remoteParent,
-      ) async {
-        if (localParent is! SchoolDirectory) {
-          throw "local is not SchoolDir";
-        }
-        if (remoteParent is! SchoolDirectory) {
-          throw "remote is not SchoolDir";
-        }
-
-        final localChildren = localParent.children;
-        final remoteChildren = remoteParent.children;
-
-        if (localChildren.length > 1) {
-          throw "Local TodoEvent has more than one child: $localChildren";
-        }
-        if (remoteChildren.length > 1) {
-          throw "Remote TodoEvent has more than one child: $remoteChildren";
-        }
-
-        final localFile = localChildren.firstOrNull;
-        final remoteFile = remoteChildren.firstOrNull;
-
-        if (localFile == null) {
-          throw "Local todoevent file isnt there!";
-        }
-        if (localFile is! SchoolFile) {
-          throw "local todoevent file is not a file?!";
-        }
-        if (remoteFile is! SchoolFile?) {
-          throw "remote todoevent file is not a file?!";
-        }
-
-        final remoteMap = await remoteFile?.getContentAsJson();
-        List<TodoEvent>? remoteTodos = remoteMap == null
-            ? null
-            : SaveManager().todoEventsFromJson(
-                remoteMap,
-              );
-
-        //Weil die create Content funktion die gleichen daten nimmt, wäre es unnötig das hier dann zu parsen..
-        List<TodoEvent> localTodos = TimetableManager().todoEvents;
-
-        if (remoteTodos == null || remoteTodos.isEmpty) {
-          //upload
-          final parentId = remoteParent.driveId;
-          if (parentId == null) throw "parentId not set";
-          final response = await uploadDriveFileFromBytes(
-            name: localFile.name,
-            data: await localFile.content,
-            id: remoteFile?.driveId,
-            parentId: parentId,
-          );
-          return response != null;
-        }
-
-        //hier fängt das eigentliche mergen an
-
-        List<TodoEvent> remoteDeletedTodos = [];
-        List<TodoEvent> localDeletedTodos = [];
-
-        //id, todoevent
-        Map<String, TodoEvent> mergedTodosMap = {};
-
-        // Zuerst lokale mergen
-        for (var localTodo in localTodos) {
-          final remoteTodo = remoteTodos.cast<TodoEvent?>().firstWhere(
-                (todoEvent) => todoEvent?.uid == localTodo.uid,
-              );
-
-          if (remoteTodo == null) {
-            final deletedTodo =
-                remoteDeletedTodos.cast<TodoEvent?>().firstWhere(
-                      (element) => element?.uid == localTodo.uid,
-                      orElse: () => null,
-                    );
-            if (deletedTodo != null) {
-              // linkedSchoolNote soll wenn schoolnotes gesynced werden gelöscht werden
-              TimetableManager().removeTodoEvent(localTodo);
-              //wenn es vom Server gelöscht wurde, dann nicht wieder hinzufügen
-              localDeletedTodos.add(localTodo);
-              continue;
-            }
-
-            /// Wenn server das Todo nicht hat, dann einfach lokale Version hochladen
-            mergedTodosMap[localTodo.uid] = localTodo;
-            continue;
-          }
-
-          final mergedTodo = await localTodo.merge(remoteTodo, onMergeError);
-          for (var todo in mergedTodo) {
-            mergedTodosMap[todo.uid] = todo;
-          }
-        }
-
-        // anschließend remotes mergen
-        for (var remoteTodo in remoteTodos) {
-          final localTodo = localTodos.cast<TodoEvent?>().firstWhere(
-                (todoEvent) => todoEvent?.uid == remoteTodo.uid,
-                orElse: () => null,
-              );
-
-          /// Wenn lokal das Todo nicht hat, dann einfach die server Version übernehmen
-          /// außer wenn es gelöscht wurde
-          if (localTodo == null) {
-            final deletedTodo =
-                remoteDeletedTodos.cast<TodoEvent?>().firstWhere(
-                      (element) => element?.uid == remoteTodo.uid,
-                      orElse: () => null,
-                    );
-
-            if (deletedTodo != null) {
-              remoteDeletedTodos.add(deletedTodo);
-              continue;
-            }
-
-            if (!mergedTodosMap.containsKey(remoteTodo.uid)) {
-              mergedTodosMap[remoteTodo.uid] = remoteTodo;
-            } else {
-              print("Todo gab es schon! ${remoteTodo.name}");
-            }
-            continue;
-          }
-
-          //Wenn die Aufgabe bereits gemerged wurde, dann skippen
-          if (mergedTodosMap.containsKey(remoteTodo.uid)) {
-            continue;
-          }
-
-          final mergedTodo = await localTodo.merge(remoteTodo, onMergeError);
-          for (var todo in mergedTodo) {
-            mergedTodosMap[todo.uid] = todo;
-          }
-        }
-
-        if (remoteFile == null) {
-          throw "Remote file is null";
-        }
-
-        final mergedTodoEventsList = mergedTodosMap.values.toList();
-
-        TimetableManager().setTodoEvents(mergedTodoEventsList);
-
-        final response = await uploadDriveFileFromBytes(
-          name: remoteFile.name,
-          data: utf8.encode(
-            jsonEncode(
-              SaveManager().todoEventsToJson(mergedTodoEventsList),
-            ),
-          ),
-          id: remoteFile.driveId,
-          parentId: remoteParent.driveId!,
-        );
-
-        return response != null;
-      },
+      SaveManager.todoEventSaveDirName: _syncTodoEventDirs,
     };
 
     for (var localFile in allLocalFiles) {
@@ -710,34 +771,16 @@ class OnlineSyncManager {
       existingFileId: existingInfoFileId,
     );
 
+    lastSyncTime = DateTime.now();
+
     while (processedFilesCount < totalFilesCount) {
       updateProgress();
       await Future<void>.delayed(const Duration(milliseconds: 50));
     }
 
-    /// Upload
-    // await addFolderContentToDrive(allFiles, "appDataFolder");
-
     return OnlineSyncState(
       state: OnlineSyncStateEnum.syncedSucessful,
     );
-
-    // alles was nicht schon onineist wird hochgeladen
-    // alles was schon online ist und sich nicht geändert hat wird übersprungen
-    // alles was schon online ist und sich geändert hat wird überschrieben?
-
-    // for (int i = 0; i < 10; i++) {
-    //   _setStreamState(
-    //     OnlineSyncState(
-    //         state: OnlineSyncStateEnum.syncing, progress: i / 10),
-    //   );
-    //   await Future<void>.delayed(const Duration(seconds: 2));
-    // }
-
-    // return OnlineSyncState(
-    //   state: OnlineSyncStateEnum.syncedSucessful,
-    //   progress: 100,
-    // );
   }
 
   Future<drive.File> _updateInfoJson({

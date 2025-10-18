@@ -10,6 +10,19 @@
             "type": "dart"
         },
         {
+            "name": "Flutter Linux (Impeller + X11)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "debug",
+            "args": [
+                "--enable-impeller"
+            ],
+            "deviceId": "linux",
+            "env": {
+                "GDK_BACKEND": "x11"
+            }
+        },
+        {
             "name": "schulapp (profile mode)",
             "request": "launch",
             "type": "dart",
