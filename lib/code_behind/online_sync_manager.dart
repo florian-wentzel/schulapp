@@ -343,6 +343,9 @@ class OnlineSyncManager {
 
   Future<MergeErrorSolution> _onMergeError(String errorMsg) async {
     Completer<MergeErrorSolution> userInputCompleter = Completer();
+
+    final prevSyncState = _currentState;
+
     _setStreamState(
       OnlineSyncState(
         state: OnlineSyncStateEnum.waitingForUserInput,
@@ -351,12 +354,21 @@ class OnlineSyncManager {
       ),
     );
 
+    userInputCompleter.future.then(
+      (value) {
+        _setStreamState(
+          prevSyncState,
+        );
+      },
+    );
+
     return userInputCompleter.future;
   }
 
   Future<bool> _syncTodoEventDirs(
     SchoolFileBase localParent,
     SchoolFileBase remoteParent,
+    VoidCallback updateProgress,
   ) async {
     if (localParent is! SchoolDirectory) {
       throw "local is not SchoolDir";
@@ -439,6 +451,8 @@ class OnlineSyncManager {
     // }
 
     //hier fängt das eigentliche mergen an
+
+    updateProgress();
 
     //id, todoevent
     Map<String, TodoEvent> mergedTodosMap = {};
@@ -564,6 +578,8 @@ class OnlineSyncManager {
       id: remoteDeletedTodoEventFile?.driveId,
       parentId: remoteParent.driveId!,
     );
+
+    updateProgress();
 
     return response != null && responseDeleted != null;
   }
@@ -702,7 +718,8 @@ class OnlineSyncManager {
       );
     }
 
-    Map<String, Future<bool> Function(SchoolFileBase, SchoolFileBase)>
+    Map<String,
+            Future<bool> Function(SchoolFileBase, SchoolFileBase, VoidCallback)>
         dirOrFileNameToWhatToDoWithFile = {
       SaveManager.todoEventSaveDirName: _syncTodoEventDirs,
     };
@@ -728,6 +745,7 @@ class OnlineSyncManager {
             await dirOrFileNameToWhatToDoWithFile[localFile.name]?.call(
           localFile,
           remoteFile,
+          updateProgress,
         );
 
         if (result == null) {
