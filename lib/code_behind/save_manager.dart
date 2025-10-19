@@ -1299,10 +1299,10 @@ class SaveManager {
 
       final lastOnlineSyncTime = DateTime.tryParse(
         jsonMap[lastSyncTimeKey] ?? "",
-      );
+      )?.toUtc();
       final lastOnlineSyncTryTime = DateTime.tryParse(
         jsonMap[lastSyncTimeTryKey] ?? "",
-      );
+      )?.toUtc();
 
       return (lastOnlineSyncTime, lastOnlineSyncTryTime);
     } catch (e) {
