@@ -22,6 +22,7 @@ class TimetableManager extends ChangeNotifier {
   List<SchoolSemester>? _semesters;
   List<TodoEvent>? _todoEvents;
   //Speicher keys von gelöschten TodoEvents.toDeletedString()
+  TODO: als klasse machen mit datum um alte zu löschen..
   List<String>? _deletedTodoEventKeys;
   Settings? _settings;
 
