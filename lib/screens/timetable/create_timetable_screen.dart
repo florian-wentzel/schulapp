@@ -37,7 +37,6 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
   final GlobalKey _moreActionsButtonKey = GlobalKey();
 
   final _pageController = PageController();
-  final _prefabScrollController = ScrollController();
 
   late Tutorial _tutorial;
 
@@ -48,6 +47,7 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
 
   // late String _originalName;
 
+  bool _tutorialShowing = false;
   bool _canPop = false;
 
   Set<int> _weekSelection = {
@@ -119,25 +119,13 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
 
     if (showTutorial) {
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-        _prefabScrollController.animateTo(
-          _prefabScrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 500),
-          curve: Curves.easeInOut,
-        );
-        Future.delayed(
-          const Duration(milliseconds: 500),
-          () {
-            if (!mounted) return;
-            TutorialOverlay.show(context, _tutorial);
-          },
-        );
+        _showTutorial();
       });
     }
   }
 
   @override
   void dispose() {
-    _prefabScrollController.dispose();
     _pageController.dispose();
     super.dispose();
   }
@@ -183,9 +171,7 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
           actions: [
             IconButton(
               icon: Icon(Icons.help),
-              onPressed: () {
-                TutorialOverlay.show(context, _tutorial);
-              },
+              onPressed: _tutorialShowing ? null : _showTutorial,
             ),
           ],
         ),
@@ -564,25 +550,6 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
         width: 8,
       ),
     );
-    //TODO Tutorial anpassen
-    children.add(
-      InkWell(
-        key: _createLessonPrefabKey,
-        onTap: _createNewPrefab,
-        child: Container(
-          width: minContainerHeight,
-          height: minContainerHeight,
-          padding: const EdgeInsets.all(8),
-          margin: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: const Icon(Icons.add),
-        ),
-      ),
-    );
-
     if (_lessonPrefabs.isEmpty && TimetableManager().timetables.isNotEmpty) {
       children.add(
         InkWell(
@@ -705,14 +672,34 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
 
     return Center(
       key: _lessonPrefabScrollbarKey,
-      child: SingleChildScrollView(
-        // primary: true,
-        controller: _prefabScrollController,
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: children,
-        ),
+      child: Row(
+        children: [
+          InkWell(
+            key: _createLessonPrefabKey,
+            onTap: _createNewPrefab,
+            child: Container(
+              width: minContainerHeight,
+              height: minContainerHeight,
+              padding: const EdgeInsets.all(8),
+              margin: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(Icons.add),
+            ),
+          ),
+          Expanded(
+            child: SingleChildScrollView(
+              // primary: true,
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: children,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -958,6 +945,27 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
       _weekSelection.first,
       duration: const Duration(milliseconds: 500),
       curve: Curves.easeInOutCirc,
+    );
+  }
+
+  Future<void> _showTutorial() async {
+    if (_tutorialShowing) return;
+
+    setState(() {
+      _tutorialShowing = true;
+    });
+
+    if (!mounted) return;
+    TutorialOverlay.show(
+      context,
+      _tutorial,
+      onOverlayRemoved: () {
+        if (mounted) {
+          setState(() {
+            _tutorialShowing = false;
+          });
+        }
+      },
     );
   }
 }

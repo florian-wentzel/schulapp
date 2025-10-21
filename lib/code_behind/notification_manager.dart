@@ -118,6 +118,9 @@ class NotificationManager {
       android: initializationSettingsAndroid,
       iOS: initializationSettingsIOS,
       windows: initializationSettingsWindows,
+      linux: LinuxInitializationSettings(
+        defaultActionName: 'Open Schulapp', //TODO
+      ),
     );
 
     bool? success = await notificationsPlugin.initialize(
