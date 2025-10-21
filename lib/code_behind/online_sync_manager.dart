@@ -427,6 +427,8 @@ class OnlineSyncManager {
     }
 
     final remoteTodoEventsMap = await remoteTodoEventFile?.getContentAsJson();
+    final remoteDeletedTodoEventsMapFuture =
+        remoteDeletedTodoEventFile?.getContentAsJson();
 
     List<TodoEvent>? remoteTodos = remoteTodoEventsMap == null
         ? []
@@ -437,8 +439,7 @@ class OnlineSyncManager {
     //Weil die create Content funktion die gleichen daten nimmt, wäre es unnötig das hier dann zu parsen..
     List<TodoEvent> localTodos = TimetableManager().todoEvents;
 
-    final remoteDeletedTodoEventsMap =
-        await remoteDeletedTodoEventFile?.getContentAsJson();
+    final remoteDeletedTodoEventsMap = await remoteDeletedTodoEventsMapFuture;
 
     final List<String> remoteDeletedTodos = remoteDeletedTodoEventsMap == null
         ? []
@@ -565,7 +566,7 @@ class OnlineSyncManager {
     TimetableManager().setTodoEvents(mergedTodoEventsList);
     TimetableManager().saveDeletedTodoEvents();
 
-    final response = await uploadDriveFileFromBytes(
+    final responseFuture = uploadDriveFileFromBytes(
       name: remoteTodoEventFile.name,
       data: utf8.encode(
         jsonEncode(
@@ -576,7 +577,7 @@ class OnlineSyncManager {
       parentId: remoteParent.driveId!,
     );
 
-    final responseDeleted = await uploadDriveFileFromBytes(
+    final responseDeletedFuture = uploadDriveFileFromBytes(
       name: remoteDeletedTodoEventFile?.name ??
           SaveManager.deletedTodoEventSaveName,
       data: utf8.encode(
@@ -588,9 +589,14 @@ class OnlineSyncManager {
       parentId: remoteParent.driveId!,
     );
 
+    final responseList = await Future.wait([
+      responseFuture,
+      responseDeletedFuture,
+    ]);
+
     updateProgress();
 
-    return response != null && responseDeleted != null;
+    return responseList[0] != null && responseList[1] != null;
   }
 
   Future<OnlineSyncState> _createOnlineBackupFutureImpl() async {
