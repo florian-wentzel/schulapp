@@ -350,7 +350,7 @@ class _TimetableOneDayDropTargetWidgetState
               )
             ];
 
-            await Utils.showStringAcionListBottomSheet(
+            await Utils.showStringActionListBottomSheet(
               context,
               items: items,
               runActionAfterPop: true,

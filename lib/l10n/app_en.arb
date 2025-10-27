@@ -1388,5 +1388,17 @@
   "subject_dutch": "Dutch",
   "@subject_dutch": {},
   "subject_orthodox_religion": "Orthodox Religion",
-  "@subject_orthodox_religion": {}
+  "@subject_orthodox_religion": {},
+  "strMainTimetable": "Main Timetable",
+  "@strMainTimetable": {},
+  "strAdditionalTimetable": "Additional Timetable",
+  "@strAdditionalTimetable": {},
+  "strShareExport": "Share / Export",
+  "@strShareExport": {},
+  "strDuplicate": "Duplicate",
+  "@strDuplicate": {},
+  "strSetOnHomeScreen": "Set on home screen",
+  "@strSetOnHomeScreen": {},
+  "strSetAsExtraTimetable": "Set as additional timetable",
+  "@strSetAsExtraTimetable": {}
 }

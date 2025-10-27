@@ -26,10 +26,411 @@ class ExportTimetablePage extends StatefulWidget {
   });
 
   @override
-  State<ExportTimetablePage> createState() => EexportTimetablePageState();
+  State<ExportTimetablePage> createState() => ExportTimetablePageState();
+
+  /// returns true if tt was exported
+  static Future<bool> showExportTimetableSheet(
+    BuildContext context,
+    Timetable timetable,
+  ) async {
+    bool exporting = false;
+
+    final actionWidgets = <(String title, Future<void> Function()? onPressed)>[
+      (
+        AppLocalizationsManager.localizations.strExportAsFile(
+          SaveManager.timetableExportExtension,
+        ),
+        () async {
+          if (exporting) return;
+          exporting = true;
+
+          await _exportTimetable(context, timetable);
+
+          exporting = false;
+        }
+      ),
+      (
+        AppLocalizationsManager.localizations.strShareViaOnlineCode,
+        () async {
+          if (exporting) return;
+          exporting = true;
+          await _onShareTimetableViaOnlineCode(context, timetable);
+          exporting = false;
+        }
+      ),
+      (
+        AppLocalizationsManager.localizations.strShareImage,
+        () async {
+          if (exporting) return;
+          exporting = true;
+          BuildContext? dialogContext;
+
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (BuildContext dContext) {
+              dialogContext = dContext;
+              return const Dialog(
+                child: Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      CircularProgressIndicator(),
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
+
+          final size = TimetableWidget.getPrefferedSize(
+            timetable,
+          );
+
+          final Uint8List? imageBytes = await Utils.createImageFromWidget(
+            context,
+            SizedBox(
+              width: size.width,
+              height: size.height,
+              child: TimetableWidget(
+                controller: TimetableController(),
+                timetable: timetable,
+                showTodoEvents: false,
+                showPageView: false,
+                showHolidaysAndDates: false,
+                highlightCurrLessonAndDay: false,
+                size: size,
+              ),
+            ),
+            wait: const Duration(milliseconds: 100),
+            logicalSize: size,
+            imageSize: Size(
+              size.width * 4,
+              size.height * 4,
+            ),
+            addBorder: true,
+          );
+
+          if (dialogContext?.mounted ?? false) {
+            dialogContext?.pop();
+          }
+
+          exporting = false;
+
+          if (imageBytes == null) {
+            if (context.mounted) {
+              Utils.showInfo(
+                context,
+                msg: AppLocalizationsManager.localizations.strThereWasAnError,
+                type: InfoType.error,
+              );
+            }
+            return;
+          }
+
+          if (!context.mounted) return;
+
+          await showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            useSafeArea: true,
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(
+                top: Radius.circular(16),
+              ),
+            ),
+            builder: (context) {
+              return SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    spacing: 12,
+                    children: [
+                      Text(
+                        AppLocalizationsManager
+                            .localizations.strShareYourTimetable,
+                        style: Theme.of(context)
+                            .textTheme
+                            .headlineMedium
+                            ?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Image.memory(imageBytes, fit: BoxFit.cover),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          IconButton(
+                            onPressed: () async {
+                              File? file = SaveManager()
+                                  .saveTempImage(imageBytes, "timetable.png");
+
+                              if (file == null) {
+                                Utils.showInfo(
+                                  context,
+                                  msg: AppLocalizationsManager
+                                      .localizations.strThereWasAnError,
+                                  type: InfoType.error,
+                                );
+                                return;
+                              }
+
+                              if (Platform.isWindows) {
+                                await MultiPlatformManager.shareFile(file);
+                                return;
+                              }
+                              final box =
+                                  context.findRenderObject() as RenderBox?;
+
+                              //SharePlus.instance.share
+                              Share.shareXFiles(
+                                [
+                                  XFile.fromData(
+                                    imageBytes,
+                                    name: "timetable.png",
+                                    mimeType: "image/png",
+                                    lastModified: DateTime.now(),
+                                  ),
+                                ],
+                                sharePositionOrigin:
+                                    box!.localToGlobal(Offset.zero) & box.size,
+                              );
+
+                              SaveManager().deleteTempDir();
+                            },
+                            icon: const Icon(Icons.share),
+                          ),
+                          IconButton(
+                            onPressed: () async {
+                              File? file = SaveManager()
+                                  .saveTempImage(imageBytes, "timetable.png");
+
+                              if (file == null) {
+                                Utils.showInfo(
+                                  context,
+                                  msg: AppLocalizationsManager
+                                      .localizations.strThereWasAnError,
+                                  type: InfoType.error,
+                                );
+                                return;
+                              }
+                              if (Platform.isWindows) {
+                                await MultiPlatformManager.shareFile(file);
+                                return;
+                              }
+                              if (Platform.isAndroid || Platform.isIOS) {
+                                await FlutterImageClipboard()
+                                    .copyImageToClipboard(
+                                  file,
+                                );
+                                if (context.mounted) {
+                                  Utils.showInfo(
+                                    context,
+                                    msg: AppLocalizationsManager
+                                        .localizations.strCopiedToClipboard,
+                                    type: InfoType.success,
+                                  );
+                                }
+                              }
+
+                              SaveManager().deleteTempDir();
+                            },
+                            icon: const Icon(Icons.copy),
+                          ),
+                        ],
+                      ),
+                      ElevatedButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: Text(
+                          AppLocalizationsManager.localizations.strFinished,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
+        }
+      ),
+    ];
+
+    final exported = await Utils.showStringActionListBottomSheet(
+      context,
+      title: timetable.name,
+      items: actionWidgets,
+    );
+
+    return exported ?? false;
+  }
+
+  static Future<void> _exportTimetable(
+      BuildContext context, Timetable timetable) async {
+    Utils.showInfo(
+      context,
+      msg: AppLocalizationsManager.localizations.strExporting,
+    );
+
+    try {
+      SaveManager().cleanExports();
+    } catch (e) {
+      Utils.hideCurrInfo(context);
+      Utils.showInfo(
+        context,
+        msg: e.toString(),
+        type: InfoType.error,
+      );
+    }
+
+    String? selectedDirectory = await FilePicker.platform.getDirectoryPath();
+
+    if (selectedDirectory == null) {
+      if (context.mounted) {
+        Utils.showInfo(
+          context,
+          type: InfoType.warning,
+          msg: AppLocalizationsManager.localizations.strNoFileSelected,
+        );
+      }
+      return;
+    }
+    if (selectedDirectory == "/") {
+      if (context.mounted) {
+        Utils.showInfo(
+          context,
+          type: InfoType.error,
+          msg: AppLocalizationsManager.localizations.strThereWasAnError,
+        );
+      }
+      return;
+    }
+
+    File? exportFile;
+
+    try {
+      exportFile =
+          await SaveManager().exportTimetable(timetable, selectedDirectory);
+      if (context.mounted) {
+        Utils.hideCurrInfo(context);
+      }
+    } catch (e) {
+      exportFile = null;
+      if (context.mounted) {
+        Utils.hideCurrInfo(context);
+        Utils.showInfo(
+          context,
+          msg: e.toString(),
+          type: InfoType.error,
+        );
+      }
+      return;
+    }
+
+    if (context.mounted) {
+      if (Platform.isAndroid || Platform.isIOS) {
+        Utils.showInfo(
+          context,
+          msg: AppLocalizationsManager
+              .localizations.strFileSavedInDownloadsDirectory,
+          type: InfoType.success,
+        );
+      } else {
+        Utils.showInfo(
+          context,
+          msg: AppLocalizationsManager.localizations.strExportingSuccessful,
+          type: InfoType.success,
+        );
+      }
+    }
+
+    await MultiPlatformManager.shareFile(exportFile);
+  }
+
+  static Future<void> _onShareTimetableViaOnlineCode(
+      BuildContext context, Timetable timetable) async {
+    final enabled =
+        await GoFileIoManager().showTermsOfServicesEnabledDialog(context);
+
+    if (!enabled) return;
+
+    try {
+      final code = SaveManager().shareTimetable(timetable);
+
+      if (!context.mounted) return;
+
+      await showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        useSafeArea: true,
+        builder: (context) {
+          return FutureBuilder(
+            future: code,
+            builder: (context, snapshot) {
+              Widget child;
+              if (!snapshot.hasData) {
+                child = const Center(
+                  key: ValueKey("CircularProgressIndicator"),
+                  child: CircularProgressIndicator(),
+                );
+              } else {
+                final headingText = snapshot.data;
+
+                if (headingText == null) {
+                  Utils.showInfo(
+                    context,
+                    msg: AppLocalizationsManager
+                        .localizations.strThereWasAnError,
+                    type: InfoType.error,
+                  );
+                  Navigator.of(context).pop();
+                  return const SizedBox.shrink();
+                }
+
+                child = ShareGoFileIOBottomSheet(
+                  key: const ValueKey("ShareTimetableBottomSheet"),
+                  shareText: AppLocalizationsManager
+                      .localizations.strShareYourTimetable,
+                  code: headingText,
+                );
+              }
+
+              return AnimatedSwitcher(
+                transitionBuilder: (Widget child, Animation<double> animation) {
+                  return FadeTransition(
+                    opacity: animation,
+                    child: SizeTransition(
+                      sizeFactor: animation,
+                      child: child,
+                    ),
+                  );
+                },
+                duration: const Duration(
+                  milliseconds: 400,
+                ),
+                child: child,
+              );
+            },
+          );
+        },
+      );
+    } catch (e) {
+      if (context.mounted) {
+        Utils.showInfo(
+          context,
+          msg: e.toString(),
+          type: InfoType.error,
+        );
+      }
+    }
+  }
 }
 
-class EexportTimetablePageState extends State<ExportTimetablePage> {
+class ExportTimetablePageState extends State<ExportTimetablePage> {
   bool _exporting = false;
 
   @override
@@ -108,404 +509,15 @@ class EexportTimetablePageState extends State<ExportTimetablePage> {
     );
   }
 
-  Future<void> _exportTimetable(int index) async {
-    Timetable timetable = TimetableManager().timetables[index];
-
-    Utils.showInfo(
-      context,
-      msg: AppLocalizationsManager.localizations.strExporting,
-    );
-
-    try {
-      SaveManager().cleanExports();
-    } catch (e) {
-      Utils.hideCurrInfo(context);
-      Utils.showInfo(
-        context,
-        msg: e.toString(),
-        type: InfoType.error,
-      );
-    }
-
-    String? selectedDirectory = await FilePicker.platform.getDirectoryPath();
-
-    if (selectedDirectory == null) {
-      if (mounted) {
-        Utils.showInfo(
-          context,
-          type: InfoType.warning,
-          msg: AppLocalizationsManager.localizations.strNoFileSelected,
-        );
-      }
-      return;
-    }
-    if (selectedDirectory == "/") {
-      if (mounted) {
-        Utils.showInfo(
-          context,
-          type: InfoType.error,
-          msg: AppLocalizationsManager.localizations.strThereWasAnError,
-        );
-      }
-      return;
-    }
-
-    File? exportFile;
-
-    try {
-      exportFile =
-          await SaveManager().exportTimetable(timetable, selectedDirectory);
-      if (mounted) {
-        Utils.hideCurrInfo(context);
-      }
-    } catch (e) {
-      exportFile = null;
-      if (mounted) {
-        Utils.hideCurrInfo(context);
-        Utils.showInfo(
-          context,
-          msg: e.toString(),
-          type: InfoType.error,
-        );
-      }
-      return;
-    }
-
-    if (mounted) {
-      if (Platform.isAndroid || Platform.isIOS) {
-        Utils.showInfo(
-          context,
-          msg: AppLocalizationsManager
-              .localizations.strFileSavedInDownloadsDirectory,
-          type: InfoType.success,
-        );
-      } else {
-        Utils.showInfo(
-          context,
-          msg: AppLocalizationsManager.localizations.strExportingSuccessful,
-          type: InfoType.success,
-        );
-      }
-    }
-
-    await MultiPlatformManager.shareFile(exportFile);
-
-    widget.goToHomePage();
-  }
-
-  Future<void> _onShareTimetable(Timetable timetable) async {
-    final enabled =
-        await GoFileIoManager().showTermsOfServicesEnabledDialog(context);
-
-    if (!enabled) return;
-
-    try {
-      final code = SaveManager().shareTimetable(timetable);
-
-      if (!mounted) return;
-
-      await showModalBottomSheet(
-        context: context,
-        isScrollControlled: true,
-        useSafeArea: true,
-        builder: (context) {
-          return FutureBuilder(
-            future: code,
-            builder: (context, snapshot) {
-              Widget child;
-              if (!snapshot.hasData) {
-                child = const Center(
-                  key: ValueKey("CircularProgressIndicator"),
-                  child: CircularProgressIndicator(),
-                );
-              } else {
-                final headingText = snapshot.data;
-
-                if (headingText == null) {
-                  Utils.showInfo(
-                    context,
-                    msg: AppLocalizationsManager
-                        .localizations.strThereWasAnError,
-                    type: InfoType.error,
-                  );
-                  Navigator.of(context).pop();
-                  return const SizedBox.shrink();
-                }
-
-                child = ShareGoFileIOBottomSheet(
-                  key: const ValueKey("ShareTimetableBottomSheet"),
-                  shareText: AppLocalizationsManager
-                      .localizations.strShareYourTimetable,
-                  code: headingText,
-                );
-              }
-
-              return AnimatedSwitcher(
-                transitionBuilder: (Widget child, Animation<double> animation) {
-                  return FadeTransition(
-                    opacity: animation,
-                    child: SizeTransition(
-                      sizeFactor: animation,
-                      child: child,
-                    ),
-                  );
-                },
-                duration: const Duration(
-                  milliseconds: 400,
-                ),
-                child: child,
-              );
-            },
-          );
-        },
-      );
-    } catch (e) {
-      if (mounted) {
-        Utils.showInfo(
-          context,
-          msg: e.toString(),
-          type: InfoType.error,
-        );
-      }
-    }
-  }
-
   void _onItemTap(int timetableIndex) async {
     Timetable timetable = TimetableManager().timetables[timetableIndex];
 
-    final actionWidgets = <(String title, Future<void> Function()? onPressed)>[
-      (
-        AppLocalizationsManager.localizations.strExportAsFile(
-          SaveManager.timetableExportExtension,
-        ),
-        () async {
-          if (_exporting) return;
-          _exporting = true;
-          setState(() {});
-          await _exportTimetable(timetableIndex);
-          _exporting = false;
-          setState(() {});
-        }
-      ),
-      (
-        AppLocalizationsManager.localizations.strShareViaOnlineCode,
-        () async {
-          if (_exporting) return;
-          _exporting = true;
-          setState(() {});
-          await _onShareTimetable(timetable);
-          _exporting = false;
-          setState(() {});
-        }
-      ),
-      (
-        AppLocalizationsManager.localizations.strShareImage,
-        () async {
-          if (_exporting) return;
-          _exporting = true;
-          setState(() {});
+    final exported =
+        await ExportTimetablePage.showExportTimetableSheet(context, timetable);
 
-          BuildContext? dialogContext;
-
-          showDialog(
-            context: context,
-            barrierDismissible: false,
-            builder: (BuildContext dContext) {
-              dialogContext = dContext;
-              return const Dialog(
-                child: Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      CircularProgressIndicator(),
-                    ],
-                  ),
-                ),
-              );
-            },
-          );
-
-          final size = TimetableWidget.getPrefferedSize(
-            timetable,
-          );
-
-          final Uint8List? imageBytes = await Utils.createImageFromWidget(
-            context,
-            SizedBox(
-              width: size.width,
-              height: size.height,
-              child: TimetableWidget(
-                controller: TimetableController(),
-                timetable: timetable,
-                showTodoEvents: false,
-                showPageView: false,
-                showHolidaysAndDates: false,
-                highlightCurrLessonAndDay: false,
-                size: size,
-              ),
-            ),
-            wait: const Duration(milliseconds: 100),
-            logicalSize: size,
-            imageSize: Size(
-              size.width * 4,
-              size.height * 4,
-            ),
-            addBorder: true,
-          );
-
-          if (dialogContext?.mounted ?? false) {
-            dialogContext?.pop();
-          }
-
-          _exporting = false;
-          setState(() {});
-
-          if (imageBytes == null) {
-            if (mounted) {
-              Utils.showInfo(
-                context,
-                msg: AppLocalizationsManager.localizations.strThereWasAnError,
-                type: InfoType.error,
-              );
-            }
-            return;
-          }
-
-          if (!mounted) return;
-
-          await showModalBottomSheet(
-            context: context,
-            isScrollControlled: true,
-            useSafeArea: true,
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.vertical(
-                top: Radius.circular(16),
-              ),
-            ),
-            builder: (context) {
-              return SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    spacing: 12,
-                    children: [
-                      Text(
-                        AppLocalizationsManager
-                            .localizations.strShareYourTimetable,
-                        style: Theme.of(context)
-                            .textTheme
-                            .headlineMedium
-                            ?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                      ),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Image.memory(imageBytes, fit: BoxFit.cover),
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          IconButton(
-                            onPressed: () async {
-                              File? file = SaveManager()
-                                  .saveTempImage(imageBytes, "timetable.png");
-
-                              if (file == null) {
-                                Utils.showInfo(
-                                  context,
-                                  msg: AppLocalizationsManager
-                                      .localizations.strThereWasAnError,
-                                  type: InfoType.error,
-                                );
-                                return;
-                              }
-
-                              if (Platform.isWindows) {
-                                await MultiPlatformManager.shareFile(file);
-                                return;
-                              }
-                              final box =
-                                  context.findRenderObject() as RenderBox?;
-
-                              Share.shareXFiles(
-                                [
-                                  XFile.fromData(
-                                    imageBytes,
-                                    name: "timetable.png",
-                                    mimeType: "image/png",
-                                    lastModified: DateTime.now(),
-                                  ),
-                                ],
-                                sharePositionOrigin:
-                                    box!.localToGlobal(Offset.zero) & box.size,
-                              );
-
-                              SaveManager().deleteTempDir();
-                            },
-                            icon: const Icon(Icons.share),
-                          ),
-                          IconButton(
-                            onPressed: () async {
-                              File? file = SaveManager()
-                                  .saveTempImage(imageBytes, "timetable.png");
-
-                              if (file == null) {
-                                Utils.showInfo(
-                                  context,
-                                  msg: AppLocalizationsManager
-                                      .localizations.strThereWasAnError,
-                                  type: InfoType.error,
-                                );
-                                return;
-                              }
-                              if (Platform.isWindows) {
-                                await MultiPlatformManager.shareFile(file);
-                                return;
-                              }
-                              if (Platform.isAndroid || Platform.isIOS) {
-                                await FlutterImageClipboard()
-                                    .copyImageToClipboard(
-                                  file,
-                                );
-                                if (context.mounted) {
-                                  Utils.showInfo(
-                                    context,
-                                    msg: AppLocalizationsManager
-                                        .localizations.strCopiedToClipboard,
-                                    type: InfoType.success,
-                                  );
-                                }
-                              }
-
-                              SaveManager().deleteTempDir();
-                            },
-                            icon: const Icon(Icons.copy),
-                          ),
-                        ],
-                      ),
-                      ElevatedButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: Text(
-                          AppLocalizationsManager.localizations.strFinished,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          );
-        }
-      ),
-    ];
-
-    await Utils.showStringAcionListBottomSheet(
-      context,
-      items: actionWidgets,
-    );
+    if (exported) {
+      widget.goToHomePage();
+    }
   }
 }
 

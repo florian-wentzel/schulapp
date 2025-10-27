@@ -497,5 +497,11 @@
   "subject_catholic_religion": "Katholische Religion",
   "subject_media": "Medien",
   "subject_dutch": "Niederländisch",
-  "subject_orthodox_religion": "Orthodoxe Religion"
+  "subject_orthodox_religion": "Orthodoxe Religion",
+  "strMainTimetable": "Hauptstundenplan",
+  "strAdditionalTimetable": "Zusätzlicher Stundenplan",
+  "strShareExport": "Teilen / Exportieren",
+  "strDuplicate": "Duplizieren",
+  "strSetOnHomeScreen": "Auf Startbildschirm setzen",
+  "strSetAsExtraTimetable": "Als zusätzlichen Stundenplan setzen"
 }

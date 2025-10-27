@@ -8,6 +8,7 @@ import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/home_widget/home_widget_manager.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/screens/timetable/create_timetable_screen.dart';
+import 'package:schulapp/screens/timetable/export_timetable_page.dart';
 import 'package:schulapp/screens/timetable/import_export_timetable_screen.dart';
 import 'package:schulapp/screens/home_screen.dart';
 import 'package:schulapp/code_behind/timetable_util_functions.dart';
@@ -147,10 +148,28 @@ class _TimetablesScreenState extends State<TimetablesScreen> {
   Widget _itemBuilder(BuildContext context, int index) {
     Timetable tt = TimetableManager().timetables[index];
 
-    // String mainTimetableName = TimetableManager().settings.getVar(
-    //           Settings.mainTimetableNameKey,
-    //         ) ??
-    //     "";
+    bool isMainTt = TimetableManager().settings.getVar(
+              Settings.mainTimetableNameKey,
+            ) ==
+        tt.name;
+
+    bool isExtraTt = TimetableManager().settings.getVar(
+              Settings.extraTimetableOnHomeScreenKey,
+            ) ==
+        tt.name;
+    bool setAsExtraTimetableDisabled = isExtraTt || isMainTt;
+
+    TextStyle? style;
+
+    if (isMainTt) {
+      style = const TextStyle(
+        fontWeight: FontWeight.bold,
+      );
+    } else if (isExtraTt) {
+      style = const TextStyle(
+        fontStyle: FontStyle.italic,
+      );
+    }
 
     return Container(
       margin: const EdgeInsets.symmetric(
@@ -177,7 +196,126 @@ class _TimetablesScreenState extends State<TimetablesScreen> {
 
           setState(() {});
         },
-        title: Text(tt.name),
+        onLongPress: () {
+          Utils.showStringActionListBottomSheet(
+            context,
+            title: tt.name,
+            items: [
+              // (
+              //   "Bearbeiten",
+              //   () async {
+              //     await Navigator.of(context).push<bool>(
+              //       MaterialPageRoute(
+              //         builder: (context) =>
+              //             CreateTimetableScreen(timetable: tt),
+              //       ),
+              //     );
+              //
+              //     setState(() {});
+              //   },
+              // ),
+              (
+                AppLocalizationsManager.localizations.strShareExport,
+                () async {
+                  await ExportTimetablePage.showExportTimetableSheet(
+                    context,
+                    tt,
+                  );
+                },
+              ),
+              (
+                AppLocalizationsManager.localizations.strDuplicate,
+                () async {
+                  for (int i = 1; i < 100; i++) {
+                    final potentialName = "${tt.name} ($i)";
+
+                    if (!TimetableManager()
+                        .timetables
+                        .any((element) => element.name == potentialName)) {
+                      final newTt = tt.copyWith(name: potentialName);
+
+                      TimetableManager().addOrChangeTimetable(
+                        newTt,
+                        originalName: null,
+                      );
+
+                      setState(() {});
+                      return;
+                    }
+                  }
+                  Utils.showInfo(
+                    context,
+                    type: InfoType.error,
+                    msg: AppLocalizationsManager
+                        .localizations.strThereWasAnError,
+                  );
+                },
+              ),
+              (
+                AppLocalizationsManager.localizations.strSetOnHomeScreen,
+                TimetableManager().settings.getVar(
+                              Settings.mainTimetableNameKey,
+                            ) ==
+                        tt.name
+                    ? null
+                    : () async {
+                        final currTtName = TimetableManager().settings.getVar(
+                              Settings.mainTimetableNameKey,
+                            );
+
+                        TimetableManager().settings.setVar(
+                              Settings.mainTimetableNameKey,
+                              tt.name,
+                            );
+
+                        if (TimetableManager().settings.getVar(
+                                  Settings.extraTimetableOnHomeScreenKey,
+                                ) ==
+                            tt.name) {
+                          TimetableManager().settings.setVar(
+                                Settings.extraTimetableOnHomeScreenKey,
+                                currTtName,
+                              );
+                        }
+
+                        if (!context.mounted) return;
+
+                        HomeWidgetManager.updateWithDefaultTimetable(
+                          context: context,
+                        );
+                      },
+              ),
+              (
+                AppLocalizationsManager.localizations.strSetAsExtraTimetable,
+                setAsExtraTimetableDisabled
+                    ? null
+                    : () async {
+                        TimetableManager().settings.setVar(
+                              Settings.extraTimetableOnHomeScreenKey,
+                              tt.name,
+                            );
+                      },
+              ),
+            ],
+          );
+        },
+        title: Text(
+          tt.name,
+          style: style,
+        ),
+        leading: isExtraTt
+            ? Tooltip(
+                message: AppLocalizationsManager
+                    .localizations.strAdditionalTimetable,
+                child: const Icon(Icons.dataset_linked_outlined),
+              )
+            : isMainTt
+                ? Tooltip(
+                    message:
+                        AppLocalizationsManager.localizations.strMainTimetable,
+                    child: const Icon(Icons.event_available),
+                  )
+                : const SizedBox.shrink(),
         trailing: Wrap(
           spacing: 8,
           crossAxisAlignment: WrapCrossAlignment.center,

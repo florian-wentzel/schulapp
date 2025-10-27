@@ -56,7 +56,7 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
 
   @override
   void initState() {
-    _timetableCopy = widget.timetable.copy();
+    _timetableCopy = widget.timetable.copyWith();
 
     Map<String, SchoolLessonPrefab> prefabs = {};
 
@@ -392,7 +392,7 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
       ),
     ];
 
-    Utils.showStringAcionListBottomSheet(
+    Utils.showStringActionListBottomSheet(
       context,
       items: actionWidgets,
     );

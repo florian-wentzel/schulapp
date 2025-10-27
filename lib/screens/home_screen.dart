@@ -316,7 +316,7 @@ class _HomeScreenState extends State<HomeScreen> {
             final tt = widget.timetable;
             if (tt == null) return;
 
-            final ttCopy = tt.copy();
+            final ttCopy = tt.copyWith();
 
             bool? newTtCreated = await Navigator.of(context).push<bool>(
               MaterialPageRoute(

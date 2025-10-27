@@ -416,7 +416,7 @@ class _NewTodoEventWidgetState extends State<NewTodoEventWidget> {
     final notes = SchoolNotesManager().schoolNotes;
     SchoolNote? selectedNote;
 
-    await Utils.showStringAcionListBottomSheet(
+    await Utils.showStringActionListBottomSheet(
       context,
       title: AppLocalizationsManager.localizations.strSelectNote,
       items: List.generate(
