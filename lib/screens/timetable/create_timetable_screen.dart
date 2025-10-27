@@ -37,7 +37,6 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
   final GlobalKey _moreActionsButtonKey = GlobalKey();
 
   final _pageController = PageController();
-  final _prefabScrollController = ScrollController();
 
   late Tutorial _tutorial;
 
@@ -48,6 +47,7 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
 
   // late String _originalName;
 
+  bool _tutorialShowing = false;
   bool _canPop = false;
 
   Set<int> _weekSelection = {
@@ -56,7 +56,7 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
 
   @override
   void initState() {
-    _timetableCopy = widget.timetable.copy();
+    _timetableCopy = widget.timetable.copyWith();
 
     Map<String, SchoolLessonPrefab> prefabs = {};
 
@@ -119,25 +119,13 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
 
     if (showTutorial) {
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-        _prefabScrollController.animateTo(
-          _prefabScrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 500),
-          curve: Curves.easeInOut,
-        );
-        Future.delayed(
-          const Duration(milliseconds: 500),
-          () {
-            if (!mounted) return;
-            TutorialOverlay.show(context, _tutorial);
-          },
-        );
+        _showTutorial();
       });
     }
   }
 
   @override
   void dispose() {
-    _prefabScrollController.dispose();
     _pageController.dispose();
     super.dispose();
   }
@@ -180,6 +168,12 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
               _timetableCopy.name,
             ),
           ),
+          actions: [
+            IconButton(
+              icon: Icon(Icons.help),
+              onPressed: _tutorialShowing ? null : _showTutorial,
+            ),
+          ],
         ),
         bottomNavigationBar: _bottomNavBar(),
         // floatingActionButton: FloatingActionButton(
@@ -398,7 +392,7 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
       ),
     ];
 
-    Utils.showStringAcionListBottomSheet(
+    Utils.showStringActionListBottomSheet(
       context,
       items: actionWidgets,
     );
@@ -551,6 +545,11 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
 
     List<Widget> children = [];
 
+    children.add(
+      const SizedBox(
+        width: 8,
+      ),
+    );
     if (_lessonPrefabs.isEmpty && TimetableManager().timetables.isNotEmpty) {
       children.add(
         InkWell(
@@ -664,23 +663,6 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
       );
     }
 
-    children.add(
-      InkWell(
-        key: _createLessonPrefabKey,
-        onTap: _createNewPrefab,
-        child: Container(
-          width: minContainerHeight,
-          height: minContainerHeight,
-          padding: const EdgeInsets.all(8),
-          margin: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: const Icon(Icons.add),
-        ),
-      ),
-    );
     //so there is a bit space between add Button and right screen end
     children.add(
       const SizedBox(
@@ -690,14 +672,34 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
 
     return Center(
       key: _lessonPrefabScrollbarKey,
-      child: SingleChildScrollView(
-        // primary: true,
-        controller: _prefabScrollController,
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: children,
-        ),
+      child: Row(
+        children: [
+          InkWell(
+            key: _createLessonPrefabKey,
+            onTap: _createNewPrefab,
+            child: Container(
+              width: minContainerHeight,
+              height: minContainerHeight,
+              padding: const EdgeInsets.all(8),
+              margin: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(Icons.add),
+            ),
+          ),
+          Expanded(
+            child: SingleChildScrollView(
+              // primary: true,
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: children,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -943,6 +945,27 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
       _weekSelection.first,
       duration: const Duration(milliseconds: 500),
       curve: Curves.easeInOutCirc,
+    );
+  }
+
+  Future<void> _showTutorial() async {
+    if (_tutorialShowing) return;
+
+    setState(() {
+      _tutorialShowing = true;
+    });
+
+    if (!mounted) return;
+    TutorialOverlay.show(
+      context,
+      _tutorial,
+      onOverlayRemoved: () {
+        if (mounted) {
+          setState(() {
+            _tutorialShowing = false;
+          });
+        }
+      },
     );
   }
 }

@@ -648,7 +648,7 @@ class _AbiCalculationScreenState extends State<AbiCalculationScreen> {
         )
         .toList();
 
-    final result = await Utils.showStringAcionListBottomSheet(
+    final result = await Utils.showStringActionListBottomSheet(
       context,
       title: title,
       items: items,
@@ -1274,7 +1274,7 @@ class _AbiCalculationScreenState extends State<AbiCalculationScreen> {
 
     final items = calculator.allSubjects;
 
-    final result = await Utils.showStringAcionListBottomSheet(
+    final result = await Utils.showStringActionListBottomSheet(
       context,
       items: items
           .map(

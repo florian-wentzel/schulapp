@@ -39,16 +39,16 @@ class WeekTimetable extends Timetable {
     return WeekTimetable(
       name: name,
       maxLessonCount: timetable.maxLessonCount,
-      schoolTimes: timetable.copy().schoolTimes,
-      schoolDays: timetable.copy().schoolDays,
+      schoolTimes: timetable.copyWith().schoolTimes,
+      schoolDays: timetable.copyWith().schoolDays,
       parent: timetable,
     );
   }
 
   @override
-  WeekTimetable copy() {
+  WeekTimetable copyWith({String? name}) {
     return WeekTimetable(
-      name: name,
+      name: name ?? this.name,
       parent: parent,
       maxLessonCount: maxLessonCount,
       schoolDays: List.generate(
@@ -672,11 +672,11 @@ class Timetable {
     SaveManager().saveTimetable(this);
   }
 
-  Timetable copy() {
+  Timetable copyWith({String? name}) {
     final weeks = _weekTimetables;
 
     return Timetable(
-      name: name,
+      name: name ?? _name,
       maxLessonCount: maxLessonCount,
       yearStartedWithWeekIndex: _yearStartedWithWeekIndex,
       schoolDays: List.generate(
@@ -691,7 +691,7 @@ class Timetable {
           ? null
           : List.generate(
               weeks.length,
-              (index) => weeks[index].copy(),
+              (index) => weeks[index].copyWith(),
             ),
       lessonPrefabs: List.generate(
         _lessonPrefabs.length,

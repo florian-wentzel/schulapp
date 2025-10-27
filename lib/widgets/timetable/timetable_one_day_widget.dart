@@ -507,7 +507,7 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
           final dayIsSubstituted =
               totalSubstituteLessonsCount > totalLessonCount / 2;
 
-          Utils.showStringAcionListBottomSheet(
+          Utils.showStringActionListBottomSheet(
             context,
             runActionAfterPop: true,
             items: [

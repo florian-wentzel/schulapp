@@ -114,7 +114,7 @@ class _TimetableLessonWidgetState extends State<TimetableLessonWidget> {
           schoolTimeIndex: widget.lessonIndex,
         );
 
-        Utils.showStringAcionListBottomSheet(
+        Utils.showStringActionListBottomSheet(
           context,
           runActionAfterPop: true,
           autoRunOnlyPossibleOption: true,

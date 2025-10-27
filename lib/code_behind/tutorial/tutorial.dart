@@ -60,6 +60,8 @@ class Tutorial {
   }
 
   void init() {
+    _currentStepIndex = 0;
+    _previousStepIndex = -1;
     _stepChanged();
   }
 }

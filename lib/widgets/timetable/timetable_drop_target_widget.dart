@@ -205,7 +205,7 @@ class _TimetableDropTargetWidgetState extends State<TimetableDropTargetWidget> {
               )
             ];
 
-            await Utils.showStringAcionListBottomSheet(
+            await Utils.showStringActionListBottomSheet(
               context,
               items: items,
               runActionAfterPop: true,

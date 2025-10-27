@@ -699,7 +699,7 @@ class Utils {
   }) async {
     SchoolLessonPrefab? selectedPrefab;
 
-    await showStringAcionListBottomSheet(
+    await showStringActionListBottomSheet(
       context,
       items: prefabs.map((e) {
         return (
@@ -717,7 +717,7 @@ class Utils {
   ///returns true if the action was executed
   ///returns false if the action was not executed
   ///returns null if the delete button was pressed
-  static Future<bool?> showStringAcionListBottomSheet(
+  static Future<bool?> showStringActionListBottomSheet(
     BuildContext context, {
     String? title,
     bool runActionAfterPop = false,
@@ -740,6 +740,7 @@ class Utils {
       context,
       title: title,
       items: items,
+      scrollControlDisabledMaxHeightRatio: 0.7,
       itemBuilder: (context, index) {
         final label = items[index].$1;
         final cb = items[index].$2;
