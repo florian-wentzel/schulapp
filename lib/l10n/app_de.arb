@@ -1,6 +1,7 @@
 {
   "@@locale": "de",
   "language_name": "Deutsch",
+  "version_0_10_3": "Erstellung von Stundenplänen und die UI für alle Stundenpläne überarbeitet (#12)",
   "version_0_10_2": "Kleine Fehlerbehebungen Edge-to-Edge (#4)",
   "version_0_10_1": "Fehlerbehebungen beim Teilen vom Stundenplan via Online Code",
   "version_0_10_0": "Stundenbenachrichtigungen hinzugefügt (einstellbar in den Einstellungen)",
@@ -393,7 +394,7 @@
   "strDoYouWantToDeleteTheExam": "Möchtest Du die Prüfung löschen?",
   "strAddExam": "Prüfung hinzufügen",
   "strClassNameText": "{lowerThan11, select, true{{classNumber}. Klasse} false{{classNumber}. Klasse, HJ {semesterNumber}} other{{classNumber}. Klasse}}",
-  "strConnectTimetable": "Strundenplan verbinden",
+  "strConnectTimetable": "Stundenplan verbinden",
   "strYearGrade": "Klasse",
   "strSemester": "Semester",
   "strSearch": "Suchen",

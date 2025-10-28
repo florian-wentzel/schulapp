@@ -2,6 +2,8 @@
   "@@locale": "en",
   "language_name": "Englisch",
   "@language_name": {},
+  "version_0_10_3": "Remade timetable creation and revised the UI for all timetables (#12)",
+  "@version_0_10_3": {},
   "version_0_10_2": "Small bug fixes: Edge-to-Edge (#4)",
   "@version_0_10_2": {},
   "version_0_10_1": "Bug fixes when sharing the timetable via online code",
