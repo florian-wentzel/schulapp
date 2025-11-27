@@ -456,12 +456,70 @@ class _TimetableLessonWidgetState extends State<TimetableLessonWidget> {
       heroString,
       showDeleteButton,
       () {
+        //delete button pressed
         widget.tt.removeSpecialLesson(
           weekIndex: widget.currWeekIndex,
           year: widget.currYear,
           dayIndex: widget.dayIndex,
           timeIndex: widget.lessonIndex,
         );
+
+        _updateNotification();
+
+        setState(() {});
+      },
+      () async {
+        //edit button pressed
+        final specialLesson = widget.tt.getSpecialLesson(
+          year: widget.currYear,
+          weekIndex: widget.currWeekIndex,
+          schoolDayIndex: widget.dayIndex,
+          schoolTimeIndex: widget.lessonIndex,
+        );
+
+        if (specialLesson is! SubstituteSpecialLesson) {
+          return;
+        }
+
+        final lessonTuple = await showCreateNewPrefabBottomSheet(
+          context,
+          prefab: specialLesson.asSchoolLessonPrefab,
+        );
+
+        if (lessonTuple == null) return;
+
+        final prefab = lessonTuple.$1;
+        final delete = lessonTuple.$2;
+
+        if (delete) {
+          widget.tt.removeSpecialLesson(
+            weekIndex: widget.currWeekIndex,
+            year: widget.currYear,
+            dayIndex: widget.dayIndex,
+            timeIndex: widget.lessonIndex,
+          );
+
+          _updateNotification();
+
+          setState(() {});
+
+          return;
+        }
+
+        widget.tt.setSpecialLesson(
+          removeIfExists: true,
+          weekIndex: widget.currWeekIndex,
+          year: widget.currYear,
+          specialLesson: SubstituteSpecialLesson(
+            dayIndex: widget.dayIndex,
+            timeIndex: widget.lessonIndex,
+            prefab: prefab,
+          ),
+        );
+
+        _updateNotification();
+
+        setState(() {});
       },
     );
 

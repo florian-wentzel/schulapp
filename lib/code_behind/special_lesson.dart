@@ -161,6 +161,14 @@ class SubstituteSpecialLesson extends SpecialLesson {
           color: prefab.color,
         );
 
+  SchoolLessonPrefab get asSchoolLessonPrefab => SchoolLessonPrefab(
+        name: _name,
+        shortName: _shortName,
+        room: _room,
+        teacher: _teacher,
+        color: _color,
+      );
+
   @override
   Map<String, dynamic> toJson() {
     final map = {

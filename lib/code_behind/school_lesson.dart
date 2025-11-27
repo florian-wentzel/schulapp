@@ -15,7 +15,7 @@ class SchoolLesson {
   static const maxNameLength = 30;
   static const maxShortNameLength = 3;
   static const maxShortWeekNameLength = 2;
-  static const maxRoomLength = 10;
+  static const maxRoomLength = 20;
   static const maxTeacherLength = 15;
 
   static const String emptyLessonName = "---";

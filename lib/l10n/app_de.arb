@@ -1,6 +1,7 @@
 {
   "@@locale": "de",
   "language_name": "Deutsch",
+  "version_0_10_4": "Vertretungsstunden können jetzt bearbeitet werden und kleine Bugfixes (#14)",
   "version_0_10_3": "Erstellung von Stundenplänen und die UI für alle Stundenpläne überarbeitet (#12)",
   "version_0_10_2": "Kleine Fehlerbehebungen Edge-to-Edge (#4)",
   "version_0_10_1": "Fehlerbehebungen beim Teilen vom Stundenplan via Online Code",
@@ -504,5 +505,6 @@
   "strShareExport": "Teilen / Exportieren",
   "strDuplicate": "Duplizieren",
   "strSetOnHomeScreen": "Auf Startbildschirm setzen",
-  "strSetAsExtraTimetable": "Als zusätzlichen Stundenplan setzen"
+  "strSetAsExtraTimetable": "Als zusätzlichen Stundenplan setzen",
+  "strEditSubstitutionLesson": "Vertretungsstunde bearbeiten"
 }

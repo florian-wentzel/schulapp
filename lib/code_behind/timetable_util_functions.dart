@@ -326,6 +326,7 @@ Future<bool?> showSchoolLessonHomePopUp(
   String heroString,
   bool showDeleteButton,
   VoidCallback? onDeleteButtonPressed,
+  Future<void> Function()? onEditButtonPressed,
 ) async {
   return Navigator.push<bool>(
     context,
@@ -337,8 +338,9 @@ Future<bool?> showSchoolLessonHomePopUp(
         day: day,
         schoolTime: schoolTime,
         event: event,
-        showDeleteButton: showDeleteButton,
+        showDeleteAndEditButton: showDeleteButton,
         onDeleteButtonPressed: onDeleteButtonPressed,
+        onEditButtonPressed: onEditButtonPressed,
       ),
       barrierDismissible: true,
       fullscreenDialog: true,
