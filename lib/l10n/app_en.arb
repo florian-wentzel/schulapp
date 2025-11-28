@@ -2,6 +2,10 @@
   "@@locale": "en",
   "language_name": "Englisch",
   "@language_name": {},
+  "version_0_10_4": "Substitute lessons can now be edited and small bug fixes (#14)",
+  "@version_0_10_4": {},
+  "version_0_10_3": "Remade timetable creation and revised the UI for all timetables (#12)",
+  "@version_0_10_3": {},
   "version_0_10_2": "Small bug fixes: Edge-to-Edge (#4)",
   "@version_0_10_2": {},
   "version_0_10_1": "Bug fixes when sharing the timetable via online code",
@@ -1400,5 +1404,7 @@
   "strSetOnHomeScreen": "Set on home screen",
   "@strSetOnHomeScreen": {},
   "strSetAsExtraTimetable": "Set as additional timetable",
-  "@strSetAsExtraTimetable": {}
+  "@strSetAsExtraTimetable": {},
+  "strEditSubstitutionLesson": "Edit substitution lesson",
+  "@strEditSubstitutionLesson": {}
 }

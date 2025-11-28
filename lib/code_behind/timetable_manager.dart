@@ -546,6 +546,7 @@ class TimetableManager extends ChangeNotifier {
     required int year,
     required int weekIndex,
     required SpecialLesson specialLesson,
+    bool removeIfExists = false,
   }) {
     final currSpecialLessonsKey =
         SaveManager().getSpecialLessonsFileName(year, weekIndex);
@@ -566,8 +567,18 @@ class TimetableManager extends ChangeNotifier {
         ) ??
         false;
 
-    if (alreadyInList) {
+    if (alreadyInList && !removeIfExists) {
       return;
+    }
+
+    if (alreadyInList && removeIfExists) {
+      removeSpecialLesson(
+        timetable: timetable,
+        year: year,
+        weekIndex: weekIndex,
+        dayIndex: specialLesson.dayIndex,
+        timeIndex: specialLesson.timeIndex,
+      );
     }
 
     timetable.currSpecialLessonsWeek?.add(specialLesson);

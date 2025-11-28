@@ -1072,8 +1072,9 @@ class CustomPopUpShowLesson extends StatefulWidget {
   final SchoolTime schoolTime;
   final String heroString;
   final TodoEvent? event;
-  final bool showDeleteButton;
+  final bool showDeleteAndEditButton;
   final VoidCallback? onDeleteButtonPressed;
+  final Future<void> Function()? onEditButtonPressed;
 
   const CustomPopUpShowLesson({
     super.key,
@@ -1081,8 +1082,9 @@ class CustomPopUpShowLesson extends StatefulWidget {
     required this.day,
     required this.lesson,
     required this.schoolTime,
-    required this.showDeleteButton,
+    required this.showDeleteAndEditButton,
     this.onDeleteButtonPressed,
+    this.onEditButtonPressed,
     this.event,
   });
 
@@ -1122,35 +1124,63 @@ class _CustomPopUpShowLessonState extends State<CustomPopUpShowLesson> {
               ),
             ),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const SizedBox.shrink(),
-                Text(
-                  widget.lesson.name,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Theme.of(context).textTheme.titleLarge?.color ??
-                        Colors.white,
-                    // decoration: TextDecoration.underline,
-                    fontSize: 42.0,
-                    fontWeight: FontWeight.bold,
+                widget.showDeleteAndEditButton
+                    ? IconButton(
+                        tooltip: AppLocalizationsManager
+                            .localizations.strEditSubstitutionLesson,
+                        padding: const EdgeInsets.all(18),
+                        onPressed: () async {
+                          Navigator.of(context).pop();
+
+                          await Future.delayed(
+                            const Duration(milliseconds: 300),
+                          );
+
+                          widget.onEditButtonPressed?.call();
+                        },
+                        icon: const Icon(
+                          Icons.edit,
+                        ),
+                      )
+                    : const SizedBox(
+                        width: 8,
+                      ),
+                Expanded(
+                  child: AutoSizeText(
+                    widget.lesson.name,
+                    style: TextStyle(
+                      color: Theme.of(context).textTheme.bodyLarge?.color ??
+                          Colors.white,
+                      fontSize: 48.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                    maxLines: widget.lesson.name.contains(' ') ? null : 1,
+                    minFontSize: 16,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                widget.showDeleteButton
+                widget.showDeleteAndEditButton
                     ? IconButton(
                         tooltip: AppLocalizationsManager
                             .localizations.strRemoveSubstitutionLesson,
                         padding: const EdgeInsets.all(18),
-                        onPressed: () {
-                          widget.onDeleteButtonPressed?.call();
+                        onPressed: () async {
                           Navigator.of(context).pop();
+                          await Future.delayed(
+                            const Duration(milliseconds: 500),
+                          );
+                          widget.onDeleteButtonPressed?.call();
                         },
                         icon: const Icon(
                           Icons.delete,
                           color: Colors.red,
                         ),
                       )
-                    : const SizedBox.shrink(),
+                    : const SizedBox(
+                        width: 8,
+                      ),
               ],
             ),
           ],
@@ -1163,35 +1193,38 @@ class _CustomPopUpShowLessonState extends State<CustomPopUpShowLesson> {
           child: SingleChildScrollView(
             child: Column(
               children: [
-                FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Text(
-                        widget.lesson.teacher,
-                        style: TextStyle(
-                          color: Theme.of(context).textTheme.bodyLarge?.color ??
-                              Colors.white,
-                          fontSize: 42.0,
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Row(
+                      spacing: 8,
+                      children: [
+                        Text(
+                          widget.lesson.teacher,
+                          style: TextStyle(
+                            color:
+                                Theme.of(context).textTheme.bodyLarge?.color ??
+                                    Colors.white,
+                            fontSize: 42.0,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
                         ),
-                        overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.center,
-                      ),
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width / 10,
-                      ),
-                      Text(
-                        widget.lesson.room,
-                        style: TextStyle(
-                          color: Theme.of(context).textTheme.bodyLarge?.color ??
-                              Colors.white,
-                          fontSize: 42.0,
+                        SizedBox.shrink(),
+                        Text(
+                          widget.lesson.room,
+                          style: TextStyle(
+                            color:
+                                Theme.of(context).textTheme.bodyLarge?.color ??
+                                    Colors.white,
+                            fontSize: 42.0,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
                         ),
-                        overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
                 Container(
@@ -1236,64 +1269,139 @@ class _CustomPopUpShowLessonState extends State<CustomPopUpShowLesson> {
               ),
               Visibility(
                 visible: widget.event == null,
-                replacement: Tooltip(
-                  message: AppLocalizationsManager.localizations.strDeleteTask,
-                  child: ElevatedButton(
-                    onPressed: widget.event == null
-                        ? null
-                        : () async {
-                            final event = widget.event;
-                            if (event == null) return;
+                replacement: Row(
+                  children: [
+                    Tooltip(
+                      message:
+                          AppLocalizationsManager.localizations.strDeleteTask,
+                      child: ElevatedButton(
+                        onPressed: widget.event == null
+                            ? null
+                            : () async {
+                                final event = widget.event;
+                                if (event == null) return;
 
-                            bool removeTodoEvent =
-                                await Utils.showBoolInputDialog(
-                              context,
-                              question: AppLocalizationsManager.localizations
-                                  .strDoYouWantToDeleteTaskX(
-                                event.linkedSubjectName,
-                              ),
-                              description: event.endTime == null
-                                  ? AppLocalizationsManager.localizations
-                                      .strNoEndDate //kann nicht eintreten eigentlich
-                                  : "(${Utils.dateToString(event.endTime!)})",
-                              showYesAndNoInsteadOfOK: true,
-                              markTrueAsRed: true,
-                            );
-                            if (!removeTodoEvent || !context.mounted) return;
-                            bool deleteNote = false;
+                                bool removeTodoEvent =
+                                    await Utils.showBoolInputDialog(
+                                  context,
+                                  question: AppLocalizationsManager
+                                      .localizations
+                                      .strDoYouWantToDeleteTaskX(
+                                    event.linkedSubjectName,
+                                  ),
+                                  description: event.endTime == null
+                                      ? AppLocalizationsManager.localizations
+                                          .strNoEndDate //kann nicht eintreten eigentlich
+                                      : "(${Utils.dateToString(event.endTime!)})",
+                                  showYesAndNoInsteadOfOK: true,
+                                  markTrueAsRed: true,
+                                );
+                                if (!removeTodoEvent || !context.mounted) {
+                                  return;
+                                }
+                                bool deleteNote = false;
 
-                            if (event.linkedSchoolNote != null) {
-                              final delete = await Utils.showBoolInputDialog(
-                                context,
-                                question: AppLocalizationsManager.localizations
-                                    .strDoYouWantToDeleteLinkedNote,
-                                showYesAndNoInsteadOfOK: true,
-                                markTrueAsRed: true,
-                              );
-                              deleteNote = delete;
-                            }
+                                if (event.linkedSchoolNote != null) {
+                                  final delete =
+                                      await Utils.showBoolInputDialog(
+                                    context,
+                                    question: AppLocalizationsManager
+                                        .localizations
+                                        .strDoYouWantToDeleteLinkedNote,
+                                    showYesAndNoInsteadOfOK: true,
+                                    markTrueAsRed: true,
+                                  );
+                                  deleteNote = delete;
+                                }
 
-                            TimetableManager().removeTodoEvent(
-                              event,
-                              deleteLinkedSchoolNote: deleteNote,
-                            );
+                                TimetableManager().removeTodoEvent(
+                                  event,
+                                  deleteLinkedSchoolNote: deleteNote,
+                                );
 
-                            if (!context.mounted) return;
+                                if (!context.mounted) return;
 
-                            Navigator.of(context).pop();
-                          },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      child: const Icon(
-                        Icons.delete_outline,
-                        color: Colors.red,
-                        size: 42,
+                                Navigator.of(context).pop();
+                              },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          child: const Icon(
+                            Icons.delete_outline,
+                            color: Colors.red,
+                            size: 42,
+                          ),
+                        ),
                       ),
                     ),
-                  ),
+                    // TODO: hinzufügen mit guten UI nur halt um dann zu bearbeiten (#15)
+                    // Tooltip(
+                    //   message:
+                    //       AppLocalizationsManager.localizations.strDeleteTask,
+                    //   child: ElevatedButton(
+                    //     onPressed: widget.event == null
+                    //         ? null
+                    //         : () async {
+                    //             final event = widget.event;
+                    //             if (event == null) return;
+
+                    //             bool removeTodoEvent =
+                    //                 await Utils.showBoolInputDialog(
+                    //               context,
+                    //               question: AppLocalizationsManager
+                    //                   .localizations
+                    //                   .strDoYouWantToDeleteTaskX(
+                    //                 event.linkedSubjectName,
+                    //               ),
+                    //               description: event.endTime == null
+                    //                   ? AppLocalizationsManager.localizations
+                    //                       .strNoEndDate //kann nicht eintreten eigentlich
+                    //                   : "(${Utils.dateToString(event.endTime!)})",
+                    //               showYesAndNoInsteadOfOK: true,
+                    //               markTrueAsRed: true,
+                    //             );
+                    //             if (!removeTodoEvent || !context.mounted)
+                    //               return;
+                    //             bool deleteNote = false;
+
+                    //             if (event.linkedSchoolNote != null) {
+                    //               final delete =
+                    //                   await Utils.showBoolInputDialog(
+                    //                 context,
+                    //                 question: AppLocalizationsManager
+                    //                     .localizations
+                    //                     .strDoYouWantToDeleteLinkedNote,
+                    //                 showYesAndNoInsteadOfOK: true,
+                    //                 markTrueAsRed: true,
+                    //               );
+                    //               deleteNote = delete;
+                    //             }
+
+                    //             TimetableManager().removeTodoEvent(
+                    //               event,
+                    //               deleteLinkedSchoolNote: deleteNote,
+                    //             );
+
+                    //             if (!context.mounted) return;
+
+                    //             Navigator.of(context).pop();
+                    //           },
+                    //     child: Container(
+                    //       padding: const EdgeInsets.symmetric(
+                    //         horizontal: 8,
+                    //         vertical: 4,
+                    //       ),
+                    //       child: const Icon(
+                    //         Icons.delete_outline,
+                    //         color: Colors.red,
+                    //         size: 42,
+                    //       ),
+                    //     ),
+                    //   ),
+                    // ),
+                  ],
                 ),
                 child: ElevatedButton(
                   onPressed: () async {

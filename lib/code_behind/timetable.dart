@@ -67,12 +67,14 @@ class WeekTimetable extends Timetable {
     required int weekIndex,
     required int year,
     required SpecialLesson specialLesson,
+    bool removeIfExists = false,
   }) {
     TimetableManager().setSpecialLesson(
       timetable: parent,
       year: year,
       weekIndex: weekIndex,
       specialLesson: specialLesson,
+      removeIfExists: removeIfExists,
     );
   }
 
@@ -773,12 +775,14 @@ class Timetable {
     required int weekIndex,
     required int year,
     required SpecialLesson specialLesson,
+    bool removeIfExists = false,
   }) {
     TimetableManager().setSpecialLesson(
       timetable: this,
       year: year,
       weekIndex: weekIndex,
       specialLesson: specialLesson,
+      removeIfExists: removeIfExists,
     );
   }
 
