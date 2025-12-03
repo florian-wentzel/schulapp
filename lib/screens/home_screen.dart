@@ -238,8 +238,13 @@ class _HomeScreenState extends State<HomeScreen> {
             )
           : null,
       floatingActionButton: _floatingActionButton(context),
-      body: SafeArea(
-        child: _body(),
+      body: AnimatedBuilder(
+        animation: TimetableManager(),
+        builder: (context, child) {
+          return SafeArea(
+            child: _body(),
+          );
+        },
       ),
     );
   }

@@ -22,8 +22,7 @@ class TimetableManager extends ChangeNotifier {
   List<SchoolSemester>? _semesters;
   List<TodoEvent>? _todoEvents;
   //Speicher keys von gelöschten TodoEvents.toDeletedString()
-  TODO: als klasse machen mit datum um alte zu löschen..
-  List<String>? _deletedTodoEventKeys;
+  List<DeletedTodoEvent>? _deletedTodoEventKeys;
   Settings? _settings;
 
   List<Timetable> get timetables {
@@ -49,7 +48,7 @@ class TimetableManager extends ChangeNotifier {
     return _todoEvents!;
   }
 
-  List<String> get deletedTodoEvents {
+  List<DeletedTodoEvent> get deletedTodoEvents {
     _deletedTodoEventKeys ??= SaveManager().loadAllDeletedTodoEvents();
     return _deletedTodoEventKeys!;
   }
@@ -58,17 +57,8 @@ class TimetableManager extends ChangeNotifier {
     TodoEvent todoEvent, {
     bool saveAfterRemove = true,
   }) {
-    addDeletedTodoEventStr(
-      todoEvent.toDeletedString(),
-      saveAfterRemove: saveAfterRemove,
-    );
-  }
+    deletedTodoEvents.add(DeletedTodoEvent.fromTodoEvent(todoEvent));
 
-  void addDeletedTodoEventStr(
-    String todoEventKey, {
-    bool saveAfterRemove = true,
-  }) {
-    deletedTodoEvents.add(todoEventKey);
     if (saveAfterRemove) {
       saveDeletedTodoEvents();
     }
@@ -76,16 +66,6 @@ class TimetableManager extends ChangeNotifier {
 
   void saveDeletedTodoEvents() {
     SaveManager().saveDeletedTodoEvents(deletedTodoEvents);
-  }
-
-  void setTodoEvents(List<TodoEvent> newEvents) {
-    //TODO
-    //alle die es bereits gibt, checken ob sich was geändert hat, wenn ja dann neue Benachrichtigung
-    //wenn nicht dann einfach übernehmen, alle anderen müssen halt hinzugefügt werden
-    //erstmal nur übernehmen
-    _todoEvents = newEvents;
-    SaveManager().saveTodoEvents(todoEvents);
-    notifyListeners();
   }
 
   Future<void> setTodoEventsNotifications() async {
@@ -368,8 +348,9 @@ class TimetableManager extends ChangeNotifier {
     }
   }
 
-  void addOrChangeTodoEvent(
+  bool addOrChangeTodoEvent(
     TodoEvent event, {
+    bool saveAfterChange = true,
     String? saveOnlineCode,
   }) {
     //damit bei änderungen nicht der gleiche onlineCode angezeigt wird
@@ -386,7 +367,16 @@ class TimetableManager extends ChangeNotifier {
       event.addNotification();
     }
 
-    SaveManager().saveTodoEvents(todoEvents);
+    if (saveAfterChange) {
+      return SaveManager().saveTodoEvents(todoEvents);
+    }
+
+    return true;
+  }
+
+  bool saveTodoEvents() {
+    notifyListeners();
+    return SaveManager().saveTodoEvents(todoEvents);
   }
 
   bool removeTodoEvent(

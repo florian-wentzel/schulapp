@@ -1,12 +1,11 @@
 import 'dart:async';
-import 'dart:convert' show utf8, base64Url, jsonDecode, jsonEncode;
+import 'dart:convert' show utf8, jsonEncode;
 import 'dart:io' as io;
 import 'dart:math';
 import 'package:googleapis/drive/v3.dart' as drive;
 import 'package:flutter/foundation.dart';
-import 'package:google_sign_in_all_platforms/google_sign_in_all_platforms.dart';
 import 'package:path/path.dart' as path;
-import 'package:schulapp/code_behind/google_auth_data.dart';
+import 'package:schulapp/code_behind/google_drive/custom_google_sign_in_base.dart';
 import 'package:schulapp/code_behind/google_drive/online_sync_state.dart';
 import 'package:schulapp/code_behind/mergable.dart';
 import 'package:schulapp/code_behind/save_manager.dart';
@@ -33,28 +32,19 @@ class OnlineSyncManager {
     return _instance;
   }
 
+  late final CustomGoogleSignInBase _googleSignIn;
+
   OnlineSyncManager._internal() {
-    _googleSignIn.authenticationState
-        .listen(_handleAuthenticationEvent)
-        .onError(_handleAuthenticationError);
-    _googleSignIn.silentSignIn();
+    // TODO Plattform checken
+    _googleSignIn = CustomGoogleSignInDesktop();
+    _googleSignIn.init();
+
+    // _googleSignIn.lightweightSignIn(); // das macht ein pop up in android, JEDES MAL!
     _setStreamState(_currentState);
     final lastSyncTimeAndTry = SaveManager().loadLastOnlineSyncTimeAndTry();
     _lastSyncTime = lastSyncTimeAndTry.$1;
     _lastSyncTryTime = lastSyncTimeAndTry.$2;
   }
-
-  final GoogleSignIn _googleSignIn = GoogleSignIn(
-    params: const GoogleSignInParams(
-      clientId: GoogleAuthData.serverClientId,
-      clientSecret: GoogleAuthData.serverClientSecret,
-      scopes: [
-        drive.DriveApi.driveAppdataScope,
-        "email",
-        "profile",
-      ],
-    ),
-  );
 
   DateTime? _lastSyncTime;
   DateTime? get lastSyncTime => _lastSyncTime;
@@ -70,15 +60,14 @@ class OnlineSyncManager {
     SaveManager().saveLastOnlineSyncTimeAndTry(lastSyncTime, time);
   }
 
-  drive.DriveApi? _driveClient;
-  GoogleUserData? _currUserData;
+  drive.DriveApi? get driveClient => _googleSignIn.driveApi;
+  GoogleUserData? get currUserData => _googleSignIn.currUser;
 
-  String? get currentUserName => _currUserData?.name;
-  String? get currentUserEmail => _currUserData?.email;
+  String? get currentUserName => currUserData?.name;
+  String? get currentUserEmail => currUserData?.email;
 
   Future<bool> signIn() async {
-    final user = await _googleSignIn.signIn();
-    return user != null;
+    return _googleSignIn.signIn();
   }
 
   Future<void> signOut() => _googleSignIn.signOut();
@@ -102,40 +91,9 @@ class OnlineSyncManager {
     _stateController.add(state);
   }
 
-  Future<void> _handleAuthenticationEvent(
-    GoogleSignInCredentials? user,
-  ) async {
-    final loggedin = user != null;
-
-    if (loggedin) {
-      unawaited(_handleAfterLogInInit(user));
-    }
-  }
-
-  Future<void> _handleAuthenticationError(Object e) async {
-    // _isAuthorized = false;
-    // _errorMessage = e is GoogleSignInException
-    //     ? _errorMessageFromSignInException(e)
-    //     : 'Unknown error: $e';
-  }
-
-  Future<drive.DriveApi?> getDriveApi() async {
-    drive.DriveApi? driveApi;
-    try {
-      final client = await _googleSignIn.authenticatedClient;
-
-      if (client == null) return null;
-
-      driveApi = drive.DriveApi(client);
-    } catch (e) {
-      debugPrint(e.toString());
-    }
-    return driveApi;
-  }
-
   Future<drive.File?> getDriveFile(String filename) async {
     try {
-      final client = _driveClient;
+      final client = driveClient;
       if (client == null) return null;
 
       drive.FileList fileList = await client.files.list(
@@ -154,7 +112,7 @@ class OnlineSyncManager {
 
   Future<Map<String, drive.File>?> getAllDriveFiles() async {
     try {
-      final client = _driveClient;
+      final client = driveClient;
       if (client == null) return null;
 
       drive.FileList fileList = await client.files.list(
@@ -189,7 +147,7 @@ class OnlineSyncManager {
     required String? id,
     required String parentId,
   }) async {
-    final driveApi = _driveClient;
+    final driveApi = driveClient;
 
     if (driveApi == null) return null;
 
@@ -224,7 +182,7 @@ class OnlineSyncManager {
     String? driveFileId,
     drive.DriveApi? driveApi,
   }) async {
-    driveApi ??= _driveClient;
+    driveApi ??= driveClient;
 
     if (driveApi == null) return null;
 
@@ -259,7 +217,7 @@ class OnlineSyncManager {
     required String driveFileId,
   }) async {
     try {
-      final client = _driveClient;
+      final client = driveClient;
 
       if (client == null) return null;
 
@@ -286,7 +244,7 @@ class OnlineSyncManager {
     required String targetLocalPath,
   }) async {
     try {
-      final client = _driveClient;
+      final client = driveClient;
 
       if (client == null) return null;
 
@@ -307,45 +265,6 @@ class OnlineSyncManager {
       debugPrint(e.toString());
       return null;
     }
-  }
-
-  GoogleUserData? getCurrUser(GoogleSignInCredentials creds) {
-    final parts = creds.idToken?.split('.');
-
-    if (parts == null || parts.length != 3) {
-      return null;
-    }
-
-    final payload = utf8.decode(
-      base64Url.decode(
-        base64Url.normalize(parts[1]),
-      ),
-    );
-
-    final Map<String, dynamic> claims = jsonDecode(payload);
-
-    final email = claims['email'];
-    final name = claims['name'];
-    final picture = claims['picture'];
-    final sub = claims['sub']; // user’s unique Google ID
-
-    if (email == null || name == null || picture == null || sub == null) {
-      return null;
-    }
-
-    return GoogleUserData(
-      email: email,
-      name: name,
-      picture: picture,
-      sub: sub,
-    );
-  }
-
-  Future<void> _handleAfterLogInInit(GoogleSignInCredentials user) async {
-    _driveClient = await getDriveApi();
-    _currUserData = getCurrUser(user);
-
-    print("Drive API initialized: $_currUserData");
   }
 
   static const _folderMimeType = "application/vnd.google-apps.folder";
@@ -441,11 +360,12 @@ class OnlineSyncManager {
 
     final remoteDeletedTodoEventsMap = await remoteDeletedTodoEventsMapFuture;
 
-    final List<String> remoteDeletedTodos = remoteDeletedTodoEventsMap == null
-        ? []
-        : SaveManager().deletedTodoEventsFromJson(
-            remoteDeletedTodoEventsMap,
-          );
+    final List<DeletedTodoEvent> remoteDeletedTodos =
+        remoteDeletedTodoEventsMap == null
+            ? []
+            : SaveManager().deletedTodoEventsFromJson(
+                remoteDeletedTodoEventsMap,
+              );
 
     // if (remoteTodos.isEmpty && remoteDeletedTodos.isEmpty) {
     //   //upload
@@ -468,6 +388,7 @@ class OnlineSyncManager {
     Map<String, TodoEvent> mergedTodosMap = {};
 
     List<TodoEvent> todoEventsToDelete = [];
+    List<TodoEvent> todoEventsToAddOrChangeLocal = [];
 
     // Zuerst lokale mergen
     for (var localTodo in localTodos) {
@@ -477,10 +398,12 @@ class OnlineSyncManager {
           );
 
       if (remoteTodo == null) {
-        final deletedTodo = remoteDeletedTodos.cast<String?>().firstWhere(
-              (element) => element == localTodo.toDeletedString(),
-              orElse: () => null,
-            );
+        final deletedTodo =
+            remoteDeletedTodos.cast<DeletedTodoEvent?>().firstWhere(
+                  (element) =>
+                      element?.deletedStr == localTodo.toDeletedString(),
+                  orElse: () => null,
+                );
         if (deletedTodo != null) {
           // linkedSchoolNote soll wenn schoolnotes gesynced werden gelöscht werden
           // weil wir gerade durch die localTodos iterieren, können wir sie erst nach der schleife entfernen..
@@ -497,11 +420,15 @@ class OnlineSyncManager {
         continue;
       }
 
-      final mergedTodo = await localTodo.merge(remoteTodo, _onMergeError);
+      final mergedTodos = await localTodo.merge(remoteTodo, _onMergeError);
 
       //hier nochmal sagen, dass es noch bzw. wieder synctonisiert
 
-      for (var todo in mergedTodo) {
+      for (var todo in mergedTodos) {
+        // wenn wir die Lokale Version behalten, dann muss sie lokal nicht geändert werden
+        if (todo != localTodo) {
+          todoEventsToAddOrChangeLocal.add(todo);
+        }
         mergedTodosMap[todo.uid] = todo;
       }
     }
@@ -527,10 +454,12 @@ class OnlineSyncManager {
       if (localTodo == null) {
         final localDeletedTodos = TimetableManager().deletedTodoEvents;
 
-        final deletedTodo = localDeletedTodos.cast<String?>().firstWhere(
-              (element) => element == remoteTodo.toDeletedString(),
-              orElse: () => null,
-            );
+        final deletedTodo =
+            localDeletedTodos.cast<DeletedTodoEvent?>().firstWhere(
+                  (element) =>
+                      element?.deletedStr == remoteTodo.toDeletedString(),
+                  orElse: () => null,
+                );
 
         if (deletedTodo != null) {
           remoteDeletedTodos.add(deletedTodo);
@@ -539,6 +468,7 @@ class OnlineSyncManager {
 
         if (!mergedTodosMap.containsKey(remoteTodo.uid)) {
           mergedTodosMap[remoteTodo.uid] = remoteTodo;
+          todoEventsToAddOrChangeLocal.add(remoteTodo);
         }
         continue;
       }
@@ -548,11 +478,15 @@ class OnlineSyncManager {
         continue;
       }
 
-      final mergedTodo = await localTodo.merge(remoteTodo, _onMergeError);
+      final mergedTodos = await localTodo.merge(remoteTodo, _onMergeError);
 
       //hier nochmal sagen, dass es noch bzw. wieder synctonisiert
 
-      for (var todo in mergedTodo) {
+      for (var todo in mergedTodos) {
+        // wenn wir die Lokale Version behalten, dann muss sie lokal nicht geändert werden
+        if (todo != localTodo) {
+          todoEventsToAddOrChangeLocal.add(todo);
+        }
         mergedTodosMap[todo.uid] = todo;
       }
     }
@@ -563,7 +497,16 @@ class OnlineSyncManager {
 
     final mergedTodoEventsList = mergedTodosMap.values.toList();
 
-    TimetableManager().setTodoEvents(mergedTodoEventsList);
+    for (var todo in todoEventsToAddOrChangeLocal) {
+      TimetableManager().addOrChangeTodoEvent(
+        todo,
+        saveAfterChange: false,
+        // weil wir nur von einem gerät alle vars von TodoEvent übernehmen können wir auch den code speichern..
+        saveOnlineCode: todo.saveOnlineCode,
+      );
+    }
+
+    TimetableManager().saveTodoEvents();
     TimetableManager().saveDeletedTodoEvents();
 
     final responseFuture = uploadDriveFileFromBytes(
@@ -914,6 +857,17 @@ class OnlineSyncManager {
       return alreadyRunningFuture;
     }
 
+    // Testen ob man angemeldet ist
+    final client = driveClient;
+    if (client == null) {
+      final state = OnlineSyncState(
+        state: OnlineSyncStateEnum.errorWhileSync,
+        errorMsg: "Not signed in!",
+      );
+      _setStreamState(state);
+      return state;
+    }
+
     _setStreamState(
       OnlineSyncState(
         state: OnlineSyncStateEnum.syncing,
@@ -958,7 +912,7 @@ class OnlineSyncManager {
     drive.DriveApi? driveApi,
     String? parentId,
   }) async {
-    driveApi ??= _driveClient;
+    driveApi ??= driveClient;
 
     if (driveApi == null) return null;
 
@@ -1076,53 +1030,5 @@ class OnlineSyncManager {
       print(
           "File | ${entry.value.name} | ${entry.value.modifiedTime} | parent: $parent");
     }
-  }
-
-  // vielleicht kann man das später noch hinzufügn
-  // String _errorMessageFromSignInException(GoogleSignInException e) {
-  //   // In practice, an application should likely have specific handling for most
-  //   // or all of the, but for simplicity this just handles cancel, and reports
-  //   // the rest as generic errors.
-  //   return switch (e.code) {
-  //     GoogleSignInExceptionCode.canceled => 'Sign in canceled',
-  //     _ => 'GoogleSignInException ${e.code}: ${e.description}',
-  //   };
-  // }
-}
-
-/// kann man vielleicht gebrauchen
-// enum MergeFileContainerState {
-//   downloadedRemoteSuccessful,
-//   uploadedLocalSuccessful,
-//   merged
-// }
-
-// class MergeFileContainer {
-//   SchoolFile mergedFile;
-//   MergeFileContainerState state;
-
-//   MergeFileContainer({
-//     required this.mergedFile,
-//     required this.state,
-//   });
-// }
-
-/// Custom class for saving user data from Googl login
-class GoogleUserData {
-  GoogleUserData({
-    required this.email,
-    required this.name,
-    required this.picture,
-    required this.sub,
-  });
-
-  final String email;
-  final String name;
-  final String picture;
-  final String sub;
-
-  @override
-  String toString() {
-    return 'GoogleUserData{email: $email, name: $name, picture: $picture, sub: $sub}';
   }
 }

@@ -1024,9 +1024,10 @@ class SaveManager {
     };
   }
 
-  Map<String, dynamic> deletedTodoEventsToJson(List<String> deletedTodoEvents) {
+  Map<String, dynamic> deletedTodoEventsToJson(
+      List<DeletedTodoEvent> deletedTodoEvents) {
     return {
-      todosKey: deletedTodoEvents,
+      todosKey: deletedTodoEvents.map((e) => e.toJson()).toList(),
     };
   }
 
@@ -1044,7 +1045,7 @@ class SaveManager {
     }
   }
 
-  bool saveDeletedTodoEvents(List<String> deletedTodoEvents) {
+  bool saveDeletedTodoEvents(List<DeletedTodoEvent> deletedTodoEvents) {
     Directory eventDir = getTodosDir();
     String pathToFile = join(eventDir.path, deletedTodoEventSaveName);
 
@@ -1072,26 +1073,43 @@ class SaveManager {
     }
   }
 
-  List<String> loadAllDeletedTodoEvents() {
+  List<DeletedTodoEvent> loadAllDeletedTodoEvents() {
     Directory eventDir = getTodosDir();
     String pathToFile = join(eventDir.path, deletedTodoEventSaveName);
     try {
       String fileContent = File(pathToFile).readAsStringSync();
       Map<String, dynamic> json = jsonDecode(fileContent);
-      return deletedTodoEventsFromJson(json);
+      final list = deletedTodoEventsFromJson(json);
+
+      final deleteDateTime = DateTime.now().subtract(
+        Duration(
+          days: DeletedTodoEvent.daysToKeepDeletedEvents,
+        ),
+      );
+
+      list.removeWhere(
+        (element) => element.time.isBefore(deleteDateTime),
+      );
+
+      return list;
     } catch (e) {
       return [];
     }
   }
 
-  List<String> deletedTodoEventsFromJson(Map<String, dynamic> json) {
+  List<DeletedTodoEvent> deletedTodoEventsFromJson(Map<String, dynamic> json) {
     try {
       List<dynamic> todos = (json[todosKey] as List).cast();
+      List<DeletedTodoEvent> deletedTodos = [];
 
-      return List.generate(
-        todos.length,
-        (index) => todos[index] as String,
-      );
+      for (int i = 0; i < todos.length; i++) {
+        final todo = DeletedTodoEvent.fromJson(todos[i]);
+        if (todo != null) {
+          deletedTodos.add(todo);
+        }
+      }
+
+      return deletedTodos;
     } catch (e) {
       return [];
     }

@@ -9,6 +9,7 @@ enum OnlineSyncStateEnum {
   syncedSucessful,
   // if there was an error while merging
   waitingForUserInput,
+  // TODO: not signed in
 }
 
 class OnlineSyncState {
