@@ -245,15 +245,16 @@ class GoFileIoManager {
     String id,
     String accToken,
   ) async {
-    //where does wt=... come from?
-    //https://gofile.io/dist/js/global.js at line 23 (appdata.wt = "4fd6sg89d7s6")
-    final getContentUrl = "https://api.gofile.io/contents/$id?wt=4fd6sg89d7s6";
+    final getContentUrl = "https://api.gofile.io/contents/$id";
 
     final client = http.Client();
 
     var request = http.Request('GET', Uri.parse(getContentUrl));
     request.headers.addAll({
       'Authorization': 'Bearer $accToken',
+      //where does 'X-Website-Token come from? (its like ?wt=... before in the old api)
+      //https://gofile.io/dist/js/config.js at line 24 (like appdata.wt = "...")
+      'X-Website-Token': "4fd6sg89d7s6",
     });
 
     var streamedResponse = await client.send(request);
