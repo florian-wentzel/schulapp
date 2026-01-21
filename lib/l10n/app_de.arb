@@ -506,5 +506,8 @@
   "strDuplicate": "Duplizieren",
   "strSetOnHomeScreen": "Auf Startbildschirm setzen",
   "strSetAsExtraTimetable": "Als zusätzlichen Stundenplan setzen",
-  "strEditSubstitutionLesson": "Vertretungsstunde bearbeiten"
+  "strEditSubstitutionLesson": "Vertretungsstunde bearbeiten",
+  "strTaskMarkedAsFinished": "Aufgabe als erledigt markiert: {subjectName}",
+  "strTaskMarkedAsNotFinished": "Aufgabe als unerledigt markiert: {subjectName}",
+  "strUndo": "Rückgängig machen"
 }

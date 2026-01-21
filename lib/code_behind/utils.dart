@@ -477,6 +477,28 @@ class Utils {
     return TimeOfDay(hour: hour, minute: minute);
   }
 
+  static Future<void> showInfoPopUp(
+    BuildContext context, {
+    required String msg,
+  }) async {
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: Text(msg),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text(AppLocalizationsManager.localizations.strOK),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   static void showInfo(
     BuildContext context, {
     required String msg,
@@ -514,6 +536,8 @@ class Utils {
         action: actionWidget,
         backgroundColor: backgroundColor,
         duration: duration,
+        //damit es automatisch nach x Sekunden verschwindet
+        persist: false,
         content: Text(
           msg,
           style: TextStyle(

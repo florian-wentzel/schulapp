@@ -1406,5 +1406,26 @@
   "strSetAsExtraTimetable": "Set as additional timetable",
   "@strSetAsExtraTimetable": {},
   "strEditSubstitutionLesson": "Edit substitution lesson",
-  "@strEditSubstitutionLesson": {}
+  "@strEditSubstitutionLesson": {},
+  "strTaskMarkedAsFinished": "Task marked as finished: {subjectName}",
+  "@strTaskMarkedAsFinished": {
+    "placeholders": {
+      "subjectName": {
+        "type": "String",
+        "example": "Mathematics"
+      }
+    }
+  },
+  "strTaskMarkedAsNotFinished": "Task marked as not finished: {subjectName}",
+  "@strTaskMarkedAsNotFinished": {
+    "placeholders": {
+      "subjectName": {
+        "type": "String",
+        "example": "Mathematics"
+      }
+    }
+  },
+  "strUndo": "Undo",
+  "@strUndo": {}
+
 }
