@@ -32,6 +32,11 @@ class WeekTimetable extends Timetable {
           lessonPrefabs: null,
         );
 
+  @override
+  List<SchoolLessonPrefab> get lessonPrefabs {
+    return parent.lessonPrefabs;
+  }
+
   static WeekTimetable fromTimetable({
     required String name,
     required Timetable timetable,
@@ -336,36 +341,41 @@ class Timetable {
       lessonPrefabsMap[_lessonPrefabs[i].name] = _lessonPrefabs[i];
     }
 
-    for (int schoolDayIndex = 0;
-        schoolDayIndex < schoolDays.length;
-        schoolDayIndex++) {
-      for (int schoolLessonIndex = 0;
-          schoolLessonIndex < maxLessonCount;
-          schoolLessonIndex++) {
-        SchoolLesson lesson =
-            schoolDays[schoolDayIndex].lessons[schoolLessonIndex];
+    final ttList = [this, ...weekTimetables];
 
-        if (lesson is EmptySchoolLesson) {
-          continue;
+    for (var tt in ttList) {
+      for (int schoolDayIndex = 0;
+          schoolDayIndex < tt.schoolDays.length;
+          schoolDayIndex++) {
+        for (int schoolLessonIndex = 0;
+            schoolLessonIndex < tt.maxLessonCount;
+            schoolLessonIndex++) {
+          SchoolLesson lesson =
+              tt.schoolDays[schoolDayIndex].lessons[schoolLessonIndex];
+
+          if (lesson is EmptySchoolLesson) {
+            continue;
+          }
+
+          bool exists = lessonPrefabsMap.containsKey(lesson.name);
+
+          if (exists) continue;
+
+          SchoolLessonPrefab prefab = SchoolLessonPrefab(
+            name: lesson.name,
+            shortName: lesson.shortName,
+            room: lesson.room,
+            teacher: lesson.teacher,
+            color: lesson.color,
+          );
+
+          lessonPrefabsMap[lesson.name] = prefab;
         }
-
-        bool exists = lessonPrefabsMap.containsKey(lesson.name);
-
-        if (exists) continue;
-
-        SchoolLessonPrefab prefab = SchoolLessonPrefab(
-          name: lesson.name,
-          shortName: lesson.shortName,
-          room: lesson.room,
-          teacher: lesson.teacher,
-          color: lesson.color,
-        );
-
-        lessonPrefabsMap[lesson.name] = prefab;
       }
     }
 
-    return lessonPrefabsMap.values.toList();
+    return lessonPrefabsMap.values.toList()
+      ..sort((a, b) => a.name.compareTo(b.name));
   }
 
   set name(String value) {
