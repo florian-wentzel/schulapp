@@ -10,6 +10,7 @@ import 'package:schulapp/code_behind/save_manager.dart';
 import 'package:schulapp/code_behind/school_semester.dart';
 import 'package:schulapp/code_behind/school_time.dart';
 import 'package:schulapp/code_behind/timetable.dart';
+import 'package:schulapp/code_behind/timetable_manager.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 
 import 'grade_group.dart';
@@ -148,7 +149,8 @@ class Settings {
       "lessonNotificationEnabled";
   static const preLessonReminderNotificationDurationKey =
       "preLessonReminderNotificationDuration";
-
+  static const goFileIoTokenKey = "goFileIoToken";
+  static const goFileIoTokenValidToDateKey = "goFileIoTokenDate";
   static const waitBetweenAskForReviewDuration = Duration(days: 3);
 
   static final key = encrypt.Key.fromUtf8("a/wdkaw1ln=921jt48wadan249Bamd=#");
@@ -500,6 +502,50 @@ class Settings {
         if (millis == null) return null;
 
         return Duration(milliseconds: millis);
+      },
+    ),
+    SettingsVar<String?>(
+      key: goFileIoTokenKey,
+      // damit jedes mal der token überprüft wird, ob er noch gültig ist
+      onlyReturnCopy: (value) {
+        if (value == null) return null;
+
+        final date = TimetableManager().settings.getVar<DateTime?>(
+              goFileIoTokenValidToDateKey,
+            );
+
+        if (date == null) {
+          return null;
+        }
+
+        if (DateTime.now().toUtc().isAfter(date)) {
+          return null;
+        }
+
+        return value;
+      },
+      defaultValue: () => null,
+      canBeNull: () => null,
+    ),
+    SettingsVar<DateTime?>(
+      key: goFileIoTokenValidToDateKey,
+      defaultValue: () => null,
+      canBeNull: () => null,
+      loadCustomType: (value) {
+        if (value == null) return null;
+        int? millieseconds = int.tryParse(value);
+
+        if (millieseconds == null) return null;
+
+        return DateTime.fromMillisecondsSinceEpoch(
+          millieseconds,
+          isUtc: true,
+        );
+      },
+      saveCustomType: (type) {
+        if (type == null) return null;
+
+        return type.millisecondsSinceEpoch.toString();
       },
     ),
   ];

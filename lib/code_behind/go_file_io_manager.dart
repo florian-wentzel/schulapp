@@ -11,6 +11,7 @@ import 'package:schulapp/code_behind/timetable_manager.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:crypto/crypto.dart';
 
 class GoFileIoManager {
   static final GoFileIoManager _instance = GoFileIoManager._internal();
@@ -223,6 +224,13 @@ class GoFileIoManager {
   }
 
   Future<String> _getAccToken() async {
+    final token =
+        TimetableManager().settings.getVar<String?>(Settings.goFileIoTokenKey);
+
+    if (token != null) {
+      return token;
+    }
+
     const getAccountTokenUrl = "https://api.gofile.io/accounts";
 
     var response = await http.post(Uri.parse(getAccountTokenUrl));
@@ -231,7 +239,20 @@ class GoFileIoManager {
       String responseBody = response.body;
       Map<String, dynamic>? json = jsonDecode(responseBody);
       String? accToken = json?["data"]["token"];
+
       if (accToken != null) {
+        //Das muss zuerst gespeichert werden!!
+        TimetableManager().settings.setVar<DateTime?>(
+              Settings.goFileIoTokenValidToDateKey,
+              DateTime.now().toUtc().add(
+                    Duration(days: 7),
+                  ),
+            );
+
+        TimetableManager()
+            .settings
+            .setVar<String?>(Settings.goFileIoTokenKey, accToken);
+
         return accToken;
       }
     }
@@ -249,12 +270,19 @@ class GoFileIoManager {
 
     final client = http.Client();
 
+    final userAgent = "Dart/3.10 (dart:io)";
+    final language = 'en-US';
+
     var request = http.Request('GET', Uri.parse(getContentUrl));
     request.headers.addAll({
       'Authorization': 'Bearer $accToken',
-      //where does 'X-Website-Token come from? (its like ?wt=... before in the old api)
-      //https://gofile.io/dist/js/config.js at line 24 (like appdata.wt = "...")
-      'X-Website-Token': "4fd6sg89d7s6",
+      'X-Website-Token': generateWT(
+        token: accToken,
+        userAgent: userAgent,
+        language: language,
+      ),
+      'X-BL': language,
+      'User-Agent': userAgent,
     });
 
     var streamedResponse = await client.send(request);
@@ -364,5 +392,25 @@ class GoFileIoManager {
       return false;
     }
     return true;
+  }
+
+  String sha256Hex(String input) {
+    final List<int> bytes = utf8.encode(input);
+    final Digest digest = sha256.convert(bytes);
+    return digest.toString();
+  }
+
+  String generateWT({
+    required String token,
+    required String userAgent,
+    required String language,
+  }) {
+    final int timeBucket =
+        (DateTime.now().millisecondsSinceEpoch / 1000 / 14400).floor();
+
+    final String payload =
+        '$userAgent::$language::$token::$timeBucket::gf2026x';
+
+    return sha256Hex(payload);
   }
 }
