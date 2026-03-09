@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:intl/intl.dart';
 import 'package:schulapp/code_behind/school_lesson.dart';
 import 'package:schulapp/code_behind/school_lesson_prefab.dart';
 import 'package:schulapp/code_behind/school_semester.dart';
@@ -59,6 +60,9 @@ class Utils {
     return /*!kIsWeb && */
         (Platform.isWindows || Platform.isLinux || Platform.isMacOS);
   }
+
+  static final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
+      GlobalKey<ScaffoldMessengerState>();
 
   static void updateTimetableLessons(
     Timetable timetable,
@@ -477,13 +481,42 @@ class Utils {
     return TimeOfDay(hour: hour, minute: minute);
   }
 
-  static void showInfo(
+  static Future<void> showInfoPopUp(
     BuildContext context, {
+    required String msg,
+  }) async {
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: Text(msg),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text(AppLocalizationsManager.localizations.strOK),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  static void showInfo(
+    BuildContext? contextt, {
     required String msg,
     InfoType type = InfoType.normal,
     Duration? duration,
     SnackBarAction? actionWidget,
   }) {
+    if (!(scaffoldMessengerKey.currentContext?.mounted ?? false)) {
+      return;
+    }
+
+    final context = scaffoldMessengerKey.currentContext;
+    if (context == null) return;
+
     duration ??= const Duration(seconds: 4);
     Color textColor =
         Theme.of(context).textTheme.bodyLarge?.color ?? Colors.white;
@@ -509,11 +542,14 @@ class Utils {
         break;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
+    // ScaffoldMessenger.of(context).showSnackBar(
+    scaffoldMessengerKey.currentState?.showSnackBar(
       SnackBar(
         action: actionWidget,
         backgroundColor: backgroundColor,
         duration: duration,
+        //damit es automatisch nach x Sekunden verschwindet
+        persist: false,
         content: Text(
           msg,
           style: TextStyle(
@@ -525,10 +561,11 @@ class Utils {
   }
 
   static void hideCurrInfo(
-    BuildContext context, {
+    BuildContext? context, {
     SnackBarClosedReason closedReason = SnackBarClosedReason.hide,
   }) {
-    ScaffoldMessenger.of(context).hideCurrentSnackBar(
+    // ScaffoldMessenger.of(context).hideCurrentSnackBar(
+    scaffoldMessengerKey.currentState?.hideCurrentSnackBar(
       reason: closedReason,
     );
   }
@@ -884,6 +921,31 @@ class Utils {
     return isCustomTask;
   }
 
+  // von KI gekocht
+  static int getISO8601WeekIndex(DateTime date) {
+    // https://de.wikipedia.org/wiki/Woche#Z%C3%A4hlweise_nach_ISO_8601
+
+    // ISO 8601: week containing the year's first Thursday is week 1
+    // Weeks start on Monday
+    final dayOfYear = int.parse(DateFormat("D").format(date));
+    final weekday = date.weekday; // Monday = 1, Sunday = 7
+
+    // Shift so week starts on Monday, Thursday = day 4
+    final weekNumber = ((dayOfYear - weekday + 10) / 7).floor();
+
+    if (weekNumber < 1) {
+      // Belongs to last week of the previous year
+      return getISO8601WeekIndex(DateTime(date.year - 1, 12, 28));
+    } else if (weekNumber > 52) {
+      // Check if it belongs to week 1 of the next year
+      final jan1Weekday = DateTime(date.year + 1, 1, 1).weekday;
+      if (jan1Weekday <= 4) return 1; // Next year's week 1
+    }
+
+    return weekNumber;
+  }
+
+  /// returns the old index because its used for saving special lessons...
   static int getWeekIndex(DateTime date) {
     DateTime firstDayOfYear = DateTime(date.year, 1, 1);
 
@@ -1062,7 +1124,7 @@ class Utils {
 }
 
 enum InfoType {
-  normal,
+  normal, // does not look good
   info,
   success,
   warning,

@@ -138,8 +138,22 @@ class _DragDownContainerState extends State<DragDownContainer> {
           );
         });
       },
-      onPointerUp: (_) {
+      onPointerUp: (details) {
         _isDragging = false;
+
+        // If there was a tap, close the container
+        if (_xDragDistance <= 2 &&
+            _yDragDistance <= 2 && // ist nicht schön, aber funktioniert
+            details.position.dy > widget.maxContainerHeight / 2) {
+          setState(() {
+            controller._setContainerHeight(0);
+            if (_wasOpenOnPressStart) {
+              controller._notify();
+            }
+          });
+          return;
+        }
+
         // Snap behavior
         if (controller._containerHeight > widget.maxContainerHeight / 2) {
           setState(() {

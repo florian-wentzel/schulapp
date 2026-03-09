@@ -769,6 +769,10 @@ class SaveManager {
   }
 
   Directory getSpecialLessonsDirForTimetable(Timetable timetable) {
+    if (timetable is WeekTimetable) {
+      return getSpecialLessonsDirForTimetable(timetable.parent);
+    }
+
     String timetbaleDirPath = join(getTimetablesDir().path, timetable.name);
     String specialLessonsDirPath =
         join(timetbaleDirPath, specialLessonsDirName);

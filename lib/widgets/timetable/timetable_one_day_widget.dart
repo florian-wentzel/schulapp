@@ -338,7 +338,7 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
     );
   }
 
-  Widget _createTimes(bool isCurrDay) {
+  Widget _createTimes(bool isCurrDay, DateTime date) {
     List<Widget> timeWidgets = [];
 
     timeWidgets.add(
@@ -349,6 +349,7 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
         child: Center(
           child: TimeToNextLessonWidget(
             ttSchoolTimes: ttSchoolTimes,
+            date: date,
             onNewLessonCB: () {
               if (mounted) {
                 setState(() {});
@@ -1048,7 +1049,7 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        _createTimes(isCurrDay),
+        _createTimes(isCurrDay, currLessonDateTime),
         Column(
           children: lessonWidgets,
         ),

@@ -7,6 +7,7 @@ import 'package:schulapp/code_behind/go_file_io_manager.dart';
 import 'package:schulapp/code_behind/save_manager.dart';
 import 'package:schulapp/code_behind/school_note.dart';
 import 'package:schulapp/code_behind/school_notes_manager.dart';
+import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/todo_event.dart';
 import 'package:schulapp/code_behind/timetable_manager.dart';
 import 'package:schulapp/code_behind/utils.dart';
@@ -196,13 +197,13 @@ class _TodoEventsScreenState extends State<TodoEventsScreen> {
       body: AnimatedBuilder(
         animation: TimetableManager(),
         builder: (context, child) {
-          return _body();
+          return _body(context);
         },
       ),
     );
   }
 
-  Widget _body() {
+  Widget _body(BuildContext bodyContext) {
     final List<TodoEvent> events;
 
     if (widget.showFinishedTasks) {
@@ -322,10 +323,35 @@ class _TodoEventsScreenState extends State<TodoEventsScreen> {
 
                         setState(() {});
 
+                        String msg;
                         if (!widget.showFinishedTasks) {
                           _createAnimationToFinishedTasks(event, itemContext);
+                          msg = AppLocalizationsManager.localizations
+                              .strTaskMarkedAsFinished(event.name);
                         } else {
                           _createAnimationToUnfinishedTasks(event, itemContext);
+                          msg = AppLocalizationsManager.localizations
+                              .strTaskMarkedAsNotFinished(event.name);
+                        }
+
+                        if (TimetableManager()
+                            .settings
+                            .getVar(Settings.showUndoTodoEventInfoKey)) {
+                          Utils.showInfo(
+                            bodyContext,
+                            msg: msg,
+                            actionWidget: SnackBarAction(
+                              label:
+                                  AppLocalizationsManager.localizations.strUndo,
+                              onPressed: () {
+                                event.finished = !event.finished;
+                                TimetableManager().addOrChangeTodoEvent(event);
+
+                                setState(() {});
+                              },
+                            ),
+                            type: InfoType.info,
+                          );
                         }
                       },
                       onDeleteSwipe: () {

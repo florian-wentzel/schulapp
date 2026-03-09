@@ -354,7 +354,16 @@ Future<(String, bool)?> showSelectSubjectNameSheet(
   bool allowCustomNames = false,
 }) async {
   Timetable? selectedTimetable = Utils.getHomescreenTimetable();
-  if (selectedTimetable == null) return null;
+  if (selectedTimetable == null) {
+    String? customName = await _selectCustomSubjectName(
+      context,
+      showError: true,
+    );
+
+    if (customName == null) return null;
+
+    return (customName, true);
+  }
 
   Map<String, SchoolLessonPrefab> prefabs = {};
 
@@ -409,6 +418,24 @@ Future<(String, bool)?> showSelectSubjectNameSheet(
 
   if (!context.mounted) return null;
 
+  String? customName = await _selectCustomSubjectName(
+    context,
+    showError: true,
+  );
+
+  if (customName == null) return null;
+
+  bool isCustomTask = Utils.isCustomTask(
+    linkedSubjectName: customName,
+  );
+
+  return (customName, isCustomTask);
+}
+
+Future<String?> _selectCustomSubjectName(
+  BuildContext context, {
+  bool showError = false,
+}) async {
   String? customName = await Utils.showStringInputDialog(
     context,
     hintText: AppLocalizationsManager.localizations.strCustomSubject,
@@ -421,7 +448,7 @@ Future<(String, bool)?> showSelectSubjectNameSheet(
   customName = customName.trim();
 
   if (customName.isEmpty) {
-    if (context.mounted) {
+    if (context.mounted && showError) {
       Utils.showInfo(
         context,
         msg: AppLocalizationsManager.localizations.strNameCanNotBeEmpty,
@@ -431,11 +458,7 @@ Future<(String, bool)?> showSelectSubjectNameSheet(
     return null;
   }
 
-  bool isCustomTask = Utils.isCustomTask(
-    linkedSubjectName: customName,
-  );
-
-  return (customName, isCustomTask);
+  return customName;
 }
 
 Future<(SchoolLessonPrefab schoolLessonPrefab, bool delete)?>
