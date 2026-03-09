@@ -2,12 +2,15 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:schulapp/code_behind/school_time.dart';
+import 'package:schulapp/code_behind/settings.dart';
+import 'package:schulapp/code_behind/timetable_manager.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/extensions.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 
 class TimeToNextLessonWidget extends StatefulWidget {
   final List<SchoolTime> ttSchoolTimes;
+  final DateTime date;
   final void Function() onNewLessonCB;
   final bool showTime;
 
@@ -15,6 +18,7 @@ class TimeToNextLessonWidget extends StatefulWidget {
     super.key,
     required this.ttSchoolTimes,
     required this.onNewLessonCB,
+    required this.date,
     this.showTime = true,
   });
 
@@ -67,6 +71,12 @@ class _TimeToNextLessonWidgetState extends State<TimeToNextLessonWidget> {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          if (TimetableManager().settings.getVar(Settings.showCWInTimetableKey))
+            Text(
+              "${AppLocalizationsManager.localizations.strKW} ${Utils.getISO8601WeekIndex(widget.date)}",
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.labelSmall,
+            ),
           Text(
             AppLocalizationsManager.localizations.strTimes,
             textAlign: TextAlign.center,

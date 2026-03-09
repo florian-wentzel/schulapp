@@ -1,6 +1,7 @@
 {
   "@@locale": "de",
   "language_name": "Deutsch",
+  "version_0_10_5": "Kalenderwochen werden angezeigt und man kann Aufgaben, die man als erledigt markiert hat, rückgängig machen. (In den Einstellungen anpassbar) (#18)",
   "version_0_10_4": "Vertretungsstunden können jetzt bearbeitet werden und kleine Bugfixes (#14)",
   "version_0_10_3": "Erstellung von Stundenplänen und die UI für alle Stundenpläne überarbeitet (#12)",
   "version_0_10_2": "Kleine Fehlerbehebungen Edge-to-Edge (#4)",
@@ -509,5 +510,8 @@
   "strEditSubstitutionLesson": "Vertretungsstunde bearbeiten",
   "strTaskMarkedAsFinished": "Aufgabe als erledigt markiert: {subjectName}",
   "strTaskMarkedAsNotFinished": "Aufgabe als unerledigt markiert: {subjectName}",
-  "strUndo": "Rückgängig machen"
+  "strUndo": "Rückgängig machen",
+  "strKW": "KW",
+  "strShowCwOnHomeScreen": "Kalenderwoche im Stundenplan anzeigen",
+  "strShowUndoTodoEvent": "Aufgabe zurücksetzen Option anzeigen"
 }

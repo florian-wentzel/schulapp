@@ -891,7 +891,10 @@ class Timetable {
   void setCurrWeekTimetableIndex(int currWeekTimetableIndex) {
     //get first week index
     int currWeekIndex = Utils.getWeekIndex(
-          DateTime.now(),
+          Utils.getWeekDay(
+            DateTime.now(),
+            DateTime.monday,
+          ),
         ) -
         1;
 

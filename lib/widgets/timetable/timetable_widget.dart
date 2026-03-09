@@ -311,7 +311,7 @@ class _TimetableWidgetState extends State<TimetableWidget> {
 
     final currDayPage = pageIndex == initialPageIndex;
 
-    dayWidgets.add(_createTimes(currDayPage));
+    dayWidgets.add(_createTimes(currDayPage, currMonday));
 
     for (int dayIndex = 0; dayIndex < tt.schoolDays.length; dayIndex++) {
       Widget dayWidget = _createDay(
@@ -334,7 +334,7 @@ class _TimetableWidgetState extends State<TimetableWidget> {
     );
   }
 
-  Widget _createTimes(bool currDayPage) {
+  Widget _createTimes(bool currDayPage, DateTime currMonday) {
     List<Widget> timeWidgets = [];
 
     timeWidgets.add(
@@ -349,6 +349,7 @@ class _TimetableWidgetState extends State<TimetableWidget> {
           child: TimeToNextLessonWidget(
             showTime: widget.highlightCurrLessonAndDay,
             ttSchoolTimes: ttSchoolTimes,
+            date: currMonday,
             onNewLessonCB: () {
               if (mounted) {
                 setState(() {});

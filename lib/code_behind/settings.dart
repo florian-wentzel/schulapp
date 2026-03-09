@@ -151,6 +151,9 @@ class Settings {
       "preLessonReminderNotificationDuration";
   static const goFileIoTokenKey = "goFileIoToken";
   static const goFileIoTokenValidToDateKey = "goFileIoTokenDate";
+  static const showCWInTimetableKey = "showCWInTimetable";
+  static const showUndoTodoEventInfoKey = "showUndoTodoEventInfo";
+
   static const waitBetweenAskForReviewDuration = Duration(days: 3);
 
   static final key = encrypt.Key.fromUtf8("a/wdkaw1ln=921jt48wadan249Bamd=#");
@@ -547,6 +550,14 @@ class Settings {
 
         return type.millisecondsSinceEpoch.toString();
       },
+    ),
+    SettingsVar<bool>(
+      key: showCWInTimetableKey,
+      defaultValue: () => true,
+    ),
+    SettingsVar<bool>(
+      key: showUndoTodoEventInfoKey,
+      defaultValue: () => true,
     ),
   ];
 

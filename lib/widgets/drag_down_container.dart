@@ -142,8 +142,8 @@ class _DragDownContainerState extends State<DragDownContainer> {
         _isDragging = false;
 
         // If there was a tap, close the container
-        if (_xDragDistance == 0 &&
-            _yDragDistance == 0 && // ist nicht schön, aber funktioniert
+        if (_xDragDistance <= 2 &&
+            _yDragDistance <= 2 && // ist nicht schön, aber funktioniert
             details.position.dy > widget.maxContainerHeight / 2) {
           setState(() {
             controller._setContainerHeight(0);

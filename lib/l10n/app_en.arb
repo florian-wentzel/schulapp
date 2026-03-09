@@ -2,6 +2,8 @@
   "@@locale": "en",
   "language_name": "Englisch",
   "@language_name": {},
+  "version_0_10_5": "Calendar weeks are displayed and tasks marked as completed can be undone. (Customizable in settings) (#18)",
+  "@version_0_10_5": {},
   "version_0_10_4": "Substitute lessons can now be edited and small bug fixes (#14)",
   "@version_0_10_4": {},
   "version_0_10_3": "Remade timetable creation and revised the UI for all timetables (#12)",
@@ -1426,6 +1428,11 @@
     }
   },
   "strUndo": "Undo",
-  "@strUndo": {}
-
+  "@strUndo": {},
+  "strKW": "CW",
+  "@strKW": {},
+  "strShowCwOnHomeScreen": "Show calendar week in timetable",
+  "@strShowCwOnHomeScreen": {},
+  "strShowUndoTodoEvent": "Show undo task option",
+  "@strShowUndoTodoEvent": {}
 }

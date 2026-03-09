@@ -176,6 +176,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _gradeSystemSelector(),
         _calendarTodoEventStyle(),
         _openMainSemesterAutomatically(),
+        _showCwOnHomeScreen(),
+        _showUndoTodoEvent(),
         _showTasksOnHomeScreen(),
         _showNextDayIfDayEnds(),
         _showAlwaysWeekTimetableKey(),
@@ -510,6 +512,48 @@ class _SettingsScreenState extends State<SettingsScreen> {
           onChanged: (value) {
             TimetableManager().settings.setVar(
                   Settings.openMainSemesterAutomaticallyKey,
+                  value,
+                );
+            setState(() {});
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _showCwOnHomeScreen() {
+    return SettingsScreen.listItem(
+      context,
+      title: AppLocalizationsManager.localizations.strShowCwOnHomeScreen,
+      afterTitle: [
+        Switch.adaptive(
+          value: TimetableManager().settings.getVar(
+                Settings.showCWInTimetableKey,
+              ),
+          onChanged: (value) {
+            TimetableManager().settings.setVar(
+                  Settings.showCWInTimetableKey,
+                  value,
+                );
+            setState(() {});
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _showUndoTodoEvent() {
+    return SettingsScreen.listItem(
+      context,
+      title: AppLocalizationsManager.localizations.strShowUndoTodoEvent,
+      afterTitle: [
+        Switch.adaptive(
+          value: TimetableManager().settings.getVar(
+                Settings.showUndoTodoEventInfoKey,
+              ),
+          onChanged: (value) {
+            TimetableManager().settings.setVar(
+                  Settings.showUndoTodoEventInfoKey,
                   value,
                 );
             setState(() {});

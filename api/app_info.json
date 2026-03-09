@@ -1,0 +1,8 @@
+{
+  "latest_version": "0.10.5",
+  "warnings": {
+    "< 0.10.5": "Teilen über Online Code funktioniert nicht mehr – bitte updaten!",
+    "= 0.9.5": "Bli blo, jetzt update!",
+    "<> 0.9.5 0.10.5": "Blo bli mach update"
+  }
+}

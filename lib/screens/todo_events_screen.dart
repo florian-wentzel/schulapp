@@ -7,6 +7,7 @@ import 'package:schulapp/code_behind/go_file_io_manager.dart';
 import 'package:schulapp/code_behind/save_manager.dart';
 import 'package:schulapp/code_behind/school_note.dart';
 import 'package:schulapp/code_behind/school_notes_manager.dart';
+import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/todo_event.dart';
 import 'package:schulapp/code_behind/timetable_manager.dart';
 import 'package:schulapp/code_behind/utils.dart';
@@ -326,21 +327,25 @@ class _TodoEventsScreenState extends State<TodoEventsScreen> {
                               .strTaskMarkedAsNotFinished(event.name);
                         }
 
-                        Utils.showInfo(
-                          bodyContext,
-                          msg: msg,
-                          actionWidget: SnackBarAction(
-                            label:
-                                AppLocalizationsManager.localizations.strUndo,
-                            onPressed: () {
-                              event.finished = !event.finished;
-                              TimetableManager().addOrChangeTodoEvent(event);
+                        if (TimetableManager()
+                            .settings
+                            .getVar(Settings.showUndoTodoEventInfoKey)) {
+                          Utils.showInfo(
+                            bodyContext,
+                            msg: msg,
+                            actionWidget: SnackBarAction(
+                              label:
+                                  AppLocalizationsManager.localizations.strUndo,
+                              onPressed: () {
+                                event.finished = !event.finished;
+                                TimetableManager().addOrChangeTodoEvent(event);
 
-                              setState(() {});
-                            },
-                          ),
-                          type: InfoType.info,
-                        );
+                                setState(() {});
+                              },
+                            ),
+                            type: InfoType.info,
+                          );
+                        }
                       },
                       onDeleteSwipe: () {
                         setState(() {
