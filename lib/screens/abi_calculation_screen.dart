@@ -232,7 +232,6 @@ class _AbiCalculationScreenState extends State<AbiCalculationScreen> {
             ),
             LinearProgressIndicator(
               semanticsLabel: name,
-              semanticsValue: value.toString(),
               value: progress,
               color: Color.lerp(
                 Utils.getGradeColor(
