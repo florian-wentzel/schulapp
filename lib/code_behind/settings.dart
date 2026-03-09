@@ -153,6 +153,7 @@ class Settings {
   static const goFileIoTokenValidToDateKey = "goFileIoTokenDate";
   static const showCWInTimetableKey = "showCWInTimetable";
   static const showUndoTodoEventInfoKey = "showUndoTodoEventInfo";
+  static const lastAppInfoJsonFetchKey = "lastAppInfoJsonFetch";
 
   static const waitBetweenAskForReviewDuration = Duration(days: 3);
 
@@ -558,6 +559,27 @@ class Settings {
     SettingsVar<bool>(
       key: showUndoTodoEventInfoKey,
       defaultValue: () => true,
+    ),
+    SettingsVar<DateTime?>(
+      key: lastAppInfoJsonFetchKey,
+      defaultValue: () => null,
+      canBeNull: () => null,
+      loadCustomType: (value) {
+        if (value == null) return null;
+        int? millieseconds = int.tryParse(value);
+
+        if (millieseconds == null) return null;
+
+        return DateTime.fromMillisecondsSinceEpoch(
+          millieseconds,
+          isUtc: true,
+        );
+      },
+      saveCustomType: (type) {
+        if (type == null) return null;
+
+        return type.millisecondsSinceEpoch.toString();
+      },
     ),
   ];
 

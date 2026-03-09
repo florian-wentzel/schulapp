@@ -1434,5 +1434,9 @@
   "strShowCwOnHomeScreen": "Show calendar week in timetable",
   "@strShowCwOnHomeScreen": {},
   "strShowUndoTodoEvent": "Show undo task option",
-  "@strShowUndoTodoEvent": {}
+  "@strShowUndoTodoEvent": {},
+  "strNewVersionAvailable": "A new version is available!",
+  "@strNewVersionAvailable": {},
+  "strUpdate": "Update!",
+  "@strUpdate": {}
 }

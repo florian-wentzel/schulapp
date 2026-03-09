@@ -29,7 +29,8 @@ final _router = GoRouter(
       builder: (context, state, child) {
         final localizations = AppLocalizations.of(context);
         if (localizations != null) {
-          AppLocalizationsManager.setLocalizations(localizations);
+          final Locale locale = Localizations.localeOf(context);
+          AppLocalizationsManager.setLocalizations(localizations, locale);
         }
 
         final showBottomNavBar = Utils.isMobileRatio(context) &&
@@ -181,6 +182,7 @@ class _MainAppState extends State<MainApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
+      scaffoldMessengerKey: Utils.scaffoldMessengerKey,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       locale: _locale,
@@ -193,6 +195,8 @@ class _MainAppState extends State<MainApp> {
   }
 
   Future<void> postFrameCallback(Duration timeStamp) async {
+    VersionManager.checkForUpdateAndErrors();
+
     if (NotificationManager().pendingNotification) {
       NotificationManager().handlePendingNotification();
     }

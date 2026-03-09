@@ -2,6 +2,7 @@ How to Update:
  - Change version in pubspec.yaml
  - Add translation at the top of l10n/app_de.arb etc.
  - Go to VersionManager.dart and add the translation to the _versions map
+ - (after upload on both stores) Change app_info.json "latest_version"
 
 #TODO: sign build
 How to Build Windows:

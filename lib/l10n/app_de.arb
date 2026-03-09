@@ -513,5 +513,7 @@
   "strUndo": "Rückgängig machen",
   "strKW": "KW",
   "strShowCwOnHomeScreen": "Kalenderwoche im Stundenplan anzeigen",
-  "strShowUndoTodoEvent": "Aufgabe zurücksetzen Option anzeigen"
+  "strShowUndoTodoEvent": "Aufgabe zurücksetzen Option anzeigen",
+  "strNewVersionAvailable": "Eine neue Version ist verfügbar!",
+  "strUpdate": "Update!"
 }

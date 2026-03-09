@@ -1,11 +1,102 @@
+import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 
+import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:schulapp/code_behind/settings.dart';
 import 'package:schulapp/code_behind/timetable_manager.dart';
+import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
+import 'package:http/http.dart' as http;
+import 'package:url_launcher/url_launcher.dart';
 
 class VersionManager {
+  static Future<void> checkForUpdateAndErrors() async {
+    const waitHours = 4;
+
+    final lastFetch = TimetableManager().settings.getVar<DateTime?>(
+          Settings.lastAppInfoJsonFetchKey,
+        );
+
+    if (lastFetch != null &&
+        lastFetch
+            .add(Duration(hours: waitHours))
+            .isAfter(DateTime.now().toUtc())) {
+      return;
+    }
+
+    TimetableManager().settings.setVar<DateTime?>(
+          Settings.lastAppInfoJsonFetchKey,
+          DateTime.now().toUtc(),
+        );
+
+    await Future.delayed(const Duration(seconds: 1));
+
+    final updateVersion = await checkForUpdates();
+    if (updateVersion != null) {
+      Utils.showInfo(
+        null,
+        type: InfoType.info,
+        msg: AppLocalizationsManager.localizations.strNewVersionAvailable,
+        actionWidget: SnackBarAction(
+          label: AppLocalizationsManager.localizations.strUpdate,
+          onPressed: _launchStorePage,
+        ),
+      );
+    }
+
+    final errors = await checkForKnownErrors();
+    if (errors != null) {
+      for (final error in errors) {
+        Utils.showInfo(
+          null,
+          msg: error.$1,
+          type: error.$2,
+          duration: Duration(seconds: 7),
+          actionWidget: SnackBarAction(
+            label: AppLocalizationsManager.localizations.strUpdate,
+            onPressed: _launchStorePage,
+          ),
+        );
+      }
+    }
+  }
+
+  static Future<void> _launchStorePage() async {
+    Utils.hideCurrInfo(null);
+    if (Platform.isAndroid) {
+      try {
+        await launchUrl(
+          Uri.parse(
+            "market://details?id=com.flologames.schulapp",
+          ),
+          mode: LaunchMode.externalApplication,
+        );
+      } catch (e) {
+        await launchUrl(
+          Uri.parse(
+            "https://play.google.com/store/apps/details?id=com.flologames.schulapp",
+          ),
+          mode: LaunchMode.externalApplication,
+        );
+      }
+    } else if (Platform.isIOS) {
+      await launchUrl(
+        Uri.parse(
+          'https://apps.apple.com/us/app/schulapp-dein-schulbegleiter/id6743677720',
+        ),
+        mode: LaunchMode.externalApplication,
+      );
+    } else {
+      await launchUrl(
+        Uri.parse(
+          'https://github.com/florian-wentzel/schulapp/',
+        ),
+      );
+    }
+  }
+
   static final VersionManager _instance = VersionManager._privateConstructor();
   VersionManager._privateConstructor();
 
@@ -86,6 +177,127 @@ class VersionManager {
       return 0;
     } catch (_) {
       return 0;
+    }
+  }
+
+  static List<(String, InfoType)>? parseAppInfoJsonWarnings(
+    String currVersion,
+    Map<String, dynamic> appInfoJsonMap,
+  ) {
+    final warnings = appInfoJsonMap["warnings"] as Map<String, dynamic>?;
+
+    if (warnings == null) {
+      return null;
+    }
+
+    List<(String, InfoType)> errors = [];
+
+    for (final error in warnings.entries) {
+      final key = error.key.trim();
+      final map = error.value as Map<String, dynamic>?;
+      if (map == null) continue;
+
+      String? msg = map[AppLocalizationsManager.languageCode] as String?;
+      msg ??= map["en"] as String?;
+      if (msg == null) continue;
+
+      final importance = map["importance"] as int?;
+      if (importance == null) continue;
+
+      final infoType = _getInfoType(importance);
+
+      if (key.startsWith("<>")) {
+        final versions = key.substring(2).trim().split(' ');
+        if (versions.length != 2) continue;
+
+        final version1 = versions[0];
+        final version2 = versions[1];
+
+        if (compareVersions(currVersion, version1) < 0 ||
+            compareVersions(currVersion, version2) > 0) {
+          continue;
+        }
+
+        errors.add((msg, infoType));
+        continue;
+      }
+      if (key.startsWith("<")) {
+        final version = key.substring(1).trim();
+
+        if (compareVersions(currVersion, version) != -1) {
+          continue;
+        }
+
+        errors.add((msg, infoType));
+        continue;
+      }
+      if (key.startsWith(">")) {
+        final version = key.substring(1).trim();
+
+        if (compareVersions(currVersion, version) != 1) {
+          continue;
+        }
+
+        errors.add((msg, infoType));
+        continue;
+      }
+      if (key.startsWith("=")) {
+        final version = key.substring(1).trim();
+
+        if (compareVersions(currVersion, version) != 0) {
+          continue;
+        }
+
+        errors.add((msg, infoType));
+        continue;
+      }
+    }
+
+    return errors;
+  }
+
+  /// returns null if no update is available, otherwise the latest version
+  static Future<String?> checkForUpdates() async {
+    final currVersion = await VersionManager().getVersionString();
+
+    final appInfoJsonMap = await _getAppInfoJsonMap();
+
+    final latestVersion = appInfoJsonMap["latest_version"] as String?;
+
+    if (latestVersion == null) return null;
+
+    if (VersionManager.compareVersions(currVersion, latestVersion) != -1) {
+      return null;
+    }
+
+    return latestVersion;
+  }
+
+  static Future<List<(String, InfoType)>?> checkForKnownErrors() async {
+    final currVersion = await VersionManager().getVersionString();
+
+    final appInfoJsonMap = await _getAppInfoJsonMap();
+
+    return parseAppInfoJsonWarnings(currVersion, appInfoJsonMap);
+  }
+
+  static Future<Map<String, dynamic>> _getAppInfoJsonMap() async {
+    final appInfoUrl =
+        "https://raw.githubusercontent.com/florian-wentzel/schulapp/refs/heads/main/api/app_info.json";
+    final response = await http.get(Uri.parse(appInfoUrl));
+    return json.decode(response.body);
+  }
+
+  static InfoType _getInfoType(int importance) {
+    switch (importance) {
+      case 0:
+        return InfoType.info;
+      case 1:
+        return InfoType.warning;
+      case 2:
+        return InfoType.error;
+      default:
+        return InfoType.info;
     }
   }
 }

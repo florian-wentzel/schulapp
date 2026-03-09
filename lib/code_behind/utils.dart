@@ -61,6 +61,9 @@ class Utils {
         (Platform.isWindows || Platform.isLinux || Platform.isMacOS);
   }
 
+  static final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
+      GlobalKey<ScaffoldMessengerState>();
+
   static void updateTimetableLessons(
     Timetable timetable,
     SchoolLessonPrefab prefab, {
@@ -501,12 +504,19 @@ class Utils {
   }
 
   static void showInfo(
-    BuildContext context, {
+    BuildContext? contextt, {
     required String msg,
     InfoType type = InfoType.normal,
     Duration? duration,
     SnackBarAction? actionWidget,
   }) {
+    if (!(scaffoldMessengerKey.currentContext?.mounted ?? false)) {
+      return;
+    }
+
+    final context = scaffoldMessengerKey.currentContext;
+    if (context == null) return;
+
     duration ??= const Duration(seconds: 4);
     Color textColor =
         Theme.of(context).textTheme.bodyLarge?.color ?? Colors.white;
@@ -532,7 +542,8 @@ class Utils {
         break;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
+    // ScaffoldMessenger.of(context).showSnackBar(
+    scaffoldMessengerKey.currentState?.showSnackBar(
       SnackBar(
         action: actionWidget,
         backgroundColor: backgroundColor,
@@ -550,10 +561,11 @@ class Utils {
   }
 
   static void hideCurrInfo(
-    BuildContext context, {
+    BuildContext? context, {
     SnackBarClosedReason closedReason = SnackBarClosedReason.hide,
   }) {
-    ScaffoldMessenger.of(context).hideCurrentSnackBar(
+    // ScaffoldMessenger.of(context).hideCurrentSnackBar(
+    scaffoldMessengerKey.currentState?.hideCurrentSnackBar(
       reason: closedReason,
     );
   }
@@ -1112,7 +1124,7 @@ class Utils {
 }
 
 enum InfoType {
-  normal,
+  normal, // does not look good
   info,
   success,
   warning,
