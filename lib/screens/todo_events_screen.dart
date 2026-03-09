@@ -363,6 +363,7 @@ class _TodoEventsScreenState extends State<TodoEventsScreen> {
                 a.name == b.name &&
                 a.type == b.type &&
                 a.linkedSubjectName == b.linkedSubjectName,
+            padding: const EdgeInsets.only(bottom: 80),
           ),
         ),
         multiSelectionButton(),
