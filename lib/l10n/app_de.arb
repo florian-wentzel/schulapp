@@ -515,5 +515,9 @@
   "strShowCwOnHomeScreen": "Kalenderwoche im Stundenplan anzeigen",
   "strShowUndoTodoEvent": "Aufgabe zurücksetzen Option anzeigen",
   "strNewVersionAvailable": "Eine neue Version ist verfügbar!",
-  "strUpdate": "Update!"
+  "strUpdate": "Update!",
+  "strSelectTimetableView": "Stundenplanansicht",
+  "strSelectTimetableViewDescription": "Wie möchtest du deinen Stundenplan auf dem Startbildschirm anzeigen?",
+  "strDayView": "Tag",
+  "strWeekView": "Woche"
 }

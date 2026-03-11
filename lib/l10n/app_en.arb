@@ -1438,5 +1438,13 @@
   "strNewVersionAvailable": "A new version is available!",
   "@strNewVersionAvailable": {},
   "strUpdate": "Update!",
-  "@strUpdate": {}
+  "@strUpdate": {},
+  "strSelectTimetableView": "Timetable View",
+  "@strSelectTimetableView": {},
+  "strSelectTimetableViewDescription": "How do you prefer to view your timetable on the home screen?",
+  "@strSelectTimetableViewDescription": {},
+  "strDayView": "Day",
+  "@strDayView": {},
+  "strWeekView": "Week",
+  "@strWeekView": {}
 }
