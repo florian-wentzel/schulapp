@@ -33,7 +33,9 @@ class VersionManager {
 
     await Future.delayed(const Duration(seconds: 1));
 
-    final updateVersion = await checkForUpdates();
+    final appInfoJsonMap = await _getAppInfoJsonMap();
+
+    final updateVersion = await checkForUpdates(appInfoJsonMap);
     if (updateVersion != null) {
       Utils.showInfo(
         null,
@@ -46,7 +48,7 @@ class VersionManager {
       );
     }
 
-    final errors = await checkForKnownErrors();
+    final errors = await checkForKnownErrors(appInfoJsonMap);
     if (errors != null) {
       for (final error in errors) {
         Utils.showInfo(
@@ -54,10 +56,12 @@ class VersionManager {
           msg: error.$1,
           type: error.$2,
           duration: Duration(seconds: 7),
-          actionWidget: SnackBarAction(
-            label: AppLocalizationsManager.localizations.strUpdate,
-            onPressed: _launchStorePage,
-          ),
+          actionWidget: error.$3
+              ? SnackBarAction(
+                  label: AppLocalizationsManager.localizations.strUpdate,
+                  onPressed: _launchStorePage,
+                )
+              : null,
         );
       }
     }
@@ -180,7 +184,7 @@ class VersionManager {
     }
   }
 
-  static List<(String, InfoType)>? parseAppInfoJsonWarnings(
+  static List<(String, InfoType, bool)>? parseAppInfoJsonWarnings(
     String currVersion,
     Map<String, dynamic> appInfoJsonMap,
   ) {
@@ -190,7 +194,7 @@ class VersionManager {
       return null;
     }
 
-    List<(String, InfoType)> errors = [];
+    List<(String, InfoType, bool)> errors = [];
 
     for (final error in warnings.entries) {
       final key = error.key.trim();
@@ -206,6 +210,8 @@ class VersionManager {
 
       final infoType = _getInfoType(importance);
 
+      final updateAvailable = (map["updateAvailable"] as bool?) ?? false;
+
       if (key.startsWith("<>")) {
         final versions = key.substring(2).trim().split(' ');
         if (versions.length != 2) continue;
@@ -218,7 +224,7 @@ class VersionManager {
           continue;
         }
 
-        errors.add((msg, infoType));
+        errors.add((msg, infoType, updateAvailable));
         continue;
       }
       if (key.startsWith("<")) {
@@ -228,7 +234,7 @@ class VersionManager {
           continue;
         }
 
-        errors.add((msg, infoType));
+        errors.add((msg, infoType, updateAvailable));
         continue;
       }
       if (key.startsWith(">")) {
@@ -238,7 +244,7 @@ class VersionManager {
           continue;
         }
 
-        errors.add((msg, infoType));
+        errors.add((msg, infoType, updateAvailable));
         continue;
       }
       if (key.startsWith("=")) {
@@ -248,7 +254,7 @@ class VersionManager {
           continue;
         }
 
-        errors.add((msg, infoType));
+        errors.add((msg, infoType, updateAvailable));
         continue;
       }
     }
@@ -257,10 +263,10 @@ class VersionManager {
   }
 
   /// returns null if no update is available, otherwise the latest version
-  static Future<String?> checkForUpdates() async {
+  static Future<String?> checkForUpdates(
+    Map<String, dynamic> appInfoJsonMap,
+  ) async {
     final currVersion = await VersionManager().getVersionString();
-
-    final appInfoJsonMap = await _getAppInfoJsonMap();
 
     final latestVersion = appInfoJsonMap["latest_version"] as String?;
 
@@ -273,10 +279,10 @@ class VersionManager {
     return latestVersion;
   }
 
-  static Future<List<(String, InfoType)>?> checkForKnownErrors() async {
+  static Future<List<(String, InfoType, bool)>?> checkForKnownErrors(
+    Map<String, dynamic> appInfoJsonMap,
+  ) async {
     final currVersion = await VersionManager().getVersionString();
-
-    final appInfoJsonMap = await _getAppInfoJsonMap();
 
     return parseAppInfoJsonWarnings(currVersion, appInfoJsonMap);
   }
