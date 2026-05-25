@@ -2,7 +2,7 @@
   "@@locale": "en",
   "language_name": "Englisch",
   "@language_name": {},
-  "version_0_11_0": "Timetables can be shared with substitute lessons and cancellations. Sharing via online code has been switched to Litterbox. General bug fixes.",
+  "version_0_11_0": "Timetables can be shared with substitute lessons and cancellations. Sharing via online code has been switched to Litterbox. General bug fixes. (#24)",
   "@version_0_11_0": {},
   "version_0_10_5": "Calendar weeks are displayed and tasks marked as completed can be undone. (Customizable in settings) (#18)",
   "@version_0_10_5": {},

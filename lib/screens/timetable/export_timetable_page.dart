@@ -302,7 +302,7 @@ class ExportTimetablePage extends StatefulWidget {
       );
     }
 
-    String? selectedDirectory = await FilePicker.platform.getDirectoryPath();
+    String? selectedDirectory = await FilePicker.getDirectoryPath();
 
     if (selectedDirectory == null) {
       if (context.mounted) {

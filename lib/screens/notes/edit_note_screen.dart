@@ -215,10 +215,9 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
   }
 
   Future<void> _onAddFilePressed() async {
-    FilePickerResult? result;
+    PlatformFile? result;
     try {
-      result = await FilePicker.platform.pickFiles(
-        allowMultiple: false,
+      result = await FilePicker.pickFile(
         type: FileType.any,
       );
     } on Exception {
@@ -232,7 +231,7 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
       return;
     }
 
-    String? path = result?.files.single.path;
+    String? path = result?.path;
     if (path == null) {
       if (mounted) {
         Utils.showInfo(

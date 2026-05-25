@@ -67,21 +67,19 @@ class _ImportTimetablePageState extends State<ImportTimetablePage> {
   }
 
   void _selectTimetable() async {
-    FilePickerResult? result;
+    PlatformFile? result;
     try {
       if (Theme.of(context).platform == TargetPlatform.iOS) {
         throw Exception("");
       }
-      result = await FilePicker.platform.pickFiles(
-        allowMultiple: false,
+      result = await FilePicker.pickFile(
         type: FileType.custom,
         allowedExtensions: [
           SaveManager.timetableExportExtension.replaceAll(".", "")
         ],
       );
     } on Exception {
-      result = await FilePicker.platform.pickFiles(
-        allowMultiple: false,
+      result = await FilePicker.pickFile(
         type: FileType.any,
       );
     }
@@ -97,7 +95,7 @@ class _ImportTimetablePageState extends State<ImportTimetablePage> {
       return;
     }
 
-    File selectedFile = File(result.files.single.path!);
+    File selectedFile = File(result.path!);
     if (!selectedFile.existsSync()) {
       if (mounted) {
         Utils.showInfo(

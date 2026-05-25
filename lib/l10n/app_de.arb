@@ -1,7 +1,7 @@
 {
   "@@locale": "de",
   "language_name": "Deutsch",
-  "version_0_11_0": "Stundenpläne können mit Vertretungsstunden und Ausfällen geteilt werden, Teilen per Online-Code auf Litterbox umgestellt. Generelle Bugfixes.",
+  "version_0_11_0": "Stundenpläne können mit Vertretungsstunden und Ausfällen geteilt werden, Teilen per Online-Code auf Litterbox umgestellt. Generelle Bugfixes. (#24)",
   "version_0_10_5": "Kalenderwochen werden angezeigt und man kann Aufgaben, die man als erledigt markiert hat, rückgängig machen. (In den Einstellungen anpassbar) (#18)",
   "version_0_10_4": "Vertretungsstunden können jetzt bearbeitet werden und kleine Bugfixes (#14)",
   "version_0_10_3": "Erstellung von Stundenplänen und die UI für alle Stundenpläne überarbeitet (#12)",
