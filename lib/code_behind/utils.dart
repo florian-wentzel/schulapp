@@ -162,7 +162,9 @@ class Utils {
         -1;
   }
 
-  static Future<bool> showBoolInputDialog(
+  /// Use this if you want to know if the user tapped outside the dialog
+  // TODO Anstatt einem Dialog vielleicht ein bottomsheet verwenden was besser aussieht und anfühlt
+  static Future<bool?> showBoolInputDialogNullable(
     BuildContext context, {
     required String question,
     String? description,
@@ -213,6 +215,32 @@ class Utils {
           ],
         );
       },
+    );
+
+    return value;
+  }
+
+  static Future<bool> showBoolInputDialog(
+    BuildContext context, {
+    required String question,
+    String? description,
+    TextButton Function(BuildContext context)? extraButtonBuilder,
+    bool autofocus = false,
+    bool showYesAndNoInsteadOfOK = false,
+    bool markTrueAsRed = false,
+    bool markFalseAsRed = false,
+    bool hideFalse = false,
+  }) async {
+    final value = await showBoolInputDialogNullable(
+      context,
+      question: question,
+      extraButtonBuilder: extraButtonBuilder,
+      autofocus: autofocus,
+      description: description,
+      hideFalse: hideFalse,
+      markFalseAsRed: markFalseAsRed,
+      markTrueAsRed: markTrueAsRed,
+      showYesAndNoInsteadOfOK: showYesAndNoInsteadOfOK,
     );
 
     return value ?? false;

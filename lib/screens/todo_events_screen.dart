@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:animated_list_plus/animated_list_plus.dart';
 import 'package:animated_list_plus/transitions.dart';
 import 'package:flutter/material.dart';
-import 'package:schulapp/code_behind/go_file_io_manager.dart';
+import 'package:schulapp/code_behind/online_share_manager.dart';
 import 'package:schulapp/code_behind/save_manager.dart';
 import 'package:schulapp/code_behind/school_note.dart';
 import 'package:schulapp/code_behind/school_notes_manager.dart';
@@ -510,7 +510,7 @@ class _TodoEventsScreenState extends State<TodoEventsScreen> {
 
   void _shareAllItems() async {
     final enabled =
-        await GoFileIoManager().showTermsOfServicesEnabledDialog(context);
+        await OnlineShareManager.showTermsOfServicesEnabledDialog(context);
 
     if (!enabled) return;
 
@@ -715,13 +715,13 @@ class _TodoEventsScreenState extends State<TodoEventsScreen> {
 
   void _importViaOnlineCode() async {
     final userKnows =
-        await GoFileIoManager().showImportTodoEventWarningDialog(context);
+        await OnlineShareManager.showImportTodoEventWarningDialog(context);
 
     if (!userKnows) return;
     if (!mounted) return;
 
     final enabled =
-        await GoFileIoManager().showTermsOfServicesEnabledDialog(context);
+        await OnlineShareManager.showTermsOfServicesEnabledDialog(context);
 
     if (!enabled) return;
     if (!mounted) return;
@@ -767,12 +767,11 @@ class _TodoEventsScreenState extends State<TodoEventsScreen> {
       },
     );
 
-    List<String>? downloadedPaths;
+    List<File>? downloadedFiles;
 
     try {
-      downloadedPaths = await GoFileIoManager().downloadFiles(
+      downloadedFiles = await OnlineShareManager.downloadFromLitterbox(
         code,
-        isSaveCode: true,
       );
       await Future.delayed(const Duration(milliseconds: 250));
     } catch (e) {
@@ -789,7 +788,7 @@ class _TodoEventsScreenState extends State<TodoEventsScreen> {
       Navigator.of(dialogContext!).pop();
     }
 
-    if (downloadedPaths == null) return;
+    if (downloadedFiles == null) return;
 
     List<
         ({
@@ -800,11 +799,7 @@ class _TodoEventsScreenState extends State<TodoEventsScreen> {
 
     try {
       todoEventsList = SaveManager().importTodoEvents(
-        downloadedPaths
-            .map(
-              (e) => File(e),
-            )
-            .toList(),
+        downloadedFiles,
       );
     } catch (e) {
       debugPrint(e.toString());

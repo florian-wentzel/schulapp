@@ -5,7 +5,7 @@ import 'package:feedback/feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 import 'package:schulapp/code_behind/custom_feedback.dart';
-import 'package:schulapp/code_behind/go_file_io_manager.dart';
+import 'package:schulapp/code_behind/online_share_manager.dart';
 import 'package:schulapp/code_behind/save_manager.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/code_behind/version_manager.dart';
@@ -41,7 +41,8 @@ class CustomFeedbackForm extends StatefulWidget {
 
           feedbackFile.writeAsBytesSync(feedback.screenshot);
 
-          String code = await GoFileIoManager().uploadFiles([feedbackFile]);
+          String code =
+              await OnlineShareManager.uploadToLitterbox([feedbackFile]);
 
           final extra = feedback.extra;
 
