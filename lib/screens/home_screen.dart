@@ -463,6 +463,7 @@ class _HomeScreenState extends State<HomeScreen> {
         controller: _timetableController,
         timetable: tt,
         showTodoEvents: widget.isHomeScreen,
+        showSubstituteLessons: true,
         size: Size(
           width,
           height,
@@ -1103,6 +1104,7 @@ class _HomeScreenState extends State<HomeScreen> {
           tutorialWidget: Text(
             AppLocalizationsManager
                 .localizations.strYouCanSeeTheComingWeeksTimetable,
+            textAlign: TextAlign.center,
           ),
           action: () {
             // _timetableController.swipeToRight?.call();
@@ -1113,6 +1115,7 @@ class _HomeScreenState extends State<HomeScreen> {
           tutorialWidget: Text(
             AppLocalizationsManager
                 .localizations.strByClickingOnSubjectsYouCanAddHomework,
+            textAlign: TextAlign.center,
           ),
         ),
         TutorialStep(
@@ -1120,12 +1123,14 @@ class _HomeScreenState extends State<HomeScreen> {
           tutorialWidget: Text(
             AppLocalizationsManager
                 .localizations.strByClickingOnTheDayNameYouReturnToToday,
+            textAlign: TextAlign.center,
           ),
         ),
         TutorialStep(
           highlightKey: _timetableController.timeLeftKey,
           tutorialWidget: Text(
             AppLocalizationsManager.localizations.strDisplayOfTheRemainingTime,
+            textAlign: TextAlign.center,
           ),
         ),
         TutorialStep(
@@ -1133,6 +1138,7 @@ class _HomeScreenState extends State<HomeScreen> {
           tutorialWidget: Text(
             AppLocalizationsManager
                 .localizations.strTapHereToSwitchTimetablesEtc,
+            textAlign: TextAlign.center,
           ),
         ),
       ],

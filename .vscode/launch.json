@@ -5,8 +5,11 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "schulapp",
+            "name": "schulapp (no pub)",
             "request": "launch",
+            "args": [
+                "--no-pub"
+            ],
             "type": "dart"
         },
         {

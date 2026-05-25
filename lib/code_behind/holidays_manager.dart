@@ -171,6 +171,12 @@ class HolidaysManager {
     return _loadedHolidays!;
   }
 
+  static bool _isSameDay(DateTime date1, DateTime date2) {
+    return date1.year == date2.year &&
+        date1.month == date2.month &&
+        date1.day == date2.day;
+  }
+
   static Future<Holidays?> getRunningHolidays(DateTime dateTime) async {
     String? stateCode = TimetableManager().settings.getVar(
           Settings.selectedFederalStateCodeKey,
@@ -180,10 +186,12 @@ class HolidaysManager {
 
     List<Holidays> allHolidays = await getAllHolidaysForState(
       stateApiCode: stateCode,
+      withCustomHolidays: true,
     );
 
     for (final holidays in allHolidays) {
-      if (dateTime == holidays.start || dateTime == holidays.end) {
+      if (_isSameDay(dateTime, holidays.start) ||
+          _isSameDay(dateTime, holidays.end)) {
         return holidays;
       }
       if (dateTime.isAfter(holidays.start) && dateTime.isBefore(holidays.end)) {

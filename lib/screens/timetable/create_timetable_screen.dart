@@ -82,6 +82,7 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
           highlightKey: _createLessonPrefabKey,
           tutorialWidget: Text(
             AppLocalizationsManager.localizations.strAddNewLessons,
+            textAlign: TextAlign.center,
           ),
         ),
         TutorialStep(
@@ -89,6 +90,7 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
           tutorialWidget: Text(
             AppLocalizationsManager
                 .localizations.strDragAndDropLessonsAndClickToEdit,
+            textAlign: TextAlign.center,
           ),
         ),
         TutorialStep(
@@ -96,18 +98,21 @@ class _CreateTimetableScreenState extends State<CreateTimetableScreen> {
           tutorialWidget: Text(
             AppLocalizationsManager
                 .localizations.strChangeTimetableNameByClickingOnIt,
+            textAlign: TextAlign.center,
           ),
         ),
         TutorialStep(
           highlightKey: _moreActionsButtonKey,
           tutorialWidget: Text(
             AppLocalizationsManager.localizations.strAccessAdditionalOptions,
+            textAlign: TextAlign.center,
           ),
         ),
         TutorialStep(
           highlightKey: _saveButtonKey,
           tutorialWidget: Text(
             AppLocalizationsManager.localizations.strSaveTimetable,
+            textAlign: TextAlign.center,
           ),
         ),
       ],

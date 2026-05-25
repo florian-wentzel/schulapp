@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_image_clipboard/flutter_image_clipboard.dart';
 import 'package:go_router/go_router.dart';
-import 'package:schulapp/code_behind/go_file_io_manager.dart';
 import 'package:schulapp/code_behind/multi_platform_manager.dart';
+import 'package:schulapp/code_behind/online_share_manager.dart';
 import 'package:schulapp/code_behind/save_manager.dart';
 import 'package:schulapp/code_behind/timetable.dart';
 import 'package:schulapp/code_behind/timetable_controller.dart';
@@ -44,7 +44,18 @@ class ExportTimetablePage extends StatefulWidget {
           if (exporting) return;
           exporting = true;
 
-          await _exportTimetable(context, timetable);
+          final includeSpecialLessons = await Utils.showBoolInputDialog(
+            context,
+            question: AppLocalizationsManager
+                .localizations.strIncludeSpecialLessonsInExport,
+            description: AppLocalizationsManager
+                .localizations.strIncludeSpecialLessonsInExportDescription,
+            showYesAndNoInsteadOfOK: true,
+          );
+
+          if (!context.mounted) return;
+
+          await _exportTimetable(context, timetable, includeSpecialLessons);
 
           exporting = false;
         }
@@ -98,6 +109,7 @@ class ExportTimetablePage extends StatefulWidget {
                 timetable: timetable,
                 showTodoEvents: false,
                 showPageView: false,
+                showSubstituteLessons: false,
                 showHolidaysAndDates: false,
                 highlightCurrLessonAndDay: false,
                 size: size,
@@ -270,7 +282,10 @@ class ExportTimetablePage extends StatefulWidget {
   }
 
   static Future<void> _exportTimetable(
-      BuildContext context, Timetable timetable) async {
+    BuildContext context,
+    Timetable timetable,
+    bool includeSpecialLessons,
+  ) async {
     Utils.showInfo(
       context,
       msg: AppLocalizationsManager.localizations.strExporting,
@@ -313,8 +328,11 @@ class ExportTimetablePage extends StatefulWidget {
     File? exportFile;
 
     try {
-      exportFile =
-          await SaveManager().exportTimetable(timetable, selectedDirectory);
+      exportFile = await SaveManager().exportTimetable(
+        timetable,
+        selectedDirectory,
+        includeSpecialLessons,
+      );
       if (context.mounted) {
         Utils.hideCurrInfo(context);
       }
@@ -354,12 +372,33 @@ class ExportTimetablePage extends StatefulWidget {
   static Future<void> _onShareTimetableViaOnlineCode(
       BuildContext context, Timetable timetable) async {
     final enabled =
-        await GoFileIoManager().showTermsOfServicesEnabledDialog(context);
+        await OnlineShareManager.showTermsOfServicesEnabledDialog(context);
 
-    if (!enabled) return;
+    if (!enabled || !context.mounted) return;
+
+    final includeSpecialLessons = await Utils.showBoolInputDialogNullable(
+      context,
+      question: AppLocalizationsManager
+          .localizations.strIncludeSpecialLessonsInExport,
+      description: AppLocalizationsManager
+          .localizations.strIncludeSpecialLessonsInExportDescription,
+      showYesAndNoInsteadOfOK: true,
+    );
+
+    if (includeSpecialLessons == null) {
+      if (context.mounted) {
+        Utils.showInfo(
+          context,
+          msg: AppLocalizationsManager
+              .localizations.strOnlyYourTimetableGetsShared,
+        );
+      }
+      return;
+    }
 
     try {
-      final code = SaveManager().shareTimetable(timetable);
+      final code =
+          SaveManager().shareTimetable(timetable, includeSpecialLessons);
 
       if (!context.mounted) return;
 

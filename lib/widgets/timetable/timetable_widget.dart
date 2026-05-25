@@ -4,6 +4,7 @@ class TimetableWidget extends StatefulWidget {
   final TimetableController controller;
   final Timetable timetable;
   final bool showTodoEvents;
+  final bool showSubstituteLessons;
   final bool showPageView;
   final bool showHolidaysAndDates;
   final bool highlightCurrLessonAndDay;
@@ -14,6 +15,7 @@ class TimetableWidget extends StatefulWidget {
     required this.controller,
     required this.timetable,
     required this.showTodoEvents,
+    required this.showSubstituteLessons,
     this.showPageView = true,
     this.showHolidaysAndDates = true,
     this.highlightCurrLessonAndDay = true,
@@ -347,6 +349,10 @@ class _TimetableWidgetState extends State<TimetableWidget> {
         height: lessonHeight,
         child: Center(
           child: TimeToNextLessonWidget(
+            showKW: widget.showHolidaysAndDates &&
+                TimetableManager()
+                    .settings
+                    .getVar(Settings.showCWInTimetableKey),
             showTime: widget.highlightCurrLessonAndDay,
             ttSchoolTimes: ttSchoolTimes,
             date: currMonday,
@@ -1031,7 +1037,6 @@ class _TimetableWidgetState extends State<TimetableWidget> {
       //     containerController.strikeThrough = false;
       //   };
       // }
-
       Widget lessonWidget = TimetableLessonWidget(
         key: dayIndex == 0 && lessonIndex == 0 && currDayPage
             ? widget.controller.firstLessonKey
@@ -1050,7 +1055,7 @@ class _TimetableWidgetState extends State<TimetableWidget> {
         lessonWidth: lessonWidth,
         showTaskOnHomescreen: showTaskOnHomescreen,
         tt: tt,
-        showSubstituteLessons: widget.showTodoEvents,
+        showSubstituteLessons: widget.showSubstituteLessons,
         showOnlyShortName: _showOnlyShortNameOfLessons,
       );
 
