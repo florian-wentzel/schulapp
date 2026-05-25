@@ -116,9 +116,6 @@ class _HolidaysScreenState extends State<HolidaysScreen> {
   }
 
   Future<void> _fetchHolidays() async {
-    allHolidays = HolidaysManager.getCustomHolidays();
-    setState(() {});
-
     String? stateCode = TimetableManager().settings.getVar(
           Settings.selectedFederalStateCodeKey,
         );

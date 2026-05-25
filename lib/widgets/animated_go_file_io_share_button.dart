@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:schulapp/code_behind/go_file_io_manager.dart';
+import 'package:schulapp/code_behind/online_share_manager.dart';
 import 'package:schulapp/code_behind/utils.dart';
 import 'package:schulapp/l10n/app_localizations_manager.dart';
 import 'package:schulapp/screens/timetable/export_timetable_page.dart';
@@ -44,9 +44,8 @@ class _AnimatedGoFileIOShareButtonState
       return;
     }
 
-    final exists = await GoFileIoManager().doesFileExists(
+    final exists = await OnlineShareManager.fileExistsOnLitterbox(
       onlineCode,
-      isSaveCode: true,
     );
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -98,7 +97,7 @@ class _AnimatedGoFileIOShareButtonState
                     if (_saveOnlineCode == null)
                       IconButton(
                         onPressed: () async {
-                          final enabled = await GoFileIoManager()
+                          final enabled = await OnlineShareManager
                               .showTermsOfServicesEnabledDialog(context);
 
                           if (!enabled) return;

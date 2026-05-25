@@ -1233,8 +1233,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
             if (selectedFile == null) return;
 
-            String? selectedDirectory =
-                await FilePicker.platform.getDirectoryPath();
+            String? selectedDirectory = await FilePicker.getDirectoryPath();
 
             if (selectedDirectory == null) {
               return;
@@ -1276,14 +1275,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         ElevatedButton(
           onPressed: () async {
-            final result = await FilePicker.platform.pickFiles(
-              allowMultiple: false,
+            final result = await FilePicker.pickFile(
               type: FileType.any,
             );
 
-            String? path = result?.files.first.path;
+            String? path = result?.path;
 
-            if (result == null || result.files.isEmpty || path == null) {
+            if (result == null || path == null) {
               if (mounted) {
                 Utils.showInfo(
                   context,
@@ -1467,7 +1465,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     if (!backupData) return;
 
-    String? selectedDirectory = await FilePicker.platform.getDirectoryPath();
+    String? selectedDirectory = await FilePicker.getDirectoryPath();
 
     if (selectedDirectory == null) {
       if (mounted) {
@@ -1526,21 +1524,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     if (!restoreData) return;
 
-    FilePickerResult? result;
+    PlatformFile? result;
     try {
       if (platform == TargetPlatform.iOS) {
         throw Exception();
       }
-      result = await FilePicker.platform.pickFiles(
-        allowMultiple: false,
+      result = await FilePicker.pickFile(
         type: FileType.custom,
         allowedExtensions: [
           BackupManager.backupExportExtension.replaceAll(".", "")
         ],
       );
     } on Exception {
-      result = await FilePicker.platform.pickFiles(
-        allowMultiple: false,
+      result = await FilePicker.pickFile(
         type: FileType.any,
       );
     }
@@ -1556,7 +1552,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       return;
     }
 
-    final selectedFilePath = result.files.single.path!;
+    final selectedFilePath = result.path!;
 
     final backupRestored = await BackupManager.restoreBackupFrom(
       path: selectedFilePath,

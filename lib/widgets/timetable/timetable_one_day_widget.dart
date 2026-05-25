@@ -349,6 +349,9 @@ class _TimetableOneDayWidgetState extends State<TimetableOneDayWidget> {
         child: Center(
           child: TimeToNextLessonWidget(
             ttSchoolTimes: ttSchoolTimes,
+            showKW: TimetableManager()
+                .settings
+                .getVar(Settings.showCWInTimetableKey),
             date: date,
             onNewLessonCB: () {
               if (mounted) {

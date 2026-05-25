@@ -7,7 +7,7 @@ import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:schulapp/code_behind/abi_calculator.dart';
 import 'package:schulapp/code_behind/backup_manager.dart';
-import 'package:schulapp/code_behind/go_file_io_manager.dart';
+import 'package:schulapp/code_behind/online_share_manager.dart';
 import 'package:schulapp/code_behind/school_file.dart';
 import 'package:schulapp/code_behind/school_lesson_notification.dart';
 import 'package:schulapp/code_behind/school_note.dart';
@@ -473,32 +473,45 @@ class SaveManager {
     return todoEvents;
   }
 
-  Timetable? importTimetable(File timetableExportFile) {
+  Future<Timetable?> importTimetable(
+    File timetableExportFile,
+    Future<bool> Function() showDoYouWantToImportSpecialLessonsDialog,
+  ) async {
     if (!timetableExportFile.existsSync()) return null;
-    ZipManager.zipToFolder(timetableExportFile, getImportDir());
 
+    getImportDir().deleteSync(recursive: true);
+
+    final dir = ZipManager.zipToFolder(timetableExportFile, getImportDir());
+
+    if (Directory(join(dir.path, specialLessonsDirName)).existsSync()) {
+      bool importSpecialLessons =
+          await showDoYouWantToImportSpecialLessonsDialog();
+      if (!importSpecialLessons) {
+        Directory(join(dir.path, specialLessonsDirName))
+            .deleteSync(recursive: true);
+      }
+    }
     String timetableFilePath =
         join(getImportDir().path, SaveManager.timetableFileName);
     File timetableFile = File(timetableFilePath);
 
     String jsonString = timetableFile.readAsStringSync();
 
-    getImportDir().deleteSync(recursive: true);
-
     Map<String, dynamic> json = jsonDecode(jsonString);
 
     return Timetable.fromJson(json);
   }
 
-  Future<String> shareTimetable(Timetable timetable) async {
+  Future<String> shareTimetable(
+      Timetable timetable, bool includeSpecialLessons) async {
     final exportFile = await SaveManager().exportTimetable(
       timetable,
       SaveManager().getTempDir().path,
+      includeSpecialLessons,
     );
 
-    final code = await GoFileIoManager().uploadFiles(
+    final code = await OnlineShareManager.uploadToLitterbox(
       [exportFile],
-      returnSaveCode: true,
     );
 
     SaveManager().deleteTempDir();
@@ -515,9 +528,8 @@ class SaveManager {
       files.add(File(path));
     }
 
-    final code = await GoFileIoManager().uploadFiles(
+    final code = await OnlineShareManager.uploadToLitterbox(
       files,
-      returnSaveCode: true,
     );
 
     SaveManager().deleteTempDir();
@@ -540,9 +552,8 @@ class SaveManager {
       return exportFile.path;
     }
 
-    final code = await GoFileIoManager().uploadFiles(
+    final code = await OnlineShareManager.uploadToLitterbox(
       [exportFile],
-      returnSaveCode: true,
     );
 
     SaveManager().deleteTempDir();
@@ -579,7 +590,9 @@ class SaveManager {
     return File(zipExportPath);
   }
 
-  Future<File> exportTimetable(Timetable timetable, String path) async {
+  /// includeEverything indicates that the complete folder gets copied.
+  Future<File> exportTimetable(
+      Timetable timetable, String path, bool includeEverything) async {
     final now = DateTime.now();
     final exportName = " ${now.day}.${now.month}.${now.year}";
 
@@ -592,6 +605,22 @@ class SaveManager {
       timetable.name + exportName + timetableExportExtension,
     );
 
+    if (includeEverything) {
+      final dir = getTimetableDir(timetable);
+      if (!dir.existsSync()) {
+        // Wenn das passiert ist was gewaltig schiefgelaufen
+        throw Exception(
+            AppLocalizationsManager.localizations.strSelectedFileDoesNotExist);
+      }
+
+      await ZipManager.folderToZip(
+        Directory(dir.path),
+        File(zipExportPath),
+      );
+
+      return File(zipExportPath);
+    }
+    // just timetable data
     saveTimetable(
       timetable,
       timetableDirPath: dirSavePath,

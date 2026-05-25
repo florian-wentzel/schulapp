@@ -136,8 +136,8 @@ class Settings {
   static const showTutorialInCreateTimetableScreenKey =
       "showTutorialInCreateTimetableScreen";
   static const showTutorialOnHomeScreenKey = "showTutorialInHomeScreen";
-  static const termsOfServiceGoFileIoAllowed =
-      "termsOfServiceGoFileIoAllowedKey";
+  static const termsOfServiceLitterboxAllowedKey =
+      "termsOfServiceLitterboxAllowed";
   static const lastAskForReviewDateKey = "lastAskForReviewDate";
   static const calendarShowTodoEventColorKey = "calendarShowTodoEventColor";
   static const showNextDayAfterDayEndKey = "showNextDayAfterDayEnd";
@@ -433,7 +433,7 @@ class Settings {
       defaultValue: () => true,
     ),
     SettingsVar<bool>(
-      key: termsOfServiceGoFileIoAllowed,
+      key: termsOfServiceLitterboxAllowedKey,
       defaultValue: () => false,
     ),
     //wenn null dann wird nicht mehr angezeigt

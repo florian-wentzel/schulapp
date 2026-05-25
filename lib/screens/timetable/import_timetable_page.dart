@@ -2,7 +2,9 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:schulapp/code_behind/go_file_io_manager.dart';
+import 'package:path/path.dart' as path;
+import 'package:schulapp/code_behind/backup_manager.dart';
+import 'package:schulapp/code_behind/online_share_manager.dart';
 import 'package:schulapp/code_behind/save_manager.dart';
 import 'package:schulapp/code_behind/timetable.dart';
 import 'package:schulapp/code_behind/utils.dart';
@@ -65,21 +67,19 @@ class _ImportTimetablePageState extends State<ImportTimetablePage> {
   }
 
   void _selectTimetable() async {
-    FilePickerResult? result;
+    PlatformFile? result;
     try {
       if (Theme.of(context).platform == TargetPlatform.iOS) {
         throw Exception("");
       }
-      result = await FilePicker.platform.pickFiles(
-        allowMultiple: false,
+      result = await FilePicker.pickFile(
         type: FileType.custom,
         allowedExtensions: [
           SaveManager.timetableExportExtension.replaceAll(".", "")
         ],
       );
     } on Exception {
-      result = await FilePicker.platform.pickFiles(
-        allowMultiple: false,
+      result = await FilePicker.pickFile(
         type: FileType.any,
       );
     }
@@ -95,7 +95,7 @@ class _ImportTimetablePageState extends State<ImportTimetablePage> {
       return;
     }
 
-    File selectedFile = File(result.files.single.path!);
+    File selectedFile = File(result.path!);
     if (!selectedFile.existsSync()) {
       if (mounted) {
         Utils.showInfo(
@@ -114,9 +114,29 @@ class _ImportTimetablePageState extends State<ImportTimetablePage> {
         msg: AppLocalizationsManager.localizations.strImportingTimetable,
       );
     }
+
     Timetable? timetable;
+    bool importSpecialLessons;
+
     try {
-      timetable = SaveManager().importTimetable(selectedFile);
+      timetable = await SaveManager().importTimetable(
+        selectedFile,
+        () async {
+          importSpecialLessons = await showImportSpecialLessonsDialog();
+          return importSpecialLessons;
+        },
+      );
+      try {
+        timetable?.name =
+            "${timetable.name} (${AppLocalizationsManager.localizations.strImported})";
+      } catch (e) {
+        timetable?.name =
+            "${timetable.name} (${AppLocalizationsManager.localizations.strImported})"
+                .substring(
+          0,
+          Timetable.maxNameLength,
+        );
+      }
     } catch (e) {
       debugPrint(e.toString());
     }
@@ -136,7 +156,6 @@ class _ImportTimetablePageState extends State<ImportTimetablePage> {
         );
       }
     }
-    if (timetable == null) return;
 
     await Future.delayed(
       const Duration(milliseconds: 250),
@@ -144,20 +163,58 @@ class _ImportTimetablePageState extends State<ImportTimetablePage> {
 
     if (!mounted) return;
 
-    await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => CreateTimetableScreen(timetable: timetable!),
-      ),
-    );
+    if (timetable == null) return;
+
+    final saved = await Navigator.of(context).push<bool?>(
+          MaterialPageRoute(
+            builder: (context) => CreateTimetableScreen(timetable: timetable!),
+          ),
+        ) ??
+        false;
+
+    if (saved) {
+      final dir = SaveManager().getTimetableDir(timetable);
+      final specialLessonsDir = Directory(
+        path.join(
+          SaveManager().getImportDir().path,
+          SaveManager.specialLessonsDirName,
+        ),
+      );
+
+      if (specialLessonsDir.existsSync()) {
+        BackupManager.copyDirectorySync(
+          source: specialLessonsDir,
+          destination: Directory(
+            path.join(
+              dir.path,
+              SaveManager.specialLessonsDirName,
+            ),
+          ),
+        );
+      }
+    }
+
+    SaveManager().getImportDir().deleteSync(recursive: true);
 
     if (!mounted) return;
 
     Navigator.of(context).pop();
   }
 
+  Future<bool> showImportSpecialLessonsDialog() {
+    return Utils.showBoolInputDialog(
+      context,
+      question:
+          AppLocalizationsManager.localizations.strImportSpecialLessonsQuestion,
+      description: AppLocalizationsManager
+          .localizations.strImportSpecialLessonsDescription,
+      showYesAndNoInsteadOfOK: true,
+    );
+  }
+
   void _selectViaCode() async {
     final allowed =
-        await GoFileIoManager().showTermsOfServicesEnabledDialog(context);
+        await OnlineShareManager.showTermsOfServicesEnabledDialog(context);
 
     if (!allowed || !mounted) return;
 
@@ -202,12 +259,11 @@ class _ImportTimetablePageState extends State<ImportTimetablePage> {
       },
     );
 
-    String? downloadedPath;
+    File? downloadedFile;
 
     try {
-      downloadedPath = (await GoFileIoManager().downloadFiles(
+      downloadedFile = (await OnlineShareManager.downloadFromLitterbox(
         code,
-        isSaveCode: true,
       ))
           .first;
     } catch (e) {
@@ -224,14 +280,29 @@ class _ImportTimetablePageState extends State<ImportTimetablePage> {
       Navigator.of(dialogContext!).pop();
     }
 
-    if (downloadedPath == null) return;
+    if (downloadedFile == null) return;
 
     Timetable? timetable;
-
+    bool importSpecialLessons;
     try {
-      timetable = SaveManager().importTimetable(
-        File(downloadedPath),
+      timetable = await SaveManager().importTimetable(
+        downloadedFile,
+        () async {
+          importSpecialLessons = await showImportSpecialLessonsDialog();
+          return importSpecialLessons;
+        },
       );
+      try {
+        timetable?.name =
+            "${timetable.name} (${AppLocalizationsManager.localizations.strImported})";
+      } catch (e) {
+        timetable?.name =
+            "${timetable.name} (${AppLocalizationsManager.localizations.strImported})"
+                .substring(
+          0,
+          Timetable.maxNameLength,
+        );
+      }
     } catch (e) {
       debugPrint(e.toString());
     }
@@ -252,24 +323,46 @@ class _ImportTimetablePageState extends State<ImportTimetablePage> {
       }
     }
 
-    if (timetable == null) return;
-
     await Future.delayed(
       const Duration(milliseconds: 250),
     );
 
     if (!mounted) return;
+    if (timetable == null) return;
 
-    await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => CreateTimetableScreen(timetable: timetable!),
-      ),
-    );
+    final saved = await Navigator.of(context).push<bool?>(
+          MaterialPageRoute(
+            builder: (context) => CreateTimetableScreen(timetable: timetable!),
+          ),
+        ) ??
+        false;
+
+    if (saved) {
+      final dir = SaveManager().getTimetableDir(timetable);
+      final specialLessonsDir = Directory(
+        path.join(
+          SaveManager().getImportDir().path,
+          SaveManager.specialLessonsDirName,
+        ),
+      );
+
+      if (specialLessonsDir.existsSync()) {
+        BackupManager.copyDirectorySync(
+          source: specialLessonsDir,
+          destination: Directory(
+            path.join(
+              dir.path,
+              SaveManager.specialLessonsDirName,
+            ),
+          ),
+        );
+      }
+    }
+
+    SaveManager().getImportDir().deleteSync(recursive: true);
 
     if (!mounted) return;
 
     Navigator.of(context).pop();
-
-    SaveManager().deleteTempDir();
   }
 }
